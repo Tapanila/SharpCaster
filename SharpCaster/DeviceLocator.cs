@@ -109,7 +109,7 @@ namespace SharpCaster
             if (string.IsNullOrWhiteSpace(res)) return false;
             var stringReader = new StringReader(res);
             var data = (DiscoveryRoot)_xmlSerializer.Deserialize(stringReader);
-            if (data.Device.DeviceType.ToLower().Equals("urn:dial-multiscreen-org:device:dial:1")) return false;
+            if (!data.Device.DeviceType.ToLower().Equals("urn:dial-multiscreen-org:device:dial:1")) return false;
             chromecast.FriendlyName = data.Device.FriendlyName;
             return true;
         }
