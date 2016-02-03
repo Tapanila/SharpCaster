@@ -51,8 +51,9 @@ namespace SharpCaster.Test.DummyServices
                 }
                 _responses = new List<string>();
             }
-            StorageFile output = await ApplicationData.Current.LocalFolder.CreateFileAsync("output", CreationCollisionOption.ReplaceExisting);
-            return new DataWriter((await output.OpenStreamForWriteAsync()).AsOutputStream());
+            InMemoryRandomAccessStream randomAccessStream = new InMemoryRandomAccessStream();
+            
+            return new DataWriter(randomAccessStream.AsStream().AsOutputStream());
         }
 
         public void AddResponse(string response)
