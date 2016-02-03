@@ -2,13 +2,12 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net.Http;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
 using Windows.Networking;
-using Windows.Networking.Sockets;
-using Windows.Storage.Streams;
 using SharpCaster.Models;
+using SharpCaster.Interfaces;
+using SharpCaster.Services;
 
 namespace SharpCaster
 {
@@ -18,12 +17,14 @@ namespace SharpCaster
         private const string MulticastPort = "1900";
         private TimeSpan _timeOut;
         private readonly XmlSerializer _xmlSerializer;
-
+        public ISocketService _socketService;
+        private List<Chromecast> _discoveredDevices;
+        
         public DeviceLocator()
         {
             _xmlSerializer = new XmlSerializer(typeof(DiscoveryRoot));
+            _socketService = new SocketService();
         }
-
 
         public async Task<IEnumerable<Chromecast>> LocateDevicesAsync(TimeSpan timeout)
         {
@@ -32,58 +33,47 @@ namespace SharpCaster
 
             _timeOut = timeout;
 
-            var discoveredDevices = new List<Chromecast>();
+            _discoveredDevices = new List<Chromecast>();
 
             var multicastIP = new HostName(MulticastHostName);
-
-
-            using (var socket = new DatagramSocket())
+            _socketService.MessageReceived += MulticastResponseReceived;
+            using (_socketService.Initialize())
             {
-                //Handle MessageReceived
-                socket.MessageReceived += (sender, e) =>
-                {
-                    var reader = e.GetDataReader();
-                    var bytesRemaining = reader.UnconsumedBufferLength;
-                    var receivedString = reader.ReadString(bytesRemaining);
-
-                    var location = receivedString.Substring(receivedString.ToLower().IndexOf("location:", StringComparison.Ordinal) + 9);
-                    receivedString = location.Substring(0, location.IndexOf("\r", StringComparison.Ordinal)).Trim();
-
-                    Uri uri;
-                    if (!Uri.TryCreate(receivedString, UriKind.Absolute, out uri)) return;
-                    if (!discoveredDevices.Any(x => x.DeviceUri.Equals(uri)))
-                    {
-                        discoveredDevices.Add(new Chromecast {DeviceUri = uri});
-                    }
-                };
-                await socket.BindEndpointAsync(null, string.Empty);
-                socket.JoinMulticastGroup(multicastIP);
-
+                await _socketService.BindEndpointAsync(null, string.Empty);
+                _socketService.JoinMulticastGroup(multicastIP);
                 var start = DateTime.Now;
                 do
                 {
-                    using (var stream = await socket.GetOutputStreamAsync(multicastIP, MulticastPort))
-                    using (var writer = new DataWriter(stream))
-                    {
+                    using (var writer = await _socketService.GetOutputWriterAsync(multicastIP, MulticastPort))
+                    { 
                         const string request = "M-SEARCH * HTTP/1.1\r\n" +
                                                "HOST:" + MulticastHostName + ":" + MulticastPort + "\r\n" +
                                                "ST:SsdpSearch:all\r\n" +
                                                "MAN:\"ssdp:discover\"\r\n" +
                                                "MX:3\r\n\r\n\r\n";
-
                         writer.WriteString(request);
                         await writer.StoreAsync();
-
                     }
-
                 }
-
                 while (DateTime.Now.Subtract(start) < timeout);
             }
-            
+            _socketService.MessageReceived -= MulticastResponseReceived;
+            return await FilterChromeCasts(_discoveredDevices);
 
-            return await FilterChromeCasts(discoveredDevices);
+        }
 
+        private void MulticastResponseReceived(object sender, string receivedString)
+        {
+            if (string.IsNullOrWhiteSpace(receivedString)) return;
+            var location = receivedString.Substring(receivedString.ToLower().IndexOf("location:", StringComparison.Ordinal) + 9);
+            receivedString = location.Substring(0, location.IndexOf("\r", StringComparison.Ordinal)).Trim();
+
+            Uri uri;
+            if (!Uri.TryCreate(receivedString, UriKind.Absolute, out uri)) return;
+            if (!_discoveredDevices.Any(x => x.DeviceUri.Equals(uri)))
+            {
+                _discoveredDevices.Add(new Chromecast { DeviceUri = uri });
+            }
         }
 
         private async Task<IEnumerable<Chromecast>> FilterChromeCasts(IEnumerable<Chromecast> discoveredDevices)
@@ -103,8 +93,7 @@ namespace SharpCaster
 
         private async Task<bool> GetChromecastName(Chromecast chromecast)
         {
-            var http = new HttpClient { Timeout = _timeOut };
-            var res = await http.GetStringAsync(chromecast.DeviceUri);
+            var res = await _socketService.GetStringAsync(chromecast.DeviceUri, _timeOut);
 
             if (string.IsNullOrWhiteSpace(res)) return false;
             var stringReader = new StringReader(res);

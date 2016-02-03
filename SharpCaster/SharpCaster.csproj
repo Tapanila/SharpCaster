@@ -42,6 +42,7 @@
     <Compile Include="Helpers\ChromecastSSLClientDataReceivedArgs.cs" />
     <Compile Include="Helpers\MessageFactory.cs" />
     <Compile Include="Helpers\Requests.cs" />
+    <Compile Include="Interfaces\ISocketService.cs" />
     <Compile Include="Models\Chromecast.cs" />
     <Compile Include="Models\ChromecastStatus\ChromecastApplication.cs" />
     <Compile Include="Models\ChromecastStatus\ChromecastStatusResponse.cs" />
@@ -50,6 +51,7 @@
     <Compile Include="Models\ChromecastStatus\Volume.cs" />
     <Compile Include="Models\Discovery.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Services\SocketService.cs" />
   </ItemGroup>
   <ItemGroup>
     <TargetPlatform Include="Windows, Version=8.1" />
