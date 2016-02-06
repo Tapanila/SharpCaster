@@ -355,12 +355,6 @@ namespace SharpCaster.Helpers
             public string url { get; set; }
         }
 
-    public class MagineUrl
-    {
-        public string channelId { get; set; }
-        public string programId { get; set; }
-    }
-
         [DataContract]
         public class Media
         {

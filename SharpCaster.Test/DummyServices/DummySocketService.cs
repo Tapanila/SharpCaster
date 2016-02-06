@@ -52,7 +52,6 @@ namespace SharpCaster.Test.DummyServices
                 _responses = new List<string>();
             }
             InMemoryRandomAccessStream randomAccessStream = new InMemoryRandomAccessStream();
-            
             return new DataWriter(randomAccessStream.AsStream().AsOutputStream());
         }
 

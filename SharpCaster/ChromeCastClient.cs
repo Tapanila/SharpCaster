@@ -21,9 +21,7 @@ namespace SharpCaster
         public ChromecastChannel HeartbeatChannel { get; set; }
         public ChromecastChannel ReceiverChannel { get; set; }
         public ChromecastChannel MediaChannel { get; set; }
-
-        public ChromecastChannel MagineChannel { get; set; }
-
+        
         public List<ChromecastChannel> Channels { get; set; }
 
         private const string ChromecastPort = "8009";
@@ -33,8 +31,8 @@ namespace SharpCaster
         private StreamSocket socket;
         private bool connected = false;
 
-        public EventHandler Connected;
-        public EventHandler<ChromecastApplication> ApplicationStarted;
+        public event EventHandler Connected;
+        public event EventHandler<ChromecastApplication> ApplicationStarted;
 
         public ChromeCastClient()
         {
@@ -44,7 +42,6 @@ namespace SharpCaster
             ReceiverChannel = CreateChannel(MessageFactory.DialConstants.DialReceiverUrn);
             MediaChannel = CreateChannel(MessageFactory.DialConstants.DialMediaUrn);
 
-            MagineChannel = CreateChannel(MessageFactory.DialConstants.MagineUrn);
             MediaChannel.MessageReceived += MediaChannel_MessageReceived;
             ReceiverChannel.MessageReceived += ReceiverChannel_MessageReceived;
             HeartbeatChannel.MessageReceived += HeartbeatChannel_MessageReceived;
@@ -184,7 +181,6 @@ namespace SharpCaster
 
 #pragma warning disable 4014
             Task.Run(async () =>
-
             {
                 while (true)
                 {

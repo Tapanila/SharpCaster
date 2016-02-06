@@ -12,7 +12,6 @@ namespace SharpCaster.Helpers
             public const string DialHeartbeatUrn = "urn:x-cast:com.google.cast.tp.heartbeat";
             public const string DialReceiverUrn = "urn:x-cast:com.google.cast.receiver";
             public const string DialMediaUrn = "urn:x-cast:com.google.cast.media";
-            public const string MagineUrn = "urn:x-cast:com.magine.cast.state";
         }
 
         public static CastMessage Generic()
