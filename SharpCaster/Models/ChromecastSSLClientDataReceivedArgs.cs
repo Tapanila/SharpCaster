@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace SharpCaster.Helpers
+namespace SharpCaster.Models
 {
     public class ChromecastSSLClientDataReceivedArgs : EventArgs
     {

@@ -16,7 +16,7 @@ namespace SharpCaster
     {
         public TimeSpan TimeOut;
         public ISocketService SocketService;
-        public event EventHandler<List<Chromecast>> DeviceListChanged;
+        public event EventHandler<Chromecast> DeviceFounded;
 
         private const string MulticastHostName = "239.255.255.250";
         private const string MulticastPort = "1900";
@@ -83,7 +83,7 @@ namespace SharpCaster
             if (!await GetChromecastName(possibleChromeCast)) return;
 
             _discoveredDevices.Add(possibleChromeCast);
-            DeviceListChanged?.Invoke(this, _discoveredDevices);
+            DeviceFounded?.Invoke(this, possibleChromeCast);
         }
 
         private async Task<bool> GetChromecastName(Chromecast chromecast)

@@ -2,7 +2,7 @@
 using System.Diagnostics;
 using System.Threading.Tasks;
 
-namespace SharpCaster.Helpers
+namespace SharpCaster.Models
 {
     public class ChromecastChannel
     {
@@ -22,14 +22,13 @@ namespace SharpCaster.Helpers
             Debug.WriteLine("Sending: " + message.GetJsonType());
             message.Namespace = Namespace;
 
-            var bytes = CastHelper.ToProto(message);
+            var bytes = message.ToProto();
             await Client.Write(bytes);
         }
 
         public void OnMessageReceived(ChromecastSSLClientDataReceivedArgs e)
         {
-            if (MessageReceived != null)
-                MessageReceived(this, e);
+            MessageReceived?.Invoke(this, e);
         }
     }
 }

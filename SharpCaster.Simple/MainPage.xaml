@@ -8,6 +8,27 @@
     mc:Ignorable="d">
 
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-
+        <Grid.RowDefinitions>
+            <RowDefinition Height="1*"/>
+            <RowDefinition Height="9*"/>
+        </Grid.RowDefinitions>
+        <StackPanel
+            Grid.Row="0"
+            Orientation="Horizontal"
+         >
+            <Button Content="Connect" Click="ConnectClicked"/>
+            <Button Content="Launch application" Click="LaunchApplication" />
+            <Button Content="Play" Click="Play"/>
+            <Button Content="Pause" Click="Pause"/>
+        </StackPanel>
+        <ListView Margin="14" Grid.Row="1" ItemsSource="{Binding Chromecasts}" SelectedItem="{Binding SelectedChromecast, Mode=TwoWay}">
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <Grid Margin="4">
+                        <TextBlock Text="{Binding FriendlyName}"/>
+                    </Grid>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
     </Grid>
 </Page>

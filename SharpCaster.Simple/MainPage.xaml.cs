@@ -1,68 +1,55 @@
 ﻿using System;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Diagnostics;
 using Windows.UI.Popups;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using SharpCaster.Models;
 using Windows.UI.Core;
 using Windows.ApplicationModel.Core;
+using SharpCaster.Simple.Annotations;
 
 namespace SharpCaster.Simple
 {
     public sealed partial class MainPage : Page
-    {
-        private ChromeCastClient _client;
-        private CancellationTokenSource _cancellationTokenSource;
+    { 
+        public MainPageViewModel MainPageViewModel { get; set; }
+
         public MainPage()
         {
             InitializeComponent();
+            MainPageViewModel = new MainPageViewModel();
+            DataContext = MainPageViewModel;
             Loaded += MainPage_Loaded;
         }
 
-        private async void MainPage_Loaded(object sender, RoutedEventArgs e)
+        private void MainPage_Loaded(object sender, RoutedEventArgs e)
         {
-            var deviceLocator = new DeviceLocator();
-            _cancellationTokenSource = new CancellationTokenSource();
-            //We want to be alerted as soon as we found one device so we use the event
-            deviceLocator.DeviceListChanged += DeviceLocator_DeviceListChanged;
-            await deviceLocator.LocateDevicesAsync(_cancellationTokenSource.Token);  
+            MainPageViewModel.StartLocating();
         }
 
-        private async void DeviceLocator_DeviceListChanged(object sender, System.Collections.Generic.List<Chromecast> e)
+        private async void ConnectClicked(object sender, RoutedEventArgs e)
         {
-            //We are only looking for one chromecast so we cancel the process after finding it
-            _cancellationTokenSource.Cancel();
-            await CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal,
-                async () =>
-                {
-                    MessageDialog msg = new MessageDialog("Found chromecast " + e.First().FriendlyName);
-                    await msg.ShowAsync();
-                });
-            StartApplication(e.First());
+            await MainPageViewModel.Connect();
         }
 
-        private void StartApplication(Chromecast chromecast)
+        private async void LaunchApplication(object sender, RoutedEventArgs e)
         {
-            _client = new ChromeCastClient();
-            _client.Connected += Client_Connected;
-            _client.ApplicationStarted += Client_ApplicationStarted;
-            _client.ConnectChromecast(chromecast.DeviceUri);
+            await MainPageViewModel.LaunchApplication();
         }
 
-        private async void Client_ApplicationStarted(object sender, Models.ChromecastStatus.ChromecastApplication e)
+        private async void Play(object sender, RoutedEventArgs e)
         {
-            await CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal,
-                async () =>
-                    {
-                        var msg = new MessageDialog($"Application {e.displayName} has launched");
-                        await msg.ShowAsync();
-                });
+            await MainPageViewModel.Play();
         }
 
-        private void Client_Connected(object sender, EventArgs e)
+        private async void Pause(object sender, RoutedEventArgs e)
         {
-            _client.LaunchApplication("B3419EF5");
+            await MainPageViewModel.Pause();
         }
     }
 }
