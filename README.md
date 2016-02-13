@@ -4,7 +4,7 @@
 
 ### This project is on beta stage
 
-SharpCaster is Chromecast SDK for Windows and Windows Phone platforms.
+SharpCaster is Chromecast C# SDK for Windows and Windows Phone platforms.
 
 ## The nuget package  [![NuGet Status](http://img.shields.io/nuget/v/SharpCaster.svg?style=flat)](https://www.nuget.org/packages/SharpCaster/)
 
