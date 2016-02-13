@@ -5,7 +5,7 @@ namespace SharpCaster.Models.ChromecastRequests
     [DataContract]
     public class LoadRequest : RequestWithId
     {
-        public LoadRequest(string sessionId, MediaRequest media, bool autoPlay, double currentTime,
+        public LoadRequest(string sessionId, MediaData media, bool autoPlay, double currentTime,
             object customData = null)
             : base("LOAD")
         {
@@ -20,7 +20,7 @@ namespace SharpCaster.Models.ChromecastRequests
         public string SessionId { get; private set; }
 
         [DataMember(Name = "media")]
-        public MediaRequest Media { get; private set; }
+        public MediaData Media { get; private set; }
 
         [DataMember(Name = "autoplay")]
         public bool AutoPlay { get; private set; }

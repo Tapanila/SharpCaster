@@ -1,45 +1,15 @@
-using System.Runtime.Serialization;
+﻿using System.Runtime.Serialization;
 
 namespace SharpCaster.Models.ChromecastRequests
 {
-    [DataContract]
-    public class MediaRequest
+    public class MediaRequest : RequestWithId
     {
-        public MediaRequest(string url, string contentType, Metadata metadata = null, string streamType = "BUFFERED", double duration = 0d, object customData = null)
+        public MediaRequest(string requestType, long mediaSessionId) : base(requestType)
         {
-            Url = url;
-            ContentType = contentType;
-            StreamType = streamType;
-            Duration = duration;
-            Metadata = metadata;
-            CustomData = customData;
+            MediaSessionId = mediaSessionId;
         }
 
-        [DataMember(Name = "contentId")]
-        public string Url { get; set; }
-
-        [DataMember(Name = "contentType")]
-        public string ContentType { get; set; }
-
-        [DataMember(Name = "metadata")]
-        public Metadata Metadata { get; set; }
-
-        ///-------------------------------------------------------------------------------------------------
-        /// <summary>
-        ///     Gets or sets the type of the stream. This can be BUFFERED, LIVE or NONE
-        /// </summary>
-        ///
-        /// <value>
-        ///     The type of the stream.
-        /// </value>
-        ///-------------------------------------------------------------------------------------------------
-        [DataMember(Name = "streamType")]
-        public string StreamType { get; set; }
-
-        [DataMember(Name = "duration")]
-        public double Duration { get; set; }
-
-        [DataMember(Name = "customData")]
-        public object CustomData { get; set; }
+        [DataMember(Name = "mediaSessionId")]
+        public long MediaSessionId { get; set; }
     }
 }

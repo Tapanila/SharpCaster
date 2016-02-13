@@ -1,4 +1,4 @@
-﻿using System;
+﻿using System; 
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -30,6 +30,7 @@ namespace SharpCaster
         private string _chromecastApplicationId;
         private string _currentApplicationSessionId = "";
         private string _currentApplicationTransportId = "";
+        private long _currentMediaSessionId;
         private StreamSocket _socket;
         private bool _connected;
 
@@ -76,14 +77,19 @@ namespace SharpCaster
             Connected?.Invoke(this, EventArgs.Empty);
         }
 
-        public async Task PauseMedia()
+        public async Task Pause()
         {
-            await Write(MessageFactory.Pause(_currentApplicationTransportId).ToProto());
+            await Write(MessageFactory.Pause(_currentApplicationTransportId, _currentMediaSessionId).ToProto());
         }
 
-        public async Task PlayMedia(string mediaUrl, object customData = null)
+        public async Task Play()
         {
-            var mediaObject = new MediaRequest(mediaUrl, "application/vnd.ms-sstr+xml", null, "BUFFERED", 0D, customData);
+            await Write(MessageFactory.Play(_currentApplicationTransportId, _currentMediaSessionId).ToProto());
+        }
+
+        public async Task LoadMedia(string mediaUrl, object customData = null)
+        {
+            var mediaObject = new MediaData(mediaUrl, "application/vnd.ms-sstr+xml", null, "BUFFERED", 0D, customData);
             var req = new LoadRequest(_currentApplicationSessionId, mediaObject, true, 0.0, customData);
 
             var reqJson = req.ToJson();
@@ -94,8 +100,10 @@ namespace SharpCaster
         {
             var json = e.Message.PayloadUtf8;
             var response = JsonConvert.DeserializeObject<MediaStatus>(json);
-            var volume = response.status?.First().volume;
+            if (response.status == null) return;
+            var volume = response.status.First()?.volume;
             if (volume != null) UpdateVolume(volume.level);
+            _currentMediaSessionId = response.status.First().mediaSessionId;
         }
 
         private void UpdateVolume(float volume)
@@ -112,7 +120,7 @@ namespace SharpCaster
             UpdateVolume(response.status.volume.level);
             var startedApplication = response?.status?.applications?.FirstOrDefault(x => x.appId == _chromecastApplicationId);
             if (startedApplication == null) return;
-            if (_currentApplicationSessionId != "") return;
+            if (!string.IsNullOrWhiteSpace(_currentApplicationSessionId)) return;
             _currentApplicationSessionId = startedApplication.sessionId;
             _currentApplicationTransportId = startedApplication.transportId;
             await Write(MessageFactory.ConnectWithDestination(startedApplication.transportId).ToProto());

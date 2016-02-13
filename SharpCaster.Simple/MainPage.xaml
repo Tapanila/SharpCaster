@@ -18,15 +18,17 @@
          >
             <Button Content="Connect" Click="ConnectClicked"/>
             <Button Content="Launch application" Click="LaunchApplication" />
+            <Button Content="Load media" Click="LoadMedia" />
             <Button Content="Play" Click="Play"/>
             <Button Content="Pause" Click="Pause"/>
         </StackPanel>
         <ListView Margin="14" Grid.Row="1" ItemsSource="{Binding Chromecasts}" SelectedItem="{Binding SelectedChromecast, Mode=TwoWay}">
             <ListView.ItemTemplate>
                 <DataTemplate>
-                    <Grid Margin="4">
+                    <StackPanel Orientation="Horizontal" Margin="4">
                         <TextBlock Text="{Binding FriendlyName}"/>
-                    </Grid>
+                        <TextBlock Text="{Binding DeviceUri}"/>
+                    </StackPanel>
                 </DataTemplate>
             </ListView.ItemTemplate>
         </ListView>

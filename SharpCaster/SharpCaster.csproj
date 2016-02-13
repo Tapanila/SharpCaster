@@ -47,6 +47,7 @@
     <Compile Include="Models\ChromecastRequests\GetStatusRequest.cs" />
     <Compile Include="Models\ChromecastRequests\LaunchRequest.cs" />
     <Compile Include="Models\ChromecastRequests\LoadRequest.cs" />
+    <Compile Include="Models\ChromecastRequests\MediaData.cs" />
     <Compile Include="Models\ChromecastRequests\MediaRequest.cs" />
     <Compile Include="Models\ChromecastRequests\Metadata.cs" />
     <Compile Include="Models\ChromecastRequests\PauseRequest.cs" />

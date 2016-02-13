@@ -4,7 +4,7 @@ namespace SharpCaster.Models.MediaStatus
 {
     public class Status
     {
-        public int mediaSessionId { get; set; }
+        public long mediaSessionId { get; set; }
         public int playbackRate { get; set; }
         public string playerState { get; set; }
         public double currentTime { get; set; }

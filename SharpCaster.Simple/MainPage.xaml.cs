@@ -42,6 +42,11 @@ namespace SharpCaster.Simple
             await MainPageViewModel.LaunchApplication();
         }
 
+        private async void LoadMedia(object sender, RoutedEventArgs e)
+        {
+            await MainPageViewModel.LoadMedia();
+        }
+
         private async void Play(object sender, RoutedEventArgs e)
         {
             await MainPageViewModel.Play();

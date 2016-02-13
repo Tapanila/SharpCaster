@@ -58,16 +58,17 @@ namespace SharpCaster.Models
             PayloadUtf8 = new GetStatusRequest().ToJson()
         };
 
-        public static CastMessage Play(string destinationId) => new CastMessage(destinationId, UniqueSourceID)
+        public static CastMessage Play(string destinationId, long mediaSessionId) => new CastMessage(destinationId, UniqueSourceID)
         {
             Namespace = DialConstants.DialMediaUrn,
-            PayloadUtf8 = new PlayRequest().ToJson()
+            PayloadUtf8 = new PlayRequest(mediaSessionId).ToJson()
         };
 
-        public static CastMessage Pause(string destinationId) => new CastMessage(destinationId, UniqueSourceID)
+        public static CastMessage Pause(string destinationId, long mediaSessionId) => new CastMessage(destinationId, UniqueSourceID)
         {
+            
             Namespace = DialConstants.DialMediaUrn,
-            PayloadUtf8 = new PauseRequest().ToJson()
+            PayloadUtf8 = new PauseRequest(mediaSessionId).ToJson()
         };
 
         public static CastMessage Launch(string appId) => new CastMessage

@@ -3,10 +3,10 @@ using System.Runtime.Serialization;
 namespace SharpCaster.Models.ChromecastRequests
 {
     [DataContract]
-    public class PauseRequest : RequestWithId
+    public class PauseRequest : MediaRequest
     {
-        public PauseRequest()
-            : base("PAUSE")
+        public PauseRequest(long mediaSessionId)
+            : base("PAUSE", mediaSessionId)
         {
         }
     }
