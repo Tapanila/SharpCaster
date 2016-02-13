@@ -21,6 +21,7 @@
             <Button Content="Load media" Click="LoadMedia" />
             <Button Content="Play" Click="Play"/>
             <Button Content="Pause" Click="Pause"/>
+            <Button Content="Seek to 90 seconds" Click="Seek" />
         </StackPanel>
         <ListView Margin="14" Grid.Row="1" ItemsSource="{Binding Chromecasts}" SelectedItem="{Binding SelectedChromecast, Mode=TwoWay}">
             <ListView.ItemTemplate>

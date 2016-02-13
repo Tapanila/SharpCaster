@@ -77,6 +77,11 @@ namespace SharpCaster
             Connected?.Invoke(this, EventArgs.Empty);
         }
 
+        public async Task Seek(double seconds)
+        {
+            await Write(MessageFactory.Seek(_currentApplicationTransportId, _currentMediaSessionId, seconds).ToProto());
+        }
+
         public async Task Pause()
         {
             await Write(MessageFactory.Pause(_currentApplicationTransportId, _currentMediaSessionId).ToProto());

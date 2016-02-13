@@ -82,5 +82,12 @@ namespace SharpCaster.Models
             Namespace = DialConstants.DialMediaUrn,
             PayloadUtf8 = payload
         };
+
+        public static CastMessage Seek(string destinationId, long mediaSessionId, double seconds)
+            => new CastMessage(destinationId, UniqueSourceID)
+            {
+                Namespace =  DialConstants.DialMediaUrn,
+                PayloadUtf8 = new SeekRequest(mediaSessionId, seconds).ToJson()
+            };
     }
 }

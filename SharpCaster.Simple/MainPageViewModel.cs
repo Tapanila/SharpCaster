@@ -137,5 +137,10 @@ namespace SharpCaster.Simple
         {
             await _client.LoadMedia("http://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/dash/BigBuckBunny.mpd");
         }
+
+        public async Task Seek(double seconds)
+        {
+            await _client.Seek(seconds);
+        }
     }
 }

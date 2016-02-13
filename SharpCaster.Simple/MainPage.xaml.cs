@@ -56,5 +56,10 @@ namespace SharpCaster.Simple
         {
             await MainPageViewModel.Pause();
         }
+
+        private async void Seek(object sender, RoutedEventArgs e)
+        {
+            await MainPageViewModel.Seek(90);
+        }
     }
 }

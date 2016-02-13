@@ -76,6 +76,7 @@
     <Compile Include="Models\MediaStatus\MediaStatus.cs" />
     <Compile Include="Models\MediaStatus\Status.cs" />
     <Compile Include="Models\MediaStatus\Track.cs" />
+    <Compile Include="Models\ChromecastRequests\SeekRequest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services\SocketService.cs" />
   </ItemGroup>
