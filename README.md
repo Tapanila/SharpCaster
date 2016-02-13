@@ -6,6 +6,12 @@
 
 SharpCaster is ChromeCast implementation for Windows and Windows Phone platforms.
 
+## The nuget package  [![NuGet Status](http://img.shields.io/nuget/v/SharpCaster.svg?style=flat)](https://www.nuget.org/packages/SharpCaster/)
+
+https://nuget.org/packages/SharpCaster/
+
+    PM> Install-Package SharpCaster
+
 # Notes
 
 Heavily based on [NCast](https://github.com/jeremychild/NCast)
