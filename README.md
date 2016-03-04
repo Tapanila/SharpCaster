@@ -12,6 +12,23 @@ https://nuget.org/packages/SharpCaster/
 
     PM> Install-Package SharpCaster
 
+# Getting started
+
+## Finding chromecast devices from network
+```cs
+DeviceLocator deviceLocator = new DeviceLocator();
+var cancellationTokenSource = new CancellationTokenSource();
+cancellationTokenSource.CancelAfter(5000);
+List<Chromecast> chromecasts = await deviceLocator.LocateDevicesAsync(cancellationTokenSource.Token);
+```
+## Connecting to chromecast device, launch application and load media
+```cs
+var chromecast = chromecasts.First();
+var client = new ChromeCastClient();
+client.Connected += async delegate { await client.LaunchApplication("B3419EF5"); };
+client.ApplicationStarted += async delegate { await client.LoadMedia("http://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/dash/BigBuckBunny.mpd"); };
+client.ConnectChromecast(chromecast.DeviceUri);
+```    
 # Notes
 
 Heavily based on [NCast](https://github.com/jeremychild/NCast)
