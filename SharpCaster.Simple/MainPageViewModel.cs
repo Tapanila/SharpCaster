@@ -45,6 +45,18 @@ namespace SharpCaster.Simple
 
         private Chromecast _selectedChromecast;
 
+        public double Volume
+        {
+            get { return _volume; }
+            set
+            {
+                _volume = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private double _volume;
+
 
         [NotifyPropertyChangedInvocator]
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
@@ -85,7 +97,7 @@ namespace SharpCaster.Simple
 
         private async void _client_VolumeChanged(object sender, Volume e)
         {
-            await ShowMessage("Chromecast volume is now " + e.level);
+            await ExecuteOnUiThread(() => { Volume = e.level*100; });
         }
 
         private async void Client_ApplicationStarted(object sender, Models.ChromecastStatus.ChromecastApplication e)
@@ -116,13 +128,17 @@ namespace SharpCaster.Simple
 
         private async Task ShowMessage(string message)
         {
-            await CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal,
+            await ExecuteOnUiThread(
             async () =>
             {
-
                 var msg = new MessageDialog(message);
                 await msg.ShowAsync();
             });
+        }
+
+        private static async Task ExecuteOnUiThread(DispatchedHandler yourAction)
+        {
+            await CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal, yourAction);
         }
 
         public async Task PlayPause()
@@ -155,6 +171,11 @@ namespace SharpCaster.Simple
         public async Task MuteUnmute()
         {
             await _client.SetMute(!_client.Volume.muted);
+        }
+
+        public async Task SetVolume(double newValue)
+        {
+            await _client.SetVolume((float) (newValue / 100));
         }
     }
 }

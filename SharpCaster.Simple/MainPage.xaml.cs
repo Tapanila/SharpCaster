@@ -49,5 +49,10 @@ namespace SharpCaster.Simple
         {
             await MainPageViewModel.MuteUnmute();
         }
+
+        private async void Slider_ValueChanged(object sender, Windows.UI.Xaml.Controls.Primitives.RangeBaseValueChangedEventArgs e)
+        {
+            await MainPageViewModel.SetVolume(e.NewValue);
+        }
     }
 }

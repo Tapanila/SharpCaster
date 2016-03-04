@@ -22,6 +22,7 @@
             <Button Content="Play/Pause" Click="PlayPause"/>
             <Button Content="Mute/Unmute" Click="MuteUnmute"/>
             <Button Content="Seek to 90 seconds" Click="Seek" />
+            <Slider Maximum="100" LargeChange="10" SmallChange="1" Width="100" Value="{Binding Volume}" ValueChanged="Slider_ValueChanged" />
         </StackPanel>
         <ListView Margin="14" Grid.Row="1" ItemsSource="{Binding Chromecasts}" SelectedItem="{Binding SelectedChromecast, Mode=TwoWay}">
             <ListView.ItemTemplate>
