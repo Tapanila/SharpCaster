@@ -18,6 +18,7 @@
          >
             <Button Content="Connect" Click="ConnectClicked"/>
             <Button Content="Launch application" Click="LaunchApplication" />
+            <Button Content="Stop Application" Click="StopApplication" />
             <Button Content="Load media" Click="LoadMedia" />
             <Button Content="Play/Pause" Click="PlayPause"/>
             <Button Content="Mute/Unmute" Click="MuteUnmute"/>

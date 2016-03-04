@@ -167,6 +167,11 @@ namespace SharpCaster
             await Write(MessageFactory.Launch(applicationId).ToProto());
         }
 
+        public async Task StopApplication()
+        {
+            await Write(MessageFactory.Stop(_currentApplicationSessionId).ToProto());
+        }
+
         private void ReadPacket(Stream stream)
         {
             try

@@ -177,5 +177,10 @@ namespace SharpCaster.Simple
         {
             await _client.SetVolume((float) (newValue / 100));
         }
+
+        public async Task StopApplication()
+        {
+            await _client.StopApplication();
+        }
     }
 }

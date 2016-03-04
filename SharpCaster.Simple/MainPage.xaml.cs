@@ -54,5 +54,10 @@ namespace SharpCaster.Simple
         {
             await MainPageViewModel.SetVolume(e.NewValue);
         }
+
+        private async void StopApplication(object sender, RoutedEventArgs e)
+        {
+            await MainPageViewModel.StopApplication();
+        }
     }
 }
