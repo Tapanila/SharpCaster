@@ -1,17 +1,5 @@
-﻿using System;
-using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Diagnostics;
-using Windows.UI.Popups;
-using Windows.UI.Xaml;
+﻿using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Threading;
-using SharpCaster.Models;
-using Windows.UI.Core;
-using Windows.ApplicationModel.Core;
-using SharpCaster.Simple.Annotations;
 
 namespace SharpCaster.Simple
 {
@@ -47,19 +35,29 @@ namespace SharpCaster.Simple
             await MainPageViewModel.LoadMedia();
         }
 
-        private async void Play(object sender, RoutedEventArgs e)
+        private async void PlayPause(object sender, RoutedEventArgs e)
         {
-            await MainPageViewModel.Play();
-        }
-
-        private async void Pause(object sender, RoutedEventArgs e)
-        {
-            await MainPageViewModel.Pause();
+            await MainPageViewModel.PlayPause();
         }
 
         private async void Seek(object sender, RoutedEventArgs e)
         {
             await MainPageViewModel.Seek(90);
+        }
+
+        private async void MuteUnmute(object sender, RoutedEventArgs e)
+        {
+            await MainPageViewModel.MuteUnmute();
+        }
+
+        private async void Slider_ValueChanged(object sender, Windows.UI.Xaml.Controls.Primitives.RangeBaseValueChangedEventArgs e)
+        {
+            await MainPageViewModel.SetVolume(e.NewValue);
+        }
+
+        private async void StopApplication(object sender, RoutedEventArgs e)
+        {
+            await MainPageViewModel.StopApplication();
         }
     }
 }

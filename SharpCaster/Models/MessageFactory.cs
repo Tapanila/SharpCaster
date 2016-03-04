@@ -40,6 +40,12 @@ namespace SharpCaster.Models
             PayloadUtf8 = new VolumeRequest(level).ToJson()
         };
 
+        public static CastMessage Volume(bool muted) => new CastMessage
+        {
+            Namespace = DialConstants.DialReceiverUrn,
+            PayloadUtf8 = new VolumeRequest(muted).ToJson()
+        };
+
         public static CastMessage Ping => new CastMessage
         {
             Namespace = DialConstants.DialHeartbeatUrn,
@@ -89,5 +95,18 @@ namespace SharpCaster.Models
                 Namespace =  DialConstants.DialMediaUrn,
                 PayloadUtf8 = new SeekRequest(mediaSessionId, seconds).ToJson()
             };
+
+        public static CastMessage Stop(string sessionId) => new CastMessage
+        {
+            Namespace = DialConstants.DialReceiverUrn,
+            PayloadUtf8 = new StopRequest(sessionId).ToJson()
+        };
+
+        public static CastMessage MediaStatus(string destinationId) => new CastMessage(destinationId, UniqueSourceID)
+        {
+            Namespace = DialConstants.DialMediaUrn,
+            PayloadUtf8 = new MediaStatusRequest().ToJson()
+        };
+        
     }
 }

@@ -7,8 +7,6 @@ using System.Threading.Tasks;
 using Windows.Networking;
 using Windows.Networking.Sockets;
 using Windows.Security.Cryptography;
-using Windows.Security.Cryptography.Certificates;
-using Windows.Storage.Streams;
 using Newtonsoft.Json;
 using SharpCaster.Extensions;
 using SharpCaster.Models;
@@ -20,7 +18,9 @@ namespace SharpCaster
 {
     public class ChromeCastClient
     {
-        public float Volume { get; private set; }
+        public Volume Volume { get; private set; }
+        public ChromecastStatus ChromecastStatus { get; set; }
+        public MediaStatus MediaStatus { get; set; }
 
         private ChromecastChannel _connectionChannel;
         private ChromecastChannel _mediaChannel;
@@ -36,7 +36,9 @@ namespace SharpCaster
 
         public event EventHandler Connected;
         public event EventHandler<ChromecastApplication> ApplicationStarted;
-        public event EventHandler<float> VolumeChanged;
+        public event EventHandler<MediaStatus> MediaStatusChanged;
+        public event EventHandler<ChromecastStatus> ChromecastStatusChanged;
+        public event EventHandler<Volume> VolumeChanged;
 
         public ChromeCastClient()
         {
@@ -51,6 +53,11 @@ namespace SharpCaster
             _heartbeatChannel.MessageReceived += HeartbeatChannel_MessageReceived;
         }
 
+        public async void GetChromecastStatus()
+        {
+            await Write(MessageFactory.Status().ToProto());
+        }
+
         public async Task SetVolume(float level)
         {
             if (level < 0 || level > 1.0f)
@@ -60,14 +67,19 @@ namespace SharpCaster
             await Write(MessageFactory.Volume(level).ToProto());
         }
 
+        public async Task SetMute(bool muted)
+        {
+            await Write(MessageFactory.Volume(muted).ToProto());
+        }
+
         public async Task IncreaseVolume()
         {
-            await SetVolume(Volume + 0.05f);
+            await SetVolume(Volume.level + 0.05f);
         }
 
         public async Task DecreaseVolume()
         {
-            await SetVolume(Volume - 0.05f);
+            await SetVolume(Volume.level - 0.05f);
         }
 
         private void HeartbeatChannel_MessageReceived(object sender, ChromecastSSLClientDataReceivedArgs e)
@@ -75,6 +87,7 @@ namespace SharpCaster
             if (_connected || e.Message.GetJsonType() != "PONG") return;
             _connected = true;
             Connected?.Invoke(this, EventArgs.Empty);
+            GetChromecastStatus();
         }
 
         public async Task Seek(double seconds)
@@ -104,16 +117,19 @@ namespace SharpCaster
         private void MediaChannel_MessageReceived(object sender, ChromecastSSLClientDataReceivedArgs e)
         {
             var json = e.Message.PayloadUtf8;
-            var response = JsonConvert.DeserializeObject<MediaStatus>(json);
-            if (response.status == null) return;
-            var volume = response.status.First()?.volume;
-            if (volume != null) UpdateVolume(volume.level);
-            _currentMediaSessionId = response.status.First().mediaSessionId;
+            var response = JsonConvert.DeserializeObject<MediaStatusResponse>(json);
+            if (response.status?.Count < 1) return;
+            MediaStatus = response.status.First();
+            MediaStatusChanged?.Invoke(this, MediaStatus);
+            if (MediaStatus.volume != null) UpdateVolume(MediaStatus.volume);
+            _currentMediaSessionId = MediaStatus.mediaSessionId;
         }
 
-        private void UpdateVolume(float volume)
+        private void UpdateVolume(Volume volume)
         {
-            if (!(Math.Abs(Volume - volume) > 0.01f)) return;
+            if (Volume != null &&
+                !(Math.Abs(Volume.level - volume.level) > 0.01f) &&
+                Volume.muted == volume.muted) return;
             Volume = volume;
             VolumeChanged?.Invoke(this, Volume);
         }
@@ -122,14 +138,23 @@ namespace SharpCaster
         {
             var json = e.Message.PayloadUtf8;
             var response = JsonConvert.DeserializeObject<ChromecastStatusResponse>(json);
-            UpdateVolume(response.status.volume.level);
-            var startedApplication = response?.status?.applications?.FirstOrDefault(x => x.appId == _chromecastApplicationId);
-            if (startedApplication == null) return;
-            if (!string.IsNullOrWhiteSpace(_currentApplicationSessionId)) return;
-            _currentApplicationSessionId = startedApplication.sessionId;
-            _currentApplicationTransportId = startedApplication.transportId;
-            await Write(MessageFactory.ConnectWithDestination(startedApplication.transportId).ToProto());
+            if (response.ChromecastStatus == null) return;
+            ChromecastStatus = response.ChromecastStatus;
+            ChromecastStatusChanged?.Invoke(this, ChromecastStatus);
+            UpdateVolume(ChromecastStatus.Volume);
+            await ConnectToApplication(_chromecastApplicationId);
+        }
+
+        private async Task<bool> ConnectToApplication(string applicationId)
+        {
+            var startedApplication = ChromecastStatus.Applications?.FirstOrDefault(x => x.AppId == applicationId);
+            if (startedApplication == null) return false;
+            if (!string.IsNullOrWhiteSpace(_currentApplicationSessionId)) return false;
+            _currentApplicationSessionId = startedApplication.SessionId;
+            _currentApplicationTransportId = startedApplication.TransportId;
+            await Write(MessageFactory.ConnectWithDestination(startedApplication.TransportId).ToProto());
             ApplicationStarted?.Invoke(this, startedApplication);
+            return true;
         }
 
 
@@ -151,10 +176,25 @@ namespace SharpCaster
             });
         }
 
-        public async Task LaunchApplication(string applicationId)
+        public async Task GetMediaStatus()
+        {
+            await Write(MessageFactory.MediaStatus(_currentApplicationTransportId).ToProto());
+        }
+
+        public async Task LaunchApplication(string applicationId, bool joinExisting = true)
         {
             _chromecastApplicationId = applicationId;
+            if (joinExisting && await ConnectToApplication(applicationId))
+            {
+                await GetMediaStatus();
+                return;
+            }
             await Write(MessageFactory.Launch(applicationId).ToProto());
+        }
+
+        public async Task StopApplication()
+        {
+            await Write(MessageFactory.Stop(_currentApplicationSessionId).ToProto());
         }
 
         private void ReadPacket(Stream stream)

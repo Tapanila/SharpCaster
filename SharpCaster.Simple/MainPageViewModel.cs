@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
@@ -8,6 +9,7 @@ using Windows.ApplicationModel.Core;
 using Windows.UI.Core;
 using Windows.UI.Popups;
 using SharpCaster.Models;
+using SharpCaster.Models.MediaStatus;
 using SharpCaster.Simple.Annotations;
 
 namespace SharpCaster.Simple
@@ -42,6 +44,18 @@ namespace SharpCaster.Simple
         }
 
         private Chromecast _selectedChromecast;
+
+        public double Volume
+        {
+            get { return _volume; }
+            set
+            {
+                _volume = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private double _volume;
 
 
         [NotifyPropertyChangedInvocator]
@@ -81,14 +95,14 @@ namespace SharpCaster.Simple
             _client.VolumeChanged += _client_VolumeChanged;
         }
 
-        private async void _client_VolumeChanged(object sender, float e)
+        private async void _client_VolumeChanged(object sender, Volume e)
         {
-            await ShowMessage("Chromecast volume is now " + e);
+            await ExecuteOnUiThread(() => { Volume = e.level*100; });
         }
 
         private async void Client_ApplicationStarted(object sender, Models.ChromecastStatus.ChromecastApplication e)
         {
-            await ShowMessage($"Application {e.displayName} has launched");
+            await ShowMessage($"Application {e.DisplayName} has launched");
         }
 
         private async void Client_Connected(object sender, EventArgs e)
@@ -114,18 +128,29 @@ namespace SharpCaster.Simple
 
         private async Task ShowMessage(string message)
         {
-            await CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal,
+            await ExecuteOnUiThread(
             async () =>
             {
-
                 var msg = new MessageDialog(message);
                 await msg.ShowAsync();
             });
         }
 
-        public async Task Play()
+        private static async Task ExecuteOnUiThread(DispatchedHandler yourAction)
         {
-            await _client.Play();
+            await CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal, yourAction);
+        }
+
+        public async Task PlayPause()
+        {
+            if (_client.MediaStatus.PlayerState == PlayerState.Paused)
+            {
+                await _client.Play();
+            }
+            else
+            {
+                await _client.Pause();
+            }
         }
 
         public async Task Pause()
@@ -141,6 +166,22 @@ namespace SharpCaster.Simple
         public async Task Seek(double seconds)
         {
             await _client.Seek(seconds);
+        }
+
+        public async Task MuteUnmute()
+        {
+            await _client.SetMute(!_client.Volume.muted);
+        }
+
+        public async Task SetVolume(double newValue)
+        {
+            if (Math.Abs(_client.Volume.level - (newValue/100)) < 0.01) return;
+            await _client.SetVolume((float) (newValue / 100));
+        }
+
+        public async Task StopApplication()
+        {
+            await _client.StopApplication();
         }
     }
 }

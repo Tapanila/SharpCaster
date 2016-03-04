@@ -1,4 +1,4 @@
-﻿namespace SharpCaster.Models.MediaStatus
+﻿namespace SharpCaster.Models
 {
     public class Volume
     {

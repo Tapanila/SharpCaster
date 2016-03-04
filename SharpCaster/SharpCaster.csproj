@@ -49,6 +49,7 @@
     <Compile Include="Models\ChromecastRequests\LoadRequest.cs" />
     <Compile Include="Models\ChromecastRequests\MediaData.cs" />
     <Compile Include="Models\ChromecastRequests\MediaRequest.cs" />
+    <Compile Include="Models\ChromecastRequests\MediaStatusRequest.cs" />
     <Compile Include="Models\ChromecastRequests\Metadata.cs" />
     <Compile Include="Models\ChromecastRequests\PauseRequest.cs" />
     <Compile Include="Models\ChromecastRequests\PingRequest.cs" />
@@ -60,6 +61,7 @@
     <Compile Include="Models\ChromecastRequests\VolumeDataObject.cs" />
     <Compile Include="Models\ChromecastRequests\VolumeRequest.cs" />
     <Compile Include="Models\ChromecastSSLClientDataReceivedArgs.cs" />
+    <Compile Include="JsonConverters\PlayerStateEnumConverter.cs" />
     <Compile Include="Models\MessageFactory.cs" />
     <Compile Include="Models\ChromecastRequests\RequestIdProvider.cs" />
     <Compile Include="Interfaces\ISocketService.cs" />
@@ -67,14 +69,13 @@
     <Compile Include="Models\ChromecastStatus\ChromecastApplication.cs" />
     <Compile Include="Models\ChromecastStatus\ChromecastStatusResponse.cs" />
     <Compile Include="Models\ChromecastStatus\Namespace.cs" />
-    <Compile Include="Models\ChromecastStatus\Status.cs" />
-    <Compile Include="Models\ChromecastStatus\Volume.cs" />
+    <Compile Include="Models\ChromecastStatus\ChromecastStatus.cs" />
     <Compile Include="Models\Discovery.cs" />
-    <Compile Include="Models\MediaStatus\Volume.cs" />
+    <Compile Include="Models\Volume.cs" />
     <Compile Include="Models\MediaStatus\Item.cs" />
     <Compile Include="Models\MediaStatus\Media.cs" />
+    <Compile Include="Models\MediaStatus\MediaStatusResponse.cs" />
     <Compile Include="Models\MediaStatus\MediaStatus.cs" />
-    <Compile Include="Models\MediaStatus\Status.cs" />
     <Compile Include="Models\MediaStatus\Track.cs" />
     <Compile Include="Models\ChromecastRequests\SeekRequest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -7,6 +7,9 @@ namespace SharpCaster.Models.ChromecastRequests
     public class VolumeDataObject
     {
         [DataMember(Name = "level")]
-        public float Level { get; set; }
+        public float? Level { get; set; }
+
+        [DataMember(Name = "muted")]
+        public bool? Muted { get; set; }
     }
 }
