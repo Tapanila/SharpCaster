@@ -49,6 +49,7 @@
     <Compile Include="Models\ChromecastRequests\LoadRequest.cs" />
     <Compile Include="Models\ChromecastRequests\MediaData.cs" />
     <Compile Include="Models\ChromecastRequests\MediaRequest.cs" />
+    <Compile Include="Models\ChromecastRequests\MediaStatusRequest.cs" />
     <Compile Include="Models\ChromecastRequests\Metadata.cs" />
     <Compile Include="Models\ChromecastRequests\PauseRequest.cs" />
     <Compile Include="Models\ChromecastRequests\PingRequest.cs" />
@@ -68,7 +69,7 @@
     <Compile Include="Models\ChromecastStatus\ChromecastApplication.cs" />
     <Compile Include="Models\ChromecastStatus\ChromecastStatusResponse.cs" />
     <Compile Include="Models\ChromecastStatus\Namespace.cs" />
-    <Compile Include="Models\ChromecastStatus\Status.cs" />
+    <Compile Include="Models\ChromecastStatus\ChromecastStatus.cs" />
     <Compile Include="Models\Discovery.cs" />
     <Compile Include="Models\Volume.cs" />
     <Compile Include="Models\MediaStatus\Item.cs" />

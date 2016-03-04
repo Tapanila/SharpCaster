@@ -102,7 +102,7 @@ namespace SharpCaster.Simple
 
         private async void Client_ApplicationStarted(object sender, Models.ChromecastStatus.ChromecastApplication e)
         {
-            await ShowMessage($"Application {e.displayName} has launched");
+            await ShowMessage($"Application {e.DisplayName} has launched");
         }
 
         private async void Client_Connected(object sender, EventArgs e)
@@ -175,6 +175,7 @@ namespace SharpCaster.Simple
 
         public async Task SetVolume(double newValue)
         {
+            if (Math.Abs(_client.Volume.level - (newValue/100)) < 0.01) return;
             await _client.SetVolume((float) (newValue / 100));
         }
 
