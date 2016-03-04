@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
@@ -8,6 +9,7 @@ using Windows.ApplicationModel.Core;
 using Windows.UI.Core;
 using Windows.UI.Popups;
 using SharpCaster.Models;
+using SharpCaster.Models.MediaStatus;
 using SharpCaster.Simple.Annotations;
 
 namespace SharpCaster.Simple
@@ -81,9 +83,9 @@ namespace SharpCaster.Simple
             _client.VolumeChanged += _client_VolumeChanged;
         }
 
-        private async void _client_VolumeChanged(object sender, float e)
+        private async void _client_VolumeChanged(object sender, Volume e)
         {
-            await ShowMessage("Chromecast volume is now " + e);
+            await ShowMessage("Chromecast volume is now " + e.level);
         }
 
         private async void Client_ApplicationStarted(object sender, Models.ChromecastStatus.ChromecastApplication e)
@@ -123,9 +125,16 @@ namespace SharpCaster.Simple
             });
         }
 
-        public async Task Play()
+        public async Task PlayPause()
         {
-            await _client.Play();
+            if (_client.MediaStatus.PlayerState == PlayerState.Paused)
+            {
+                await _client.Play();
+            }
+            else
+            {
+                await _client.Pause();
+            }
         }
 
         public async Task Pause()
@@ -141,6 +150,11 @@ namespace SharpCaster.Simple
         public async Task Seek(double seconds)
         {
             await _client.Seek(seconds);
+        }
+
+        public async Task MuteUnmute()
+        {
+            await _client.SetMute(!_client.Volume.muted);
         }
     }
 }

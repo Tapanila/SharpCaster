@@ -7,7 +7,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
-    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="1*"/>
             <RowDefinition Height="9*"/>
@@ -19,8 +19,8 @@
             <Button Content="Connect" Click="ConnectClicked"/>
             <Button Content="Launch application" Click="LaunchApplication" />
             <Button Content="Load media" Click="LoadMedia" />
-            <Button Content="Play" Click="Play"/>
-            <Button Content="Pause" Click="Pause"/>
+            <Button Content="Play/Pause" Click="PlayPause"/>
+            <Button Content="Mute/Unmute" Click="MuteUnmute"/>
             <Button Content="Seek to 90 seconds" Click="Seek" />
         </StackPanel>
         <ListView Margin="14" Grid.Row="1" ItemsSource="{Binding Chromecasts}" SelectedItem="{Binding SelectedChromecast, Mode=TwoWay}">

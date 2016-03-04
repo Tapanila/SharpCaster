@@ -40,6 +40,12 @@ namespace SharpCaster.Models
             PayloadUtf8 = new VolumeRequest(level).ToJson()
         };
 
+        public static CastMessage Volume(bool muted) => new CastMessage
+        {
+            Namespace = DialConstants.DialReceiverUrn,
+            PayloadUtf8 = new VolumeRequest(muted).ToJson()
+        };
+
         public static CastMessage Ping => new CastMessage
         {
             Namespace = DialConstants.DialHeartbeatUrn,
