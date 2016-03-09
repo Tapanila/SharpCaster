@@ -5,6 +5,7 @@
     xmlns:local="using:SharpCaster.Simple"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:controllers="using:SharpCaster.Controllers"
     mc:Ignorable="d">
 
     <Grid>
@@ -16,7 +17,7 @@
             Grid.Row="0"
             Orientation="Horizontal"
          >
-            <Button Content="Connect" Click="ConnectClicked"/>
+            <controllers:CastButton ChromecastService="{Binding ChromecastService}" />
             <Button Content="Launch application" Click="LaunchApplication" />
             <Button Content="Stop Application" Click="StopApplication" />
             <Button Content="Load media" Click="LoadMedia" />
@@ -25,15 +26,5 @@
             <Button Content="Seek to 90 seconds" Click="Seek" />
             <Slider Maximum="100" LargeChange="10" SmallChange="1" Width="100" Value="{Binding Volume}" ValueChanged="Slider_ValueChanged" />
         </StackPanel>
-        <ListView Margin="14" Grid.Row="1" ItemsSource="{Binding Chromecasts}" SelectedItem="{Binding SelectedChromecast, Mode=TwoWay}">
-            <ListView.ItemTemplate>
-                <DataTemplate>
-                    <StackPanel Orientation="Horizontal" Margin="4">
-                        <TextBlock Text="{Binding FriendlyName}"/>
-                        <TextBlock Text="{Binding DeviceUri}"/>
-                    </StackPanel>
-                </DataTemplate>
-            </ListView.ItemTemplate>
-        </ListView>
     </Grid>
 </Page>

@@ -12,18 +12,8 @@ namespace SharpCaster.Simple
             InitializeComponent();
             MainPageViewModel = new MainPageViewModel();
             DataContext = MainPageViewModel;
-            Loaded += MainPage_Loaded;
         }
-
-        private void MainPage_Loaded(object sender, RoutedEventArgs e)
-        {
-            MainPageViewModel.StartLocating();
-        }
-
-        private async void ConnectClicked(object sender, RoutedEventArgs e)
-        {
-            await MainPageViewModel.Connect();
-        }
+        
 
         private async void LaunchApplication(object sender, RoutedEventArgs e)
         {
