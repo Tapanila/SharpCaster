@@ -2,14 +2,14 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
     <metadata>
         <id>SharpCaster</id>
-        <version>0.1.1</version>
+        <version>0.1.3</version>
         <authors>Tapanila</authors>
         <owners>Tapanila</owners>
         <licenseUrl>https://raw.githubusercontent.com/tapanila/SharpCaster/master/LICENSE.txt</licenseUrl>
         <projectUrl>https://github.com/tapanila/SharpCaster</projectUrl>
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <description>Chromecast SDK for Windows and Windows Phone</description>
-        <releaseNotes>All media commands are now supported</releaseNotes>
+        <releaseNotes>First implementation of CastDialog and CastButton</releaseNotes>
         <copyright>Copyright 2016</copyright>
         <dependencies>
             <dependency id="Newtonsoft.Json" version="8.0.2" />
