@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
 using Windows.Networking;
@@ -9,19 +11,27 @@ using SharpCaster.Models;
 using SharpCaster.Interfaces;
 using SharpCaster.Services;
 using System.Threading;
+using SharpCaster.Annotations;
 
 namespace SharpCaster
 {
-    public class DeviceLocator
+    public class DeviceLocator : INotifyPropertyChanged
     {
         public TimeSpan TimeOut;
         public ISocketService SocketService;
         public event EventHandler<Chromecast> DeviceFounded;
 
+        public List<Chromecast> DiscoveredDevices
+        {
+            get { return _discoveredDevices; }
+            private set { _discoveredDevices = value; OnPropertyChanged(); }
+        }
+
+        private List<Chromecast> _discoveredDevices; 
+
         private const string MulticastHostName = "239.255.255.250";
         private const string MulticastPort = "1900";
         private readonly XmlSerializer _xmlSerializer;
-        private List<Chromecast> _discoveredDevices;
         private CancellationToken _cancellationToken;
         private List<Uri> _possibleDevicesList; 
         
@@ -32,39 +42,51 @@ namespace SharpCaster
             TimeOut = TimeSpan.FromSeconds(4);
             _possibleDevicesList = new List<Uri>();
         }
-        
-        public async Task<List<Chromecast>> LocateDevicesAsync(CancellationToken token, TimeSpan? delay = null)
-        {
-            if (delay == null) { delay = TimeSpan.FromMilliseconds(500); }
-            _cancellationToken = token;
-            var Delay = (TimeSpan)delay;
 
-            _discoveredDevices = new List<Chromecast>();
+        public async Task<List<Chromecast>> LocateDevicesAsync(CancellationToken token)
+        {
+            return await LocateDevicesAsync(token, TimeSpan.FromMilliseconds(500));
+        }
+
+        public async Task<List<Chromecast>> LocateDevicesAsync(CancellationToken token, TimeSpan delay)
+        {
+            _cancellationToken = token;
+            
+            DiscoveredDevices = new List<Chromecast>();
 
             var multicastIP = new HostName(MulticastHostName);
             SocketService.MessageReceived += MulticastResponseReceived;
             using (SocketService.Initialize())
             {
-                await SocketService.BindEndpointAsync(null, string.Empty);
-                SocketService.JoinMulticastGroup(multicastIP);
-                do
+                try
                 {
-                    using (var writer = await SocketService.GetOutputWriterAsync(multicastIP, MulticastPort))
+                    await SocketService.BindEndpointAsync(null, string.Empty);
+                    SocketService.JoinMulticastGroup(multicastIP);
+                    do
                     {
-                        const string request = "M-SEARCH * HTTP/1.1\r\n" +
-                                               "HOST:" + MulticastHostName + ":" + MulticastPort + "\r\n" +
-                                               "ST:SsdpSearch:all\r\n" +
-                                               "MAN:\"ssdp:discover\"\r\n" +
-                                               "MX:3\r\n\r\n\r\n";
-                        writer.WriteString(request);
-                        await writer.StoreAsync();
-                    }
-                    await Task.Delay(Delay);
+                        using (var writer = await SocketService.GetOutputWriterAsync(multicastIP, MulticastPort))
+                        {
+                            const string request = "M-SEARCH * HTTP/1.1\r\n" +
+                                                   "HOST:" + MulticastHostName + ":" + MulticastPort + "\r\n" +
+                                                   "ST:SsdpSearch:all\r\n" +
+                                                   "MAN:\"ssdp:discover\"\r\n" +
+                                                   "MX:3\r\n\r\n\r\n";
+                            writer.WriteString(request);
+                            await writer.StoreAsync();
+                        }
+                        await Task.Delay(delay, token);
+                    } while (!_cancellationToken.IsCancellationRequested);
                 }
-                while (!_cancellationToken.IsCancellationRequested);
+                catch (Exception)
+                {
+                    return DiscoveredDevices;
+                }
+                finally
+                {
+                    SocketService.MessageReceived -= MulticastResponseReceived;
+                }
             }
-            SocketService.MessageReceived -= MulticastResponseReceived;
-            return _discoveredDevices;
+            return DiscoveredDevices;
         }
 
         private async void MulticastResponseReceived(object sender, string receivedString)
@@ -82,7 +104,7 @@ namespace SharpCaster
             _possibleDevicesList.Add(uri);
             if (!await GetChromecastName(possibleChromeCast)) return;
 
-            _discoveredDevices.Add(possibleChromeCast);
+            DiscoveredDevices.Add(possibleChromeCast);
             DeviceFounded?.Invoke(this, possibleChromeCast);
         }
 
@@ -104,5 +126,12 @@ namespace SharpCaster
             return true;
         }
 
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        [NotifyPropertyChangedInvocator]
+        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
     }
 }

@@ -35,6 +35,9 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="ChromeCastClient.cs" />
+    <Compile Include="ChromecastService.cs" />
+    <Compile Include="Controllers\CastButton.cs" />
+    <Compile Include="Controllers\CastDialog.cs" />
     <Compile Include="DeviceLocator.cs" />
     <Compile Include="Extensions\ByteArrayExtension.cs" />
     <Compile Include="Extensions\StreamExtension.cs" />
@@ -78,6 +81,7 @@
     <Compile Include="Models\MediaStatus\MediaStatus.cs" />
     <Compile Include="Models\MediaStatus\Track.cs" />
     <Compile Include="Models\ChromecastRequests\SeekRequest.cs" />
+    <Compile Include="Properties\Annotations.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services\SocketService.cs" />
   </ItemGroup>
@@ -99,6 +103,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Page Include="Themes\Generic.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
 </Project>
