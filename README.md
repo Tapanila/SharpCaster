@@ -29,6 +29,11 @@ client.Connected += async delegate { await client.LaunchApplication("B3419EF5");
 client.ApplicationStarted += async delegate { await client.LoadMedia("http://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/dash/BigBuckBunny.mpd"); };
 client.ConnectChromecast(chromecast.DeviceUri);
 ```    
+
+## SharpCaster Simple
+
+![SharpCaster Simple demo](https://raw.githubusercontent.com/tapanila/SharpCaster/master/Assets/SharpCaster.Simple.Demo.gif)
+
 # Notes
 
 Heavily based on [NCast](https://github.com/jeremychild/NCast)
