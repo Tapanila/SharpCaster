@@ -11,6 +11,7 @@
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="1*"/>
+            <RowDefinition Height="1*"/>
             <RowDefinition Height="9*"/>
         </Grid.RowDefinitions>
         <StackPanel
@@ -23,8 +24,13 @@
             <Button Content="Load media" Click="LoadMedia" />
             <Button Content="Play/Pause" Click="PlayPause"/>
             <Button Content="Mute/Unmute" Click="MuteUnmute"/>
-            <Button Content="Seek to 90 seconds" Click="Seek" />
             <Slider Maximum="100" LargeChange="10" SmallChange="1" Width="100" Value="{Binding Volume}" ValueChanged="Slider_ValueChanged" />
         </StackPanel>
+        <Slider
+            Grid.Row="1"
+            Margin="20,0,20,0"
+            Maximum="{Binding Length}"
+            Value="{Binding Position}"
+            ValueChanged="TimelineValueChanged"/>
     </Grid>
 </Page>
