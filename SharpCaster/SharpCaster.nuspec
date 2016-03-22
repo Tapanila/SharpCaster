@@ -16,6 +16,7 @@
         </dependencies>
     </metadata>
     <files>
-        <file src="bin\release\protobuf-net.dll" target="lib\portable-win81+wpa81" />
+		<file src="bin\release\protobuf-net.dll" target="lib\portable-win81+wpa81" />
+		<file src="bin\release\Themes\Generic.xbf" target="lib\portable-win81+wpa81\SharpCaster\Themes\Generic.xbf" />
     </files>
 </package>
