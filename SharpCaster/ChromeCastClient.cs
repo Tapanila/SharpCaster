@@ -147,7 +147,7 @@ namespace SharpCaster
 
         private async Task<bool> ConnectToApplication(string applicationId)
         {
-            var startedApplication = ChromecastStatus.Applications?.FirstOrDefault(x => x.AppId == applicationId);
+            var startedApplication = ChromecastStatus?.Applications?.FirstOrDefault(x => x.AppId == applicationId);
             if (startedApplication == null) return false;
             if (!string.IsNullOrWhiteSpace(_currentApplicationSessionId)) return false;
             _currentApplicationSessionId = startedApplication.SessionId;
@@ -211,7 +211,7 @@ namespace SharpCaster
             }
             catch (Exception ex)
             {
-                // Log these bytes?
+                // Log these bytes
                 Debug.WriteLine(ex);
             }
 
@@ -228,7 +228,7 @@ namespace SharpCaster
 
         private async void OpenConnection()
         {
-            await Write(MessageFactory.Connect().ToProto());
+            await _connectionChannel.Write(MessageFactory.Connect());
         }
 
         private ChromecastChannel CreateChannel(string channelNamespace)

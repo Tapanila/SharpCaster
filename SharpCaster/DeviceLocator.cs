@@ -115,6 +115,7 @@ namespace SharpCaster
                 deviceResponse = await SocketService.GetStringAsync(chromecast.DeviceUri, TimeOut);
             } catch (Exception ex)
             {
+                _possibleDevicesList.Remove(chromecast.DeviceUri);
                 //TODO: Implement error logging
                 return false;
             }

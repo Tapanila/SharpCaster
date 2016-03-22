@@ -16,14 +16,14 @@ namespace SharpCaster.Extensions
             return dataToSend.ToArray();
         }
 
-        public static CastMessage ToCastMessage(this byte[] array, bool includeHeader = true)
+        public static CastMessage ToCastMessage(this byte[] array)
         {
             try
             {
                 Stream bufStream = new MemoryStream();
                 bufStream.Write(array, 0, array.Length);
                 bufStream.Position = 0;
-                var msg = Serializer.DeserializeWithLengthPrefix<CastMessage>(bufStream, PrefixStyle.Fixed32BigEndian);
+                var msg = Serializer.Deserialize<CastMessage>(bufStream);
                 return msg;
             }
             catch (Exception)

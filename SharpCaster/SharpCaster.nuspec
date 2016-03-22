@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
     <metadata>
         <id>SharpCaster</id>
-        <version>0.1.3</version>
+        <version>0.1.4</version>
         <authors>Tapanila</authors>
         <owners>Tapanila</owners>
         <licenseUrl>https://raw.githubusercontent.com/tapanila/SharpCaster/master/LICENSE.txt</licenseUrl>
@@ -16,6 +16,7 @@
         </dependencies>
     </metadata>
     <files>
-        <file src="bin\release\protobuf-net.dll" target="lib\portable-win81+wpa81" />
+		<file src="bin\release\protobuf-net.dll" target="lib\portable-win81+wpa81" />
+		<file src="bin\release\Themes\Generic.xbf" target="lib\portable-win81+wpa81\SharpCaster\Themes\Generic.xbf" />
     </files>
 </package>
