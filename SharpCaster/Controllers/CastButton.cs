@@ -35,13 +35,31 @@ namespace SharpCaster.Controllers
             DefaultStyleKey = typeof(CastButton);
         }
 
+        private void UpdateState()
+        {
+            if (ChromecastService?.ConnectedChromecast != null)
+            {
+                VisualStateManager.GoToState(this, CastButtonVisualStates.InteractiveStates.Connected.ToString(), true);
+                return;
+            }
+            if (ChromecastService?.DeviceLocator.DiscoveredDevices.Count > 0)
+            {
+                VisualStateManager.GoToState(this, CastButtonVisualStates.InteractiveStates.Disconnected.ToString(), true);
+                return;
+            }
+            VisualStateManager.GoToState(this, CastButtonVisualStates.InteractiveStates.Unavailable.ToString(), true);
+        }
+
         protected override void OnApplyTemplate()
         {
             base.OnApplyTemplate();
             var castIcon = GetTemplateChild("CastIcon") as Path;
-            if (ChromecastService != null) ChromecastService.CastButton = this;
+            if (ChromecastService != null)
+            {
+                ChromecastService.CastButton = this;
+            }
             if (castIcon != null) Tapped += CastIcon_Tapped;
-            VisualStateManager.GoToState(this, CastButtonVisualStates.InteractiveStates.Unavailable.ToString(), true);
+            UpdateState();
         }
 
         private void CastIcon_Tapped(object sender, Windows.UI.Xaml.Input.TappedRoutedEventArgs e)
