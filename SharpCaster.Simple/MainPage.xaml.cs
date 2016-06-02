@@ -1,5 +1,6 @@
 ﻿using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
+using Windows.UI.Xaml.Controls.Primitives;
 
 namespace SharpCaster.Simple
 {
@@ -30,11 +31,6 @@ namespace SharpCaster.Simple
             await MainPageViewModel.PlayPause();
         }
 
-        private async void Seek(object sender, RoutedEventArgs e)
-        {
-            await MainPageViewModel.Seek(90);
-        }
-
         private async void MuteUnmute(object sender, RoutedEventArgs e)
         {
             await MainPageViewModel.MuteUnmute();
@@ -48,6 +44,12 @@ namespace SharpCaster.Simple
         private async void StopApplication(object sender, RoutedEventArgs e)
         {
             await MainPageViewModel.StopApplication();
+        }
+        
+
+        private async void TimelineValueChanged(object sender, RangeBaseValueChangedEventArgs e)
+        {
+            await MainPageViewModel.Seek(e.NewValue);
         }
     }
 }

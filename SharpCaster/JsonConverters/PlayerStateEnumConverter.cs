@@ -21,7 +21,7 @@ namespace SharpCaster.JsonConverters
                     writer.WriteValue("PAUSED");
                     break;
                 case PlayerState.Playing:
-                    writer.WriteValue("PLAY");
+                    writer.WriteValue("PLAYING");
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -44,7 +44,7 @@ namespace SharpCaster.JsonConverters
                 case "PAUSED":
                     playerState = PlayerState.Paused;
                     break;
-                case "PLAY":
+                case "PLAYING":
                     playerState = PlayerState.Playing;
                     break;
             }

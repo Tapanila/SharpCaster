@@ -1,13 +1,11 @@
 ﻿using System;
-using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Threading;
 using System.Threading.Tasks;
 using Windows.ApplicationModel.Core;
 using Windows.UI.Core;
 using Windows.UI.Popups;
+using Windows.UI.Xaml;
 using SharpCaster.Models;
 using SharpCaster.Models.MediaStatus;
 using SharpCaster.Simple.Annotations;
@@ -18,8 +16,8 @@ namespace SharpCaster.Simple
     {
         readonly ChromecastService _chromecastService = ChromecastService.Current;
         public event PropertyChangedEventHandler PropertyChanged;
-        
-        
+        private DispatcherTimer secondsTimer;
+
         public ChromecastService ChromecastService => _chromecastService;
 
         public double Volume
@@ -34,6 +32,29 @@ namespace SharpCaster.Simple
 
         private double _volume;
 
+        public double Length
+        {
+            get { return _length; }
+            set
+            {
+                _length = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private double _length;
+
+        public double Position
+        {
+            get { return _position; }
+            set
+            {
+                _position = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private double _position;
 
         [NotifyPropertyChangedInvocator]
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
@@ -43,9 +64,39 @@ namespace SharpCaster.Simple
 
         public MainPageViewModel()
         {
+            #pragma warning disable 4014
             _chromecastService.StartLocatingDevices();
+            #pragma warning restore 4014
             _chromecastService.ChromeCastClient.ApplicationStarted += Client_ApplicationStarted;
             _chromecastService.ChromeCastClient.VolumeChanged += _client_VolumeChanged;
+            _chromecastService.ChromeCastClient.MediaStatusChanged += ChromeCastClient_MediaStatusChanged;
+            secondsTimer = new DispatcherTimer {Interval = TimeSpan.FromSeconds(1)};
+            secondsTimer.Tick += SecondsTimer_Tick;
+        }
+
+        private void SecondsTimer_Tick(object sender, object e)
+        {
+            Position += 1;
+        }
+
+        private async void ChromeCastClient_MediaStatusChanged(object sender, MediaStatus e)
+        {
+            if (_chromecastService.ChromeCastClient.MediaStatus == null) return;
+            await ExecuteOnUiThread(() =>
+            {
+                switch (_chromecastService.ChromeCastClient.MediaStatus.PlayerState)
+                {
+                    case PlayerState.Playing:
+                        secondsTimer.Start();
+                        break;
+                    default:
+                        secondsTimer.Stop();
+                        break;
+                }
+                Position = _chromecastService.ChromeCastClient.MediaStatus.currentTime;
+                if (_chromecastService.ChromeCastClient.MediaStatus.media != null)
+                    Length = _chromecastService.ChromeCastClient.MediaStatus.media.duration;
+            });
         }
 
         private async void _client_VolumeChanged(object sender, Volume e)
@@ -80,7 +131,7 @@ namespace SharpCaster.Simple
 
         public async Task PlayPause()
         {
-            if (_chromecastService.ChromeCastClient.MediaStatus.PlayerState == PlayerState.Paused)
+            if (_chromecastService.ChromeCastClient.MediaStatus != null && _chromecastService.ChromeCastClient.MediaStatus.PlayerState == PlayerState.Paused)
             {
                 await _chromecastService.ChromeCastClient.Play();
             }
@@ -102,6 +153,7 @@ namespace SharpCaster.Simple
 
         public async Task Seek(double seconds)
         {
+            if (Math.Abs(Position - seconds) > 0.1)
             await _chromecastService.ChromeCastClient.Seek(seconds);
         }
 

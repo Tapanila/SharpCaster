@@ -8,6 +8,7 @@ namespace SharpCaster.Models.MediaStatus
         public string contentType { get; set; }
         public string streamType { get; set; }
         public double duration { get; set; }
-        public List<Track> tracks { get; set; }
+        public GenericMediaMetadata metadata { get; set; }
+        public object customData { get; set; }
     }
 }
