@@ -6,6 +6,7 @@ using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
 using Windows.UI.Xaml.Shapes;
+using SharpCaster.Services;
 
 namespace SharpCaster.Controllers
 {

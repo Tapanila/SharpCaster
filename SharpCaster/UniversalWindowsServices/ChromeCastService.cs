@@ -3,23 +3,13 @@ using System.Threading.Tasks;
 using SharpCaster.Controllers;
 using SharpCaster.Models;
 
-namespace SharpCaster
+namespace SharpCaster.Services
 {
     public class ChromecastService
     {
         private static ChromecastService _instance;
 
-        public static ChromecastService Current
-        {
-            get
-            {
-                if (_instance == null)
-                {
-                    _instance = new ChromecastService();
-                }
-                return _instance;
-            }
-        }
+        public static ChromecastService Current => _instance ?? (_instance = new ChromecastService());
 
         public DeviceLocator DeviceLocator { get; }
         public ChromeCastClient ChromeCastClient { get; }
