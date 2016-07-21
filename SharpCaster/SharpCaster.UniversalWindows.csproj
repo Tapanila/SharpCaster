@@ -105,6 +105,7 @@
     <Compile Include="ChromeCastClient.cs" />
     <Compile Include="Controllers\CastButton.cs" />
     <Compile Include="Controllers\CastDialog.cs" />
+    <Compile Include="Controllers\CastPlayer.cs" />
     <Compile Include="DeviceLocator.cs" />
     <Compile Include="Extensions\ByteArrayExtension.cs" />
     <Compile Include="Extensions\StreamExtension.cs" />
