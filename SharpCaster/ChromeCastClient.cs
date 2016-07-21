@@ -25,6 +25,7 @@ namespace SharpCaster
         private ChromecastChannel _connectionChannel;
         private ChromecastChannel _mediaChannel;
         private ChromecastChannel _heartbeatChannel;
+        private ChromecastChannel _receiverChannel;
         private List<ChromecastChannel> _channels;
         private const string ChromecastPort = "8009";
         private string _chromecastApplicationId;
@@ -45,17 +46,17 @@ namespace SharpCaster
             _channels = new List<ChromecastChannel>();
             _connectionChannel = CreateChannel(MessageFactory.DialConstants.DialConnectionUrn);
             _heartbeatChannel = CreateChannel(MessageFactory.DialConstants.DialHeartbeatUrn);
-            var receiverChannel = CreateChannel(MessageFactory.DialConstants.DialReceiverUrn);
+            _receiverChannel = CreateChannel(MessageFactory.DialConstants.DialReceiverUrn);
             _mediaChannel = CreateChannel(MessageFactory.DialConstants.DialMediaUrn);
 
             _mediaChannel.MessageReceived += MediaChannel_MessageReceived;
-            receiverChannel.MessageReceived += ReceiverChannel_MessageReceived;
+            _receiverChannel.MessageReceived += ReceiverChannel_MessageReceived;
             _heartbeatChannel.MessageReceived += HeartbeatChannel_MessageReceived;
         }
 
         public async void GetChromecastStatus()
         {
-            await Write(MessageFactory.Status().ToProto());
+            await _receiverChannel.Write(MessageFactory.Status());
         }
 
         public async Task SetVolume(float level)
@@ -82,12 +83,17 @@ namespace SharpCaster
             await SetVolume(Volume.level - 0.05f);
         }
 
-        private void HeartbeatChannel_MessageReceived(object sender, ChromecastSSLClientDataReceivedArgs e)
+        private async void HeartbeatChannel_MessageReceived(object sender, ChromecastSSLClientDataReceivedArgs e)
         {
             if (_connected || e.Message.GetJsonType() != "PONG") return;
+            //Wait 100 milliseconds before sending GET_STATUS because chromecast was sending CLOSE back without a wait
+            await Task.Delay(100);
+            GetChromecastStatus();
+            //Wait 100 milliseconds to make sure that the status of Chromecast device is received before notifying we have connected to it
+            await Task.Delay(100);
             _connected = true;
             Connected?.Invoke(this, EventArgs.Empty);
-            GetChromecastStatus();
+
         }
 
         public async Task Seek(double seconds)
