@@ -11,7 +11,7 @@ namespace SharpCaster.Services
     public class SocketService : ISocketService
     {
         private DatagramSocket _datagramSocket;
-        
+
         public ISocketService Initialize()
         {
             _datagramSocket = new DatagramSocket();
@@ -34,29 +34,30 @@ namespace SharpCaster.Services
         {
             _datagramSocket.MessageReceived -= _datagramSocket_MessageReceived;
             _datagramSocket.Dispose();
-            _datagramSocket = null;  
+            _datagramSocket = null;
         }
 
-        public async Task BindEndpointAsync(HostName localHostName, string localServiceName)
+        public async Task BindEndpointAsync(string localHostName, string localServiceName)
         {
-            await _datagramSocket.BindEndpointAsync(localHostName, localServiceName);
+            await _datagramSocket.BindEndpointAsync(new HostName(localHostName), localServiceName);
         }
 
-        public void JoinMulticastGroup(HostName multicastIP)
+        public void JoinMulticastGroup(string multicastIP)
         {
-            _datagramSocket.JoinMulticastGroup(multicastIP);
-
-        }
-
-        public async Task<DataWriter> GetOutputWriterAsync(HostName multicastIP, string multicastPort)
-        {
-            return new DataWriter(await _datagramSocket.GetOutputStreamAsync(multicastIP, multicastPort));
+            _datagramSocket.JoinMulticastGroup(new HostName(multicastIP));
         }
 
         public async Task<string> GetStringAsync(Uri uri, TimeSpan timeout)
         {
             var http = new HttpClient { Timeout = timeout };
             return await http.GetStringAsync(uri);
+        }
+
+        public async Task Write(string request, string multicastPort, string multicastIP)
+        {
+            var writer = new DataWriter(await _datagramSocket.GetOutputStreamAsync(new HostName(multicastIP), multicastPort));
+            writer.WriteString(request);
+            await writer.StoreAsync();
         }
     }
 }

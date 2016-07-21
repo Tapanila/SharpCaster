@@ -9,6 +9,7 @@ using Windows.UI.Xaml;
 using Windows.UI.Xaml.Media;
 using SharpCaster.Models;
 using SharpCaster.Models.MediaStatus;
+using SharpCaster.Services;
 using SharpCaster.Simple.Annotations;
 
 namespace SharpCaster.Simple
@@ -124,7 +125,6 @@ namespace SharpCaster.Simple
 
         private async void ChromeCastClient_MediaStatusChanged(object sender, MediaStatus e)
         {
-            if (_chromecastService.ChromeCastClient.MediaStatus == null) return;
             await ExecuteOnUiThread(() =>
             {
                 switch (_chromecastService.ChromeCastClient.MediaStatus.PlayerState)
