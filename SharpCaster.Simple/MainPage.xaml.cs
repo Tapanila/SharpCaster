@@ -1,6 +1,8 @@
-﻿using Windows.UI.Xaml;
+﻿using System;
+using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
+using Windows.UI.Xaml.Media.Imaging;
 
 namespace SharpCaster.Simple
 {
@@ -14,16 +16,13 @@ namespace SharpCaster.Simple
             MainPageViewModel = new MainPageViewModel();
             DataContext = MainPageViewModel;
         }
-        
-
-        private async void LaunchApplication(object sender, RoutedEventArgs e)
-        {
-            await MainPageViewModel.LaunchApplication();
-        }
 
         private async void LoadMedia(object sender, RoutedEventArgs e)
         {
-            await MainPageViewModel.LoadMedia();
+            await MainPageViewModel.LoadMedia(
+                "Big Buck Bunny", 
+                "A large and lovable rabbit", 
+                new BitmapImage(new Uri("https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Big_buck_bunny_poster_big.jpg/339px-Big_buck_bunny_poster_big.jpg")));
         }
 
         private async void PlayPause(object sender, RoutedEventArgs e)
