@@ -4,14 +4,58 @@ using System.Linq;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
+using SharpCaster.Models;
+using SharpCaster.Models.ChromecastStatus;
+using SharpCaster.Models.MediaStatus;
+using SharpCaster.Services;
 
 namespace SharpCaster.Console
 {
     class Program
     {
+        static readonly ChromecastService _chromecastService = ChromecastService.Current;
+        
         static void Main(string[] args)
         {
             
+#pragma warning disable 4014
+            _chromecastService.StartLocatingDevices();
+            System.Console.WriteLine("Started locating chromecasts!");
+#pragma warning restore 4014
+            _chromecastService.DeviceLocator.DeviceFounded += DeviceLocator_DeviceFounded;
+            _chromecastService.ChromeCastClient.ApplicationStarted += Client_ApplicationStarted;
+            _chromecastService.ChromeCastClient.VolumeChanged += _client_VolumeChanged;
+            _chromecastService.ChromeCastClient.MediaStatusChanged += ChromeCastClient_MediaStatusChanged;
+            _chromecastService.ChromeCastClient.Connected += ChromeCastClient_Connected;
+
+            var input = System.Console.ReadLine();
+        }
+
+        private static void DeviceLocator_DeviceFounded(object sender, Chromecast e)
+        {
+            System.Console.WriteLine("Device founded " + e.FriendlyName);
+            _chromecastService.ConnectToChromecast(e);
+            _chromecastService.StopLocatingDevices();
+        }
+
+        private static void ChromeCastClient_Connected(object sender, EventArgs e)
+        {
+            System.Console.WriteLine("Connected to chromecast");
+        }
+
+        private static void ChromeCastClient_MediaStatusChanged(object sender, MediaStatus e)
+        {
+            throw new NotImplementedException();
+        }
+
+        private static void _client_VolumeChanged(object sender, Volume e)
+        {
+            throw new NotImplementedException();
+        }
+
+        private static void Client_ApplicationStarted(object sender, ChromecastApplication e)
+        {
+            throw new NotImplementedException();
         }
     }
 }

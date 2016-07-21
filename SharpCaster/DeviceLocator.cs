@@ -68,12 +68,12 @@ namespace SharpCaster
                                                    "MAN:\"ssdp:discover\"\r\n" +
                                                    "MX:3\r\n\r\n\r\n";
 
-                        await SocketService.Write(request, MulticastHostName, MulticastPort);
+                        await SocketService.Write(request, MulticastPort, MulticastHostName);
                         
                         await Task.Delay(delay, token);
                     } while (!_cancellationToken.IsCancellationRequested);
                 }
-                catch (Exception)
+                catch (Exception exception)
                 {
                     return DiscoveredDevices;
                 }

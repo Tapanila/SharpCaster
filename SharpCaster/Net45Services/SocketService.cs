@@ -3,6 +3,7 @@ using System;
 using System.IO;
 using System.Net;
 using System.Net.Http;
+using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
@@ -18,9 +19,11 @@ namespace SharpCaster.Services
 
         public ISocketService Initialize()
         {
-            _datagramSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-            _datagramSocket.ReceiveTimeout = 1000;
-            _datagramSocket.SendTimeout = 1000;
+            _datagramSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp)
+            {
+                ReceiveTimeout = 1000,
+                SendTimeout = 1000
+            };
             _datagramSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.Broadcast, 1);
             _datagramSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReceiveTimeout, 1000);
             _datagramSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReceiveBuffer, (int)ushort.MaxValue);
@@ -51,13 +54,26 @@ namespace SharpCaster.Services
 
         public Task BindEndpointAsync(string localHostName, string localServiceName)
         {
-            //_datagramSocket.Bind(new IPEndPoint(long.Parse(localHostName), 1900));
-            return null;
+            foreach (NetworkInterface networkInterface in NetworkInterface.GetAllNetworkInterfaces())
+            {
+                if ((networkInterface.NetworkInterfaceType != NetworkInterfaceType.Wireless80211 &&
+                     networkInterface.NetworkInterfaceType != NetworkInterfaceType.Ethernet) ||
+                    networkInterface.OperationalStatus != OperationalStatus.Up) continue;
+                foreach (UnicastIPAddressInformation ip in networkInterface.GetIPProperties().UnicastAddresses)
+                {
+                    if (ip.Address.AddressFamily != AddressFamily.InterNetworkV6)
+                    {
+                        _datagramSocket.Bind(new IPEndPoint(ip.Address, 1901));
+                    }
+                }
+            }
+
+            return Task.FromResult(0);
         }
 
         public void JoinMulticastGroup(string multicastIP)
         {
-            _datagramSocket.Bind(new IPEndPoint(long.Parse(multicastIP), 1900));
+            //_datagramSocket.Bind(new IPEndPoint(IPAddress.Parse(multicastIP), 1900));
         }
 
         public async Task<string> GetStringAsync(Uri uri, TimeSpan timeout)

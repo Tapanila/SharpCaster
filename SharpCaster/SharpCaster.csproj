@@ -35,13 +35,12 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="ChromeCastClient.cs" />
+    <Compile Include="Models\CastMessage.cs" />
     <Compile Include="StubServices\ChromecastService.cs" />
-    <Compile Include="Extensions\ByteArrayExtension.cs" />
     <Compile Include="Extensions\StreamExtension.cs" />
     <Compile Include="StubServices\ChromecastSocketService.cs" />
     <Compile Include="DeviceLocator.cs" />
     <Compile Include="Interfaces\IChromecastSocketService.cs" />
-    <Compile Include="Models\CastMessage.cs" />
     <Compile Include="Models\ChromecastChannel.cs" />
     <Compile Include="Models\ChromecastRequests\CloseRequest.cs" />
     <Compile Include="Models\ChromecastRequests\ConnectRequest.cs" />
@@ -86,18 +85,21 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Interfaces\IChromecastService.cs" />
     <Compile Include="StubServices\SocketService.cs" />
+    <Compile Include="StubServices\StubByteArrayExtension.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="Google.Protobuf, Version=3.0.0.0, Culture=neutral, PublicKeyToken=a7d26565bac4d604, processorArchitecture=MSIL">
+      <HintPath>..\packages\Google.Protobuf.3.0.0-beta4\lib\netstandard1.0\Google.Protobuf.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.9.0.1\lib\portable-net45+wp80+win8+wpa81\Newtonsoft.Json.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="protobuf-net">
-      <HintPath>Libraries\protobuf-net.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Content Include="Libraries\protobuf-net.dll" />
+    <Content Include="Libraries\protobuf-net45.dll" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

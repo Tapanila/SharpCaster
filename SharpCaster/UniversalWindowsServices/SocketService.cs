@@ -39,7 +39,7 @@ namespace SharpCaster.Services
 
         public async Task BindEndpointAsync(string localHostName, string localServiceName)
         {
-            await _datagramSocket.BindEndpointAsync(new HostName(localHostName), localServiceName);
+            await _datagramSocket.BindEndpointAsync(null, localServiceName);
         }
 
         public void JoinMulticastGroup(string multicastIP)
