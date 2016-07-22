@@ -26,7 +26,6 @@ namespace SharpCaster
         private ChromecastChannel _mediaChannel;
         private ChromecastChannel _heartbeatChannel;
         private ChromecastChannel _receiverChannel;
-        private List<ChromecastChannel> _channels;
         private const string ChromecastPort = "8009";
         private string _chromecastApplicationId;
         private string _currentApplicationSessionId = "";
@@ -39,11 +38,12 @@ namespace SharpCaster
         public event EventHandler<MediaStatus> MediaStatusChanged;
         public event EventHandler<ChromecastStatus> ChromecastStatusChanged;
         public event EventHandler<Volume> VolumeChanged;
+        public List<ChromecastChannel> Channels;
 
         public ChromeCastClient()
         {
             ChromecastSocketService = new ChromecastSocketService();
-            _channels = new List<ChromecastChannel>();
+            Channels = new List<ChromecastChannel>();
             _connectionChannel = CreateChannel(MessageFactory.DialConstants.DialConnectionUrn);
             _heartbeatChannel = CreateChannel(MessageFactory.DialConstants.DialHeartbeatUrn);
             _receiverChannel = CreateChannel(MessageFactory.DialConstants.DialReceiverUrn);
@@ -224,7 +224,7 @@ namespace SharpCaster
 
         private void ReceivedMessage(CastMessage castMessage)
         {
-            foreach (var channel in _channels.Where(i => i.Namespace == castMessage.Namespace))
+            foreach (var channel in Channels.Where(i => i.Namespace == castMessage.Namespace))
             {
                 channel.OnMessageReceived(new ChromecastSSLClientDataReceivedArgs(castMessage));
             }
@@ -236,7 +236,7 @@ namespace SharpCaster
         private ChromecastChannel CreateChannel(string channelNamespace)
         {
             var channel = new ChromecastChannel(this, channelNamespace);
-            _channels.Add(channel);
+            Channels.Add(channel);
             return channel;
         }
 
