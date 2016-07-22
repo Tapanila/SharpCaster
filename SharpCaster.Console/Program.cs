@@ -33,29 +33,33 @@ namespace SharpCaster.Console
 
         private static void DeviceLocator_DeviceFounded(object sender, Chromecast e)
         {
+            if (!e.FriendlyName.Contains("CC"))
+            {
+                return;
+            }
+            _chromecastService.StopLocatingDevices();
             System.Console.WriteLine("Device founded " + e.FriendlyName);
             _chromecastService.ConnectToChromecast(e);
-            _chromecastService.StopLocatingDevices();
         }
 
-        private static void ChromeCastClient_Connected(object sender, EventArgs e)
+        private static async void ChromeCastClient_Connected(object sender, EventArgs e)
         {
+            await _chromecastService.ChromeCastClient.LaunchApplication("B3419EF5");
             System.Console.WriteLine("Connected to chromecast");
         }
 
         private static void ChromeCastClient_MediaStatusChanged(object sender, MediaStatus e)
         {
-            throw new NotImplementedException();
         }
 
         private static void _client_VolumeChanged(object sender, Volume e)
         {
-            throw new NotImplementedException();
         }
 
-        private static void Client_ApplicationStarted(object sender, ChromecastApplication e)
+        private static async void Client_ApplicationStarted(object sender, ChromecastApplication e)
         {
-            throw new NotImplementedException();
+            System.Console.WriteLine($"Application {e.DisplayName} has launched");
+            await _chromecastService.ChromeCastClient.LoadMedia("http://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/dash/BigBuckBunny.mpd");
         }
     }
 }

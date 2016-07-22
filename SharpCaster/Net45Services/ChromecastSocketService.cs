@@ -14,13 +14,14 @@ namespace SharpCaster.Services
         private TcpClient _client;
         private SslStream _stream;
 
-        public async Task Initialize(string host, string port, ChromecastChannel connectionChannel, ChromecastChannel heartbeatChannel, Action<Stream> packetReader)
+        public async Task Initialize(string host, string port, ChromecastChannel connectionChannel, ChromecastChannel heartbeatChannel, Action<Stream, bool> packetReader)
         {
             if (_client == null) _client = new TcpClient();
             _client.ReceiveBufferSize = 2048;
             _client.SendBufferSize = 2048;
             await _client.ConnectAsync(host, int.Parse(port));
             _stream = new SslStream(_client.GetStream(), true, ValidateServerCertificate, null);
+            
             _stream.AuthenticateAsClient("client");
             
         
@@ -31,10 +32,21 @@ namespace SharpCaster.Services
             {
                 while (true)
                 {
-                    byte[] buffer = new byte[2048];
-                    _stream.Read(buffer, 0, buffer.Length);
-                    var stream = new MemoryStream(buffer);
-                    packetReader(stream);
+                    var sizeBuffer = new byte[4];
+                    byte[] messageBuffer = { };
+                    // First message should contain the size of message
+                    _stream.Read(sizeBuffer, 0, sizeBuffer.Length);
+                    // The message is little-endian (that is, little end first),
+                    // reverse the byte array.
+                    Array.Reverse(sizeBuffer);
+                    //Retrieve the size of message
+                    var messageSize = BitConverter.ToInt32(sizeBuffer, 0);
+                    messageBuffer = new byte[messageSize];
+                    _stream.Read(messageBuffer, 0, messageBuffer.Length);
+                    var answer = new MemoryStream(messageBuffer.Length);
+                    answer.Write(messageBuffer,0,messageBuffer.Length);
+                    answer.Position = 0;
+                    packetReader(answer,true);
                 }
             });
         }
@@ -61,9 +73,10 @@ namespace SharpCaster.Services
             await connectionChannel.Write(MessageFactory.Connect());
         }
 
-        public async Task Write(byte[] bytes)
+        public Task Write(byte[] bytes)
         {
-            await _stream.WriteAsync(bytes, 0, bytes.Length);
+            _stream.Write(bytes, 0, bytes.Length);
+            return Task.Delay(0);
         }
     }
 }

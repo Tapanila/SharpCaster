@@ -73,7 +73,7 @@ namespace SharpCaster
                         await Task.Delay(delay, token);
                     } while (!_cancellationToken.IsCancellationRequested);
                 }
-                catch (Exception exception)
+                catch (Exception)
                 {
                     return DiscoveredDevices;
                 }

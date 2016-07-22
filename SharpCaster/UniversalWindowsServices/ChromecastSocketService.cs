@@ -14,7 +14,7 @@ namespace SharpCaster.Services
     {
         private StreamSocket _socket;
 
-        public async Task Initialize(string host, string port, ChromecastChannel connectionChannel, ChromecastChannel heartbeatChannel, Action<Stream> packetReader)
+        public async Task Initialize(string host, string port, ChromecastChannel connectionChannel, ChromecastChannel heartbeatChannel, Action<Stream, bool> packetReader)
         {
             _socket = new StreamSocket().ConfigureForChromecast();
             await _socket.ConnectAsync(new HostName(host), port, SocketProtectionLevel.Tls10);
@@ -26,7 +26,7 @@ namespace SharpCaster.Services
             {
                 while (true)
                 {
-                    packetReader(_socket.InputStream.AsStreamForRead());
+                    packetReader(_socket.InputStream.AsStreamForRead(), false);
                 }
             });
         }

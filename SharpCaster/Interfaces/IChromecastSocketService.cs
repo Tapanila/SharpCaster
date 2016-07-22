@@ -7,7 +7,7 @@ namespace SharpCaster.Interfaces
 {
     public interface IChromecastSocketService
     {
-        Task Initialize(string host, string port, ChromecastChannel connectionChannel, ChromecastChannel heartbeatChannel, Action<Stream> packetReader);
+        Task Initialize(string host, string port, ChromecastChannel connectionChannel, ChromecastChannel heartbeatChannel, Action<Stream,bool> packetReader);
         Task Write(byte[] bytes);
     }
 }

@@ -191,11 +191,22 @@ namespace SharpCaster
             await Write(MessageFactory.Stop(_currentApplicationSessionId).ToProto());
         }
 
-        private void ReadPacket(Stream stream)
+        private void ReadPacket(Stream stream, bool parsed)
         {
             try
             {
-                var entireMessage = stream.ParseData();
+                IEnumerable<byte> entireMessage;
+                if (parsed)
+                {
+                    var buffer = new byte[stream.Length];
+                    stream.Read(buffer, 0, buffer.Length);
+                    entireMessage = buffer;
+                }
+                else
+                {
+                    entireMessage = stream.ParseData();
+                }
+                
                 var entireMessageArray = entireMessage.ToArray();
                 var castMessage = entireMessageArray.ToCastMessage();
                 if (castMessage == null) return;
