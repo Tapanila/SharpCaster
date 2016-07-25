@@ -22,7 +22,7 @@ namespace SharpCaster.Console
             _chromecastService.StartLocatingDevices();
             System.Console.WriteLine("Started locating chromecasts!");
 #pragma warning restore 4014
-            _chromecastService.DeviceLocator.DeviceFounded += DeviceLocator_DeviceFounded;
+            _chromecastService.DeviceLocator.DeviceFound += DeviceLocator_DeviceFound;
             _chromecastService.ChromeCastClient.ApplicationStarted += Client_ApplicationStarted;
             _chromecastService.ChromeCastClient.VolumeChanged += _client_VolumeChanged;
             _chromecastService.ChromeCastClient.MediaStatusChanged += ChromeCastClient_MediaStatusChanged;
@@ -31,14 +31,14 @@ namespace SharpCaster.Console
             var input = System.Console.ReadLine();
         }
 
-        private static void DeviceLocator_DeviceFounded(object sender, Chromecast e)
+        private static void DeviceLocator_DeviceFound(object sender, Chromecast e)
         {
             if (!e.FriendlyName.Contains("CC"))
             {
                 return;
             }
             _chromecastService.StopLocatingDevices();
-            System.Console.WriteLine("Device founded " + e.FriendlyName);
+            System.Console.WriteLine("Device found " + e.FriendlyName);
             _chromecastService.ConnectToChromecast(e);
         }
 

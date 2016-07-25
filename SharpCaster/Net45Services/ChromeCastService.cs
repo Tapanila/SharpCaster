@@ -18,13 +18,13 @@ namespace SharpCaster.Services
         public ChromecastService()
         {
             DeviceLocator = new DeviceLocator();
-            DeviceLocator.DeviceFounded += DeviceLocator_DeviceFounded;
+            DeviceLocator.DeviceFound += DeviceLocator_DeviceFound;
             ChromeCastClient = new ChromeCastClient();
             ChromeCastClient.Connected += ChromeCastClient_Connected;
 
         }
 
-        private void DeviceLocator_DeviceFounded(object sender, Chromecast e)
+        private void DeviceLocator_DeviceFound(object sender, Chromecast e)
         {
             //CastButton?.GoToState(CastButtonVisualStates.InteractiveStates.Disconnected);
         }
