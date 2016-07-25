@@ -6,7 +6,6 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
-using Windows.Networking;
 using SharpCaster.Models;
 using SharpCaster.Interfaces;
 using SharpCaster.Services;
@@ -19,7 +18,7 @@ namespace SharpCaster
     {
         public TimeSpan TimeOut;
         public ISocketService SocketService;
-        public event EventHandler<Chromecast> DeviceFounded;
+        public event EventHandler<Chromecast> DeviceFound;
 
         public List<Chromecast> DiscoveredDevices
         {
@@ -54,26 +53,23 @@ namespace SharpCaster
             
             DiscoveredDevices = new List<Chromecast>();
 
-            var multicastIP = new HostName(MulticastHostName);
             SocketService.MessageReceived += MulticastResponseReceived;
             using (SocketService.Initialize())
             {
                 try
                 {
                     await SocketService.BindEndpointAsync(null, string.Empty);
-                    SocketService.JoinMulticastGroup(multicastIP);
+                    SocketService.JoinMulticastGroup(MulticastHostName);
                     do
                     {
-                        using (var writer = await SocketService.GetOutputWriterAsync(multicastIP, MulticastPort))
-                        {
-                            const string request = "M-SEARCH * HTTP/1.1\r\n" +
+                        const string request = "M-SEARCH * HTTP/1.1\r\n" +
                                                    "HOST:" + MulticastHostName + ":" + MulticastPort + "\r\n" +
                                                    "ST:SsdpSearch:all\r\n" +
                                                    "MAN:\"ssdp:discover\"\r\n" +
                                                    "MX:3\r\n\r\n\r\n";
-                            writer.WriteString(request);
-                            await writer.StoreAsync();
-                        }
+
+                        await SocketService.Write(request, MulticastPort, MulticastHostName);
+                        
                         await Task.Delay(delay, token);
                     } while (!_cancellationToken.IsCancellationRequested);
                 }
@@ -105,7 +101,7 @@ namespace SharpCaster
             if (!await GetChromecastName(possibleChromeCast)) return;
 
             DiscoveredDevices.Add(possibleChromeCast);
-            DeviceFounded?.Invoke(this, possibleChromeCast);
+            DeviceFound?.Invoke(this, possibleChromeCast);
         }
 
         private async Task<bool> GetChromecastName(Chromecast chromecast)

@@ -19,7 +19,6 @@
             Orientation="Horizontal"
          >
             <controllers:CastButton ChromecastService="{Binding ChromecastService}" />
-            <Button Content="Launch application" Click="LaunchApplication" />
             <Button Content="Stop Application" Click="StopApplication" />
             <Button Content="Load media" Click="LoadMedia" />
             <Button Content="Play/Pause" Click="PlayPause"/>
@@ -32,5 +31,7 @@
             Maximum="{Binding Length}"
             Value="{Binding Position}"
             ValueChanged="TimelineValueChanged"/>
+        <controllers:CastPlayer Grid.Row="2" Description="{Binding Description}" Title="{Binding Title}" PosterImageSource="{Binding Poster}" />
+            
     </Grid>
 </Page>

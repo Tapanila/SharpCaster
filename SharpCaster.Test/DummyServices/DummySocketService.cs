@@ -25,6 +25,15 @@ namespace SharpCaster.Test.DummyServices
 
         }
 
+        public Task BindEndpointAsync(string localHostName, string localServiceName)
+        {
+            return null;
+        }
+
+        public void JoinMulticastGroup(string multicastIP)
+        {
+        }
+
         public ISocketService Initialize()
         {
             return this;
@@ -70,6 +79,11 @@ namespace SharpCaster.Test.DummyServices
             var information = _deviceInformationResponses[0];
             _deviceInformationResponses.RemoveAt(0);
             return information;
+        }
+
+        public Task Write(string request, string multicastPort, string multicastIP)
+        {
+            throw new NotImplementedException();
         }
     }
 }

@@ -128,4 +128,41 @@
             </Setter.Value>
         </Setter>
     </Style>
+
+    <Style TargetType="local:CastPlayer">
+        <Setter Property="Height" Value="160" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="local:CastPlayer">
+                    <Grid Height="{TemplateBinding Height}" x:Name="RootGrid" Background="Transparent">
+                        <VisualStateManager.VisualStateGroups>
+                            <VisualStateGroup x:Name="InteractiveStates">
+                                <VisualState x:Name="Playing"/>
+                                <VisualState x:Name="Paused"/>
+                                <VisualState x:Name="Stopped"/>
+                            </VisualStateGroup>
+                        </VisualStateManager.VisualStateGroups>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="10*"/>
+                            <ColumnDefinition Width="80*"/>
+                            <ColumnDefinition Width="10*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="95*"/>
+                            <RowDefinition Height="5*"/>
+                        </Grid.RowDefinitions>
+                        <Image
+                            Grid.Column="0"
+                            Grid.Row="0"
+                            Source="{TemplateBinding PosterImageSource}"/>
+                        <StackPanel Grid.Row="0" Grid.Column="1">
+                            <TextBlock Text="{TemplateBinding Title}" FontSize="24" FontWeight="Bold" />
+                            <TextBlock Text="{TemplateBinding Description}" FontSize="18"/>
+                        </StackPanel>
+                        <Button Grid.Row="0" Grid.Column="2" Content="Play/Pause"/>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
 </ResourceDictionary>

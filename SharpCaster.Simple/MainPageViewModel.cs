@@ -6,8 +6,10 @@ using Windows.ApplicationModel.Core;
 using Windows.UI.Core;
 using Windows.UI.Popups;
 using Windows.UI.Xaml;
+using Windows.UI.Xaml.Media;
 using SharpCaster.Models;
 using SharpCaster.Models.MediaStatus;
+using SharpCaster.Services;
 using SharpCaster.Simple.Annotations;
 
 namespace SharpCaster.Simple
@@ -56,6 +58,42 @@ namespace SharpCaster.Simple
 
         private double _position;
 
+        public string Title
+        {
+            get { return _title; }
+            set
+            {
+                _title = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private string _title;
+
+        public string Description
+        {
+            get { return _description; }
+            set
+            {
+                _description = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private string _description;
+
+        public ImageSource Poster
+        {
+            get { return _poster; }
+            set
+            {
+                _poster = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private ImageSource _poster;
+
         [NotifyPropertyChangedInvocator]
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
@@ -70,8 +108,14 @@ namespace SharpCaster.Simple
             _chromecastService.ChromeCastClient.ApplicationStarted += Client_ApplicationStarted;
             _chromecastService.ChromeCastClient.VolumeChanged += _client_VolumeChanged;
             _chromecastService.ChromeCastClient.MediaStatusChanged += ChromeCastClient_MediaStatusChanged;
+            _chromecastService.ChromeCastClient.Connected += ChromeCastClient_Connected;
             secondsTimer = new DispatcherTimer {Interval = TimeSpan.FromSeconds(1)};
             secondsTimer.Tick += SecondsTimer_Tick;
+        }
+
+        private async void ChromeCastClient_Connected(object sender, EventArgs e)
+        {
+            await _chromecastService.ChromeCastClient.LaunchApplication("B3419EF5");
         }
 
         private void SecondsTimer_Tick(object sender, object e)
@@ -81,7 +125,6 @@ namespace SharpCaster.Simple
 
         private async void ChromeCastClient_MediaStatusChanged(object sender, MediaStatus e)
         {
-            if (_chromecastService.ChromeCastClient.MediaStatus == null) return;
             await ExecuteOnUiThread(() =>
             {
                 switch (_chromecastService.ChromeCastClient.MediaStatus.PlayerState)
@@ -107,11 +150,6 @@ namespace SharpCaster.Simple
         private async void Client_ApplicationStarted(object sender, Models.ChromecastStatus.ChromecastApplication e)
         {
             await ShowMessage($"Application {e.DisplayName} has launched");
-        }
-
-        public async Task LaunchApplication()
-        {
-            await _chromecastService.ChromeCastClient.LaunchApplication("B3419EF5");
         }
 
         private async Task ShowMessage(string message)
@@ -146,8 +184,11 @@ namespace SharpCaster.Simple
             await _chromecastService.ChromeCastClient.Pause();
         }
 
-        public async Task LoadMedia()
+        public async Task LoadMedia(string title, string description, ImageSource poster)
         {
+            Title = title;
+            Description = description;
+            Poster = poster;
             await _chromecastService.ChromeCastClient.LoadMedia("http://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/dash/BigBuckBunny.mpd");
         }
 
