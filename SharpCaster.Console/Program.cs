@@ -59,7 +59,13 @@ namespace SharpCaster.Console
         private static async void Client_ApplicationStarted(object sender, ChromecastApplication e)
         {
             System.Console.WriteLine($"Application {e.DisplayName} has launched");
-            await _chromecastService.ChromeCastClient.LoadMedia("http://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/dash/BigBuckBunny.mpd");
+
+            var mediaController = _chromecastService.ChromeCastClient.MediaController;
+
+            if (mediaController.SupportsCommand(MediaControllers.SupportedCommand.LoadSmoothStreaming))
+            {
+                await mediaController.LoadSmoothStreaming("http://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/dash/BigBuckBunny.mpd");
+            }
         }
     }
 }

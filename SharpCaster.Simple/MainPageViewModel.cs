@@ -102,14 +102,14 @@ namespace SharpCaster.Simple
 
         public MainPageViewModel()
         {
-            #pragma warning disable 4014
+#pragma warning disable 4014
             _chromecastService.StartLocatingDevices();
-            #pragma warning restore 4014
+#pragma warning restore 4014
             _chromecastService.ChromeCastClient.ApplicationStarted += Client_ApplicationStarted;
             _chromecastService.ChromeCastClient.VolumeChanged += _client_VolumeChanged;
             _chromecastService.ChromeCastClient.MediaStatusChanged += ChromeCastClient_MediaStatusChanged;
             _chromecastService.ChromeCastClient.Connected += ChromeCastClient_Connected;
-            secondsTimer = new DispatcherTimer {Interval = TimeSpan.FromSeconds(1)};
+            secondsTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
             secondsTimer.Tick += SecondsTimer_Tick;
         }
 
@@ -144,7 +144,7 @@ namespace SharpCaster.Simple
 
         private async void _client_VolumeChanged(object sender, Volume e)
         {
-            await ExecuteOnUiThread(() => { Volume = e.level*100; });
+            await ExecuteOnUiThread(() => { Volume = e.level * 100; });
         }
 
         private async void Client_ApplicationStarted(object sender, Models.ChromecastStatus.ChromecastApplication e)
@@ -169,33 +169,55 @@ namespace SharpCaster.Simple
 
         public async Task PlayPause()
         {
+            var mediaController = _chromecastService.ChromeCastClient.MediaController;
+
             if (_chromecastService.ChromeCastClient.MediaStatus != null && _chromecastService.ChromeCastClient.MediaStatus.PlayerState == PlayerState.Paused)
             {
-                await _chromecastService.ChromeCastClient.Play();
+                if (mediaController.SupportsCommand(MediaControllers.SupportedCommand.Play){
+                    await mediaController.Play();
+                }
             }
             else
             {
-                await _chromecastService.ChromeCastClient.Pause();
+                if (mediaController.SupportsCommand(MediaControllers.SupportedCommand.Pause){
+                    await mediaController.Pause();
+                }
             }
         }
 
         public async Task Pause()
         {
-            await _chromecastService.ChromeCastClient.Pause();
+            var mediaController = _chromecastService.ChromeCastClient.MediaController;
+
+            if (mediaController.SupportsCommand(MediaControllers.SupportedCommand.Pause){
+                await mediaController.Pause();
+            }
         }
 
         public async Task LoadMedia(string title, string description, ImageSource poster)
         {
-            Title = title;
-            Description = description;
-            Poster = poster;
-            await _chromecastService.ChromeCastClient.LoadMedia("http://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/dash/BigBuckBunny.mpd");
+            var mediaController = _chromecastService.ChromeCastClient.MediaController;
+
+            if (mediaController.SupportsCommand(MediaControllers.SupportedCommand.LoadSmoothStreaming))
+            {
+                Title = title;
+                Description = description;
+                Poster = poster;
+                await mediaController.LoadSmoothStreaming("http://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/dash/BigBuckBunny.mpd");
+            }
         }
 
         public async Task Seek(double seconds)
         {
+            var mediaController = _chromecastService.ChromeCastClient.MediaController;
+
             if (Math.Abs(Position - seconds) > 0.1)
-            await _chromecastService.ChromeCastClient.Seek(seconds);
+            {
+                if (mediaController.SupportsCommand(MediaControllers.SupportedCommand.Seek))
+                {
+                    await mediaController.Seek(seconds);
+                }
+            }
         }
 
         public async Task MuteUnmute()
@@ -205,8 +227,8 @@ namespace SharpCaster.Simple
 
         public async Task SetVolume(double newValue)
         {
-            if (Math.Abs(_chromecastService.ChromeCastClient.Volume.level - (newValue/100)) < 0.01) return;
-            await _chromecastService.ChromeCastClient.SetVolume((float) (newValue / 100));
+            if (Math.Abs(_chromecastService.ChromeCastClient.Volume.level - (newValue / 100)) < 0.01) return;
+            await _chromecastService.ChromeCastClient.SetVolume((float)(newValue / 100));
         }
 
         public async Task StopApplication()

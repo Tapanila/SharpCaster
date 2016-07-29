@@ -53,5 +53,9 @@ namespace SharpCaster.MediaControllers
         Task Shuffle();
 
         Task GetMediaStatus();
+
+        //TODO I think that the customData can be removed here if we have custom media controllers
+        //TODO I kept it for now, for compatibility
+        Task LoadSmoothStreaming(string streamUrl, object customData = null);
     }
 }
