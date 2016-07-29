@@ -173,13 +173,15 @@ namespace SharpCaster.Simple
 
             if (_chromecastService.ChromeCastClient.MediaStatus != null && _chromecastService.ChromeCastClient.MediaStatus.PlayerState == PlayerState.Paused)
             {
-                if (mediaController.SupportsCommand(MediaControllers.SupportedCommand.Play){
+                if (mediaController.SupportsCommand(MediaControllers.SupportedCommand.Play))
+                {
                     await mediaController.Play();
                 }
             }
             else
             {
-                if (mediaController.SupportsCommand(MediaControllers.SupportedCommand.Pause){
+                if (mediaController.SupportsCommand(MediaControllers.SupportedCommand.Pause))
+                {
                     await mediaController.Pause();
                 }
             }
@@ -189,7 +191,8 @@ namespace SharpCaster.Simple
         {
             var mediaController = _chromecastService.ChromeCastClient.MediaController;
 
-            if (mediaController.SupportsCommand(MediaControllers.SupportedCommand.Pause){
+            if (mediaController.SupportsCommand(MediaControllers.SupportedCommand.Pause))
+            {
                 await mediaController.Pause();
             }
         }

@@ -8,13 +8,20 @@ namespace SharpCaster.MediaControllers
     {
         Play,
         Pause,
-        Stop,
         Seek,
+        Stop,
         Previous,
         Next,
         Shuffle,
         GetMediaStatus,
-        LoadSmoothStreaming
+        LoadSmoothStreaming,
+        SkipTo, //This is also a Plex command but I assume it works the same as the PlayIndex command in DS Audio
+
+        // Should these rare commands be in the common interface?
+        PlexShowDetails,
+        PlexRefreshPlayQueue,
+        PlexSetQuality,
+        PlexSetStream
     }
 
     public interface IMediaController

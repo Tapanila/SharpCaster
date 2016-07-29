@@ -1,7 +1,8 @@
 ﻿using System;
 using SharpCaster.Models.ChromecastRequests;
+using SharpCaster.Models;
 
-namespace SharpCaster.Models
+namespace SharpCaster.MediaControllers
 {
     public static class DefaultMediaMessageFactory
     {

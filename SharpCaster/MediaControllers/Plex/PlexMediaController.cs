@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace SharpCaster.MediaControllers
 {
-    public class DefaultMediaController : IMediaController
+    public class PlexMediaController : IMediaController
     {
         #region controller metadata
         public string DefaultAppId
@@ -25,7 +25,7 @@ namespace SharpCaster.MediaControllers
         {
             get
             {
-                return DefaultMediaMessageFactory.DefaultMediaUrn;
+                return "urn:x-cast:plex";
             }
         }
 
@@ -33,11 +33,17 @@ namespace SharpCaster.MediaControllers
         {
             get
             {
-                return SupportedCommand.GetMediaStatus
-              | SupportedCommand.LoadSmoothStreaming
-              | SupportedCommand.Play
-              | SupportedCommand.Pause
-              | SupportedCommand.Seek;
+                return SupportedCommand.Play
+                    | SupportedCommand.Pause
+                    | SupportedCommand.Seek;
+                    //| SupportedCommand.Stop
+                    //| SupportedCommand.Previous
+                    //| SupportedCommand.Next
+                    //| SupportedCommand.SkipTo
+                    //| SupportedCommand.PlexShowDetails
+                    //| SupportedCommand.PlexRefreshPlayQueue
+                    //| SupportedCommand.PlexSetQuality
+                    //| SupportedCommand.PlexSetStream;
             }
         }
 
@@ -53,7 +59,7 @@ namespace SharpCaster.MediaControllers
         private ChromecastChannel _mediaChannel;
         private long _currentMediaSessionId;
 
-        public DefaultMediaController(ChromeCastClient chromecastClient)
+        public PlexMediaController(ChromeCastClient chromecastClient)
         {
             _chromecastClient = chromecastClient;
 
@@ -64,33 +70,36 @@ namespace SharpCaster.MediaControllers
         }
 
         #region implemented commands
-        public async Task GetMediaStatus()
-        {
-            await _chromecastClient.Write(DefaultMediaMessageFactory.MediaStatus(_chromecastClient.CurrentApplicationTransportId).ToProto());
-        }
-
-        public async Task LoadSmoothStreaming(string mediaUrl, object customData = null)
-        {
-            var mediaObject = new MediaData(mediaUrl, "application/vnd.ms-sstr+xml", null, "BUFFERED", 0D, customData);
-            var req = new LoadRequest(_chromecastClient.CurrentApplicationSessionId, mediaObject, true, 0.0, customData);
-
-            var reqJson = req.ToJson();
-            await _mediaChannel.Write(DefaultMediaMessageFactory.Load(_chromecastClient.CurrentApplicationTransportId, reqJson));
-        }
-
         public async Task Play()
         {
-            await _chromecastClient.Write(DefaultMediaMessageFactory.Play(_chromecastClient.CurrentApplicationTransportId, _currentMediaSessionId).ToProto());
+            await _chromecastClient.Write(PlexMediaMessageFactory.Play(_chromecastClient.CurrentApplicationTransportId, _currentMediaSessionId).ToProto());
         }
 
         public async Task Pause()
         {
-            await _chromecastClient.Write(DefaultMediaMessageFactory.Pause(_chromecastClient.CurrentApplicationTransportId, _currentMediaSessionId).ToProto());
+            await _chromecastClient.Write(PlexMediaMessageFactory.Pause(_chromecastClient.CurrentApplicationTransportId, _currentMediaSessionId).ToProto());
         }
 
         public async Task Seek(double seconds)
         {
-            await _chromecastClient.Write(DefaultMediaMessageFactory.Seek(_chromecastClient.CurrentApplicationTransportId, _currentMediaSessionId, seconds).ToProto());
+            await _chromecastClient.Write(PlexMediaMessageFactory.Seek(_chromecastClient.CurrentApplicationTransportId, _currentMediaSessionId, seconds).ToProto());
+        }
+        #endregion
+
+        #region not supported commands
+        public async Task GetMediaStatus()
+        {
+            throw new NotSupportedException();
+        }
+
+        public async Task LoadSmoothStreaming(string mediaUrl, object customData = null)
+        {
+            throw new NotSupportedException();
+        }
+
+        public async Task Shuffle()
+        {
+            throw new NotSupportedException();
         }
         #endregion
 
@@ -105,12 +114,32 @@ namespace SharpCaster.MediaControllers
             throw new NotImplementedException();
         }
 
-        public Task Shuffle()
+        public Task Stop()
+        {
+            throw new NotImplementedException();
+        }
+        
+        public Task SkipTo(object key)
         {
             throw new NotImplementedException();
         }
 
-        public Task Stop()
+        public Task PlexShowDetails()
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task PlexRefreshPlayQueue()
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task PlexSetQuality()
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task PlexSetStream()
         {
             throw new NotImplementedException();
         }
