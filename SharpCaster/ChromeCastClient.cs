@@ -98,17 +98,17 @@ namespace SharpCaster
 
         public async Task Seek(double seconds)
         {
-            await Write(MessageFactory.Seek(_currentApplicationTransportId, _currentMediaSessionId, seconds).ToProto());
+            await Write(DefaultMediaMessageFactory.Seek(_currentApplicationTransportId, _currentMediaSessionId, seconds).ToProto());
         }
 
         public async Task Pause()
         {
-            await Write(MessageFactory.Pause(_currentApplicationTransportId, _currentMediaSessionId).ToProto());
+            await Write(DefaultMediaMessageFactory.Pause(_currentApplicationTransportId, _currentMediaSessionId).ToProto());
         }
 
         public async Task Play()
         {
-            await Write(MessageFactory.Play(_currentApplicationTransportId, _currentMediaSessionId).ToProto());
+            await Write(DefaultMediaMessageFactory.Play(_currentApplicationTransportId, _currentMediaSessionId).ToProto());
         }
 
         public async Task LoadMedia(string mediaUrl, object customData = null)
@@ -117,7 +117,7 @@ namespace SharpCaster
             var req = new LoadRequest(_currentApplicationSessionId, mediaObject, true, 0.0, customData);
 
             var reqJson = req.ToJson();
-            await _mediaChannel.Write(MessageFactory.Load(_currentApplicationTransportId, reqJson));
+            await _mediaChannel.Write(DefaultMediaMessageFactory.Load(_currentApplicationTransportId, reqJson));
         }
 
         private void MediaChannel_MessageReceived(object sender, ChromecastSSLClientDataReceivedArgs e)
@@ -172,7 +172,7 @@ namespace SharpCaster
 
         public async Task GetMediaStatus()
         {
-            await Write(MessageFactory.MediaStatus(_currentApplicationTransportId).ToProto());
+            await Write(DefaultMediaMessageFactory.MediaStatus(_currentApplicationTransportId).ToProto());
         }
 
         public async Task LaunchApplication(string applicationId, bool joinExisting = true)

@@ -13,7 +13,7 @@ using Windows.UI.Xaml.Media;
 
 namespace SharpCaster.Controllers
 {
-    public sealed class CastPlayer : Control
+    public class CastPlayer : Control
     {
         public static readonly DependencyProperty PosterImageSourceProperty = DependencyProperty.Register(
             "PosterImageSource", typeof (ImageSource), typeof (CastPlayer), new PropertyMetadata(default(ImageSource)));

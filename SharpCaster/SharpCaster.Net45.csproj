@@ -78,6 +78,7 @@
     <Compile Include="Models\ChromecastRequests\VolumeRequest.cs" />
     <Compile Include="Models\ChromecastSSLClientDataReceivedArgs.cs" />
     <Compile Include="JsonConverters\PlayerStateEnumConverter.cs" />
+    <Compile Include="Models\MediaMessageFactory.cs" />
     <Compile Include="Models\MediaStatus\ChromecastImage.cs" />
     <Compile Include="Models\MediaStatus\GenericMediaMetadata.cs" />
     <Compile Include="Models\MessageFactory.cs" />

@@ -37,6 +37,7 @@
     <Compile Include="ChromeCastClient.cs" />
     <Compile Include="Extensions\ByteArrayExtension.cs" />
     <Compile Include="Models\CastMessage.cs" />
+    <Compile Include="Models\MediaMessageFactory.cs" />
     <Compile Include="StubServices\ChromecastService.cs" />
     <Compile Include="Extensions\StreamExtension.cs" />
     <Compile Include="StubServices\ChromecastSocketService.cs" />
