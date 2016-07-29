@@ -36,8 +36,10 @@
   <ItemGroup>
     <Compile Include="ChromeCastClient.cs" />
     <Compile Include="Extensions\ByteArrayExtension.cs" />
+    <Compile Include="MediaControllers\DefaultMediaController.cs" />
+    <Compile Include="MediaControllers\IMediaController.cs" />
     <Compile Include="Models\CastMessage.cs" />
-    <Compile Include="Models\MediaMessageFactory.cs" />
+    <Compile Include="Models\DefaultMediaMessageFactory.cs" />
     <Compile Include="StubServices\ChromecastService.cs" />
     <Compile Include="Extensions\StreamExtension.cs" />
     <Compile Include="StubServices\ChromecastSocketService.cs" />

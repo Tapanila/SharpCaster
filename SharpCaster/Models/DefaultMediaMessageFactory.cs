@@ -5,7 +5,7 @@ namespace SharpCaster.Models
 {
     public static class DefaultMediaMessageFactory
     {
-        private const string DefaultMediaUrn = "urn:x-cast:com.google.cast.media";
+        public const string DefaultMediaUrn = "urn:x-cast:com.google.cast.media";
 
         private static readonly string UniqueSourceID = "client-" + new Random((int)DateTime.Now.Ticks).Next() % 9999;
 

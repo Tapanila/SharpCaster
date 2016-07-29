@@ -55,6 +55,8 @@
     <Compile Include="Extensions\StreamExtension.cs" />
     <Compile Include="Interfaces\IChromecastService.cs" />
     <Compile Include="Interfaces\IChromecastSocketService.cs" />
+    <Compile Include="MediaControllers\DefaultMediaController.cs" />
+    <Compile Include="MediaControllers\IMediaController.cs" />
     <Compile Include="Models\CastMessage.cs" />
     <Compile Include="Models\ChromecastChannel.cs" />
     <Compile Include="Models\ChromecastRequests\CloseRequest.cs" />
@@ -78,7 +80,7 @@
     <Compile Include="Models\ChromecastRequests\VolumeRequest.cs" />
     <Compile Include="Models\ChromecastSSLClientDataReceivedArgs.cs" />
     <Compile Include="JsonConverters\PlayerStateEnumConverter.cs" />
-    <Compile Include="Models\MediaMessageFactory.cs" />
+    <Compile Include="Models\DefaultMediaMessageFactory.cs" />
     <Compile Include="Models\MediaStatus\ChromecastImage.cs" />
     <Compile Include="Models\MediaStatus\GenericMediaMetadata.cs" />
     <Compile Include="Models\MessageFactory.cs" />
