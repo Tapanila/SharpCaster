@@ -57,7 +57,7 @@ namespace SharpCaster.MediaControllers
         {
             _chromecastClient = chromecastClient;
 
-            _mediaChannel = new ChromecastChannel(chromecastClient, this.SpecificNamespace);
+            _mediaChannel = new ChromecastChannel(chromecastClient.ChromecastSocketService, this.SpecificNamespace);
             chromecastClient.Channels.Add(_mediaChannel);
 
             _mediaChannel.MessageReceived += MediaChannel_MessageReceived;
@@ -66,7 +66,7 @@ namespace SharpCaster.MediaControllers
         #region implemented commands
         public async Task GetMediaStatus()
         {
-            await _chromecastClient.Write(DefaultMediaMessageFactory.MediaStatus(_chromecastClient.CurrentApplicationTransportId).ToProto());
+            await _mediaChannel.Write(DefaultMediaMessageFactory.MediaStatus(_chromecastClient.CurrentApplicationTransportId));
         }
 
         public async Task LoadSmoothStreaming(string mediaUrl, object customData = null)
@@ -80,17 +80,17 @@ namespace SharpCaster.MediaControllers
 
         public async Task Play()
         {
-            await _chromecastClient.Write(DefaultMediaMessageFactory.Play(_chromecastClient.CurrentApplicationTransportId, _currentMediaSessionId).ToProto());
+            await _mediaChannel.Write(DefaultMediaMessageFactory.Play(_chromecastClient.CurrentApplicationTransportId, _currentMediaSessionId));
         }
 
         public async Task Pause()
         {
-            await _chromecastClient.Write(DefaultMediaMessageFactory.Pause(_chromecastClient.CurrentApplicationTransportId, _currentMediaSessionId).ToProto());
+            await _mediaChannel.Write(DefaultMediaMessageFactory.Pause(_chromecastClient.CurrentApplicationTransportId, _currentMediaSessionId));
         }
 
         public async Task Seek(double seconds)
         {
-            await _chromecastClient.Write(DefaultMediaMessageFactory.Seek(_chromecastClient.CurrentApplicationTransportId, _currentMediaSessionId, seconds).ToProto());
+            await _mediaChannel.Write(DefaultMediaMessageFactory.Seek(_chromecastClient.CurrentApplicationTransportId, _currentMediaSessionId, seconds));
         }
         #endregion
 
@@ -132,12 +132,20 @@ namespace SharpCaster.MediaControllers
             if (response.status?.Count < 1) return;
             var mediaStatus = response.status.First();
 
+            // TODO shouldn't the MediaStatus property and the MediaStatusChanged event
+            // be a part of IMediaController instead of ChromeCastClient?
             _chromecastClient.MediaStatus = mediaStatus;
             _chromecastClient.InvokeMediaStatusChanged(mediaStatus);
-            if (mediaStatus.volume != null)
-            {
-                _chromecastClient.UpdateVolume(mediaStatus.volume);
-            }
+
+            //TODO According to https://developers.google.com/cast/docs/reference/messages#SetVolume
+            // There is a difference between device volume and stream volume.
+            // Since this property is part of IMediaController it should be used
+            // only for stream volume!
+            //Because of that I commented it out for now.
+            //if (mediaStatus.volume != null)
+            //{
+            //    _chromecastClient.UpdateVolume(mediaStatus.volume);
+            //}
             _currentMediaSessionId = mediaStatus.mediaSessionId;
         }
     }

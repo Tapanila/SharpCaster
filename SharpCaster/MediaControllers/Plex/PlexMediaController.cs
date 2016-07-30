@@ -63,7 +63,7 @@ namespace SharpCaster.MediaControllers
         {
             _chromecastClient = chromecastClient;
 
-            _mediaChannel = new ChromecastChannel(chromecastClient, this.SpecificNamespace);
+            _mediaChannel = new ChromecastChannel(chromecastClient.ChromecastSocketService, this.SpecificNamespace);
             chromecastClient.Channels.Add(_mediaChannel);
 
             _mediaChannel.MessageReceived += MediaChannel_MessageReceived;
@@ -72,17 +72,17 @@ namespace SharpCaster.MediaControllers
         #region implemented commands
         public async Task Play()
         {
-            await _chromecastClient.Write(PlexMediaMessageFactory.Play(_chromecastClient.CurrentApplicationTransportId, _currentMediaSessionId).ToProto());
+            await _mediaChannel.Write(PlexMediaMessageFactory.Play(_chromecastClient.CurrentApplicationTransportId, _currentMediaSessionId));
         }
 
         public async Task Pause()
         {
-            await _chromecastClient.Write(PlexMediaMessageFactory.Pause(_chromecastClient.CurrentApplicationTransportId, _currentMediaSessionId).ToProto());
+            await _mediaChannel.Write(PlexMediaMessageFactory.Pause(_chromecastClient.CurrentApplicationTransportId, _currentMediaSessionId));
         }
 
         public async Task Seek(double seconds)
         {
-            await _chromecastClient.Write(PlexMediaMessageFactory.Seek(_chromecastClient.CurrentApplicationTransportId, _currentMediaSessionId, seconds).ToProto());
+            await _mediaChannel.Write(PlexMediaMessageFactory.Seek(_chromecastClient.CurrentApplicationTransportId, _currentMediaSessionId, seconds));
         }
         #endregion
 

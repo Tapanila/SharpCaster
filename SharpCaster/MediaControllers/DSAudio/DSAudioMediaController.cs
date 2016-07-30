@@ -54,7 +54,7 @@ namespace SharpCaster.MediaControllers
         {
             _chromecastClient = chromecastClient;
 
-            _mediaChannel = new ChromecastChannel(chromecastClient, this.SpecificNamespace);
+            _mediaChannel = new ChromecastChannel(chromecastClient.ChromecastSocketService, this.SpecificNamespace);
             chromecastClient.Channels.Add(_mediaChannel);
 
             _mediaChannel.MessageReceived += MediaChannel_MessageReceived;

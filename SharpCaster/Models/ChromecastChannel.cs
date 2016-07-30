@@ -2,19 +2,21 @@
 using System.Diagnostics;
 using System.Threading.Tasks;
 
+using SharpCaster.Interfaces;
+
 namespace SharpCaster.Models
 {
     public class ChromecastChannel
     {
-        private ChromeCastClient Client { get; set; }
+        private IChromecastSocketService SocketService { get; set; }
         public string Namespace { get; set; }
 
         public event EventHandler<ChromecastSSLClientDataReceivedArgs> MessageReceived;
 
-        public ChromecastChannel(ChromeCastClient client, string @ns)
+        public ChromecastChannel(IChromecastSocketService socketService, string @ns)
         {
             Namespace = ns;
-            Client = client;
+            SocketService = socketService;
         }
 
         public async Task Write(CastMessage message)
@@ -23,7 +25,7 @@ namespace SharpCaster.Models
             message.Namespace = Namespace;
 
             var bytes = message.ToProto();
-            await Client.Write(bytes);
+            await SocketService.Write(bytes);
         }
 
         public void OnMessageReceived(ChromecastSSLClientDataReceivedArgs e)

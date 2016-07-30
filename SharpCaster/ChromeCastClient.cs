@@ -47,8 +47,16 @@ namespace SharpCaster
 
         public event EventHandler Connected;
         public event EventHandler<ChromecastApplication> ApplicationStarted;
+
+        //TODO move MediaStatusChanged event to IMediaController?
         public event EventHandler<MediaStatus> MediaStatusChanged;
+
         public event EventHandler<ChromecastStatus> ChromecastStatusChanged;
+
+        //TODO According to https://developers.google.com/cast/docs/reference/messages#SetVolume
+        // There is a difference between device volume and stream volume.
+        // Since this property is part of ChromeCastClient it should be used
+        // only for device volume!
         public event EventHandler<Volume> VolumeChanged;
         public List<ChromecastChannel> Channels;
 
@@ -77,12 +85,12 @@ namespace SharpCaster
             {
                 throw new ArgumentException("level must be between 0.0f and 1.0f", nameof(level));
             }
-            await Write(MessageFactory.Volume(level).ToProto());
+            await ChromecastSocketService.Write(MessageFactory.Volume(level).ToProto());
         }
 
         public async Task SetMute(bool muted)
         {
-            await Write(MessageFactory.Volume(muted).ToProto());
+            await ChromecastSocketService.Write(MessageFactory.Volume(muted).ToProto());
         }
 
         public async Task IncreaseVolume()
@@ -135,7 +143,7 @@ namespace SharpCaster
             if (!string.IsNullOrWhiteSpace(_currentApplicationSessionId)) return false;
             _currentApplicationSessionId = startedApplication.SessionId;
             _currentApplicationTransportId = startedApplication.TransportId;
-            await Write(MessageFactory.ConnectWithDestination(startedApplication.TransportId).ToProto());
+            await ChromecastSocketService.Write(MessageFactory.ConnectWithDestination(startedApplication.TransportId).ToProto());
             ApplicationStarted?.Invoke(this, startedApplication);
             return true;
         }
@@ -187,12 +195,12 @@ namespace SharpCaster
 
                 return;
             }
-            await Write(MessageFactory.Launch(applicationId).ToProto());
+            await ChromecastSocketService.Write(MessageFactory.Launch(applicationId).ToProto());
         }
 
         public async Task StopApplication()
         {
-            await Write(MessageFactory.Stop(_currentApplicationSessionId).ToProto());
+            await ChromecastSocketService.Write(MessageFactory.Stop(_currentApplicationSessionId).ToProto());
         }
 
         private void ReadPacket(Stream stream, bool parsed)
@@ -239,17 +247,12 @@ namespace SharpCaster
 
         private ChromecastChannel CreateChannel(string channelNamespace)
         {
-            var channel = new ChromecastChannel(this, channelNamespace);
+            var channel = new ChromecastChannel(ChromecastSocketService, channelNamespace);
             Channels.Add(channel);
             return channel;
         }
 
-
-        internal async Task Write(byte[] bytes)
-        {
-            await ChromecastSocketService.Write(bytes);
-        }
-
+        //TODO remove this and move MediaStatusChanged event to IMediaController?
         internal void InvokeMediaStatusChanged(MediaStatus mediaStatus)
         {
             MediaStatusChanged?.Invoke(this, mediaStatus);
