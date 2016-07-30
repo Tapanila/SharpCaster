@@ -95,7 +95,12 @@ namespace SharpCaster.MediaControllers
         #endregion
 
         #region not supported commands
-        public Task Shuffle()
+        public Task Shuffle(bool enabled)
+        {
+            throw new NotSupportedException();
+        }
+
+        public Task Repeat(RepeatMode mode)
         {
             throw new NotSupportedException();
         }

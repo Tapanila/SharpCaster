@@ -152,7 +152,8 @@ namespace SharpCaster
             var mediaControllersToRegister = new List<IMediaController>
             {
                 new DefaultMediaController(this),
-                new PlexMediaController(this)
+                new PlexMediaController(this),
+                new DSAudioMediaController(this)
             };
 
             RegisteredMediaControllers = mediaControllersToRegister

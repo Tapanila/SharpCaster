@@ -13,6 +13,7 @@ namespace SharpCaster.MediaControllers
         Previous,
         Next,
         Shuffle,
+        Repeat,
         GetMediaStatus,
         LoadSmoothStreaming,
         SkipTo, //This is also a Plex command but I assume it works the same as the PlayIndex command in DS Audio
@@ -21,7 +22,28 @@ namespace SharpCaster.MediaControllers
         PlexShowDetails,
         PlexRefreshPlayQueue,
         PlexSetQuality,
-        PlexSetStream
+        PlexSetStream,
+
+        DSAudioReplayCurrent,
+        DSAudioUpdatePlaylist
+    }
+
+    public enum RepeatMode
+    {
+        /// <summary>
+        /// Do not repeat
+        /// </summary>
+        None,
+
+        /// <summary>
+        /// Repeat the current track
+        /// </summary>
+        One,
+
+        /// <summary>
+        /// Repeat after the last song in the playlist finished
+        /// </summary>
+        All
     }
 
     public interface IMediaController
@@ -57,7 +79,9 @@ namespace SharpCaster.MediaControllers
 
         Task Next();
 
-        Task Shuffle();
+        Task Shuffle(bool enabled);
+
+        Task Repeat(RepeatMode mode);
 
         Task GetMediaStatus();
 

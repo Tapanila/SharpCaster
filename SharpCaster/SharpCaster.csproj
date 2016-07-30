@@ -37,6 +37,7 @@
     <Compile Include="ChromeCastClient.cs" />
     <Compile Include="Extensions\ByteArrayExtension.cs" />
     <Compile Include="MediaControllers\Default\DefaultMediaController.cs" />
+    <Compile Include="MediaControllers\DSAudio\DSAudioMediaController.cs" />
     <Compile Include="MediaControllers\IMediaController.cs" />
     <Compile Include="MediaControllers\Plex\PlexMediaController.cs" />
     <Compile Include="MediaControllers\Plex\PlexMediaMessageFactory.cs" />
