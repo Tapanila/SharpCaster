@@ -6,9 +6,9 @@ using SharpCaster.Models;
 
 namespace SharpCaster
 {
-    public class ChromecastSocketService : IChromecastSocketService
+    public class ChromecastSocketService : BaseChromecastSocketService, IChromecastSocketService
     {
-        public Task Initialize(string host, string port, ChromecastChannel connectionChannel, ChromecastChannel heartbeatChannel, Action<Stream,bool> packetReader)
+        public Task Initialize(string host, string port, ChromecastChannel connectionChannel)
         {
             throw new NotImplementedException();
         }

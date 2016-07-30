@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using SharpCaster.Interfaces;
 using SharpCaster.Models;
 using SharpCaster.Models.MediaStatus;
 using System;

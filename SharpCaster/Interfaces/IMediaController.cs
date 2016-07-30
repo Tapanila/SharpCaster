@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 
-namespace SharpCaster.MediaControllers
+namespace SharpCaster.Interfaces
 {
     [Flags]
     public enum SupportedCommand

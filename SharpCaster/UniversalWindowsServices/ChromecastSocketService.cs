@@ -1,4 +1,5 @@
-﻿using SharpCaster.Extensions;
+﻿using SharpCaster;
+using SharpCaster.Extensions;
 using SharpCaster.Interfaces;
 using SharpCaster.Models;
 using System;
@@ -10,38 +11,27 @@ using Windows.Security.Cryptography;
 
 namespace SharpCaster.Services
 {
-    public class ChromecastSocketService : IChromecastSocketService
+    public class ChromecastSocketService : BaseChromecastSocketService, IChromecastSocketService
     {
         private StreamSocket _socket;
 
-        public async Task Initialize(string host, string port, ChromecastChannel connectionChannel, ChromecastChannel heartbeatChannel, Action<Stream, bool> packetReader)
+        public async Task Initialize(string host, string port, ChromecastChannel connectionChannel)
         {
             _socket = new StreamSocket().ConfigureForChromecast();
             await _socket.ConnectAsync(new HostName(host), port, SocketProtectionLevel.Tls10);
 
             OpenConnection(connectionChannel);
-            StartHeartbeat(heartbeatChannel);
 
             await Task.Run(() =>
             {
                 while (true)
                 {
-                    packetReader(_socket.InputStream.AsStreamForRead(), false);
+                    ReadPacket(_socket.InputStream.AsStreamForRead(), false);
                 }
             });
         }
 
-        private void StartHeartbeat(ChromecastChannel hearbeatChannel)
-        {
-            Task.Run(async () =>
-            {
-                while (true)
-                {
-                    await hearbeatChannel.Write(MessageFactory.Ping);
-                    await Task.Delay(TimeSpan.FromSeconds(5));
-                }
-            });
-        }
+        
 
         private async void OpenConnection(ChromecastChannel connectionChannel)
         {

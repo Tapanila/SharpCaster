@@ -12,6 +12,7 @@ using SharpCaster.Models.MediaStatus;
 using SharpCaster.Interfaces;
 using SharpCaster.Services;
 using SharpCaster.MediaControllers;
+using SharpCaster.DeviceControllers;
 
 namespace SharpCaster
 {
@@ -22,6 +23,7 @@ namespace SharpCaster
         public MediaStatus MediaStatus { get; set; }
         public IChromecastSocketService ChromecastSocketService { get; set; }
 
+        public IHeartbeatController HeartbeatController { get; set; }
         public IMediaController MediaController { get; set; }
 
         internal string CurrentApplicationTransportId
@@ -37,15 +39,28 @@ namespace SharpCaster
         Dictionary<string, IMediaController> RegisteredMediaControllers { get; set; }
 
         private ChromecastChannel _connectionChannel;
-        private ChromecastChannel _heartbeatChannel;
         private ChromecastChannel _receiverChannel;
         private const string ChromecastPort = "8009";
         private string _chromecastApplicationId;
         private string _currentApplicationSessionId = "";
         private string _currentApplicationTransportId = "";
-        private bool _connected;
+
+        private bool _isConnected;
 
         public event EventHandler Connected;
+        public bool IsConnected
+        {
+            get { return _isConnected; }
+            set
+            {
+                _isConnected = value;
+                if (value)
+                {
+                    Connected?.Invoke(this, EventArgs.Empty);
+                }
+            }
+        }
+
         public event EventHandler<ChromecastApplication> ApplicationStarted;
 
         //TODO move MediaStatusChanged event to IMediaController?
@@ -65,11 +80,11 @@ namespace SharpCaster
             ChromecastSocketService = new ChromecastSocketService();
             Channels = new List<ChromecastChannel>();
             _connectionChannel = CreateChannel(MessageFactory.DialConstants.DialConnectionUrn);
-            _heartbeatChannel = CreateChannel(MessageFactory.DialConstants.DialHeartbeatUrn);
             _receiverChannel = CreateChannel(MessageFactory.DialConstants.DialReceiverUrn);
 
             _receiverChannel.MessageReceived += ReceiverChannel_MessageReceived;
-            _heartbeatChannel.MessageReceived += HeartbeatChannel_MessageReceived;
+
+            HeartbeatController = new HeartbeatController(this);
 
             RegisterMediaControllers();
         }
@@ -101,19 +116,6 @@ namespace SharpCaster
         public async Task DecreaseVolume()
         {
             await SetVolume(Volume.level - 0.05f);
-        }
-
-        private async void HeartbeatChannel_MessageReceived(object sender, ChromecastSSLClientDataReceivedArgs e)
-        {
-            if (_connected || e.Message.GetJsonType() != "PONG") return;
-            //Wait 100 milliseconds before sending GET_STATUS because chromecast was sending CLOSE back without a wait
-            await Task.Delay(100);
-            GetChromecastStatus();
-            //Wait 100 milliseconds to make sure that the status of Chromecast device is received before notifying we have connected to it
-            await Task.Delay(100);
-            _connected = true;
-            Connected?.Invoke(this, EventArgs.Empty);
-
         }
 
         internal void UpdateVolume(Volume volume)
@@ -152,7 +154,8 @@ namespace SharpCaster
 
         public async void ConnectChromecast(Uri uri)
         {
-            await ChromecastSocketService.Initialize(uri.Host, ChromecastPort, _connectionChannel, _heartbeatChannel, ReadPacket);
+            await ChromecastSocketService.Initialize(uri.Host, ChromecastPort, _connectionChannel);
+            HeartbeatController.StartHeartbeat();
         }
 
         private void RegisterMediaControllers()
@@ -202,48 +205,6 @@ namespace SharpCaster
         {
             await ChromecastSocketService.Write(MessageFactory.Stop(_currentApplicationSessionId).ToProto());
         }
-
-        private void ReadPacket(Stream stream, bool parsed)
-        {
-            try
-            {
-                IEnumerable<byte> entireMessage;
-                if (parsed)
-                {
-                    var buffer = new byte[stream.Length];
-                    stream.Read(buffer, 0, buffer.Length);
-                    entireMessage = buffer;
-                }
-                else
-                {
-                    entireMessage = stream.ParseData();
-                }
-
-                var entireMessageArray = entireMessage.ToArray();
-                var castMessage = entireMessageArray.ToCastMessage();
-                if (castMessage == null) return;
-                Debug.WriteLine("Received: " + castMessage.GetJsonType());
-                if (string.IsNullOrEmpty(castMessage.Namespace)) return;
-                ReceivedMessage(castMessage);
-            }
-            catch (Exception ex)
-            {
-                // Log these bytes
-                Debug.WriteLine(ex);
-            }
-
-        }
-
-        private void ReceivedMessage(CastMessage castMessage)
-        {
-            foreach (var channel in Channels.Where(i => i.Namespace == castMessage.Namespace))
-            {
-                channel.OnMessageReceived(new ChromecastSSLClientDataReceivedArgs(castMessage));
-            }
-        }
-
-
-
 
         private ChromecastChannel CreateChannel(string channelNamespace)
         {

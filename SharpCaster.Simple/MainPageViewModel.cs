@@ -11,6 +11,7 @@ using SharpCaster.Models;
 using SharpCaster.Models.MediaStatus;
 using SharpCaster.Services;
 using SharpCaster.Simple.Annotations;
+using SharpCaster.Interfaces;
 
 namespace SharpCaster.Simple
 {
@@ -173,14 +174,14 @@ namespace SharpCaster.Simple
 
             if (_chromecastService.ChromeCastClient.MediaStatus != null && _chromecastService.ChromeCastClient.MediaStatus.PlayerState == PlayerState.Paused)
             {
-                if (mediaController.SupportsCommand(MediaControllers.SupportedCommand.Play))
+                if (mediaController.SupportsCommand(SupportedCommand.Play))
                 {
                     await mediaController.Play();
                 }
             }
             else
             {
-                if (mediaController.SupportsCommand(MediaControllers.SupportedCommand.Pause))
+                if (mediaController.SupportsCommand(SupportedCommand.Pause))
                 {
                     await mediaController.Pause();
                 }
@@ -191,7 +192,7 @@ namespace SharpCaster.Simple
         {
             var mediaController = _chromecastService.ChromeCastClient.MediaController;
 
-            if (mediaController.SupportsCommand(MediaControllers.SupportedCommand.Pause))
+            if (mediaController.SupportsCommand(SupportedCommand.Pause))
             {
                 await mediaController.Pause();
             }
@@ -201,7 +202,7 @@ namespace SharpCaster.Simple
         {
             var mediaController = _chromecastService.ChromeCastClient.MediaController;
 
-            if (mediaController.SupportsCommand(MediaControllers.SupportedCommand.LoadSmoothStreaming))
+            if (mediaController.SupportsCommand(SupportedCommand.LoadSmoothStreaming))
             {
                 Title = title;
                 Description = description;
@@ -216,7 +217,7 @@ namespace SharpCaster.Simple
 
             if (Math.Abs(Position - seconds) > 0.1)
             {
-                if (mediaController.SupportsCommand(MediaControllers.SupportedCommand.Seek))
+                if (mediaController.SupportsCommand(SupportedCommand.Seek))
                 {
                     await mediaController.Seek(seconds);
                 }

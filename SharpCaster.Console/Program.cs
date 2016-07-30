@@ -8,6 +8,7 @@ using SharpCaster.Models;
 using SharpCaster.Models.ChromecastStatus;
 using SharpCaster.Models.MediaStatus;
 using SharpCaster.Services;
+using SharpCaster.Interfaces;
 
 namespace SharpCaster.Console
 {
@@ -62,7 +63,7 @@ namespace SharpCaster.Console
 
             var mediaController = _chromecastService.ChromeCastClient.MediaController;
 
-            if (mediaController.SupportsCommand(MediaControllers.SupportedCommand.LoadSmoothStreaming))
+            if (mediaController.SupportsCommand(SupportedCommand.LoadSmoothStreaming))
             {
                 await mediaController.LoadSmoothStreaming("http://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/dash/BigBuckBunny.mpd");
             }
