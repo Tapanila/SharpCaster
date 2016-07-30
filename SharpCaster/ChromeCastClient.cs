@@ -34,6 +34,8 @@ namespace SharpCaster
             get { return _currentApplicationSessionId; }
         }
 
+        Dictionary<string, IMediaController> RegisteredMediaControllers { get; set; }
+
         private ChromecastChannel _connectionChannel;
         private ChromecastChannel _heartbeatChannel;
         private ChromecastChannel _receiverChannel;
@@ -60,6 +62,8 @@ namespace SharpCaster
 
             _receiverChannel.MessageReceived += ReceiverChannel_MessageReceived;
             _heartbeatChannel.MessageReceived += HeartbeatChannel_MessageReceived;
+
+            RegisterMediaControllers();
         }
 
         public async void GetChromecastStatus()
@@ -142,11 +146,29 @@ namespace SharpCaster
         {
             await ChromecastSocketService.Initialize(uri.Host, ChromecastPort, _connectionChannel, _heartbeatChannel, ReadPacket);
         }
-        
+
+        private void RegisterMediaControllers()
+        {
+            var mediaControllersToRegister = new List<IMediaController>
+            {
+                new DefaultMediaController(this),
+                new PlexMediaController(this)
+            };
+
+            RegisteredMediaControllers = mediaControllersToRegister
+                .ToDictionary(mediaController => mediaController.DefaultAppId);
+        }
+
+        // TODO call this when the app on the chromecast switches
         private void LoadMediaController()
         {
-            //This can be made dynamic so that it supports loading the right controller for the right app
-            MediaController = new DefaultMediaController(this);
+            //todo hot to get the active application ID? to make it dynamic
+            var currentApplicationId = new DefaultMediaController(this).DefaultAppId;
+
+            if (RegisteredMediaControllers.Keys.Contains(currentApplicationId))
+            {
+                MediaController = RegisteredMediaControllers[currentApplicationId];
+            }
         }
 
 
