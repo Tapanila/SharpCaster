@@ -102,70 +102,43 @@
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="ChromeCastClient.cs" />
-    <Compile Include="Controllers\CastButton.cs" />
-    <Compile Include="Controllers\CastDialog.cs" />
-    <Compile Include="Controllers\CastPlayer.cs" />
-    <Compile Include="DeviceLocator.cs" />
-    <Compile Include="Extensions\ByteArrayExtension.cs" />
-    <Compile Include="Extensions\StreamExtension.cs" />
-    <Compile Include="Extensions\StreamSocketExtension.cs" />
-    <Compile Include="Interfaces\IChromecastService.cs" />
-    <Compile Include="Interfaces\IChromecastSocketService.cs" />
-    <Compile Include="Models\CastMessage.cs" />
-    <Compile Include="Models\ChromecastChannel.cs" />
-    <Compile Include="Models\ChromecastRequests\CloseRequest.cs" />
-    <Compile Include="Models\ChromecastRequests\ConnectRequest.cs" />
-    <Compile Include="Models\ChromecastRequests\GetAppAvailabilityRequest.cs" />
-    <Compile Include="Models\ChromecastRequests\GetStatusRequest.cs" />
-    <Compile Include="Models\ChromecastRequests\LaunchRequest.cs" />
-    <Compile Include="Models\ChromecastRequests\LoadRequest.cs" />
-    <Compile Include="Models\ChromecastRequests\MediaData.cs" />
-    <Compile Include="Models\ChromecastRequests\MediaRequest.cs" />
-    <Compile Include="Models\ChromecastRequests\MediaStatusRequest.cs" />
-    <Compile Include="Models\ChromecastRequests\Metadata.cs" />
-    <Compile Include="Models\ChromecastRequests\PauseRequest.cs" />
-    <Compile Include="Models\ChromecastRequests\PingRequest.cs" />
-    <Compile Include="Models\ChromecastRequests\PlayRequest.cs" />
-    <Compile Include="Models\ChromecastRequests\PongRequest.cs" />
-    <Compile Include="Models\ChromecastRequests\Request.cs" />
-    <Compile Include="Models\ChromecastRequests\RequestWithId.cs" />
-    <Compile Include="Models\ChromecastRequests\StopRequest.cs" />
-    <Compile Include="Models\ChromecastRequests\VolumeDataObject.cs" />
-    <Compile Include="Models\ChromecastRequests\VolumeRequest.cs" />
-    <Compile Include="Models\ChromecastSSLClientDataReceivedArgs.cs" />
-    <Compile Include="JsonConverters\PlayerStateEnumConverter.cs" />
-    <Compile Include="Models\MediaStatus\ChromecastImage.cs" />
-    <Compile Include="Models\MediaStatus\GenericMediaMetadata.cs" />
-    <Compile Include="Models\MessageFactory.cs" />
-    <Compile Include="Models\ChromecastRequests\RequestIdProvider.cs" />
-    <Compile Include="Interfaces\ISocketService.cs" />
-    <Compile Include="Models\Chromecast.cs" />
-    <Compile Include="Models\ChromecastStatus\ChromecastApplication.cs" />
-    <Compile Include="Models\ChromecastStatus\ChromecastStatusResponse.cs" />
-    <Compile Include="Models\ChromecastStatus\Namespace.cs" />
-    <Compile Include="Models\ChromecastStatus\ChromecastStatus.cs" />
-    <Compile Include="Models\Discovery.cs" />
-    <Compile Include="Models\Volume.cs" />
-    <Compile Include="Models\MediaStatus\Item.cs" />
-    <Compile Include="Models\MediaStatus\Media.cs" />
-    <Compile Include="Models\MediaStatus\MediaStatusResponse.cs" />
-    <Compile Include="Models\MediaStatus\MediaStatus.cs" />
-    <Compile Include="Models\MediaStatus\Track.cs" />
-    <Compile Include="Models\ChromecastRequests\SeekRequest.cs" />
-    <Compile Include="Properties\Annotations.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="UniversalWindowsServices\ChromeCastService.cs" />
-    <Compile Include="UniversalWindowsServices\ChromecastSocketService.cs" />
-    <Compile Include="UniversalWindowsServices\SocketService.cs" />
+    <Compile Include="..\*.cs" />
+    <Compile Include="..\UniversalWindowsServices\*.cs">
+      <Link>Services\ThisTextDoesntMatter</Link>
+    </Compile>
+    <Compile Include="..\Extensions\*.cs">
+      <Link>Extensions\ThisTextDoesntMatter</Link>
+    </Compile>
+    <Compile Include="..\Interfaces\*.cs">
+      <Link>Interfaces\ThisTextDoesntMatter</Link>
+    </Compile>
+    <Compile Include="..\Models\*.cs">
+      <Link>Models\ThisTextDoesntMatter</Link>
+    </Compile>
+    <Compile Include="..\Models\ChromecastRequests\*.cs">
+      <Link>Models\ChromecastRequests\ThisTextDoesntMatter</Link>
+    </Compile>
+    <Compile Include="..\JsonConverters\PlayerStateEnumConverter.cs">
+      <Link>JsonConverters\ThisTextDoesntMatter</Link>
+    </Compile>
+    <Compile Include="..\Models\MediaStatus\*.cs">
+      <Link>Models\MediaStatus\ThisTextDoesntMatter</Link>
+    </Compile>
+    <Compile Include="..\Models\ChromecastStatus\*.cs">
+      <Link>Models\ChromecastStatus\ThisTextDoesntMatter</Link>
+    </Compile>
+    <Compile Include="Controllers\*.cs"/>
+    <Compile Include="..\Properties\Annotations.cs" />
+    <Compile Include="..\Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\packages\Newtonsoft.Json.9.0.1\lib\portable-net45+wp80+win8+wpa81\Newtonsoft.Json.dll</HintPath>
+      <HintPath>..\..\packages\Newtonsoft.Json.9.0.1\lib\portable-net45+wp80+win8+wpa81\Newtonsoft.Json.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="protobuf-net">
-      <HintPath>..\packages\protobuf-net-sharpcaster.2.0.0.668\lib\portable46-net451+win81+wpa81\protobuf-net.dll</HintPath>
+    <Reference Include="protobuf-net, Version=2.0.0.668, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\protobuf-net-sharpcaster.2.0.0.668\lib\portable46-net451+win81+wpa81\protobuf-net.dll</HintPath>
+      <Private>True</Private>
     </Reference>
   </ItemGroup>
   <ItemGroup>

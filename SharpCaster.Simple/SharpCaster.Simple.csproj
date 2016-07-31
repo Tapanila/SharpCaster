@@ -132,7 +132,7 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\SharpCaster\SharpCaster.UniversalWindows.csproj">
+    <ProjectReference Include="..\SharpCaster\SharpCaster.UniversalWindows\SharpCaster.UniversalWindows.csproj">
       <Project>{18d6578d-c426-4954-a5c2-20c0581ae933}</Project>
       <Name>SharpCaster.UniversalWindows</Name>
     </ProjectReference>
