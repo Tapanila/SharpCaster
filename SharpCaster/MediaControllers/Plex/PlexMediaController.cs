@@ -18,7 +18,7 @@ namespace SharpCaster.MediaControllers
         {
             get
             {
-                return "CC1AD845";
+                return "9AC194DC";
             }
         }
 
