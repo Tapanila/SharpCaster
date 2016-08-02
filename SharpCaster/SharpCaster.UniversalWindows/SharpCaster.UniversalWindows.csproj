@@ -103,6 +103,27 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="..\*.cs" />
+    <Compile Include="..\DeviceControllers\HeartbeatController.cs">
+      <Link>DeviceControllers\HeartbeatController.cs</Link>
+    </Compile>
+    <Compile Include="..\MediaControllers\BaseController.cs">
+      <Link>MediaControllers\BaseController.cs</Link>
+    </Compile>
+    <Compile Include="..\MediaControllers\Default\DefaultMediaController.cs">
+      <Link>MediaControllers\Default\DefaultMediaController.cs</Link>
+    </Compile>
+    <Compile Include="..\MediaControllers\Default\DefaultMediaMessageFactory.cs">
+      <Link>MediaControllers\Default\DefaultMediaMessageFactory.cs</Link>
+    </Compile>
+    <Compile Include="..\MediaControllers\DSAudio\DSAudioMediaController.cs">
+      <Link>MediaControllers\DSAudio\DSAudioMediaController.cs</Link>
+    </Compile>
+    <Compile Include="..\MediaControllers\Plex\PlexMediaController.cs">
+      <Link>MediaControllers\Plex\PlexMediaController.cs</Link>
+    </Compile>
+    <Compile Include="..\MediaControllers\Plex\PlexMediaMessageFactory.cs">
+      <Link>MediaControllers\Plex\PlexMediaMessageFactory.cs</Link>
+    </Compile>
     <Compile Include="..\UniversalWindowsServices\*.cs">
       <Link>Services\ThisTextDoesntMatter</Link>
     </Compile>
@@ -127,7 +148,7 @@
     <Compile Include="..\Models\ChromecastStatus\*.cs">
       <Link>Models\ChromecastStatus\ThisTextDoesntMatter</Link>
     </Compile>
-    <Compile Include="Controllers\*.cs"/>
+    <Compile Include="Controllers\*.cs" />
     <Compile Include="..\Properties\Annotations.cs" />
     <Compile Include="..\Properties\AssemblyInfo.cs" />
   </ItemGroup>
