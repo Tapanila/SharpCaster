@@ -1,49 +1,37 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
-using SharpCaster.Controllers;
 using SharpCaster.Models;
 
-namespace SharpCaster
+namespace SharpCaster.Services
 {
     public class ChromecastService
     {
         private static ChromecastService _instance;
 
-        public static ChromecastService Current
-        {
-            get
-            {
-                if (_instance == null)
-                {
-                    _instance = new ChromecastService();
-                }
-                return _instance;
-            }
-        }
+        public static ChromecastService Current => _instance ?? (_instance = new ChromecastService());
 
         public DeviceLocator DeviceLocator { get; }
         public ChromeCastClient ChromeCastClient { get; }
         public Chromecast ConnectedChromecast { get; set; }
-        public CastButton CastButton { get; set; }
-        private CancellationTokenSource _cancellationTokenSource;
+               private CancellationTokenSource _cancellationTokenSource;
 
         public ChromecastService()
         {
             DeviceLocator = new DeviceLocator();
-            DeviceLocator.DeviceFounded += DeviceLocator_DeviceFounded;
+            DeviceLocator.DeviceFound += DeviceLocator_DeviceFound;
             ChromeCastClient = new ChromeCastClient();
             ChromeCastClient.Connected += ChromeCastClient_Connected;
 
         }
 
-        private void DeviceLocator_DeviceFounded(object sender, Chromecast e)
+        private void DeviceLocator_DeviceFound(object sender, Chromecast e)
         {
-            CastButton?.GoToState(CastButtonVisualStates.InteractiveStates.Disconnected);
+            //CastButton?.GoToState(CastButtonVisualStates.InteractiveStates.Disconnected);
         }
 
         public void ConnectToChromecast(Chromecast chromecast)
         {
-            CastButton?.GoToState(CastButtonVisualStates.InteractiveStates.Connecting);
+            //CastButton?.GoToState(CastButtonVisualStates.InteractiveStates.Connecting);
             StopLocatingDevices();
             ConnectedChromecast = chromecast;
             ChromeCastClient.ConnectChromecast(chromecast.DeviceUri);
@@ -51,7 +39,7 @@ namespace SharpCaster
 
         private void ChromeCastClient_Connected(object sender, System.EventArgs e)
         {
-            CastButton?.GoToState(CastButtonVisualStates.InteractiveStates.Connected);
+            //CastButton?.GoToState(CastButtonVisualStates.InteractiveStates.Connected);
         }
 
         public void StopLocatingDevices()
