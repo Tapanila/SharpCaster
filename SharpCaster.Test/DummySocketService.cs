@@ -27,7 +27,7 @@ namespace SharpCaster.Test.DummyServices
 
         public Task BindEndpointAsync(string localHostName, string localServiceName)
         {
-            return null;
+            return Task.Delay(1);
         }
 
         public void JoinMulticastGroup(string multicastIP)
@@ -49,21 +49,7 @@ namespace SharpCaster.Test.DummyServices
             _responses = new List<string>();
             _deviceInformationResponses = new List<string>();
         }
-
-        public async Task<DataWriter> GetOutputWriterAsync(HostName multicastIP, string multicastPort)
-        {
-            if (_responses.Count > 0)
-            {
-                foreach (var response in _responses)
-                {
-                    MessageReceived.Invoke(this, response);
-                }
-                _responses = new List<string>();
-            }
-            InMemoryRandomAccessStream randomAccessStream = new InMemoryRandomAccessStream();
-            return new DataWriter(randomAccessStream.AsStream().AsOutputStream());
-        }
-
+        
         public void AddResponse(string response)
         {
             _responses.Add(response);
@@ -83,7 +69,15 @@ namespace SharpCaster.Test.DummyServices
 
         public Task Write(string request, string multicastPort, string multicastIP)
         {
-            throw new NotImplementedException();
+            if (_responses.Count > 0)
+            {
+                foreach (var response in _responses)
+                {
+                    MessageReceived.Invoke(this, response);
+                }
+                _responses = new List<string>();
+            }
+            return Task.Delay(1);
         }
     }
 }
