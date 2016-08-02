@@ -2,21 +2,53 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
     <metadata>
         <id>SharpCaster</id>
-        <version>0.1.5</version>
+        <version>0.1.6</version>
         <authors>Tapanila</authors>
         <owners>Tapanila</owners>
         <licenseUrl>https://raw.githubusercontent.com/tapanila/SharpCaster/master/LICENSE.txt</licenseUrl>
         <projectUrl>https://github.com/tapanila/SharpCaster</projectUrl>
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
-        <description>Chromecast SDK for Windows and Windows Phone</description>
-        <releaseNotes>Added metadata to media object</releaseNotes>
+        <description>Chromecast SDK for Windows, Windows Phone and .NET 4.5.1</description>
+        <releaseNotes>Added support for .net 4.5.1 and fixed bugs</releaseNotes>
         <copyright>Copyright 2016</copyright>
+		<tags>Chromecast, GoogleCast</tags>
         <dependencies>
-            <dependency id="Newtonsoft.Json" version="8.0.2" />
+            <dependency id="Newtonsoft.Json" version="9.0.1" />
+			<dependency id="Protobuf-net-SharpCaster" version="2.0.0.668" />
         </dependencies>
     </metadata>
     <files>
-		<file src="bin\release\protobuf-net.dll" target="lib\portable-win81+wpa81" />
-		<file src="bin\release\Themes\Generic.xbf" target="lib\portable-win81+wpa81\SharpCaster\Themes\Generic.xbf" />
+		<file
+			src="SharpCaster.UniversalWindows\bin\Release\SharpCaster.dll"
+			target="lib\portable-win81+wpa81\SharpCaster.dll"
+			/>
+		<file
+			src="SharpCaster.UniversalWindows\bin\Release\SharpCaster.pdb"
+			target="lib\portable-win81+wpa81\SharpCaster.pdb"
+			/>	
+		<file
+			src="SharpCaster.UniversalWindows\bin\release\Themes\Generic.xbf"
+			target="lib\portable-win81+wpa81\SharpCaster\Themes\Generic.xbf" />
+	
+		
+		<file
+			src="SharpCaster.Portable\bin\Release\SharpCaster.pdb"
+			target="lib\portable46-net451+win81+wpa81\SharpCaster.pdb" 
+			/>
+		<file
+			src="SharpCaster.Portable\bin\Release\SharpCaster.dll"
+			target="lib\portable46-net451+win81+wpa81\SharpCaster.dll" 
+			/>
+		
+		<file 
+			src="SharpCaster.Net45\bin\Release\SharpCaster.dll"
+			target="lib\net451\SharpCaster.dll"
+			/>
+		<file
+			src="SharpCaster.Net45\bin\Release\SharpCaster.pdb"
+			target="lib\net451\SharpCaster.pdb"
+			/>
+		
+		
     </files>
 </package>
