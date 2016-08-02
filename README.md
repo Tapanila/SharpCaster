@@ -37,4 +37,3 @@ client.ConnectChromecast(chromecast.DeviceUri);
 # Notes
 
 Heavily based on [NCast](https://github.com/jeremychild/NCast)
-Using [Protocol Buffers library for .NET](https://github.com/mgravell/protobuf-net)
