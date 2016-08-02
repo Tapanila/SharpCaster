@@ -34,10 +34,6 @@ namespace SharpCaster.Console
 
         private static void DeviceLocator_DeviceFound(object sender, Chromecast e)
         {
-            if (!e.FriendlyName.Contains("CC"))
-            {
-                return;
-            }
             _chromecastService.StopLocatingDevices();
             System.Console.WriteLine("Device found " + e.FriendlyName);
             _chromecastService.ConnectToChromecast(e);
