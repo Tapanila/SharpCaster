@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
     <metadata>
         <id>SharpCaster</id>
-        <version>0.1.6-beta</version>
+        <version>0.1.6-beta2</version>
         <authors>Tapanila</authors>
         <owners>Tapanila</owners>
         <licenseUrl>https://raw.githubusercontent.com/tapanila/SharpCaster/master/LICENSE.txt</licenseUrl>
@@ -13,16 +13,17 @@
         <copyright>Copyright 2016</copyright>
         <dependencies>
             <dependency id="Newtonsoft.Json" version="9.0.1" />
+			<dependency id="Protobuf-net-SharpCaster" version="2.0.0.668" />
         </dependencies>
     </metadata>
     <files>
 		<file
 			src="SharpCaster.UniversalWindows\bin\Release\SharpCaster.dll"
-			target="lib\portable-win81+wpa81\SharpCaster\SharpCaster.dll"
+			target="lib\portable-win81+wpa81\SharpCaster.dll"
 			/>
 		<file
 			src="SharpCaster.UniversalWindows\bin\Release\SharpCaster.pdb"
-			target="lib\portable-win81+wpa81\SharpCaster\SharpCaster.pdb"
+			target="lib\portable-win81+wpa81\SharpCaster.pdb"
 			/>	
 		<file
 			src="SharpCaster.UniversalWindows\bin\release\Themes\Generic.xbf"
@@ -31,20 +32,20 @@
 		
 		<file
 			src="SharpCaster.Portable\bin\Release\SharpCaster.pdb"
-			target="lib\portable-net451+win81+wpa81\SharpCaster\SharpCaster.pdb" 
+			target="lib\portable46-net451+win81+wpa81\SharpCaster.pdb" 
 			/>
 		<file
 			src="SharpCaster.Portable\bin\Release\SharpCaster.dll"
-			target="lib\portable-net451+win81+wpa81\SharpCaster\SharpCaster.dll" 
+			target="lib\portable46-net451+win81+wpa81\SharpCaster.dll" 
 			/>
 		
 		<file 
 			src="SharpCaster.Net45\bin\Release\SharpCaster.dll"
-			target="lib\net451\SharpCaster\SharpCaster.dll"
+			target="lib\net451\SharpCaster.dll"
 			/>
 		<file
 			src="SharpCaster.Net45\bin\Release\SharpCaster.pdb"
-			target="lib\net451\SharpCaster\SharpCaster.pdb"
+			target="lib\net451\SharpCaster.pdb"
 			/>
 		
 		
