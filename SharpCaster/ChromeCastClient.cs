@@ -135,7 +135,15 @@ namespace SharpCaster
         {
             await ChromecastSocketService.Initialize(uri.Host, ChromecastPort);
             await ConnectionController.OpenConnection();
-            await ChromecastSocketService.ReadPackets();
+
+#pragma warning disable 4014
+            /*
+             * pragma warning disable since the program should continue
+             * while ReadPackets() runs
+             */
+            ChromecastSocketService.ReadPackets();
+#pragma warning restore 4014
+
             HeartbeatController.StartHeartbeat();
         }
 
