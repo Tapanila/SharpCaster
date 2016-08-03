@@ -8,6 +8,7 @@ using SharpCaster.Models;
 using SharpCaster.Models.ChromecastStatus;
 using SharpCaster.Models.MediaStatus;
 using SharpCaster.Services;
+using SharpCaster.Interfaces;
 
 namespace SharpCaster.Console
 {
@@ -33,10 +34,6 @@ namespace SharpCaster.Console
 
         private static void DeviceLocator_DeviceFound(object sender, Chromecast e)
         {
-            if (!e.FriendlyName.Contains("CC"))
-            {
-                return;
-            }
             _chromecastService.StopLocatingDevices();
             System.Console.WriteLine("Device found " + e.FriendlyName);
             _chromecastService.ConnectToChromecast(e);
@@ -59,7 +56,19 @@ namespace SharpCaster.Console
         private static async void Client_ApplicationStarted(object sender, ChromecastApplication e)
         {
             System.Console.WriteLine($"Application {e.DisplayName} has launched");
-            await _chromecastService.ChromeCastClient.LoadMedia("http://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/dash/BigBuckBunny.mpd");
+
+            var mediaController = _chromecastService.ChromeCastClient.MediaController;
+
+            await mediaController.Pause();
+
+            await Task.Delay(5000);
+
+            await mediaController.Play();
+
+            if (mediaController.SupportsCommand(SupportedCommand.LoadSmoothStreaming))
+            {
+                await mediaController.LoadSmoothStreaming("http://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/dash/BigBuckBunny.mpd");
+            }
         }
     }
 }

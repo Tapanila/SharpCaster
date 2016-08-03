@@ -103,6 +103,21 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="..\*.cs" />
+    <Compile Include="..\DeviceControllers\*.cs">
+      <Link>DeviceControllers\ThisTextDoesntMatter</Link>
+    </Compile>
+    <Compile Include="..\MediaControllers\*.cs">
+      <Link>MediaControllers\ThisTextDoesntMatter</Link>
+    </Compile>
+    <Compile Include="..\MediaControllers\Default\*.cs">
+      <Link>MediaControllers\Default\ThisTextDoesntMatter</Link>
+    </Compile>
+    <Compile Include="..\MediaControllers\DSAudio\*.cs">
+      <Link>MediaControllers\DSAudio\ThisTextDoesntMatter</Link>
+    </Compile>
+    <Compile Include="..\MediaControllers\Plex\*.cs">
+      <Link>MediaControllers\Plex\ThisTextDoesntMatter</Link>
+    </Compile>
     <Compile Include="..\UniversalWindowsServices\*.cs">
       <Link>Services\ThisTextDoesntMatter</Link>
     </Compile>

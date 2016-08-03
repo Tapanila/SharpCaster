@@ -51,13 +51,27 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\*.cs" />
-    <Compile Include="..\Extensions\ByteArrayExtension.cs">
-      <Link>Extensions\ThisTextDoesntMatter</Link>
+    <Compile Include="..\DeviceControllers\*.cs">
+      <Link>DeviceControllers\ThisTextDoesntMatter</Link>
+    </Compile>
+    <Compile Include="..\MediaControllers\*.cs">
+      <Link>MediaControllers\ThisTextDoesntMatter</Link>
+    </Compile>
+    <Compile Include="..\MediaControllers\Default\*.cs">
+      <Link>MediaControllers\Default\ThisTextDoesntMatter</Link>
+    </Compile>
+    <Compile Include="..\MediaControllers\DSAudio\*.cs">
+      <Link>MediaControllers\DSAudio\ThisTextDoesntMatter</Link>
+    </Compile>
+    <Compile Include="..\MediaControllers\Plex\*.cs">
+      <Link>MediaControllers\Plex\ThisTextDoesntMatter</Link>
     </Compile>
     <Compile Include="..\Net45Services\*.cs">
-      <Link>Services\ThisTextDoesntMatter</Link>
+      <Link>Net45Services\ThisTextDoesntMatter</Link>
     </Compile>
-    <Compile Include="..\Extensions\StreamExtension.cs">
+    <Compile Include="..\Extensions\ByteArrayExtension.cs">
+      <Link>Extensions\ThisTextDoesntMatter</Link>
+    </Compile><Compile Include="..\Extensions\StreamExtension.cs">
       <Link>Extensions\ThisTextDoesntMatter</Link>
     </Compile>
     <Compile Include="..\Interfaces\*.cs">
@@ -84,6 +98,7 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
