@@ -189,7 +189,18 @@ namespace SharpCaster.Simple
             Title = title;
             Description = description;
             Poster = poster;
-            await _chromecastService.ChromeCastClient.LoadMedia("http://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/dash/BigBuckBunny.mpd");
+            var track = new Track
+            {
+                Name = "English Subtitle",
+                TrackId = 100,
+                Type = "TEXT",
+                SubType = "captions",
+                Language = "en-US",
+                TrackContentId =
+                    "https://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/tracks/DesigningForGoogleCast-en.vtt"
+            };
+            await _chromecastService.ChromeCastClient
+                .LoadMedia("https://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/dash/DesigningForGoogleCast.mpd",null,new[] {track}, new []{100});
         }
 
         public async Task Seek(double seconds)
