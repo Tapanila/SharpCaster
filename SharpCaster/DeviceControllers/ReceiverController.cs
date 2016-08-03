@@ -15,7 +15,7 @@ namespace SharpCaster.DeviceControllers
         public ReceiverController(ChromeCastClient chromecastClient)
         {
             _chromecastClient = chromecastClient;
-            _receiverChannel = _chromecastClient.CreateChannel(MessageFactory.DialConstants.DialHeartbeatUrn);
+            _receiverChannel = _chromecastClient.CreateChannel(MessageFactory.DialConstants.DialReceiverUrn);
 
             _receiverChannel.MessageReceived += ReceiverChannel_MessageReceived;
         }
