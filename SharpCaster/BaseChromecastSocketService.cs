@@ -12,6 +12,11 @@ namespace SharpCaster
     {
         public List<ChromecastChannel> Channels { get; set; }
 
+        public BaseChromecastSocketService()
+        {
+            Channels = new List<ChromecastChannel>();
+        }
+
         protected void ReadPacket(Stream stream, bool parsed)
         {
             try

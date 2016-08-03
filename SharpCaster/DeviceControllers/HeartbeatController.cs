@@ -14,9 +14,7 @@ namespace SharpCaster.DeviceControllers
         public HeartbeatController(ChromeCastClient chromecastClient)
         {
             _chromecastClient = chromecastClient;
-            
-            _heartbeatChannel = new ChromecastChannel(chromecastClient.ChromecastSocketService, MessageFactory.DialConstants.DialHeartbeatUrn);
-            chromecastClient.Channels.Add(_heartbeatChannel);
+            _heartbeatChannel = _chromecastClient.CreateChannel(MessageFactory.DialConstants.DialHeartbeatUrn);
             
             _heartbeatChannel.MessageReceived += HeartbeatChannel_MessageReceived;
         }
@@ -38,7 +36,7 @@ namespace SharpCaster.DeviceControllers
             if (_chromecastClient.IsConnected || e.Message.GetJsonType() != "PONG") return;
             //Wait 100 milliseconds before sending GET_STATUS because chromecast was sending CLOSE back without a wait
             await Task.Delay(100);
-            _chromecastClient.GetChromecastStatus();
+            _chromecastClient.ReceiverController.GetChromecastStatus();
             //Wait 100 milliseconds to make sure that the status of Chromecast device is received before notifying we have connected to it
             await Task.Delay(100);
             _chromecastClient.IsConnected = true;

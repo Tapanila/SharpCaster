@@ -54,9 +54,7 @@ namespace SharpCaster.MediaControllers
         public DSAudioMediaController(ChromeCastClient chromecastClient)
         {
             _chromecastClient = chromecastClient;
-
-            _mediaChannel = new ChromecastChannel(chromecastClient.ChromecastSocketService, this.SpecificNamespace);
-            chromecastClient.Channels.Add(_mediaChannel);
+            _mediaChannel = _chromecastClient.CreateChannel(this.SpecificNamespace);
 
             _mediaChannel.MessageReceived += MediaChannel_MessageReceived;
         }

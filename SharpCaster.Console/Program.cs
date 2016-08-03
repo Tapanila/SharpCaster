@@ -59,6 +59,12 @@ namespace SharpCaster.Console
 
             var mediaController = _chromecastService.ChromeCastClient.MediaController;
 
+            await mediaController.Pause();
+
+            await Task.Delay(5000);
+
+            await mediaController.Play();
+
             if (mediaController.SupportsCommand(SupportedCommand.LoadSmoothStreaming))
             {
                 await mediaController.LoadSmoothStreaming("http://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/dash/BigBuckBunny.mpd");

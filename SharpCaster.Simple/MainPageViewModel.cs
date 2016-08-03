@@ -226,18 +226,18 @@ namespace SharpCaster.Simple
 
         public async Task MuteUnmute()
         {
-            await _chromecastService.ChromeCastClient.SetMute(!_chromecastService.ChromeCastClient.Volume.muted);
+            await _chromecastService.ChromeCastClient.ReceiverController.SetMute(!_chromecastService.ChromeCastClient.Volume.muted);
         }
 
         public async Task SetVolume(double newValue)
         {
             if (Math.Abs(_chromecastService.ChromeCastClient.Volume.level - (newValue / 100)) < 0.01) return;
-            await _chromecastService.ChromeCastClient.SetVolume((float)(newValue / 100));
+            await _chromecastService.ChromeCastClient.ReceiverController.SetVolume((float)(newValue / 100));
         }
 
         public async Task StopApplication()
         {
-            await _chromecastService.ChromeCastClient.StopApplication();
+            await _chromecastService.ChromeCastClient.ReceiverController.StopApplication();
         }
     }
 }

@@ -1,11 +1,17 @@
 ﻿using SharpCaster.Models;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace SharpCaster.Interfaces
 {
     public interface IChromecastSocketService
     {
-        Task Initialize(string host, string port, ChromecastChannel connectionChannel);
+        List<ChromecastChannel> Channels { get; set; }
+
+        Task Initialize(string host, string port);
+
+        Task ReadPackets();
+
         Task Write(byte[] bytes);
     }
 }

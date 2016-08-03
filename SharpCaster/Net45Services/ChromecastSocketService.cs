@@ -15,7 +15,7 @@ namespace SharpCaster.Services
         private TcpClient _client;
         private SslStream _stream;
 
-        public async Task Initialize(string host, string port, ChromecastChannel connectionChannel)
+        public async Task Initialize(string host, string port)
         {
             if (_client == null) _client = new TcpClient();
             _client.ReceiveBufferSize = 2048;
@@ -24,31 +24,6 @@ namespace SharpCaster.Services
             _stream = new SslStream(_client.GetStream(), true, ValidateServerCertificate, null);
             
             _stream.AuthenticateAsClient("client");
-            
-        
-            OpenConnection(connectionChannel);
-            
-            await Task.Run(() =>
-            {
-                while (true)
-                {
-                    var sizeBuffer = new byte[4];
-                    byte[] messageBuffer = { };
-                    // First message should contain the size of message
-                    _stream.Read(sizeBuffer, 0, sizeBuffer.Length);
-                    // The message is little-endian (that is, little end first),
-                    // reverse the byte array.
-                    Array.Reverse(sizeBuffer);
-                    //Retrieve the size of message
-                    var messageSize = BitConverter.ToInt32(sizeBuffer, 0);
-                    messageBuffer = new byte[messageSize];
-                    _stream.Read(messageBuffer, 0, messageBuffer.Length);
-                    var answer = new MemoryStream(messageBuffer.Length);
-                    answer.Write(messageBuffer,0,messageBuffer.Length);
-                    answer.Position = 0;
-                    ReadPacket(answer,true);
-                }
-            });
         }
 
         private bool ValidateServerCertificate(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
@@ -65,6 +40,31 @@ namespace SharpCaster.Services
         {
             _stream.Write(bytes, 0, bytes.Length);
             return Task.Delay(0);
+        }
+        
+        public async Task ReadPackets()
+        {
+            await Task.Run(() =>
+            {
+                while (true)
+                {
+                    var sizeBuffer = new byte[4];
+                    byte[] messageBuffer = { };
+                    // First message should contain the size of message
+                    _stream.Read(sizeBuffer, 0, sizeBuffer.Length);
+                    // The message is little-endian (that is, little end first),
+                    // reverse the byte array.
+                    Array.Reverse(sizeBuffer);
+                    //Retrieve the size of message
+                    var messageSize = BitConverter.ToInt32(sizeBuffer, 0);
+                    messageBuffer = new byte[messageSize];
+                    _stream.Read(messageBuffer, 0, messageBuffer.Length);
+                    var answer = new MemoryStream(messageBuffer.Length);
+                    answer.Write(messageBuffer, 0, messageBuffer.Length);
+                    answer.Position = 0;
+                    ReadPacket(answer, true);
+                }
+            });
         }
     }
 }

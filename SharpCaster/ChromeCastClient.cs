@@ -23,8 +23,19 @@ namespace SharpCaster
         public MediaStatus MediaStatus { get; set; }
         public IChromecastSocketService ChromecastSocketService { get; set; }
 
+
+        public IConnectionController ConnectionController { get; set; }
+
+        public IReceiverController ReceiverController { get; set; }
+
         public IHeartbeatController HeartbeatController { get; set; }
+
         public IMediaController MediaController { get; set; }
+
+        internal string ChromecastApplicationId
+        {
+            get { return _chromecastApplicationId; }
+        }
 
         internal string CurrentApplicationTransportId
         {
@@ -38,8 +49,6 @@ namespace SharpCaster
 
         Dictionary<string, IMediaController> RegisteredMediaControllers { get; set; }
 
-        private ChromecastChannel _connectionChannel;
-        private ChromecastChannel _receiverChannel;
         private const string ChromecastPort = "8009";
         private string _chromecastApplicationId;
         private string _currentApplicationSessionId = "";
@@ -78,44 +87,39 @@ namespace SharpCaster
         public ChromeCastClient()
         {
             ChromecastSocketService = new ChromecastSocketService();
-            Channels = new List<ChromecastChannel>();
-            _connectionChannel = CreateChannel(MessageFactory.DialConstants.DialConnectionUrn);
-            _receiverChannel = CreateChannel(MessageFactory.DialConstants.DialReceiverUrn);
 
-            _receiverChannel.MessageReceived += ReceiverChannel_MessageReceived;
 
+            ConnectionController = new ConnectionController(this);
+            ReceiverController = new ReceiverController(this);
             HeartbeatController = new HeartbeatController(this);
 
             RegisterMediaControllers();
         }
 
-        public async void GetChromecastStatus()
-        {
-            await _receiverChannel.Write(MessageFactory.Status());
-        }
 
-        public async Task SetVolume(float level)
-        {
-            if (level < 0 || level > 1.0f)
-            {
-                throw new ArgumentException("level must be between 0.0f and 1.0f", nameof(level));
-            }
-            await ChromecastSocketService.Write(MessageFactory.Volume(level).ToProto());
-        }
 
-        public async Task SetMute(bool muted)
-        {
-            await ChromecastSocketService.Write(MessageFactory.Volume(muted).ToProto());
-        }
+
 
         public async Task IncreaseVolume()
         {
-            await SetVolume(Volume.level + 0.05f);
+            await ReceiverController.SetVolume(Volume.level + 0.05f);
         }
 
         public async Task DecreaseVolume()
         {
-            await SetVolume(Volume.level - 0.05f);
+            await ReceiverController.SetVolume(Volume.level - 0.05f);
+        }
+
+        internal void UpdateApplicationConnectionIds(string applicationSessionId, string applicationTransportId)
+        {
+            _currentApplicationSessionId = applicationSessionId;
+            _currentApplicationTransportId = applicationTransportId;
+        }
+
+        internal void UpdateStatus(ChromecastStatus status)
+        {
+            ChromecastStatus = status;
+            ChromecastStatusChanged?.Invoke(this, status);
         }
 
         internal void UpdateVolume(Volume volume)
@@ -127,34 +131,11 @@ namespace SharpCaster
             VolumeChanged?.Invoke(this, Volume);
         }
 
-        private async void ReceiverChannel_MessageReceived(object sender, ChromecastSSLClientDataReceivedArgs e)
-        {
-            var json = e.Message.PayloadUtf8;
-            var response = JsonConvert.DeserializeObject<ChromecastStatusResponse>(json);
-            if (response.ChromecastStatus == null) return;
-            ChromecastStatus = response.ChromecastStatus;
-            ChromecastStatusChanged?.Invoke(this, ChromecastStatus);
-            UpdateVolume(ChromecastStatus.Volume);
-            await ConnectToApplication(_chromecastApplicationId);
-        }
-
-        private async Task<bool> ConnectToApplication(string applicationId)
-        {
-            var startedApplication = ChromecastStatus?.Applications?.FirstOrDefault(x => x.AppId == applicationId);
-            if (startedApplication == null) return false;
-            if (!string.IsNullOrWhiteSpace(_currentApplicationSessionId)) return false;
-            _currentApplicationSessionId = startedApplication.SessionId;
-            _currentApplicationTransportId = startedApplication.TransportId;
-            await ChromecastSocketService.Write(MessageFactory.ConnectWithDestination(startedApplication.TransportId).ToProto());
-            ApplicationStarted?.Invoke(this, startedApplication);
-            return true;
-        }
-
-
-
         public async void ConnectChromecast(Uri uri)
         {
-            await ChromecastSocketService.Initialize(uri.Host, ChromecastPort, _connectionChannel);
+            await ChromecastSocketService.Initialize(uri.Host, ChromecastPort);
+            await ConnectionController.OpenConnection();
+            await ChromecastSocketService.ReadPackets();
             HeartbeatController.StartHeartbeat();
         }
 
@@ -187,7 +168,7 @@ namespace SharpCaster
         public async Task LaunchApplication(string applicationId, bool joinExisting = true)
         {
             _chromecastApplicationId = applicationId;
-            if (joinExisting && await ConnectToApplication(applicationId))
+            if (joinExisting && await ConnectionController.ConnectToApplication(applicationId))
             {
                 LoadMediaController();
 
@@ -201,15 +182,10 @@ namespace SharpCaster
             await ChromecastSocketService.Write(MessageFactory.Launch(applicationId).ToProto());
         }
 
-        public async Task StopApplication()
-        {
-            await ChromecastSocketService.Write(MessageFactory.Stop(_currentApplicationSessionId).ToProto());
-        }
-
-        private ChromecastChannel CreateChannel(string channelNamespace)
+        public ChromecastChannel CreateChannel(string channelNamespace)
         {
             var channel = new ChromecastChannel(ChromecastSocketService, channelNamespace);
-            Channels.Add(channel);
+            ChromecastSocketService.Channels.Add(channel);
             return channel;
         }
 
@@ -219,5 +195,10 @@ namespace SharpCaster
             MediaStatusChanged?.Invoke(this, mediaStatus);
         }
 
+        //TODO 
+        internal void InvokeApplicationStarted(ChromecastApplication application)
+        {
+            ApplicationStarted?.Invoke(this, application);
+        }
     }
 }

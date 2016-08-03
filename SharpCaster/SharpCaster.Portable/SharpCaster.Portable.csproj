@@ -35,32 +35,26 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="..\*.cs" />
-    <Compile Include="..\DeviceControllers\HeartbeatController.cs">
-      <Link>DeviceControllers\HeartbeatController.cs</Link>
+    <Compile Include="..\DeviceControllers\*.cs">
+      <Link>DeviceControllers\ThisTextDoesntMatter</Link>
     </Compile>
-    <Compile Include="..\Extensions\ByteArrayExtension.cs">
-      <Link>Extensions\ThisTextDoesntMatter</Link>
+    <Compile Include="..\MediaControllers\*.cs">
+      <Link>MediaControllers\ThisTextDoesntMatter</Link>
     </Compile>
-    <Compile Include="..\MediaControllers\BaseController.cs">
-      <Link>MediaControllers\BaseController.cs</Link>
+    <Compile Include="..\MediaControllers\Default\*.cs">
+      <Link>MediaControllers\Default\ThisTextDoesntMatter</Link>
     </Compile>
-    <Compile Include="..\MediaControllers\Default\DefaultMediaController.cs">
-      <Link>MediaControllers\Default\DefaultMediaController.cs</Link>
+    <Compile Include="..\MediaControllers\DSAudio\*.cs">
+      <Link>MediaControllers\DSAudio\ThisTextDoesntMatter</Link>
     </Compile>
-    <Compile Include="..\MediaControllers\Default\DefaultMediaMessageFactory.cs">
-      <Link>MediaControllers\Default\DefaultMediaMessageFactory.cs</Link>
-    </Compile>
-    <Compile Include="..\MediaControllers\DSAudio\DSAudioMediaController.cs">
-      <Link>MediaControllers\DSAudio\DSAudioMediaController.cs</Link>
-    </Compile>
-    <Compile Include="..\MediaControllers\Plex\PlexMediaController.cs">
-      <Link>MediaControllers\Plex\PlexMediaController.cs</Link>
-    </Compile>
-    <Compile Include="..\MediaControllers\Plex\PlexMediaMessageFactory.cs">
-      <Link>MediaControllers\Plex\PlexMediaMessageFactory.cs</Link>
+    <Compile Include="..\MediaControllers\Plex\*.cs">
+      <Link>MediaControllers\Plex\ThisTextDoesntMatter</Link>
     </Compile>
     <Compile Include="..\StubServices\*.cs">
       <Link>StubServices\ThisTextDoesntMatter</Link>
+    </Compile>
+    <Compile Include="..\Extensions\ByteArrayExtension.cs">
+      <Link>Extensions\ThisTextDoesntMatter</Link>
     </Compile>
     <Compile Include="..\Extensions\StreamExtension.cs">
       <Link>Extensions\ThisTextDoesntMatter</Link>
