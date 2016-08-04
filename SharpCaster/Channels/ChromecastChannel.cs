@@ -1,18 +1,17 @@
-﻿using System;
-using System.Diagnostics;
+using System;
 using System.Threading.Tasks;
-using SharpCaster.Channels;
+using SharpCaster.Models;
 
-namespace SharpCaster.Models
+namespace SharpCaster.Channels
 {
     public abstract class ChromecastChannel : IChromecastChannel
     {
-        private ChromeCastClient Client { get; set; }
-        public string Namespace { get; set; }
+        protected ChromeCastClient Client { get; }
+        public string Namespace { get;}
 
         public event EventHandler<ChromecastSSLClientDataReceivedArgs> MessageReceived;
 
-        protected ChromecastChannel(ChromeCastClient client, string @ns)
+        protected ChromecastChannel(ChromeCastClient client, string ns)
         {
             Namespace = ns;
             Client = client;
@@ -20,9 +19,7 @@ namespace SharpCaster.Models
 
         public async Task Write(CastMessage message)
         {
-            Debug.WriteLine("Sending: " + message.GetJsonType());
             message.Namespace = Namespace;
-
             var bytes = message.ToProto();
             await Client.Write(bytes);
         }

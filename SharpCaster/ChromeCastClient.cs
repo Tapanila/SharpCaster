@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using SharpCaster.Channels;
 using SharpCaster.Extensions;
 using SharpCaster.Models;
 using SharpCaster.Models.ChromecastRequests;
@@ -20,38 +21,58 @@ namespace SharpCaster
         public Volume Volume { get; private set; }
         public ChromecastStatus ChromecastStatus { get; set; }
         public MediaStatus MediaStatus { get; set; }
+
+        public bool Connected
+        {
+            get { return _connected; }
+            set
+            {
+                if (_connected != value) ConnectedChanged?.Invoke(this, EventArgs.Empty);
+                _connected = value;
+            }
+        }
+
+        private bool _connected;
+
         public IChromecastSocketService ChromecastSocketService {get; set; }
 
-        private ChromecastChannel _connectionChannel;
-        private ChromecastChannel _mediaChannel;
-        private ChromecastChannel _heartbeatChannel;
-        private ChromecastChannel _receiverChannel;
+        private IChromecastChannel _connectionChannel;
+        private IChromecastChannel _mediaChannel;
+        private HeartbeatChannel _heartbeatChannel;
+        private IChromecastChannel _receiverChannel;
         private const string ChromecastPort = "8009";
         private string _chromecastApplicationId;
         private string _currentApplicationSessionId = "";
         private string _currentApplicationTransportId = "";
         private long _currentMediaSessionId;
-        private bool _connected;
-
-        public event EventHandler Connected;
+        
+        public event EventHandler ConnectedChanged;
         public event EventHandler<ChromecastApplication> ApplicationStarted;
         public event EventHandler<MediaStatus> MediaStatusChanged;
         public event EventHandler<ChromecastStatus> ChromecastStatusChanged;
         public event EventHandler<Volume> VolumeChanged;
-        public List<ChromecastChannel> Channels;
+        public List<IChromecastChannel> Channels;
 
         public ChromeCastClient()
         {
             ChromecastSocketService = new ChromecastSocketService();
-            Channels = new List<ChromecastChannel>();
+            Channels = new List<IChromecastChannel>();
+
             _connectionChannel = CreateChannel(MessageFactory.DialConstants.DialConnectionUrn);
-            _heartbeatChannel = CreateChannel(MessageFactory.DialConstants.DialHeartbeatUrn);
+            _heartbeatChannel = new HeartbeatChannel(this);
+            Channels.Add(_heartbeatChannel);
             _receiverChannel = CreateChannel(MessageFactory.DialConstants.DialReceiverUrn);
             _mediaChannel = CreateChannel(MessageFactory.DialConstants.DialMediaUrn);
 
             _mediaChannel.MessageReceived += MediaChannel_MessageReceived;
             _receiverChannel.MessageReceived += ReceiverChannel_MessageReceived;
-            _heartbeatChannel.MessageReceived += HeartbeatChannel_MessageReceived;
+        }
+
+        private IChromecastChannel CreateChannel(string ns)
+        {
+            var channel = new DefaultChannel(this,ns);
+            Channels.Add(channel);
+            return channel;
         }
 
         public async void GetChromecastStatus()
@@ -81,19 +102,6 @@ namespace SharpCaster
         public async Task DecreaseVolume()
         {
             await SetVolume(Volume.level - 0.05f);
-        }
-
-        private async void HeartbeatChannel_MessageReceived(object sender, ChromecastSSLClientDataReceivedArgs e)
-        {
-            if (_connected || e.Message.GetJsonType() != "PONG") return;
-            //Wait 100 milliseconds before sending GET_STATUS because chromecast was sending CLOSE back without a wait
-            await Task.Delay(100);
-            GetChromecastStatus();
-            //Wait 100 milliseconds to make sure that the status of Chromecast device is received before notifying we have connected to it
-            await Task.Delay(100);
-            _connected = true;
-            Connected?.Invoke(this, EventArgs.Empty);
-
         }
 
         public async Task Seek(double seconds)
@@ -228,16 +236,6 @@ namespace SharpCaster
             {
                 channel.OnMessageReceived(new ChromecastSSLClientDataReceivedArgs(castMessage));
             }
-        }
-
-
-     
-
-        private ChromecastChannel CreateChannel(string channelNamespace)
-        {
-            var channel = new ChromecastChannel(this, channelNamespace);
-            Channels.Add(channel);
-            return channel;
         }
 
        

@@ -26,7 +26,7 @@ namespace SharpCaster.Console
             _chromecastService.ChromeCastClient.ApplicationStarted += Client_ApplicationStarted;
             _chromecastService.ChromeCastClient.VolumeChanged += _client_VolumeChanged;
             _chromecastService.ChromeCastClient.MediaStatusChanged += ChromeCastClient_MediaStatusChanged;
-            _chromecastService.ChromeCastClient.Connected += ChromeCastClient_Connected;
+            _chromecastService.ChromeCastClient.ConnectedChanged += ChromeCastClient_Connected;
 
             var input = System.Console.ReadLine();
         }

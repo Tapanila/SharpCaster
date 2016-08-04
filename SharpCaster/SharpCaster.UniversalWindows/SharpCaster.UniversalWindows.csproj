@@ -112,7 +112,25 @@
     <Compile Include="..\Interfaces\*.cs">
       <Link>Interfaces\ThisTextDoesntMatter</Link>
     </Compile>
-    <Compile Include="..\Models\*.cs">
+    <Compile Include="..\Models\CastMessage.cs">
+      <Link>Models\ThisTextDoesntMatter</Link>
+    </Compile>
+    <Compile Include="..\Models\Chromecast.cs">
+      <Link>Models\ThisTextDoesntMatter</Link>
+    </Compile>
+    <Compile Include="..\Models\ChromecastChannel.cs">
+      <Link>Models\ThisTextDoesntMatter</Link>
+    </Compile>
+    <Compile Include="..\Models\ChromecastSSLClientDataReceivedArgs.cs">
+      <Link>Models\ThisTextDoesntMatter</Link>
+    </Compile>
+    <Compile Include="..\Models\Discovery.cs">
+      <Link>Models\ThisTextDoesntMatter</Link>
+    </Compile>
+    <Compile Include="..\Models\MessageFactory.cs">
+      <Link>Models\ThisTextDoesntMatter</Link>
+    </Compile>
+    <Compile Include="..\Models\Volume.cs">
       <Link>Models\ThisTextDoesntMatter</Link>
     </Compile>
     <Compile Include="..\Models\ChromecastRequests\*.cs">
@@ -127,7 +145,10 @@
     <Compile Include="..\Models\ChromecastStatus\*.cs">
       <Link>Models\ChromecastStatus\ThisTextDoesntMatter</Link>
     </Compile>
-    <Compile Include="Controllers\*.cs"/>
+	<Compile Include="..\Channels\*.cs">
+      <Link>Channels\ThisTextDoesntMatter</Link>
+    </Compile>	
+    <Compile Include="Controllers\*.cs" />
     <Compile Include="..\Properties\Annotations.cs" />
     <Compile Include="..\Properties\AssemblyInfo.cs" />
   </ItemGroup>

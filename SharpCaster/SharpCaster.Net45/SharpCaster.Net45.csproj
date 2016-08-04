@@ -78,6 +78,9 @@
     <Compile Include="..\Models\ChromecastStatus\*.cs">
       <Link>Models\ChromecastStatus\ThisTextDoesntMatter</Link>
     </Compile>
+	<Compile Include="..\Channels\*.cs">
+      <Link>Channels\ThisTextDoesntMatter</Link>
+    </Compile>	
     <Compile Include="..\Properties\Annotations.cs" />
     <Compile Include="..\Properties\AssemblyInfo.cs" />
   </ItemGroup>

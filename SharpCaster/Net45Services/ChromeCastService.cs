@@ -20,7 +20,7 @@ namespace SharpCaster.Services
             DeviceLocator = new DeviceLocator();
             DeviceLocator.DeviceFound += DeviceLocator_DeviceFound;
             ChromeCastClient = new ChromeCastClient();
-            ChromeCastClient.Connected += ChromeCastClient_Connected;
+            ChromeCastClient.ConnectedChanged += ChromeCastClient_Connected;
 
         }
 

@@ -1,14 +1,16 @@
 ﻿using System;
 using System.IO;
 using System.Threading.Tasks;
+using SharpCaster.Channels;
 using SharpCaster.Interfaces;
-using SharpCaster.Models;
 
 namespace SharpCaster
 {
     internal class ChromecastSocketService : IChromecastSocketService
     {
-        public Task Initialize(string host, string port, ChromecastChannel connectionChannel, ChromecastChannel heartbeatChannel, Action<Stream,bool> packetReader)
+     
+        public Task Initialize(string host, string port, IChromecastChannel connectionChannel, HeartbeatChannel heartbeatChannel,
+            Action<Stream, bool> packetReader)
         {
             throw new NotImplementedException();
         }
