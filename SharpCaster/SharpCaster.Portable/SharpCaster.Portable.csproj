@@ -34,40 +34,43 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="..\*.cs"/>
+    <Compile Include="..\*.cs" />
     <Compile Include="..\Extensions\ByteArrayExtension.cs">
-		<Link>Extensions\ThisTextDoesntMatter</Link>
-	</Compile>
+      <Link>Extensions\ThisTextDoesntMatter</Link>
+    </Compile>
     <Compile Include="..\StubServices\*.cs">
-		<Link>StubServices\ThisTextDoesntMatter</Link>
+      <Link>StubServices\ThisTextDoesntMatter</Link>
     </Compile>
     <Compile Include="..\Extensions\StreamExtension.cs">
-		<Link>Extensions\ThisTextDoesntMatter</Link>
-	</Compile>
+      <Link>Extensions\ThisTextDoesntMatter</Link>
+    </Compile>
     <Compile Include="..\Interfaces\*.cs">
-		<Link>Interfaces\ThisTextDoesntMatter</Link>
-	</Compile>
-	<Compile Include="..\Models\*.cs">
-		<Link>Models\ThisTextDoesntMatter</Link>
-	</Compile>
-	<Compile Include="..\Models\ChromecastRequests\*.cs">
-		<Link>Models\ChromecastRequests\ThisTextDoesntMatter</Link>
-	</Compile>
+      <Link>Interfaces\ThisTextDoesntMatter</Link>
+    </Compile>
+    <Compile Include="..\Models\*.cs">
+      <Link>Models\ThisTextDoesntMatter</Link>
+    </Compile>
+    <Compile Include="..\Models\ChromecastRequests\*.cs">
+      <Link>Models\ChromecastRequests\ThisTextDoesntMatter</Link>
+    </Compile>
     <Compile Include="..\JsonConverters\PlayerStateEnumConverter.cs">
-		<Link>JsonConverters\ThisTextDoesntMatter</Link>
-	</Compile>
+      <Link>JsonConverters\ThisTextDoesntMatter</Link>
+    </Compile>
     <Compile Include="..\Models\MediaStatus\*.cs">
-		<Link>Models\MediaStatus\ThisTextDoesntMatter</Link>
+      <Link>Models\MediaStatus\ThisTextDoesntMatter</Link>
     </Compile>
     <Compile Include="..\Models\ChromecastStatus\*.cs">
-		<Link>Models\ChromecastStatus\ThisTextDoesntMatter</Link>
+      <Link>Models\ChromecastStatus\ThisTextDoesntMatter</Link>
     </Compile>
 	<Compile Include="..\Channels\*.cs">
       <Link>Channels\ThisTextDoesntMatter</Link>
     </Compile>	
     <Compile Include="..\Properties\Annotations.cs" />
     <Compile Include="..\Properties\AssemblyInfo.cs" />
-    </ItemGroup>
+    <Compile Include="StubServices\ChromecastService.cs" />
+    <Compile Include="StubServices\ChromecastSocketService.cs" />
+    <Compile Include="StubServices\SocketService.cs" />
+  </ItemGroup>
   <ItemGroup>
     <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Newtonsoft.Json.9.0.1\lib\portable-net45+wp80+win8+wpa81\Newtonsoft.Json.dll</HintPath>

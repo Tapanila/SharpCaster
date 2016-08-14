@@ -83,6 +83,9 @@
     </Compile>	
     <Compile Include="..\Properties\Annotations.cs" />
     <Compile Include="..\Properties\AssemblyInfo.cs" />
+    <Compile Include="Net45Services\ChromeCastService.cs" />
+    <Compile Include="Net45Services\ChromecastSocketService.cs" />
+    <Compile Include="Net45Services\SocketService.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

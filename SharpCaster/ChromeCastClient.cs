@@ -119,10 +119,10 @@ namespace SharpCaster
             await Write(MessageFactory.Play(_currentApplicationTransportId, _currentMediaSessionId).ToProto());
         }
 
-        public async Task LoadMedia(string mediaUrl, object customData = null)
+        public async Task LoadMedia(string mediaUrl, object customData = null, Track[] tracks = null, int[] activeTrackIds = null)
         {
-            var mediaObject = new MediaData(mediaUrl, "application/vnd.ms-sstr+xml", null, "BUFFERED", 0D, customData);
-            var req = new LoadRequest(_currentApplicationSessionId, mediaObject, true, 0.0, customData);
+            var mediaObject = new MediaData(mediaUrl, "application/vnd.ms-sstr+xml", null, "BUFFERED", 0D, customData, tracks);
+            var req = new LoadRequest(_currentApplicationSessionId, mediaObject, true, 0.0, customData, activeTrackIds);
 
             var reqJson = req.ToJson();
             await _mediaChannel.Write(MessageFactory.Load(_currentApplicationTransportId, reqJson));
