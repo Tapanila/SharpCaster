@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
 using SharpCaster.Channels;
 using SharpCaster.Extensions;
 using SharpCaster.Models;
@@ -78,12 +77,28 @@ namespace SharpCaster
 
         private bool _connected;
 
+        public ChromecastApplication RunningApplication
+        {
+            get
+            {
+                return _runningApplication;
+            }
+            set
+            {
+                if (_runningApplication == value) return;
+                _runningApplication = value;
+                ApplicationStarted?.Invoke(this, _runningApplication);
+            }
+        }
+
+        private ChromecastApplication _runningApplication;
+
         public IChromecastSocketService ChromecastSocketService {get; set; }
 
-        public IChromecastChannel _connectionChannel;
-        public MediaChannel _mediaChannel;
-        public HeartbeatChannel _heartbeatChannel;
-        public ReceiverChannel _receiverChannel;
+        public ConnectionChannel ConnectionChannel;
+        public MediaChannel MediaChannel;
+        public HeartbeatChannel HeartbeatChannel;
+        public ReceiverChannel ReceiverChannel;
         private const string ChromecastPort = "8009";
         public string ChromecastApplicationId;
         public string CurrentApplicationSessionId = "";
@@ -101,67 +116,22 @@ namespace SharpCaster
         {
             ChromecastSocketService = new ChromecastSocketService();
             Channels = new List<IChromecastChannel>();
-
-            _connectionChannel = CreateChannel(MessageFactory.DialConstants.DialConnectionUrn);
-            _heartbeatChannel = new HeartbeatChannel(this);
-            Channels.Add(_heartbeatChannel);
-            _receiverChannel = new ReceiverChannel(this);
-            Channels.Add(_receiverChannel);
-            _mediaChannel = new MediaChannel(this);
-            Channels.Add(_mediaChannel);
+            ConnectionChannel = new ConnectionChannel(this);
+            Channels.Add(ConnectionChannel);
+            HeartbeatChannel = new HeartbeatChannel(this);
+            Channels.Add(HeartbeatChannel);
+            ReceiverChannel = new ReceiverChannel(this);
+            Channels.Add(ReceiverChannel);
+            MediaChannel = new MediaChannel(this);
+            Channels.Add(MediaChannel);
         }
-
-        private IChromecastChannel CreateChannel(string ns)
-        {
-            var channel = new DefaultChannel(this,ns);
-            Channels.Add(channel);
-            return channel;
-        }
-
-
-
-       
-
-    
-
-
-        public async Task<bool> ConnectToApplication(string applicationId)
-        {
-            var startedApplication = ChromecastStatus?.Applications?.FirstOrDefault(x => x.AppId == applicationId);
-            if (startedApplication == null) return false;
-            if (!string.IsNullOrWhiteSpace(CurrentApplicationSessionId)) return false;
-            CurrentApplicationSessionId = startedApplication.SessionId;
-            CurrentApplicationTransportId = startedApplication.TransportId;
-            await Write(MessageFactory.ConnectWithDestination(startedApplication.TransportId).ToProto());
-            ApplicationStarted?.Invoke(this, startedApplication);
-            return true;
-        }
+        
         
         public async void ConnectChromecast(Uri uri)
         {
-            await ChromecastSocketService.Initialize(uri.Host, ChromecastPort, _connectionChannel, _heartbeatChannel, ReadPacket);
+            await ChromecastSocketService.Initialize(uri.Host, ChromecastPort, ConnectionChannel, HeartbeatChannel, ReadPacket);
         }
 
-        public async Task GetMediaStatus()
-        {
-            await Write(MessageFactory.MediaStatus(CurrentApplicationTransportId).ToProto());
-        }
-
-        public async Task LaunchApplication(string applicationId, bool joinExisting = true)
-        {
-            ChromecastApplicationId = applicationId;
-            if (joinExisting && await ConnectToApplication(applicationId))
-            {
-                await GetMediaStatus();
-                return;
-            }
-            await Write(MessageFactory.Launch(applicationId).ToProto());
-        }
-
-        public async Task StopApplication()
-        {
-            await Write(MessageFactory.Stop(CurrentApplicationSessionId).ToProto());
-        }
 
         private void ReadPacket(Stream stream, bool parsed)
         {
@@ -191,7 +161,6 @@ namespace SharpCaster
                 // Log these bytes
                 Debug.WriteLine(ex);
             }
-
         }
 
         private void ReceivedMessage(CastMessage castMessage)
@@ -201,13 +170,5 @@ namespace SharpCaster
                 channel.OnMessageReceived(new ChromecastSSLClientDataReceivedArgs(castMessage));
             }
         }
-
-       
-        internal async Task Write(byte[] bytes)
-        {
-            await ChromecastSocketService.Write(bytes);
-        }
-
-
     }
 }

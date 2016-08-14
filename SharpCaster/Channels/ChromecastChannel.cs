@@ -24,7 +24,7 @@ namespace SharpCaster.Channels
                 message.Namespace = Namespace;
             }
             var bytes = message.ToProto();
-            await Client.Write(bytes);
+            await Client.ChromecastSocketService.Write(bytes);
         }
 
         public void OnMessageReceived(ChromecastSSLClientDataReceivedArgs e)

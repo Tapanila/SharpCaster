@@ -77,7 +77,22 @@
     <Compile Include="..\Models\ChromecastStatus\*.cs">
       <Link>Models\ChromecastStatus\ThisTextDoesntMatter</Link>
     </Compile>
-    <Compile Include="..\Channels\*.cs">
+    <Compile Include="..\Channels\ChromecastChannel.cs">
+      <Link>Channels\ThisTextDoesntMatter</Link>
+    </Compile>
+    <Compile Include="..\Channels\ConnectionChannel.cs">
+      <Link>Channels\ThisTextDoesntMatter</Link>
+    </Compile>
+    <Compile Include="..\Channels\HeartbeatChannel.cs">
+      <Link>Channels\ThisTextDoesntMatter</Link>
+    </Compile>
+    <Compile Include="..\Channels\IChromecastChannel.cs">
+      <Link>Channels\ThisTextDoesntMatter</Link>
+    </Compile>
+    <Compile Include="..\Channels\MediaChannel.cs">
+      <Link>Channels\ThisTextDoesntMatter</Link>
+    </Compile>
+    <Compile Include="..\Channels\ReceiverChannel.cs">
       <Link>Channels\ThisTextDoesntMatter</Link>
     </Compile>
     <Compile Include="..\Properties\Annotations.cs" />

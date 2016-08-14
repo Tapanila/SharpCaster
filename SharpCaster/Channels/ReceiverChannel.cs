@@ -20,7 +20,7 @@ namespace SharpCaster.Channels
             if (response.ChromecastStatus == null) return;
             Client.ChromecastStatus = response.ChromecastStatus;
             Client.Volume = response.ChromecastStatus.Volume;
-            await Client.ConnectToApplication(Client.ChromecastApplicationId);
+            await Client.ConnectionChannel.ConnectToApplication(Client.ChromecastApplicationId);
         }
 
         public async void GetChromecastStatus()

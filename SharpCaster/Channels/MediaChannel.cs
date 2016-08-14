@@ -8,7 +8,7 @@ using SharpCaster.Models.MediaStatus;
 
 namespace SharpCaster.Channels
 {
-    public class MediaChannel : DefaultChannel
+    public class MediaChannel : ChromecastChannel
     {
         public MediaChannel(ChromeCastClient client) 
             :base(client, MessageFactory.DialConstants.DialMediaUrn)
@@ -65,10 +65,20 @@ namespace SharpCaster.Channels
             await Write(MessageFactory.Play(Client.CurrentApplicationTransportId, Client.CurrentMediaSessionId), false);
         }
 
-        public async Task LoadMedia(string mediaUrl, object customData = null, Track[] tracks = null, int[] activeTrackIds = null)
+        public async Task LoadMedia(
+            string mediaUrl,
+            string contentType = "application/vnd.ms-sstr+xml",
+            Metadata metadata = null,
+            string streamType = "BUFFERED",
+            double duration = 0D,
+            object customData = null,
+            Track[] tracks = null,
+            int[] activeTrackIds = null,
+            bool autoPlay = true,
+            double currentTime = 0.0)
         {
-            var mediaObject = new MediaData(mediaUrl, "application/vnd.ms-sstr+xml", null, "BUFFERED", 0D, customData, tracks);
-            var req = new LoadRequest(Client.CurrentApplicationSessionId, mediaObject, true, 0.0, customData, activeTrackIds);
+            var mediaObject = new MediaData(mediaUrl, contentType, metadata, streamType, duration, customData, tracks);
+            var req = new LoadRequest(Client.CurrentApplicationSessionId, mediaObject, autoPlay, currentTime, customData, activeTrackIds);
 
             var reqJson = req.ToJson();
             await Write(MessageFactory.Load(Client.CurrentApplicationTransportId, reqJson));
