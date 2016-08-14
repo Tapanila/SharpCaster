@@ -17,9 +17,12 @@ namespace SharpCaster.Channels
             Client = client;
         }
 
-        public async Task Write(CastMessage message)
+        public async Task Write(CastMessage message, bool includeNameSpace = true)
         {
-            message.Namespace = Namespace;
+            if (includeNameSpace)
+            {
+                message.Namespace = Namespace;
+            }
             var bytes = message.ToProto();
             await Client.Write(bytes);
         }

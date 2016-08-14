@@ -2,7 +2,6 @@
 using System.IO;
 using System.Threading.Tasks;
 using SharpCaster.Channels;
-using ChromecastChannel = SharpCaster.Models.ChromecastChannel;
 
 namespace SharpCaster.Interfaces
 {

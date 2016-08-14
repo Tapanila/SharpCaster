@@ -8,7 +8,7 @@ namespace SharpCaster.Channels
     {
         string Namespace { get; }
         event EventHandler<ChromecastSSLClientDataReceivedArgs> MessageReceived;
-        Task Write(CastMessage message);
+        Task Write(CastMessage message, bool includeNameSpace = true);
         void OnMessageReceived(ChromecastSSLClientDataReceivedArgs e);
     }
 }
