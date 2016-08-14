@@ -6,6 +6,7 @@ using System.Net.Security;
 using System.Net.Sockets;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
+using SharpCaster.Channels;
 
 namespace SharpCaster.Services
 {
@@ -14,7 +15,7 @@ namespace SharpCaster.Services
         private TcpClient _client;
         private SslStream _stream;
 
-        public async Task Initialize(string host, string port, ChromecastChannel connectionChannel, ChromecastChannel heartbeatChannel, Action<Stream, bool> packetReader)
+        public async Task Initialize(string host, string port, IChromecastChannel connectionChannel, HeartbeatChannel heartbeatChannel, Action<Stream, bool> packetReader)
         {
             if (_client == null) _client = new TcpClient();
             _client.ReceiveBufferSize = 2048;
@@ -26,7 +27,7 @@ namespace SharpCaster.Services
             
         
             OpenConnection(connectionChannel);
-            StartHeartbeat(heartbeatChannel);
+            heartbeatChannel.StartHeartbeat();
             
             await Task.Run(() =>
             {
@@ -56,19 +57,7 @@ namespace SharpCaster.Services
             return true;
         }
 
-        private void StartHeartbeat(ChromecastChannel hearbeatChannel)
-        {
-            Task.Run(async () =>
-            {
-                while (true)
-                {
-                    await hearbeatChannel.Write(MessageFactory.Ping);
-                    await Task.Delay(TimeSpan.FromSeconds(5));
-                }
-            });
-        }
-
-        private async void OpenConnection(ChromecastChannel connectionChannel)
+        private async void OpenConnection(IChromecastChannel connectionChannel)
         {
             await connectionChannel.Write(MessageFactory.Connect());
         }

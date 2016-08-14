@@ -108,14 +108,14 @@ namespace SharpCaster.Simple
             _chromecastService.ChromeCastClient.ApplicationStarted += Client_ApplicationStarted;
             _chromecastService.ChromeCastClient.VolumeChanged += _client_VolumeChanged;
             _chromecastService.ChromeCastClient.MediaStatusChanged += ChromeCastClient_MediaStatusChanged;
-            _chromecastService.ChromeCastClient.Connected += ChromeCastClient_Connected;
+            _chromecastService.ChromeCastClient.ConnectedChanged += ChromeCastClient_Connected;
             secondsTimer = new DispatcherTimer {Interval = TimeSpan.FromSeconds(1)};
             secondsTimer.Tick += SecondsTimer_Tick;
         }
 
         private async void ChromeCastClient_Connected(object sender, EventArgs e)
         {
-            await _chromecastService.ChromeCastClient.LaunchApplication("B3419EF5");
+            await _chromecastService.ChromeCastClient.ConnectionChannel.LaunchApplication("B3419EF5");
         }
 
         private void SecondsTimer_Tick(object sender, object e)
@@ -171,17 +171,17 @@ namespace SharpCaster.Simple
         {
             if (_chromecastService.ChromeCastClient.MediaStatus != null && _chromecastService.ChromeCastClient.MediaStatus.PlayerState == PlayerState.Paused)
             {
-                await _chromecastService.ChromeCastClient.Play();
+                await _chromecastService.ChromeCastClient.MediaChannel.Play();
             }
             else
             {
-                await _chromecastService.ChromeCastClient.Pause();
+                await _chromecastService.ChromeCastClient.MediaChannel.Pause();
             }
         }
 
         public async Task Pause()
         {
-            await _chromecastService.ChromeCastClient.Pause();
+            await _chromecastService.ChromeCastClient.MediaChannel.Pause();
         }
 
         public async Task LoadMedia(string title, string description, ImageSource poster)
@@ -200,29 +200,29 @@ namespace SharpCaster.Simple
                     "https://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/tracks/DesigningForGoogleCast-en.vtt"
             };
             await _chromecastService.ChromeCastClient
-                .LoadMedia("https://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/dash/DesigningForGoogleCast.mpd",null,new[] {track}, new []{100});
+                .MediaChannel.LoadMedia("https://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/dash/DesigningForGoogleCast.mpd",null,new[] {track}, new []{100});
         }
 
         public async Task Seek(double seconds)
         {
             if (Math.Abs(Position - seconds) > 0.1)
-            await _chromecastService.ChromeCastClient.Seek(seconds);
+            await _chromecastService.ChromeCastClient.MediaChannel.Seek(seconds);
         }
 
         public async Task MuteUnmute()
         {
-            await _chromecastService.ChromeCastClient.SetMute(!_chromecastService.ChromeCastClient.Volume.muted);
+            await _chromecastService.ChromeCastClient.MediaChannel.SetMute(!_chromecastService.ChromeCastClient.Volume.muted);
         }
 
         public async Task SetVolume(double newValue)
         {
             if (Math.Abs(_chromecastService.ChromeCastClient.Volume.level - (newValue/100)) < 0.01) return;
-            await _chromecastService.ChromeCastClient.SetVolume((float) (newValue / 100));
+            await _chromecastService.ChromeCastClient.MediaChannel.SetVolume((float) (newValue / 100));
         }
 
         public async Task StopApplication()
         {
-            await _chromecastService.ChromeCastClient.StopApplication();
+            await _chromecastService.ChromeCastClient.ConnectionChannel.StopApplication();
         }
     }
 }

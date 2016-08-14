@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Windows.Networking;
 using Windows.Networking.Sockets;
 using Windows.Security.Cryptography;
+using SharpCaster.Channels;
 
 namespace SharpCaster.Services
 {
@@ -14,13 +15,13 @@ namespace SharpCaster.Services
     {
         private StreamSocket _socket;
 
-        public async Task Initialize(string host, string port, ChromecastChannel connectionChannel, ChromecastChannel heartbeatChannel, Action<Stream, bool> packetReader)
+        public async Task Initialize(string host, string port, IChromecastChannel connectionChannel, HeartbeatChannel heartbeatChannel, Action<Stream, bool> packetReader)
         {
             _socket = new StreamSocket().ConfigureForChromecast();
             await _socket.ConnectAsync(new HostName(host), port, SocketProtectionLevel.Tls10);
 
             OpenConnection(connectionChannel);
-            StartHeartbeat(heartbeatChannel);
+            heartbeatChannel.StartHeartbeat();
 
             await Task.Run(() =>
             {
@@ -30,20 +31,9 @@ namespace SharpCaster.Services
                 }
             });
         }
+        
 
-        private void StartHeartbeat(ChromecastChannel hearbeatChannel)
-        {
-            Task.Run(async () =>
-            {
-                while (true)
-                {
-                    await hearbeatChannel.Write(MessageFactory.Ping);
-                    await Task.Delay(TimeSpan.FromSeconds(5));
-                }
-            });
-        }
-
-        private async void OpenConnection(ChromecastChannel connectionChannel)
+        private async void OpenConnection(IChromecastChannel connectionChannel)
         {
             await connectionChannel.Write(MessageFactory.Connect());
         }

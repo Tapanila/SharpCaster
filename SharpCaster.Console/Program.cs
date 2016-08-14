@@ -1,9 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Sockets;
-using System.Text;
-using System.Threading.Tasks;
 using SharpCaster.Models;
 using SharpCaster.Models.ChromecastStatus;
 using SharpCaster.Models.MediaStatus;
@@ -13,20 +8,20 @@ namespace SharpCaster.Console
 {
     class Program
     {
-        static readonly ChromecastService _chromecastService = ChromecastService.Current;
+        static readonly ChromecastService ChromecastService = ChromecastService.Current;
         
         static void Main(string[] args)
         {
             
 #pragma warning disable 4014
-            _chromecastService.StartLocatingDevices();
+            ChromecastService.StartLocatingDevices();
             System.Console.WriteLine("Started locating chromecasts!");
 #pragma warning restore 4014
-            _chromecastService.DeviceLocator.DeviceFound += DeviceLocator_DeviceFound;
-            _chromecastService.ChromeCastClient.ApplicationStarted += Client_ApplicationStarted;
-            _chromecastService.ChromeCastClient.VolumeChanged += _client_VolumeChanged;
-            _chromecastService.ChromeCastClient.MediaStatusChanged += ChromeCastClient_MediaStatusChanged;
-            _chromecastService.ChromeCastClient.Connected += ChromeCastClient_Connected;
+            ChromecastService.DeviceLocator.DeviceFound += DeviceLocator_DeviceFound;
+            ChromecastService.ChromeCastClient.ApplicationStarted += Client_ApplicationStarted;
+            ChromecastService.ChromeCastClient.VolumeChanged += _client_VolumeChanged;
+            ChromecastService.ChromeCastClient.MediaStatusChanged += ChromeCastClient_MediaStatusChanged;
+            ChromecastService.ChromeCastClient.ConnectedChanged += ChromeCastClient_Connected;
 
             var input = System.Console.ReadLine();
         }
@@ -37,14 +32,14 @@ namespace SharpCaster.Console
             {
                 return;
             }
-            _chromecastService.StopLocatingDevices();
+            ChromecastService.StopLocatingDevices();
             System.Console.WriteLine("Device found " + e.FriendlyName);
-            _chromecastService.ConnectToChromecast(e);
+            ChromecastService.ConnectToChromecast(e);
         }
 
         private static async void ChromeCastClient_Connected(object sender, EventArgs e)
         {
-            await _chromecastService.ChromeCastClient.LaunchApplication("B3419EF5");
+            await ChromecastService.ChromeCastClient.ConnectionChannel.LaunchApplication("B3419EF5");
             System.Console.WriteLine("Connected to chromecast");
         }
 
@@ -59,7 +54,7 @@ namespace SharpCaster.Console
         private static async void Client_ApplicationStarted(object sender, ChromecastApplication e)
         {
             System.Console.WriteLine($"Application {e.DisplayName} has launched");
-            await _chromecastService.ChromeCastClient.LoadMedia("http://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/dash/BigBuckBunny.mpd");
+            await ChromecastService.ChromeCastClient.MediaChannel.LoadMedia("http://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/dash/BigBuckBunny.mpd");
         }
     }
 }
