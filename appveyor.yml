@@ -1,15 +1,19 @@
-version: 'setup_CI_1.0.{build}'
+version: '0.1.7-{build}'
 
-#assembly_info:
-#  patch: true
-#  file: MyVersion.cs
-#  assembly_version: '{version}'
-#  assembly_file_version: '{version}'
-#  assembly_informational_version: '{version}-rc1'
+assembly_info:
+  patch: true
+  file: 'SharpCaster\Properties\AssemblyInfo.cs'
+  assembly_version: '{version}'
+  assembly_file_version: '{version}'
+  assembly_informational_version: '{version}'
 
 #---------------------------------#
 #    environment configuration    #
 #---------------------------------#
+
+init:
+  - ps: $env:customnugetversion = if ($env:APPVEYOR_REPO_TAG -eq $True) { "$env:APPVEYOR_BUILD_VERSION" } else { "pre-$env:APPVEYOR_BUILD_VERSION-$env:APPVEYOR_REPO_BRANCH" }
+  - ps: Update-AppveyorBuild -Version $env:customnugetversion
 
 # Build worker image (VM template)
 image: Visual Studio 2015
@@ -63,6 +67,7 @@ build:
 
 # scripts to run before build
 before_build:
+  - ps: 
   - ps: nuget restore SharpCaster.Build.sln
 
 # # scripts to run *after* solution is built and *before* automatic packaging occurs (web apps, NuGet packages, Azure Cloud Services)
@@ -220,7 +225,7 @@ deploy:
       secure: gdPUjRw0zhVPZFSiOOh8lbQJe/Roa8YDJ4TJOz4tYu+bH55Hygtw01prh51hzFq9
     skip_symbols: false
     #symbol_server: https://your.symbol.server/feed
-    artifact: MyPackage.nupkg
+    artifact: SharpCaster.{version}.nupkg
 
   #   # Deploy to GitHub Releases
   # - provider: GitHub
