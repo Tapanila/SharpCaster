@@ -76,7 +76,7 @@ before_build:
 # # scripts to run after build
 after_build:
   # build -> publish_nuget: true does not work since SharpCaster.nuspec is not part of a project
-  - ps: nuget pack .\SharpCaster\SharpCaster.nuspec
+  - ps: nuget pack .\SharpCaster\SharpCaster.nuspec -Version $env:customnugetversion
 
 # # to run your custom scripts instead of automatic MSBuild
 # build_script:
