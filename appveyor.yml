@@ -1,4 +1,4 @@
-version: '0.1.7-{build}'
+version: '0.1.7.{build}'
 
 on_finish:
   - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
@@ -15,8 +15,9 @@ assembly_info:
 #---------------------------------#
 
 init:
-  - ps: $env:customnugetversion = if ($env:APPVEYOR_REPO_TAG -eq $True) { "$env:APPVEYOR_BUILD_VERSION" } else { "$env:APPVEYOR_BUILD_VERSION-$env:APPVEYOR_REPO_BRANCH" }
-  - ps: Update-AppveyorBuild -Version $env:customnugetversion
+  - ps: $env:customBuildVersion = if ($env:APPVEYOR_REPO_TAG -eq $True) { "$env:APPVEYOR_BUILD_VERSION" } else { "$env:APPVEYOR_BUILD_VERSION-$env:APPVEYOR_REPO_BRANCH" }
+#  - ps: $env:customNugetVersion = if ($env:APPVEYOR_REPO_TAG -eq $True) { "$env:APPVEYOR_BUILD_VERSION" } else { "$env:APPVEYOR_BUILD_VERSION-pre" }
+  - ps: Update-AppveyorBuild -Version $env:customBuildVersion
 
 # Build worker image (VM template)
 image: Visual Studio 2015
@@ -79,7 +80,8 @@ before_build:
 # # scripts to run after build
 after_build:
   # build -> publish_nuget: true does not work since SharpCaster.nuspec is not part of a project
-  - ps: nuget pack .\SharpCaster\SharpCaster.nuspec -Version $env:customnugetversion
+#  - ps: nuget pack .\SharpCaster\SharpCaster.nuspec -Version $env:customNugetVersion
+  - ps: nuget pack .\SharpCaster\SharpCaster.nuspec -Version $env:customBuildVersion
 
 # # to run your custom scripts instead of automatic MSBuild
 # build_script:
