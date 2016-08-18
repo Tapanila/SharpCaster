@@ -15,7 +15,7 @@ namespace SharpCaster.Services
         private TcpClient _client;
         private SslStream _stream;
 
-        public async Task Initialize(string host, string port, IChromecastChannel connectionChannel, HeartbeatChannel heartbeatChannel, Action<Stream, bool> packetReader)
+        public async Task Initialize(string host, string port, ConnectionChannel connectionChannel, HeartbeatChannel heartbeatChannel, Action<Stream, bool> packetReader)
         {
             if (_client == null) _client = new TcpClient();
             _client.ReceiveBufferSize = 2048;
@@ -26,7 +26,7 @@ namespace SharpCaster.Services
             _stream.AuthenticateAsClient("client");
             
         
-            OpenConnection(connectionChannel);
+            connectionChannel.OpenConnection();
             heartbeatChannel.StartHeartbeat();
             
             await Task.Run(() =>
@@ -55,11 +55,6 @@ namespace SharpCaster.Services
         private bool ValidateServerCertificate(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
         {
             return true;
-        }
-
-        private async void OpenConnection(IChromecastChannel connectionChannel)
-        {
-            await connectionChannel.Write(MessageFactory.Connect());
         }
 
         public Task Write(byte[] bytes)

@@ -15,12 +15,12 @@ namespace SharpCaster.Services
     {
         private StreamSocket _socket;
 
-        public async Task Initialize(string host, string port, IChromecastChannel connectionChannel, HeartbeatChannel heartbeatChannel, Action<Stream, bool> packetReader)
+        public async Task Initialize(string host, string port, ConnectionChannel connectionChannel, HeartbeatChannel heartbeatChannel, Action<Stream, bool> packetReader)
         {
             _socket = new StreamSocket().ConfigureForChromecast();
             await _socket.ConnectAsync(new HostName(host), port, SocketProtectionLevel.Tls10);
 
-            OpenConnection(connectionChannel);
+            connectionChannel.OpenConnection();
             heartbeatChannel.StartHeartbeat();
 
             await Task.Run(() =>
@@ -30,12 +30,6 @@ namespace SharpCaster.Services
                     packetReader(_socket.InputStream.AsStreamForRead(), false);
                 }
             });
-        }
-        
-
-        private async void OpenConnection(IChromecastChannel connectionChannel)
-        {
-            await connectionChannel.Write(MessageFactory.Connect());
         }
 
         public async Task Write(byte[] bytes)
