@@ -21,6 +21,7 @@ namespace SharpCaster.Channels
             var json = chromecastSSLClientDataReceivedArgs.Message.PayloadUtf8;
             var response = JsonConvert.DeserializeObject<MediaStatusResponse>(json);
             if (response.status == null) return; //TODO: Should probably raise LOAD_FAILED event
+            if (response.status.Count == 0) return; //Initializing
             Client.MediaStatus = response.status.First();
             if (Client.MediaStatus.volume != null) Client.Volume = Client.MediaStatus.volume;
             Client.CurrentMediaSessionId = Client.MediaStatus.mediaSessionId;

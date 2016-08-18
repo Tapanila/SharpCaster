@@ -97,7 +97,13 @@
     </Compile>
     <Compile Include="..\Properties\Annotations.cs" />
     <Compile Include="..\Properties\AssemblyInfo.cs" />
-    <Compile Include="StubServices\ChromecastService.cs" />
+    <Compile Include="..\Services\*.cs">
+      <Link>Services\ThisTextDoesntMatter</Link>
+    </Compile>
+    <Compile Include="..\Controllers\*.cs">
+      <Link>Controllers\ThisTextDoesntMatter</Link>
+    </Compile>
+	<Compile Include="..\Extensions\ChromeCastClientExtension.cs" />
     <Compile Include="StubServices\ChromecastSocketService.cs" />
     <Compile Include="StubServices\SocketService.cs" />
   </ItemGroup>

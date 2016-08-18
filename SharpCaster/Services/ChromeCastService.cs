@@ -13,35 +13,22 @@ namespace SharpCaster.Services
         public DeviceLocator DeviceLocator { get; }
         public ChromeCastClient ChromeCastClient { get; }
         public Chromecast ConnectedChromecast { get; set; }
-               private CancellationTokenSource _cancellationTokenSource;
+        private CancellationTokenSource _cancellationTokenSource;
 
         public ChromecastService()
         {
             DeviceLocator = new DeviceLocator();
-            DeviceLocator.DeviceFound += DeviceLocator_DeviceFound;
             ChromeCastClient = new ChromeCastClient();
-            ChromeCastClient.ConnectedChanged += ChromeCastClient_Connected;
-
         }
 
-        private void DeviceLocator_DeviceFound(object sender, Chromecast e)
-        {
-            //CastButton?.GoToState(CastButtonVisualStates.InteractiveStates.Disconnected);
-        }
-
+  
         public void ConnectToChromecast(Chromecast chromecast)
         {
-            //CastButton?.GoToState(CastButtonVisualStates.InteractiveStates.Connecting);
             StopLocatingDevices();
             ConnectedChromecast = chromecast;
             ChromeCastClient.ConnectChromecast(chromecast.DeviceUri);
         }
-
-        private void ChromeCastClient_Connected(object sender, System.EventArgs e)
-        {
-            //CastButton?.GoToState(CastButtonVisualStates.InteractiveStates.Connected);
-        }
-
+        
         public void StopLocatingDevices()
         {
             _cancellationTokenSource.Cancel();

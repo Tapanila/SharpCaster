@@ -45,5 +45,11 @@ namespace SharpCaster.Channels
         {
             await Write(MessageFactory.Stop(Client.CurrentApplicationSessionId), false);
         }
+
+
+        public async void OpenConnection()
+        {
+            await Write(MessageFactory.Connect());
+        }
     }
 }

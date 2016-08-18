@@ -1,4 +1,6 @@
 ﻿using System;
+using SharpCaster.Controllers;
+using SharpCaster.Extensions;
 using SharpCaster.Models;
 using SharpCaster.Models.ChromecastStatus;
 using SharpCaster.Models.MediaStatus;
@@ -9,6 +11,7 @@ namespace SharpCaster.Console
     class Program
     {
         static readonly ChromecastService ChromecastService = ChromecastService.Current;
+        static SharpCasterDemoController _controller;
         
         static void Main(string[] args)
         {
@@ -28,10 +31,6 @@ namespace SharpCaster.Console
 
         private static void DeviceLocator_DeviceFound(object sender, Chromecast e)
         {
-            if (!e.FriendlyName.Contains("CC"))
-            {
-                return;
-            }
             ChromecastService.StopLocatingDevices();
             System.Console.WriteLine("Device found " + e.FriendlyName);
             ChromecastService.ConnectToChromecast(e);
@@ -39,7 +38,7 @@ namespace SharpCaster.Console
 
         private static async void ChromeCastClient_Connected(object sender, EventArgs e)
         {
-            await ChromecastService.ChromeCastClient.ConnectionChannel.LaunchApplication("B3419EF5");
+            _controller = await ChromecastService.ChromeCastClient.LaunchSharpCaster();
             System.Console.WriteLine("Connected to chromecast");
         }
 
@@ -54,7 +53,19 @@ namespace SharpCaster.Console
         private static async void Client_ApplicationStarted(object sender, ChromecastApplication e)
         {
             System.Console.WriteLine($"Application {e.DisplayName} has launched");
-            await ChromecastService.ChromeCastClient.MediaChannel.LoadMedia("http://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/dash/BigBuckBunny.mpd");
+            var track = new Track
+            {
+                Name = "English Subtitle",
+                TrackId = 100,
+                Type = "TEXT",
+                SubType = "captions",
+                Language = "en-US",
+                TrackContentId =
+               "https://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/tracks/DesigningForGoogleCast-en.vtt"
+            };
+
+
+            await _controller.LoadMedia("https://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/mp4/DesigningForGoogleCast.mp4", "video/mp4", null, "BUFFERED", 0D, null, new[] { track }, new[] { 100 });
         }
     }
 }
