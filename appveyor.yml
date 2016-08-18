@@ -66,7 +66,7 @@ build:
 
   # MSBuild verbosity level
   #verbosity: quiet|minimal|normal|detailed
-  verbosity: normal
+  verbosity: minimal
 
 
 # scripts to run before build
