@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
@@ -7,6 +9,8 @@ using Windows.UI.Core;
 using Windows.UI.Popups;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Media;
+using SharpCaster.Controllers;
+using SharpCaster.Extensions;
 using SharpCaster.Models;
 using SharpCaster.Models.MediaStatus;
 using SharpCaster.Services;
@@ -19,8 +23,36 @@ namespace SharpCaster.Simple
         readonly ChromecastService _chromecastService = ChromecastService.Current;
         public event PropertyChangedEventHandler PropertyChanged;
         private DispatcherTimer secondsTimer;
+        private SharpCasterDemoController _controller;
 
         public ChromecastService ChromecastService => _chromecastService;
+
+        public ObservableCollection<Chromecast> Chromecasts
+        {
+            get { return _chromecasts; }
+            set
+            {
+                _chromecasts = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private ObservableCollection<Chromecast> _chromecasts;
+
+        public bool ConnectedToChromecast
+        {
+            get
+            {
+                return _connectedToChromecast;
+            }
+            set
+            {
+                _connectedToChromecast = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private bool _connectedToChromecast;
 
         public double Volume
         {
@@ -102,7 +134,9 @@ namespace SharpCaster.Simple
 
         public MainPageViewModel()
         {
+            Chromecasts = new ObservableCollection<Chromecast>();
             #pragma warning disable 4014
+            _chromecastService.DeviceLocator.DeviceFound += DeviceLocator_DeviceFound;
             _chromecastService.StartLocatingDevices();
             #pragma warning restore 4014
             _chromecastService.ChromeCastClient.ApplicationStarted += Client_ApplicationStarted;
@@ -113,9 +147,18 @@ namespace SharpCaster.Simple
             secondsTimer.Tick += SecondsTimer_Tick;
         }
 
+        private void DeviceLocator_DeviceFound(object sender, Chromecast e)
+        {
+            Chromecasts.Add(e);
+        }
+
         private async void ChromeCastClient_Connected(object sender, EventArgs e)
         {
-            await _chromecastService.ChromeCastClient.ConnectionChannel.LaunchApplication("B3419EF5");
+            await ExecuteOnUiThread(() =>
+            {
+                ConnectedToChromecast = true;
+            });
+            _controller = await _chromecastService.ChromeCastClient.LaunchSharpCaster();
         }
 
         private void SecondsTimer_Tick(object sender, object e)
@@ -127,7 +170,7 @@ namespace SharpCaster.Simple
         {
             await ExecuteOnUiThread(() =>
             {
-                switch (_chromecastService.ChromeCastClient.MediaStatus.PlayerState)
+                switch (e.PlayerState)
                 {
                     case PlayerState.Playing:
                         secondsTimer.Start();
@@ -136,9 +179,9 @@ namespace SharpCaster.Simple
                         secondsTimer.Stop();
                         break;
                 }
-                Position = _chromecastService.ChromeCastClient.MediaStatus.currentTime;
-                if (_chromecastService.ChromeCastClient.MediaStatus.media != null)
-                    Length = _chromecastService.ChromeCastClient.MediaStatus.media.duration;
+                Position = e.currentTime;
+                if (e.media != null)
+                    Length = e.media.duration;
             });
         }
 
@@ -171,17 +214,17 @@ namespace SharpCaster.Simple
         {
             if (_chromecastService.ChromeCastClient.MediaStatus != null && _chromecastService.ChromeCastClient.MediaStatus.PlayerState == PlayerState.Paused)
             {
-                await _chromecastService.ChromeCastClient.MediaChannel.Play();
+                await _controller.Play();
             }
             else
             {
-                await _chromecastService.ChromeCastClient.MediaChannel.Pause();
+                await _controller.Pause();
             }
         }
 
         public async Task Pause()
         {
-            await _chromecastService.ChromeCastClient.MediaChannel.Pause();
+            await _controller.Pause();
         }
 
         public async Task LoadMedia(string title, string description, ImageSource poster)
@@ -199,30 +242,29 @@ namespace SharpCaster.Simple
                 TrackContentId =
                     "https://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/tracks/DesigningForGoogleCast-en.vtt"
             };
-            await _chromecastService.ChromeCastClient
-                .MediaChannel.LoadMedia("https://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/dash/DesigningForGoogleCast.mpd",null,new[] {track}, new []{100});
+            await _controller.LoadMedia("https://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/mp4/DesigningForGoogleCast.mp4", "video/mp4", null, "BUFFERED", 0D, null, new[] { track }, new[] { 100 });
         }
 
         public async Task Seek(double seconds)
         {
             if (Math.Abs(Position - seconds) > 0.1)
-            await _chromecastService.ChromeCastClient.MediaChannel.Seek(seconds);
+            await _controller.Seek(seconds);
         }
 
         public async Task MuteUnmute()
         {
-            await _chromecastService.ChromeCastClient.MediaChannel.SetMute(!_chromecastService.ChromeCastClient.Volume.muted);
+            await _controller.SetMute(!_chromecastService.ChromeCastClient.Volume.muted);
         }
 
         public async Task SetVolume(double newValue)
         {
             if (Math.Abs(_chromecastService.ChromeCastClient.Volume.level - (newValue/100)) < 0.01) return;
-            await _chromecastService.ChromeCastClient.MediaChannel.SetVolume((float) (newValue / 100));
+            await _controller.SetVolume((float) (newValue / 100));
         }
 
         public async Task StopApplication()
         {
-            await _chromecastService.ChromeCastClient.ConnectionChannel.StopApplication();
+            await _controller.StopApplication();
         }
     }
 }

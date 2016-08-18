@@ -63,7 +63,10 @@ namespace SharpCaster.Services
                 {
                     if (ip.Address.AddressFamily != AddressFamily.InterNetworkV6)
                     {
-                        _datagramSocket.Bind(new IPEndPoint(ip.Address, 1901));
+                        if (!ip.Address.ToString().StartsWith("169.254.")) //Ignore all internal network interfaces
+                        {
+                            _datagramSocket.Bind(new IPEndPoint(ip.Address, 1901));
+                        }
                     }
                 }
             }

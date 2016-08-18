@@ -9,7 +9,7 @@ namespace SharpCaster
     internal class ChromecastSocketService : IChromecastSocketService
     {
      
-        public Task Initialize(string host, string port, IChromecastChannel connectionChannel, HeartbeatChannel heartbeatChannel,
+        public Task Initialize(string host, string port, ConnectionChannel connectionChannel, HeartbeatChannel heartbeatChannel,
             Action<Stream, bool> packetReader)
         {
             throw new NotImplementedException();

@@ -31,12 +31,7 @@
 		<file
 			src="SharpCaster.UniversalWindows\bin\Release\SharpCaster.pdb"
 			target="lib\portable-win81+wpa81\SharpCaster.pdb"
-			/>	
-		<file
-			src="SharpCaster.UniversalWindows\bin\release\Themes\Generic.xbf"
-			target="lib\portable-win81+wpa81\SharpCaster\Themes\Generic.xbf" />
-	
-		
+			/>			
 		<file
 			src="SharpCaster.Portable\bin\Release\SharpCaster.pdb"
 			target="lib\portable46-net451+win81+wpa81\SharpCaster.pdb" 
