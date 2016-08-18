@@ -1,5 +1,6 @@
 version: '0.1.7'
 
+# this can be used to make the build agent pause on finish to rdp to the machine and check its state 
 #on_finish:
 #  - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
 
@@ -129,16 +130,6 @@ test: off
 
 artifacts:
 
-  # # pushing a single file
-  # - path: test.zip
-
-  # # pushing a single file with environment variable in path and "Deployment name" specified
-  # - path: MyProject\bin\$(configuration)
-  #   name: myapp
-
-  # # pushing entire folder as a zip archive
-  # - path: logs
-
   # pushing all *.nupkg files in build directory recursively
   - path: '**\*.nupkg'
     name: Nuget
@@ -151,105 +142,33 @@ artifacts:
 # provider names are case-sensitive!
 deploy:
 
-  #   # FTP deployment provider settings
-  # - provider: FTP
-  #   protocol: ftp|ftps|sftp
-  #   host: ftp.myserver.com
-  #   username: admin
-  #   password:
-  #     secure: eYKZKFkkEvFYWX6NfjZIVw==
-  #   folder:
-  #   application:
-  #   active_mode: false
-  #   beta: true    # enable alternative FTP library for 'ftp' and 'ftps' modes
-  #   debug: true   # show complete FTP log
-
-  #   # Amazon S3 deployment provider settings
-  # - provider: S3
-  #   access_key_id:
-  #     secure: ABcd==
-  #   secret_access_key:
-  #     secure: ABcd==
-  #   bucket: my_bucket
-  #   folder:
-  #   artifact:
-  #   set_public: false
-
-  #   # Azure Blob storage deployment provider settings
-  # - provider: AzureBlob
-  #   storage_account_name:
-  #     secure: ABcd==
-  #   storage_access_key:
-  #     secure: ABcd==
-  #   container: my_container
-  #   folder:
-  #   artifact:
-
-  #   # Web Deploy deployment provider settings
-  # - provider: WebDeploy
-  #   server: http://www.deploy.com/myendpoint
-  #   website: mywebsite
-  #   username: user
-  #   password:
-  #     secure: eYKZKFkkEvFYWX6NfjZIVw==
-  #   ntlm: false
-  #   remove_files: false
-  #   app_offline: false
-  #   do_not_use_checksum: true        # do not use check sum for comparing source and destination files. By default checksums are used.
-  #   sync_retry_attempts: 2           # sync attempts, max
-  #   sync_retry_interval: 2000        # timeout between sync attempts, milliseconds
-  #   aspnet_core: true                # artifact zip contains ASP.NET Core application
-  #   aspnet_core_force_restart: true  # poke app's web.config before deploy to force application restart
-  #   skip_dirs: \\App_Data
-  #   skip_files: web.config
-  #   on:
-  #     branch: release
-  #     platform: x86
-  #     configuration: debug
-
-  #   # Deploying to Azure Cloud Service
-  # - provider: AzureCS
-  #   subscription_id:
-  #     secure: fjZIVw==
-  #   subscription_certificate:
-  #     secure: eYKZKFkkEv...FYWX6NfjZIVw==
-  #   storage_account_name: my_storage
-  #   storage_access_key:
-  #     secure: ABcd==
-  #   service: my_service
-  #   slot: Production
-  #   target_profile: Cloud
-  #   artifact: MyPackage.cspkg
+  - provider: NuGet
+    name: nuget_release
+    api_key:
+      secure: 4YYYawFKzaSc0vT1pVxuzWGaiRUEyPO4JOXeDe5rvr5KvYfVEbWziHQ+SJDdBCZI
+    skip_symbols: false
+    artifact: /^SharpCaster.*\.nupkg$/
+    on:
+      branch: master                # release from master branch only
+      appveyor_repo_tag: true       # deploy on tag push only
+    
+  - provider: NuGet
+    name: nuget_prerelease
+    api_key:
+      secure: 4YYYawFKzaSc0vT1pVxuzWGaiRUEyPO4JOXeDe5rvr5KvYfVEbWziHQ+SJDdBCZI
+    skip_symbols: false
+    artifact: /^SharpCaster.*\.nupkg$/
+    on:
+      branch: dev
 
     # Deploying to NuGet feed
   - provider: NuGet
+    name: nuget_deploy_testing
     server: https://int.nugettest.org/api/v2/package
     api_key:
       secure: gdPUjRw0zhVPZFSiOOh8lbQJe/Roa8YDJ4TJOz4tYu+bH55Hygtw01prh51hzFq9
     skip_symbols: false
-    #symbol_server: https://your.symbol.server/feed
     artifact: /^SharpCaster.*\.nupkg$/
-    #on:
-    #  - branch: master                # release from master branch only
-    #    appveyor_repo_tag: true       # deploy on tag push only
-    #  - branch: dev
-
-  #   # Deploy to GitHub Releases
-  # - provider: GitHub
-  #   artifact: /.*\.nupkg/           # upload all NuGet packages to release assets
-  #   draft: false
-  #   prerelease: false
-  #   on:
-  #     branch: master                # release from master branch only
-  #     appveyor_repo_tag: true       # deploy on tag push only
-
-#     # Deploying to a named environment
-#   - provider: Environment
-#     name: staging
-#     on:
-#       branch: staging
-#       env_var1: value1
-#       env_var2: value2
 
 # # scripts to run before deployment
 # before_deploy:
