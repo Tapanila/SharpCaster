@@ -1,7 +1,7 @@
 version: '0.1.7.{build}'
 
-on_finish:
-  - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+#on_finish:
+#  - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
 
 assembly_info:
   patch: true
@@ -230,7 +230,7 @@ deploy:
       secure: gdPUjRw0zhVPZFSiOOh8lbQJe/Roa8YDJ4TJOz4tYu+bH55Hygtw01prh51hzFq9
     skip_symbols: false
     #symbol_server: https://your.symbol.server/feed
-    artifact: SharpCaster.{version}.nupkg
+    artifact: /SharpCaster.*\.nupkg/
     #on:
     #  - branch: master                # release from master branch only
     #    appveyor_repo_tag: true       # deploy on tag push only
