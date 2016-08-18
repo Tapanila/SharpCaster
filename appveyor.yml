@@ -166,7 +166,7 @@ deploy:
     name: nuget_deploy_testing
     server: https://int.nugettest.org/api/v2/package
     api_key:
-      secure: gdPUjRw0zhVPZFSiOOh8lbQJe/Roa8YDJ4TJOz4tYu+bH55Hygtw01prh51hzFq9
+      secure: ZdrDBoAuvXRrhsJdkg2k7No0aBHiE5Q0hMcUNeeUJMoevRrZV8PnBOJvN07GaYMD
     skip_symbols: false
     artifact: /^SharpCaster.*\.nupkg$/
 
