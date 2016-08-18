@@ -28,10 +28,6 @@ namespace SharpCaster.Console
 
         private static void DeviceLocator_DeviceFound(object sender, Chromecast e)
         {
-            if (!e.FriendlyName.Contains("CC"))
-            {
-                return;
-            }
             ChromecastService.StopLocatingDevices();
             System.Console.WriteLine("Device found " + e.FriendlyName);
             ChromecastService.ConnectToChromecast(e);
@@ -54,7 +50,19 @@ namespace SharpCaster.Console
         private static async void Client_ApplicationStarted(object sender, ChromecastApplication e)
         {
             System.Console.WriteLine($"Application {e.DisplayName} has launched");
-            await ChromecastService.ChromeCastClient.MediaChannel.LoadMedia("http://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/dash/BigBuckBunny.mpd");
+            var track = new Track
+            {
+                Name = "English Subtitle",
+                TrackId = 100,
+                Type = "TEXT",
+                SubType = "captions",
+                Language = "en-US",
+                TrackContentId =
+               "https://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/tracks/DesigningForGoogleCast-en.vtt"
+            };
+
+
+            await ChromecastService.ChromeCastClient.MediaChannel.LoadMedia("https://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/mp4/DesigningForGoogleCast.mp4", "video/mp4", null, "BUFFERED", 0D, null, new[] { track }, new[] { 100 });
         }
     }
 }

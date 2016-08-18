@@ -1,14 +1,13 @@
 <ResourceDictionary
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:local="using:SharpCaster.Controllers"
-    xmlns:controllers="using:SharpCaster.Controllers">
+    xmlns:controllers="using:SharpCaster.Simple.Controllers">
 
     <Style TargetType="controllers:CastButton">
         <Setter Property="Foreground" Value="Black" />
         <Setter Property="Template">
             <Setter.Value>
-                <ControlTemplate TargetType="local:CastButton">
+                <ControlTemplate TargetType="controllers:CastButton">
                     <Grid x:Name="RootGrid" Background="Transparent">
                         <VisualStateManager.VisualStateGroups>
                             <VisualStateGroup x:Name="InteractiveStates">
@@ -103,12 +102,11 @@
         </Setter>
     </Style>
 
-    <Style TargetType="local:CastDialog">
+    <Style TargetType="controllers:CastDialog">
         <Setter Property="Template">
             <Setter.Value>
-                <ControlTemplate TargetType="local:CastDialog">
+                <ControlTemplate TargetType="controllers:CastDialog">
                     <Grid
-                        DataContext="{TemplateBinding ChromecastService}"
                         Background="LightGray"
                         >
                         <Grid.RowDefinitions>
@@ -116,7 +114,7 @@
                             <RowDefinition Height="*"/>
                         </Grid.RowDefinitions>
                         <TextBlock Text="Cast to" Grid.Row="0"/>
-                        <ListView Grid.Row="1" ItemsSource="{Binding DeviceLocator.DiscoveredDevices}" x:Name="ChromecastListView">
+                        <ListView Grid.Row="1" ItemsSource="{Binding Chromecasts}" x:Name="ChromecastListView">
                             <ListView.ItemTemplate>
                                 <DataTemplate>
                                     <TextBlock Text="{Binding FriendlyName}"/>
@@ -129,11 +127,11 @@
         </Setter>
     </Style>
 
-    <Style TargetType="local:CastPlayer">
+    <Style TargetType="controllers:CastPlayer">
         <Setter Property="Height" Value="160" />
         <Setter Property="Template">
             <Setter.Value>
-                <ControlTemplate TargetType="local:CastPlayer">
+                <ControlTemplate TargetType="controllers:CastPlayer">
                     <Grid Height="{TemplateBinding Height}" x:Name="RootGrid" Background="Transparent">
                         <VisualStateManager.VisualStateGroups>
                             <VisualStateGroup x:Name="InteractiveStates">

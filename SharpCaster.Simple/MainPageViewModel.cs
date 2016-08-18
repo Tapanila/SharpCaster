@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
@@ -21,6 +23,33 @@ namespace SharpCaster.Simple
         private DispatcherTimer secondsTimer;
 
         public ChromecastService ChromecastService => _chromecastService;
+
+        public ObservableCollection<Chromecast> Chromecasts
+        {
+            get { return _chromecasts; }
+            set
+            {
+                _chromecasts = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private ObservableCollection<Chromecast> _chromecasts;
+
+        public bool ConnectedToChromecast
+        {
+            get
+            {
+                return _connectedToChromecast;
+            }
+            set
+            {
+                _connectedToChromecast = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private bool _connectedToChromecast;
 
         public double Volume
         {
@@ -102,7 +131,9 @@ namespace SharpCaster.Simple
 
         public MainPageViewModel()
         {
+            Chromecasts = new ObservableCollection<Chromecast>();
             #pragma warning disable 4014
+            _chromecastService.DeviceLocator.DeviceFound += DeviceLocator_DeviceFound;
             _chromecastService.StartLocatingDevices();
             #pragma warning restore 4014
             _chromecastService.ChromeCastClient.ApplicationStarted += Client_ApplicationStarted;
@@ -113,8 +144,17 @@ namespace SharpCaster.Simple
             secondsTimer.Tick += SecondsTimer_Tick;
         }
 
+        private void DeviceLocator_DeviceFound(object sender, Chromecast e)
+        {
+            Chromecasts.Add(e);
+        }
+
         private async void ChromeCastClient_Connected(object sender, EventArgs e)
         {
+            await ExecuteOnUiThread(() =>
+            {
+                ConnectedToChromecast = true;
+            });
             await _chromecastService.ChromeCastClient.ConnectionChannel.LaunchApplication("B3419EF5");
         }
 
@@ -199,8 +239,7 @@ namespace SharpCaster.Simple
                 TrackContentId =
                     "https://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/tracks/DesigningForGoogleCast-en.vtt"
             };
-            await _chromecastService.ChromeCastClient
-                .MediaChannel.LoadMedia("https://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/dash/DesigningForGoogleCast.mpd",null,new[] {track}, new []{100});
+            await _chromecastService.ChromeCastClient.MediaChannel.LoadMedia("https://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/mp4/DesigningForGoogleCast.mp4", "video/mp4", null, "BUFFERED", 0D, null, new[] { track }, new[] { 100 });
         }
 
         public async Task Seek(double seconds)
