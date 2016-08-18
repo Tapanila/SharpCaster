@@ -103,6 +103,10 @@
 	<Compile Include="..\Services\*.cs">
       <Link>Services\ThisTextDoesntMatter</Link>
     </Compile>
+	<Compile Include="..\Controllers\*.cs">
+      <Link>Controllers\ThisTextDoesntMatter</Link>
+    </Compile>
+	<Compile Include="..\Extensions\ChromeCastClientExtension.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

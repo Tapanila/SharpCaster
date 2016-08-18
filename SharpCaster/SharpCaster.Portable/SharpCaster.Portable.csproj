@@ -100,6 +100,10 @@
     <Compile Include="..\Services\*.cs">
       <Link>Services\ThisTextDoesntMatter</Link>
     </Compile>
+    <Compile Include="..\Controllers\*.cs">
+      <Link>Controllers\ThisTextDoesntMatter</Link>
+    </Compile>
+	<Compile Include="..\Extensions\ChromeCastClientExtension.cs" />
     <Compile Include="StubServices\ChromecastSocketService.cs" />
     <Compile Include="StubServices\SocketService.cs" />
   </ItemGroup>

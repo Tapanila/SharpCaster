@@ -1,4 +1,6 @@
 ﻿using System;
+using SharpCaster.Controllers;
+using SharpCaster.Extensions;
 using SharpCaster.Models;
 using SharpCaster.Models.ChromecastStatus;
 using SharpCaster.Models.MediaStatus;
@@ -9,6 +11,7 @@ namespace SharpCaster.Console
     class Program
     {
         static readonly ChromecastService ChromecastService = ChromecastService.Current;
+        static SharpCasterDemoController _controller;
         
         static void Main(string[] args)
         {
@@ -35,7 +38,7 @@ namespace SharpCaster.Console
 
         private static async void ChromeCastClient_Connected(object sender, EventArgs e)
         {
-            await ChromecastService.ChromeCastClient.ConnectionChannel.LaunchApplication("B3419EF5");
+            _controller = await ChromecastService.ChromeCastClient.LaunchSharpCaster();
             System.Console.WriteLine("Connected to chromecast");
         }
 
@@ -62,7 +65,7 @@ namespace SharpCaster.Console
             };
 
 
-            await ChromecastService.ChromeCastClient.MediaChannel.LoadMedia("https://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/mp4/DesigningForGoogleCast.mp4", "video/mp4", null, "BUFFERED", 0D, null, new[] { track }, new[] { 100 });
+            await _controller.LoadMedia("https://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/mp4/DesigningForGoogleCast.mp4", "video/mp4", null, "BUFFERED", 0D, null, new[] { track }, new[] { 100 });
         }
     }
 }
