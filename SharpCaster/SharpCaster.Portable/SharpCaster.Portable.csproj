@@ -38,6 +38,9 @@
     <Compile Include="..\Extensions\ByteArrayExtension.cs">
       <Link>Extensions\ThisTextDoesntMatter</Link>
     </Compile>
+    <Compile Include="..\Models\CustomTypes\YouTubeSessionStatusResponse.cs">
+      <Link>Models\CustomTypes\YouTubeSessionStatusResponse.cs</Link>
+    </Compile>
     <Compile Include="..\StubServices\*.cs">
       <Link>StubServices\ThisTextDoesntMatter</Link>
     </Compile>
@@ -77,22 +80,7 @@
     <Compile Include="..\Models\ChromecastStatus\*.cs">
       <Link>Models\ChromecastStatus\ThisTextDoesntMatter</Link>
     </Compile>
-    <Compile Include="..\Channels\ChromecastChannel.cs">
-      <Link>Channels\ThisTextDoesntMatter</Link>
-    </Compile>
-    <Compile Include="..\Channels\ConnectionChannel.cs">
-      <Link>Channels\ThisTextDoesntMatter</Link>
-    </Compile>
-    <Compile Include="..\Channels\HeartbeatChannel.cs">
-      <Link>Channels\ThisTextDoesntMatter</Link>
-    </Compile>
-    <Compile Include="..\Channels\IChromecastChannel.cs">
-      <Link>Channels\ThisTextDoesntMatter</Link>
-    </Compile>
-    <Compile Include="..\Channels\MediaChannel.cs">
-      <Link>Channels\ThisTextDoesntMatter</Link>
-    </Compile>
-    <Compile Include="..\Channels\ReceiverChannel.cs">
+    <Compile Include="..\Channels\*.cs">
       <Link>Channels\ThisTextDoesntMatter</Link>
     </Compile>
     <Compile Include="..\Properties\Annotations.cs" />
@@ -103,7 +91,7 @@
     <Compile Include="..\Controllers\*.cs">
       <Link>Controllers\ThisTextDoesntMatter</Link>
     </Compile>
-	<Compile Include="..\Extensions\ChromeCastClientExtension.cs" />
+    <Compile Include="..\Extensions\ChromeCastClientExtension.cs" />
     <Compile Include="StubServices\ChromecastSocketService.cs" />
     <Compile Include="StubServices\SocketService.cs" />
   </ItemGroup>

@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Security.AccessControl;
+using System.Threading.Tasks;
 using SharpCaster.Controllers;
 using SharpCaster.Extensions;
 using SharpCaster.Models;
@@ -12,6 +14,8 @@ namespace SharpCaster.Console
     {
         static readonly ChromecastService ChromecastService = ChromecastService.Current;
         static SharpCasterDemoController _controller;
+        private static YouTubeController _youTubeController;
+        private static bool _connecting = false;
         
         static void Main(string[] args)
         {
@@ -31,6 +35,8 @@ namespace SharpCaster.Console
 
         private static void DeviceLocator_DeviceFound(object sender, Chromecast e)
         {
+            if (_connecting) return;
+            _connecting = true;
             ChromecastService.StopLocatingDevices();
             System.Console.WriteLine("Device found " + e.FriendlyName);
             ChromecastService.ConnectToChromecast(e);
@@ -38,8 +44,15 @@ namespace SharpCaster.Console
 
         private static async void ChromeCastClient_Connected(object sender, EventArgs e)
         {
-            _controller = await ChromecastService.ChromeCastClient.LaunchSharpCaster();
+            //_controller = await ChromecastService.ChromeCastClient.LaunchSharpCaster();
+            _youTubeController = await ChromecastService.ChromeCastClient.LaunchYouTube();
+            _youTubeController.ScreenIdChanged += ScreenIdChanged;
             System.Console.WriteLine("Connected to chromecast");
+        }
+
+        private static void ScreenIdChanged(object sender, string s)
+        {
+            var i = 0;
         }
 
         private static void ChromeCastClient_MediaStatusChanged(object sender, MediaStatus e)
@@ -63,9 +76,14 @@ namespace SharpCaster.Console
                 TrackContentId =
                "https://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/tracks/DesigningForGoogleCast-en.vtt"
             };
-
-
-            await _controller.LoadMedia("https://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/mp4/DesigningForGoogleCast.mp4", "video/mp4", null, "BUFFERED", 0D, null, new[] { track }, new[] { 100 });
+            if (_youTubeController == null)
+            {
+                _youTubeController = await ChromecastService.ChromeCastClient.LaunchYouTube();
+                _youTubeController.ScreenIdChanged += ScreenIdChanged;
+            }
+            //await Task.Delay(500);
+            //await _youTubeController.Play();
+            //await _controller.LoadMedia("https://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/mp4/DesigningForGoogleCast.mp4", "video/mp4", null, "BUFFERED", 0D, null, new[] { track }, new[] { 100 });
         }
     }
 }
