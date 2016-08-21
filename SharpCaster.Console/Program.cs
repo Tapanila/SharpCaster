@@ -45,8 +45,11 @@ namespace SharpCaster.Console
         private static async void ChromeCastClient_Connected(object sender, EventArgs e)
         {
             //_controller = await ChromecastService.ChromeCastClient.LaunchSharpCaster();
-            _youTubeController = await ChromecastService.ChromeCastClient.LaunchYouTube();
-            _youTubeController.ScreenIdChanged += ScreenIdChanged;
+            if (_youTubeController == null)
+            {
+                _youTubeController = await ChromecastService.ChromeCastClient.LaunchYouTube();
+                _youTubeController.ScreenIdChanged += ScreenIdChanged;
+            }
             System.Console.WriteLine("Connected to chromecast");
         }
 

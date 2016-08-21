@@ -55,7 +55,7 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\SharpCaster\SharpCaster.Net45\SharpCaster.Net45.csproj">
+    <ProjectReference Include="..\SharpCaster\SharpCaster.Net45.csproj">
       <Project>{59c024b0-7793-49be-b4e6-3ae5257ef4cd}</Project>
       <Name>SharpCaster.Net45</Name>
     </ProjectReference>
