@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using SharpCaster.Channels;
 using SharpCaster.Controllers;
+using SharpCaster.Models;
 
 namespace SharpCaster.Extensions
 {
@@ -25,7 +26,8 @@ namespace SharpCaster.Extensions
 
         public static YouTubeChannel GetYouTubeChannel(this IEnumerable<IChromecastChannel> channels)
         {
-            return (YouTubeChannel) channels.First(x => x.Namespace == "urn:x-cast:com.google.youtube.mdx");
+            return (YouTubeChannel)channels.First(x => x.Namespace == MessageFactory.DialConstants.YouTubeUrn);
+        }
         }
     }
 }
