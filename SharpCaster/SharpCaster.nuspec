@@ -42,11 +42,11 @@
 			/>
 		
 		<file 
-			src="SharpCaster.Net45\bin\Release\SharpCaster.dll"
+			src="bin\Release\SharpCaster.dll"
 			target="lib\net451\SharpCaster.dll"
 			/>
 		<file
-			src="SharpCaster.Net45\bin\Release\SharpCaster.pdb"
+			src="bin\Release\SharpCaster.pdb"
 			target="lib\net451\SharpCaster.pdb"
 			/>
 		

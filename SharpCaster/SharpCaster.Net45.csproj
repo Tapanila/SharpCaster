@@ -50,66 +50,29 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\*.cs" />
-    <Compile Include="..\Extensions\ByteArrayExtension.cs">
-      <Link>Extensions\ThisTextDoesntMatter</Link>
-    </Compile>
-    <Compile Include="..\models\customtypes\YouTubeSessionStatusResponse.cs">
-      <Link>Models\CustomTypes\YouTubeSessionStatusResponse.cs</Link>
-    </Compile>
-    <Compile Include="..\Net45Services\*.cs">
-      <Link>Services\ThisTextDoesntMatter</Link>
-    </Compile>
-    <Compile Include="..\Extensions\StreamExtension.cs">
-      <Link>Extensions\ThisTextDoesntMatter</Link>
-    </Compile>
-    <Compile Include="..\Interfaces\*.cs">
-      <Link>Interfaces\ThisTextDoesntMatter</Link>
-    </Compile>
-    <Compile Include="..\Models\CastMessage.cs">
-      <Link>Models\ThisTextDoesntMatter</Link>
-    </Compile>
-    <Compile Include="..\Models\Chromecast.cs">
-      <Link>Models\ThisTextDoesntMatter</Link>
-    </Compile>
-    <Compile Include="..\Models\ChromecastSSLClientDataReceivedArgs.cs">
-      <Link>Models\ThisTextDoesntMatter</Link>
-    </Compile>
-    <Compile Include="..\Models\Discovery.cs">
-      <Link>Models\ThisTextDoesntMatter</Link>
-    </Compile>
-    <Compile Include="..\Models\MessageFactory.cs">
-      <Link>Models\ThisTextDoesntMatter</Link>
-    </Compile>
-    <Compile Include="..\Models\Volume.cs">
-      <Link>Models\ThisTextDoesntMatter</Link>
-    </Compile>
-    <Compile Include="..\Models\ChromecastRequests\*.cs">
-      <Link>Models\ChromecastRequests\ThisTextDoesntMatter</Link>
-    </Compile>
-    <Compile Include="..\JsonConverters\PlayerStateEnumConverter.cs">
-      <Link>JsonConverters\ThisTextDoesntMatter</Link>
-    </Compile>
-    <Compile Include="..\Models\MediaStatus\*.cs">
-      <Link>Models\MediaStatus\ThisTextDoesntMatter</Link>
-    </Compile>
-    <Compile Include="..\Models\ChromecastStatus\*.cs">
-      <Link>Models\ChromecastStatus\ThisTextDoesntMatter</Link>
-    </Compile>
-    <Compile Include="..\Channels\*.cs">
-      <Link>Channels\ThisTextDoesntMatter</Link>
-    </Compile>
-    <Compile Include="..\Properties\Annotations.cs" />
-    <Compile Include="..\Properties\AssemblyInfo.cs" />
-    <Compile Include="Net45Services\ChromecastSocketService.cs" />
-    <Compile Include="Net45Services\SocketService.cs" />
-    <Compile Include="..\Services\*.cs">
-      <Link>Services\ThisTextDoesntMatter</Link>
-    </Compile>
-    <Compile Include="..\Controllers\*.cs">
-      <Link>Controllers\ThisTextDoesntMatter</Link>
-    </Compile>
-    <Compile Include="..\Extensions\ChromeCastClientExtension.cs" />
+    <Compile Include="*.cs" />
+    <Compile Include="Extensions\ByteArrayExtension.cs" />
+    <Compile Include="models\customtypes\YouTubeSessionStatusResponse.cs" />
+    <Compile Include="Services\ChromeCastService.cs" />
+    <Compile Include="Extensions\StreamExtension.cs" />
+    <Compile Include="Interfaces\*.cs" />
+    <Compile Include="Models\CastMessage.cs" />
+    <Compile Include="Models\Chromecast.cs" />
+    <Compile Include="Models\ChromecastSSLClientDataReceivedArgs.cs" />
+    <Compile Include="Models\Discovery.cs" />
+    <Compile Include="Models\MessageFactory.cs" />
+    <Compile Include="Models\Volume.cs" />
+    <Compile Include="Models\ChromecastRequests\*.cs" />
+    <Compile Include="JsonConverters\PlayerStateEnumConverter.cs" />
+    <Compile Include="Models\MediaStatus\*.cs" />
+    <Compile Include="Models\ChromecastStatus\*.cs" />
+    <Compile Include="Channels\*.cs" />
+    <Compile Include="Properties\Annotations.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Controllers\*.cs" />
+    <Compile Include="Extensions\ChromeCastClientExtension.cs" />
+    <Compile Include="SharpCaster.Net45\Net45Services\ChromecastSocketService.cs" />
+    <Compile Include="SharpCaster.Net45\Net45Services\SocketService.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
