@@ -15,6 +15,7 @@ namespace SharpCaster.Console
         static readonly ChromecastService ChromecastService = ChromecastService.Current;
         static SharpCasterDemoController _controller;
         private static YouTubeController _youTubeController;
+        private static PlexController _plexController;
         private static bool _connecting = false;
         
         static void Main(string[] args)
@@ -45,12 +46,13 @@ namespace SharpCaster.Console
         private static async void ChromeCastClient_Connected(object sender, EventArgs e)
         {
             //_controller = await ChromecastService.ChromeCastClient.LaunchSharpCaster();
-            if (_youTubeController == null)
+            if (_plexController == null)
             {
-                _youTubeController = await ChromecastService.ChromeCastClient.LaunchYouTube();
-                _youTubeController.ScreenIdChanged += ScreenIdChanged;
+                _plexController = await ChromecastService.ChromeCastClient.LaunchPlex();
+                //_youTubeController.ScreenIdChanged += ScreenIdChanged;
             }
             System.Console.WriteLine("Connected to chromecast");
+            
         }
 
         private static void ScreenIdChanged(object sender, string s)
@@ -79,13 +81,15 @@ namespace SharpCaster.Console
                 TrackContentId =
                "https://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/tracks/DesigningForGoogleCast-en.vtt"
             };
-            if (_youTubeController == null)
-            {
-                _youTubeController = await ChromecastService.ChromeCastClient.LaunchYouTube();
-                _youTubeController.ScreenIdChanged += ScreenIdChanged;
-            }
-            //await Task.Delay(500);
-            //await _youTubeController.Play();
+            
+            await Task.Delay(3000);
+            await _plexController.Seek(30);
+            await Task.Delay(3000);
+            await _plexController.Seek(60);
+            await Task.Delay(3000);
+            await _plexController.Seek(90);
+            await Task.Delay(3000);
+            await _plexController.Seek(30);
             //await _controller.LoadMedia("https://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/mp4/DesigningForGoogleCast.mp4", "video/mp4", null, "BUFFERED", 0D, null, new[] { track }, new[] { 100 });
         }
     }
