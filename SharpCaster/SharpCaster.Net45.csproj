@@ -32,11 +32,11 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Newtonsoft.Json.9.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <HintPath>..\packages\Newtonsoft.Json.9.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="protobuf-net, Version=2.0.0.668, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\protobuf-net-sharpcaster.2.0.0.668\lib\portable46-net451+win81+wpa81\protobuf-net.dll</HintPath>
+      <HintPath>..\packages\protobuf-net-sharpcaster.2.0.0.668\lib\portable46-net451+win81+wpa81\protobuf-net.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
