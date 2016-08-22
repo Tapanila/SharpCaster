@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-
 namespace SharpCaster.Models.MediaStatus
 {
     public class Media

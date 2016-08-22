@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using SharpCaster.Channels;
 using SharpCaster.Interfaces;
 
-namespace SharpCaster
+namespace SharpCaster.Services
 {
     internal class ChromecastSocketService : IChromecastSocketService
     {

@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using SharpCaster.Models;
@@ -27,43 +26,25 @@ namespace SharpCaster.Channels
             Client.CurrentMediaSessionId = Client.MediaStatus.mediaSessionId;
         }
 
-        public async Task SetVolume(float level)
-        {
-            if (level < 0 || level > 1.0f)
-            {
-                throw new ArgumentException("level must be between 0.0f and 1.0f", nameof(level));
-            }
-            await Write(MessageFactory.Volume(level), false);
-        }
 
-        public async Task SetMute(bool muted)
+        public async Task GetMediaStatus()
         {
-            await Write(MessageFactory.Volume(muted), false);
-        }
-
-        public async Task IncreaseVolume(float amount = 0.05f)
-        {
-            await SetVolume(Client.Volume.level + amount);
-        }
-
-        public async Task DecreaseVolume(float amount = 0.05f)
-        {
-            await SetVolume(Client.Volume.level - amount);
+            await Write(MessageFactory.MediaStatus(Client.CurrentApplicationTransportId));
         }
 
         public async Task Seek(double seconds)
         {
-            await Write(MessageFactory.Seek(Client.CurrentApplicationTransportId, Client.CurrentMediaSessionId, seconds), false);
+            await Write(MessageFactory.Seek(Client.CurrentApplicationTransportId, Client.CurrentMediaSessionId, seconds));
         }
 
         public async Task Pause()
         {
-            await Write(MessageFactory.Pause(Client.CurrentApplicationTransportId, Client.CurrentMediaSessionId), false);
+            await Write(MessageFactory.Pause(Client.CurrentApplicationTransportId, Client.CurrentMediaSessionId));
         }
 
         public async Task Play()
         {
-            await Write(MessageFactory.Play(Client.CurrentApplicationTransportId, Client.CurrentMediaSessionId), false);
+            await Write(MessageFactory.Play(Client.CurrentApplicationTransportId, Client.CurrentMediaSessionId));
         }
 
         public async Task LoadMedia(

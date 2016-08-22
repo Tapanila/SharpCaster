@@ -29,12 +29,12 @@ namespace SharpCaster.Controllers
 
         public async Task VolumeUp(float amount = 0.05f)
         {
-            await Client.MediaChannel.IncreaseVolume(amount);
+            await Client.ReceiverChannel.IncreaseVolume(amount);
         }
 
         public async Task VolumeDown(float amount = 0.05f)
         {
-            await Client.MediaChannel.DecreaseVolume(amount);
+            await Client.ReceiverChannel.DecreaseVolume(amount);
         }
 
         public async Task Seek(double seconds)
@@ -44,12 +44,12 @@ namespace SharpCaster.Controllers
 
         public async Task SetMute(bool muted)
         {
-            await Client.MediaChannel.SetMute(muted);
+            await Client.ReceiverChannel.SetMute(muted);
         }
 
         public async Task SetVolume(float f)
         {
-            await Client.MediaChannel.SetVolume(f);
+            await Client.ReceiverChannel.SetVolume(f);
         }
     }
 }
