@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Security.AccessControl;
-using System.Threading.Tasks;
 using SharpCaster.Controllers;
 using SharpCaster.Extensions;
 using SharpCaster.Models;
@@ -14,8 +12,7 @@ namespace SharpCaster.Console
     {
         static readonly ChromecastService ChromecastService = ChromecastService.Current;
         static SharpCasterDemoController _controller;
-        private static YouTubeController _youTubeController;
-        private static bool _connecting = false;
+        private static bool _connecting;
         
         static void Main(string[] args)
         {
@@ -44,18 +41,11 @@ namespace SharpCaster.Console
 
         private static async void ChromeCastClient_Connected(object sender, EventArgs e)
         {
-            //_controller = await ChromecastService.ChromeCastClient.LaunchSharpCaster();
-            if (_youTubeController == null)
-            {
-                _youTubeController = await ChromecastService.ChromeCastClient.LaunchYouTube();
-                _youTubeController.ScreenIdChanged += ScreenIdChanged;
-            }
             System.Console.WriteLine("Connected to chromecast");
-        }
-
-        private static void ScreenIdChanged(object sender, string s)
-        {
-            var i = 0;
+            if (_controller == null)
+            {
+                _controller = await ChromecastService.ChromeCastClient.LaunchSharpCaster();
+            }
         }
 
         private static void ChromeCastClient_MediaStatusChanged(object sender, MediaStatus e)
@@ -79,14 +69,11 @@ namespace SharpCaster.Console
                 TrackContentId =
                "https://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/tracks/DesigningForGoogleCast-en.vtt"
             };
-            if (_youTubeController == null)
+            if (_controller == null)
             {
-                _youTubeController = await ChromecastService.ChromeCastClient.LaunchYouTube();
-                _youTubeController.ScreenIdChanged += ScreenIdChanged;
+                _controller = await ChromecastService.ChromeCastClient.LaunchSharpCaster();
             }
-            //await Task.Delay(500);
-            //await _youTubeController.Play();
-            //await _controller.LoadMedia("https://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/mp4/DesigningForGoogleCast.mp4", "video/mp4", null, "BUFFERED", 0D, null, new[] { track }, new[] { 100 });
+            await _controller.LoadMedia("https://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/mp4/DesigningForGoogleCast.mp4", "video/mp4", null, "BUFFERED", 0D, null, new[] { track }, new[] { 100 });
         }
     }
 }
