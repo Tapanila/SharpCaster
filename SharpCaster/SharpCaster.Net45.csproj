@@ -52,27 +52,21 @@
   <ItemGroup>
     <Compile Include="*.cs" />
     <Compile Include="Extensions\ByteArrayExtension.cs" />
-    <Compile Include="models\customtypes\YouTubeSessionStatusResponse.cs" />
+    <Compile Include="Models\CustomTypes\*.cs" />
     <Compile Include="Services\ChromeCastService.cs" />
     <Compile Include="Extensions\StreamExtension.cs" />
     <Compile Include="Interfaces\*.cs" />
-    <Compile Include="Models\CastMessage.cs" />
-    <Compile Include="Models\Chromecast.cs" />
-    <Compile Include="Models\ChromecastSSLClientDataReceivedArgs.cs" />
-    <Compile Include="Models\Discovery.cs" />
-    <Compile Include="Models\MessageFactory.cs" />
-    <Compile Include="Models\Volume.cs" />
+    <Compile Include="Models\*.cs" />
     <Compile Include="Models\ChromecastRequests\*.cs" />
-    <Compile Include="JsonConverters\PlayerStateEnumConverter.cs" />
-    <Compile Include="Models\MediaStatus\*.cs" />
+	<Compile Include="Models\MediaStatus\*.cs" />
     <Compile Include="Models\ChromecastStatus\*.cs" />
-    <Compile Include="Channels\*.cs" />
+    <Compile Include="JsonConverters\PlayerStateEnumConverter.cs" />
+	<Compile Include="Channels\*.cs" />
     <Compile Include="Properties\Annotations.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Controllers\*.cs" />
     <Compile Include="Extensions\ChromeCastClientExtension.cs" />
-    <Compile Include="SharpCaster.Net45\Net45Services\ChromecastSocketService.cs" />
-    <Compile Include="SharpCaster.Net45\Net45Services\SocketService.cs" />
+    <Compile Include="SharpCaster.Net45\Net45Services\*.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
