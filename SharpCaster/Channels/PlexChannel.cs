@@ -56,7 +56,7 @@ namespace SharpCaster.Channels
         //    throw new NotImplementedException();
         //{
         //    "type": "SKIPTO",
-        //    "key": unknown
+        //    "key": unknown, probably something like "/library/metadata/2769"
         //}
         //}
 
@@ -70,6 +70,17 @@ namespace SharpCaster.Channels
         //{
         //    throw new NotImplementedException();
         //    //unknown
+
+        //00 00 00 4E 08 00 12 12  31 34 37 31 38 39 35 30      N. ..14718950
+        //32 38 33 38 36 33 33 39  32 34 1A 06 77 65 62 2D   2838633924..web-
+        //31 37 22 0F 75 72 6E 3A  78 2D 63 61 73 74 3A 70   17".urn:x-cast:p
+        //6C 65 78 28 00 32 1B 7B  22 74 79 70 65 22 3A 22   lex( 2.{"type":"
+        //52 45 46 52 45 53 48 50  4C 41 59 51 55 45 55 45   REFRESHPLAYQUEUE
+        //22 7D                                              "}
+
+        //{
+        //    "type": "REFRESHPLAYQUEUE"
+        //}
         //}
 
         /// <summary>
