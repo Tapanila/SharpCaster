@@ -23,6 +23,20 @@ namespace SharpCaster.Controllers
         {
             await Client.Channels.GetPlexChannel().Seek(seconds);
         }
-        
+
+        public async Task Stop()
+        {
+            await Client.Channels.GetPlexChannel().Stop();
+        }
+
+        public async Task Next()
+        {
+            await Client.Channels.GetPlexChannel().Next();
+        }
+
+        public async Task Previous()
+        {
+            await Client.Channels.GetPlexChannel().Previous();
+        }
     }
 }
