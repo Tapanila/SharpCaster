@@ -91,7 +91,8 @@ after_build:
 #---------------------------------#
 #       tests configuration       #
 #---------------------------------#
-
+test:
+  assemblies: SharpCaster.Test\bin\x64\Release\
 # test:
 #   assemblies:
 #     - asm1.dll
