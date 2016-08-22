@@ -12,6 +12,7 @@ namespace SharpCaster.Console
     {
         static readonly ChromecastService ChromecastService = ChromecastService.Current;
         static SharpCasterDemoController _controller;
+        private static bool _connecting;
         
         static void Main(string[] args)
         {
@@ -31,6 +32,8 @@ namespace SharpCaster.Console
 
         private static void DeviceLocator_DeviceFound(object sender, Chromecast e)
         {
+            if (_connecting) return;
+            _connecting = true;
             ChromecastService.StopLocatingDevices();
             System.Console.WriteLine("Device found " + e.FriendlyName);
             ChromecastService.ConnectToChromecast(e);
@@ -38,8 +41,11 @@ namespace SharpCaster.Console
 
         private static async void ChromeCastClient_Connected(object sender, EventArgs e)
         {
-            _controller = await ChromecastService.ChromeCastClient.LaunchSharpCaster();
             System.Console.WriteLine("Connected to chromecast");
+            if (_controller == null)
+            {
+                _controller = await ChromecastService.ChromeCastClient.LaunchSharpCaster();
+            }
         }
 
         private static void ChromeCastClient_MediaStatusChanged(object sender, MediaStatus e)
@@ -63,8 +69,10 @@ namespace SharpCaster.Console
                 TrackContentId =
                "https://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/tracks/DesigningForGoogleCast-en.vtt"
             };
-
-
+            if (_controller == null)
+            {
+                _controller = await ChromecastService.ChromeCastClient.LaunchSharpCaster();
+            }
             await _controller.LoadMedia("https://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/mp4/DesigningForGoogleCast.mp4", "video/mp4", null, "BUFFERED", 0D, null, new[] { track }, new[] { 100 });
         }
     }

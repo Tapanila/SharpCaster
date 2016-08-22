@@ -5,7 +5,7 @@ VisualStudioVersion = 14.0.25123.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpCaster.Portable", "SharpCaster\SharpCaster.Portable\SharpCaster.Portable.csproj", "{56D42483-550D-4817-844B-6C27D880130F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpCaster.Net45", "SharpCaster\SharpCaster.Net45\SharpCaster.Net45.csproj", "{59C024B0-7793-49BE-B4E6-3AE5257EF4CD}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpCaster.Net45", "SharpCaster\SharpCaster.Net45.csproj", "{59C024B0-7793-49BE-B4E6-3AE5257EF4CD}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpCaster.UniversalWindows", "SharpCaster\SharpCaster.UniversalWindows\SharpCaster.UniversalWindows.csproj", "{18D6578D-C426-4954-A5C2-20C0581AE933}"
 EndProject

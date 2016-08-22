@@ -7,7 +7,7 @@ namespace SharpCaster.Controllers
         public string ApplicationId { get; set; }
         public async Task LaunchApplication()
         {
-            await Client.ConnectionChannel.LaunchApplication(ApplicationId);
+            await Client.ReceiverChannel.LaunchApplication(ApplicationId);
         }
 
         protected readonly ChromeCastClient Client;
@@ -20,7 +20,7 @@ namespace SharpCaster.Controllers
 
         public async Task StopApplication()
         {
-            await Client.ConnectionChannel.StopApplication();
+            await Client.ReceiverChannel.StopApplication();
         }
 
     }

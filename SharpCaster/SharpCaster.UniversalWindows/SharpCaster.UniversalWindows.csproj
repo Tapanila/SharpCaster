@@ -103,6 +103,9 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="..\*.cs" />
+    <Compile Include="..\models\customtypes\YouTubeSessionStatusResponse.cs">
+      <Link>Models\CustomTypes\YouTubeSessionStatusResponse.cs</Link>
+    </Compile>
     <Compile Include="..\UniversalWindowsServices\*.cs">
       <Link>Services\ThisTextDoesntMatter</Link>
     </Compile>
@@ -148,7 +151,7 @@
     <Compile Include="..\Channels\*.cs">
       <Link>Channels\ThisTextDoesntMatter</Link>
     </Compile>
-	<Compile Include="..\Controllers\*.cs">
+    <Compile Include="..\Controllers\*.cs">
       <Link>Controllers\ThisTextDoesntMatter</Link>
     </Compile>
     <Compile Include="..\Properties\Annotations.cs" />

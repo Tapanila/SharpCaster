@@ -3,9 +3,9 @@ using System.Runtime.Serialization;
 namespace SharpCaster.Models.ChromecastRequests
 {
     [DataContract]
-    public class StopRequest : RequestWithId
+    public class StopApplicationRequest : RequestWithId
     {
-        public StopRequest(string sessionId)
+        public StopApplicationRequest(string sessionId)
             : base("STOP")
         {
             SessionId = sessionId;
