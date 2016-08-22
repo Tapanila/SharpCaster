@@ -47,6 +47,11 @@ namespace SharpCaster.Channels
             await Write(MessageFactory.Play(Client.CurrentApplicationTransportId, Client.CurrentMediaSessionId));
         }
 
+        public async Task Stop()
+        {
+            await Write(MessageFactory.StopMedia(Client.CurrentMediaSessionId));
+        }
+
         public async Task LoadMedia(
             string mediaUrl,
             string contentType = "application/vnd.ms-sstr+xml",

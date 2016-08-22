@@ -39,14 +39,7 @@ namespace SharpCaster.Channels
 
         public async Task Stop()
         {
-            //Plex uses the same messages as the Google Media messages but on its own namespace
-            //TODO this command should still be created because it is not in the messageFactory
-            //(it is different from the Stop command to stop the receiver app)
-            
-            throw new NotImplementedException();
-            //var castMessage = MessageFactory.Stop(Client.CurrentApplicationTransportId, Client.CurrentMediaSessionId);
-
-            //await Write(castMessage);
+            await Write(MessageFactory.StopMedia(Client.CurrentMediaSessionId));
         }
 
         //        this.customMessageListeners[d.PREVIOUS] = this.onPrevious,

@@ -81,7 +81,7 @@ namespace SharpCaster.Channels
 
         public async Task StopApplication()
         {
-            await Write(MessageFactory.Stop(Client.CurrentApplicationSessionId));
+            await Write(MessageFactory.StopApplication(Client.CurrentApplicationSessionId));
         }
 
 

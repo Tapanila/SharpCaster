@@ -84,16 +84,22 @@ namespace SharpCaster.Models
                 PayloadUtf8 = new SeekRequest(mediaSessionId, seconds).ToJson()
             };
 
-        public static CastMessage Stop(string sessionId) => new CastMessage
+        public static CastMessage StopApplication(string sessionId) => new CastMessage
         {
-            PayloadUtf8 = new StopRequest(sessionId).ToJson()
+            PayloadUtf8 = new StopApplicationRequest(sessionId).ToJson()
         };
 
         public static CastMessage MediaStatus(string destinationId) => new CastMessage(destinationId, UniqueSourceID)
         {
             PayloadUtf8 = new MediaStatusRequest().ToJson()
         };
-        
+
+        public static CastMessage StopMedia(long mediaSessionId) => new CastMessage
+        {
+            PayloadUtf8 = new StopMediaRequest(mediaSessionId).ToJson()
+        };
+
+
     }
 
 }
