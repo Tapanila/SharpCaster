@@ -13,6 +13,7 @@ namespace SharpCaster.Models
             public const string DialReceiverUrn = "urn:x-cast:com.google.cast.receiver";
             public const string DialMediaUrn = "urn:x-cast:com.google.cast.media";
             public const string YouTubeUrn = "urn:x-cast:com.google.youtube.mdx";
+            public const string PlexUrn = "urn:x-cast:plex";
         }
 
         private static readonly string UniqueSourceID = "client-" + new Random((int)DateTime.Now.Ticks).Next() % 9999;
