@@ -1,4 +1,4 @@
-version: '0.1.7'
+version: '0.2.0'
 
 # this can be used to make the build agent pause on finish to rdp to the machine and check its state 
 #on_finish:

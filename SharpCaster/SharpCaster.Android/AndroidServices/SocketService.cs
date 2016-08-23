@@ -6,7 +6,6 @@ using System.Net.Http;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace SharpCaster.Services
@@ -14,7 +13,6 @@ namespace SharpCaster.Services
     public class SocketService : ISocketService
     {
         private Socket _datagramSocket;
-        private static ManualResetEvent receiveDone = new ManualResetEvent(false);
         private readonly byte[] _buffer = new byte[9000];
 
         public ISocketService Initialize()

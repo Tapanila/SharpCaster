@@ -49,6 +49,23 @@
 			src="bin\Release\SharpCaster.pdb"
 			target="lib\net451\SharpCaster.pdb"
 			/>
+			
+		<file
+			src="SharpCaster.iOS\bin\Release\SharpCaster.dll"
+			target="lib\MonoiOS\SharpCaster.dll"
+			/>
+		<file
+			src="SharpCaster.iOS\bin\Release\SharpCaster.pdb"
+			target="lib\MonoiOS\SharpCaster.pdb"
+			/>
+		<file
+			src="SharpCaster.Android\bin\Release\SharpCaster.dll"
+			target="lib\MonoAndroid\SharpCaster.dll"
+			/>
+		<file
+			src="SharpCaster.Android\bin\Release\SharpCaster.pdb"
+			target="lib\MonoAndroid\SharpCaster.pdb"
+			/>
 		
 		
     </files>
