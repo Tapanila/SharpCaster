@@ -60,19 +60,19 @@ namespace SharpCaster.Channels
             await Write(MessageFactory.Volume(muted));
         }
 
-        public async Task IncreaseVolume(float amount = 0.05f)
+        public async Task IncreaseVolume(double amount = 0.05)
         {
             await SetVolume(Client.Volume.level + amount);
         }
 
-        public async Task DecreaseVolume(float amount = 0.05f)
+        public async Task DecreaseVolume(double amount = 0.05)
         {
             await SetVolume(Client.Volume.level - amount);
         }
 
-        public async Task SetVolume(float level)
+        public async Task SetVolume(double level)
         {
-            if (level < 0 || level > 1.0f)
+            if (level < 0 || level > 1.0)
             {
                 throw new ArgumentException("level must be between 0.0f and 1.0f", nameof(level));
             }

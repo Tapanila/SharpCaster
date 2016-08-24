@@ -33,7 +33,7 @@ namespace SharpCaster.Models
             PayloadUtf8 = new ConnectRequest().ToJson()
         };
 
-        public static CastMessage Volume(float level) => new CastMessage
+        public static CastMessage Volume(double level) => new CastMessage
         {
             PayloadUtf8 = new VolumeRequest(level).ToJson()
         };

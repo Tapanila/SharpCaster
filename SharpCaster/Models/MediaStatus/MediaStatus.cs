@@ -6,19 +6,41 @@ namespace SharpCaster.Models.MediaStatus
 {
     public class MediaStatus
     {
-        public long mediaSessionId { get; set; }
-        public int playbackRate { get; set; }
+        //TODO this lowerCamelCase to UpperCamelCase could be done by serializer settings
+        //TODO instead of these properties
+        [JsonProperty("mediaSessionId")]
+        public int MediaSessionId { get; set; }
+
+        [JsonProperty("PlaybackRate")]
+        public int PlaybackRate { get; set; }
+
         [JsonProperty("playerState")]
         [JsonConverter(typeof(PlayerStateEnumConverter))]
         public PlayerState PlayerState { get; set; }
-        public double currentTime { get; set; }
-        public int supportedMediaCommands { get; set; }
-        public Volume volume { get; set; }
-        public List<int> activeTrackIds { get; set; }
-        public Media media { get; set; }
-        public int currentItemId { get; set; }
-        public List<Item> items { get; set; }
-        public string repeatMode { get; set; }
+
+        [JsonProperty("currentTime")]
+        public double CurrentTime { get; set; }
+
+        [JsonProperty("supportedMediaCommands")]
+        public int SupportedMediaCommands { get; set; }
+
+        [JsonProperty("volume")]
+        public Volume Volume { get; set; }
+
+        [JsonProperty("activeTrackIds")]
+        public List<int> ActiveTrackIds { get; set; }
+
+        [JsonProperty("media")]
+        public Media Media { get; set; }
+
+        [JsonProperty("currentItemId")]
+        public int CurrentItemId { get; set; }
+
+        [JsonProperty("items")]
+        public List<Item> Items { get; set; }
+
+        [JsonProperty("repeatMode")]
+        public string RepeatMode { get; set; }
     }
 
     public enum PlayerState

@@ -103,7 +103,7 @@ namespace SharpCaster
         public string ChromecastApplicationId;
         public string CurrentApplicationSessionId = "";
         public string CurrentApplicationTransportId = "";
-        public long CurrentMediaSessionId;
+        public int CurrentMediaSessionId;
         
         public event EventHandler ConnectedChanged;
         public event EventHandler<ChromecastApplication> ApplicationStarted;

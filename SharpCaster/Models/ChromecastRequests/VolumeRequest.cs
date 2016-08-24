@@ -5,7 +5,7 @@ namespace SharpCaster.Models.ChromecastRequests
     [DataContract]
     public class VolumeRequest : RequestWithId
     {
-        public VolumeRequest(float level) : base("SET_VOLUME")
+        public VolumeRequest(double level) : base("SET_VOLUME")
         {
             VolumeDataObject = new VolumeDataObject {Level = level};
         }
