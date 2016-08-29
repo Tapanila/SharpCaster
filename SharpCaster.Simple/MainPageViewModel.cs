@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
@@ -135,23 +134,20 @@ namespace SharpCaster.Simple
         public MainPageViewModel()
         {
             Chromecasts = new ObservableCollection<Chromecast>();
-            #pragma warning disable 4014
-            _chromecastService.DeviceLocator.DeviceFound += DeviceLocator_DeviceFound;
-            _chromecastService.StartLocatingDevices();
-            #pragma warning restore 4014
             _chromecastService.ChromeCastClient.ApplicationStarted += Client_ApplicationStarted;
             _chromecastService.ChromeCastClient.VolumeChanged += _client_VolumeChanged;
             _chromecastService.ChromeCastClient.MediaStatusChanged += ChromeCastClient_MediaStatusChanged;
             _chromecastService.ChromeCastClient.ConnectedChanged += ChromeCastClient_Connected;
             secondsTimer = new DispatcherTimer {Interval = TimeSpan.FromSeconds(1)};
             secondsTimer.Tick += SecondsTimer_Tick;
+            LoadChromecasts();
         }
 
-        private void DeviceLocator_DeviceFound(object sender, Chromecast e)
+        private async void LoadChromecasts()
         {
-            Chromecasts.Add(e);
+            Chromecasts = await _chromecastService.StartLocatingDevices();
         }
-
+        
         private async void ChromeCastClient_Connected(object sender, EventArgs e)
         {
             await ExecuteOnUiThread(() =>

@@ -139,9 +139,9 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\SharpCaster\SharpCaster.UniversalWindows\SharpCaster.UniversalWindows.csproj">
-      <Project>{18d6578d-c426-4954-a5c2-20c0581ae933}</Project>
-      <Name>SharpCaster.UniversalWindows</Name>
+    <ProjectReference Include="..\SharpCaster\SharpCaster.Portable\SharpCaster.Portable.csproj">
+      <Project>{56d42483-550d-4817-844b-6c27d880130f}</Project>
+      <Name>SharpCaster.Portable</Name>
     </ProjectReference>
   </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">

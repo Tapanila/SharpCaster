@@ -129,12 +129,6 @@
     <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\SharpCaster\SharpCaster.UniversalWindows\SharpCaster.UniversalWindows.csproj">
-      <Project>{18d6578d-c426-4954-a5c2-20c0581ae933}</Project>
-      <Name>SharpCaster.UniversalWindows</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <Folder Include="DummyServices\" />
   </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
