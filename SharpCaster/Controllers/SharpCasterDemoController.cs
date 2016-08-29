@@ -4,32 +4,12 @@ using SharpCaster.Models.MediaStatus;
 
 namespace SharpCaster.Controllers
 {
-    public class SharpCasterDemoController : BaseController
+    public class SharpCasterDemoController : BaseMediaController
     {
 
         public SharpCasterDemoController(ChromeCastClient client)
             : base(client, "B3419EF5")
         {
-        }
-
-        public async Task Play()
-        {
-            await Client.MediaChannel.Play();
-        }
-
-        public async Task Pause()
-        {
-            await Client.MediaChannel.Pause();
-        }
-
-        public async Task VolumeUp(float amount = 0.05f)
-        {
-            await Client.ReceiverChannel.IncreaseVolume(amount);
-        }
-
-        public async Task VolumeDown(float amount = 0.05f)
-        {
-            await Client.ReceiverChannel.DecreaseVolume(amount);
         }
 
         public async Task LoadMedia(
@@ -47,21 +27,6 @@ namespace SharpCaster.Controllers
             await
                 Client.MediaChannel.LoadMedia(mediaUrl, contentType, metadata, streamType, duration, customData, tracks,
                     activeTrackIds, autoPlay, currentTime);
-        }
-
-        public async Task Seek(double seconds)
-        {
-            await Client.MediaChannel.Seek(seconds);
-        }
-
-        public async Task SetMute(bool muted)
-        {
-            await Client.ReceiverChannel.SetMute(muted);
-        }
-
-        public async Task SetVolume(float f)
-        {
-            await Client.ReceiverChannel.SetVolume(f);
         }
     }
 }
