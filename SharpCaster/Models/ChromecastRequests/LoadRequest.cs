@@ -30,5 +30,8 @@ namespace SharpCaster.Models.ChromecastRequests
 
         [DataMember(Name = "customData")]
         public object Customdata { get; }
+
+        //[DataMember(Name = "supportedMediaCommands")]
+        //public int SupportedMediaCommands { get { return 15; } }
     }
 }
