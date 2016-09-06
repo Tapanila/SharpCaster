@@ -126,6 +126,9 @@
     </Compile>
     <Compile Include="..\Models\ChromecastStatus\*.cs">
       <Link>Models\ChromecastStatus\ThisTextDoesntMatter</Link>
+    </Compile>  
+	<Compile Include="..\Models\MediaMetadata\*.cs">
+      <Link>Models\MediaMetadata\ThisTextDoesntMatter</Link>
     </Compile>
     <Compile Include="Controllers\*.cs"/>
     <Compile Include="..\Properties\Annotations.cs" />
