@@ -20,7 +20,7 @@ namespace SharpCaster
         public Volume Volume { get; private set; }
         public ChromecastStatus ChromecastStatus { get; set; }
         public MediaStatus MediaStatus { get; set; }
-        public IChromecastSocketService ChromecastSocketService {get; set; }
+        public IChromecastSocketService ChromecastSocketService { get; set; }
 
         private ChromecastChannel _connectionChannel;
         private ChromecastChannel _mediaChannel;
@@ -93,7 +93,6 @@ namespace SharpCaster
             await Task.Delay(100);
             _connected = true;
             Connected?.Invoke(this, EventArgs.Empty);
-
         }
 
         public async Task Seek(double seconds)
@@ -111,10 +110,10 @@ namespace SharpCaster
             await Write(MessageFactory.Play(_currentApplicationTransportId, _currentMediaSessionId).ToProto());
         }
 
-        public async Task LoadMedia(string mediaUrl, object customData = null)
+        public async Task LoadMedia(string mediaUrl, Metadata medataData = null, object customData = null, double duration = 0D, double currentTime = 0.0)
         {
-            var mediaObject = new MediaData(mediaUrl, "application/vnd.ms-sstr+xml", null, "BUFFERED", 0D, customData);
-            var req = new LoadRequest(_currentApplicationSessionId, mediaObject, true, 0.0, customData);
+            var mediaObject = new MediaData(mediaUrl, medataData.ContentType, medataData, "BUFFERED", duration, customData);
+            var req = new LoadRequest(_currentApplicationSessionId, mediaObject, true, currentTime, customData);
 
             var reqJson = req.ToJson();
             await _mediaChannel.Write(MessageFactory.Load(_currentApplicationTransportId, reqJson));
@@ -163,8 +162,6 @@ namespace SharpCaster
             return true;
         }
 
-
-
         public async void ConnectChromecast(Uri uri)
         {
             await ChromecastSocketService.Initialize(uri.Host, ChromecastPort, _connectionChannel, _heartbeatChannel, ReadPacket);
@@ -206,7 +203,7 @@ namespace SharpCaster
                 {
                     entireMessage = stream.ParseData();
                 }
-                
+
                 var entireMessageArray = entireMessage.ToArray();
                 var castMessage = entireMessageArray.ToCastMessage();
                 if (castMessage == null) return;
@@ -230,9 +227,6 @@ namespace SharpCaster
             }
         }
 
-
-     
-
         private ChromecastChannel CreateChannel(string channelNamespace)
         {
             var channel = new ChromecastChannel(this, channelNamespace);
@@ -240,12 +234,9 @@ namespace SharpCaster
             return channel;
         }
 
-       
         internal async Task Write(byte[] bytes)
         {
             await ChromecastSocketService.Write(bytes);
         }
-
-
     }
 }

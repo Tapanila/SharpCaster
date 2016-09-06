@@ -72,7 +72,7 @@ namespace SharpCaster.Models
 
         public static CastMessage Pause(string destinationId, long mediaSessionId) => new CastMessage(destinationId, UniqueSourceID)
         {
-            
+
             Namespace = DialConstants.DialMediaUrn,
             PayloadUtf8 = new PauseRequest(mediaSessionId).ToJson()
         };
@@ -92,7 +92,7 @@ namespace SharpCaster.Models
         public static CastMessage Seek(string destinationId, long mediaSessionId, double seconds)
             => new CastMessage(destinationId, UniqueSourceID)
             {
-                Namespace =  DialConstants.DialMediaUrn,
+                Namespace = DialConstants.DialMediaUrn,
                 PayloadUtf8 = new SeekRequest(mediaSessionId, seconds).ToJson()
             };
 
@@ -107,7 +107,5 @@ namespace SharpCaster.Models
             Namespace = DialConstants.DialMediaUrn,
             PayloadUtf8 = new MediaStatusRequest().ToJson()
         };
-        
     }
-
 }
