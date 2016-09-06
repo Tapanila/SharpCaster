@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
 using SharpCaster.Controllers;
 using SharpCaster.Extensions;
@@ -29,13 +30,19 @@ namespace SharpCaster.Console
             ChromecastService.ChromeCastClient.MediaStatusChanged += ChromeCastClient_MediaStatusChanged;
             ChromecastService.ChromeCastClient.ConnectedChanged += ChromeCastClient_Connected;
 
-            var devices = await ChromecastService.StartLocatingDevices();
             System.Console.WriteLine("Started locating chromecasts!");
+            var devices = await ChromecastService.StartLocatingDevices();
+
+            if (devices.Count == 0)
+            {
+                System.Console.WriteLine("No chromecasts found");
+                return;
+            }
 
             var firstChromecast = devices.First();
             System.Console.WriteLine("Device found " + firstChromecast.FriendlyName);
             ChromecastService.ConnectToChromecast(firstChromecast);
-        }
+    }
 
 
         private static async void ChromeCastClient_Connected(object sender, EventArgs e)
