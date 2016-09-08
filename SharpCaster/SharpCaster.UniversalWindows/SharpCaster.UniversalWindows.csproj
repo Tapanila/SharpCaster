@@ -118,7 +118,7 @@
     <Compile Include="..\Models\ChromecastRequests\*.cs">
       <Link>Models\ChromecastRequests\ThisTextDoesntMatter</Link>
     </Compile>
-    <Compile Include="..\JsonConverters\PlayerStateEnumConverter.cs">
+    <Compile Include="..\JsonConverters\*.cs">
       <Link>JsonConverters\ThisTextDoesntMatter</Link>
     </Compile>
     <Compile Include="..\Models\MediaStatus\*.cs">
@@ -126,6 +126,9 @@
     </Compile>
     <Compile Include="..\Models\ChromecastStatus\*.cs">
       <Link>Models\ChromecastStatus\ThisTextDoesntMatter</Link>
+    </Compile>  
+	<Compile Include="..\Models\MediaMetadata\*.cs">
+      <Link>Models\MediaMetadata\ThisTextDoesntMatter</Link>
     </Compile>
     <Compile Include="Controllers\*.cs"/>
     <Compile Include="..\Properties\Annotations.cs" />

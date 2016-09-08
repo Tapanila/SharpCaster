@@ -11,6 +11,7 @@ using SharpCaster.Models;
 using SharpCaster.Models.MediaStatus;
 using SharpCaster.Services;
 using SharpCaster.Simple.Annotations;
+using SharpCaster.Models.ChromecastRequests;
 
 namespace SharpCaster.Simple
 {
@@ -189,7 +190,10 @@ namespace SharpCaster.Simple
             Title = title;
             Description = description;
             Poster = poster;
-            await _chromecastService.ChromeCastClient.LoadMedia("http://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/dash/BigBuckBunny.mpd");
+
+            Metadata meta = new Metadata();
+            meta.ContentType = "application/vnd.ms-sstr+xml";
+            await _chromecastService.ChromeCastClient.LoadMedia("http://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/dash/BigBuckBunny.mpd", meta);
         }
 
         public async Task Seek(double seconds)

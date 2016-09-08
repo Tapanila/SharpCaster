@@ -14,6 +14,6 @@ namespace SharpCaster.Models.ChromecastRequests
         public int MetadataType { get; set; }
 
         [IgnoreDataMember]
-        public virtual string ContentType { get; }
+        public virtual string ContentType { get; set; }
     }
 }
