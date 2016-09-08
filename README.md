@@ -38,7 +38,3 @@ ChromecastService.Current.ConnectToChromecast(chromecast);
 ## SharpCaster Simple
 
 ![SharpCaster Simple demo](https://raw.githubusercontent.com/tapanila/SharpCaster/master/Assets/SharpCaster.Simple.Demo.gif)
-
-# Notes
-
-Heavily based on [NCast](https://github.com/jeremychild/NCast)
