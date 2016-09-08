@@ -1,8 +1,12 @@
 ﻿{
   "dependencies": {
-    "Microsoft.NETCore.UniversalWindowsPlatform": "5.0.0",
+    "Microsoft.Bcl.Build": "1.0.21",
+    "Microsoft.Net.Http": "2.2.29",
+    "Microsoft.NETCore.UniversalWindowsPlatform": "5.2.2",
     "Newtonsoft.Json": "9.0.1",
-    "protobuf-net-sharpcaster": "2.0.0.668"
+    "protobuf-net-sharpcaster": "2.0.0.668",
+    "rda.SocketsForPCL": "2.0.2",
+    "Rssdp-sharpcaster": "1.0.0.13"
   },
   "frameworks": {
     "uap10.0": {}

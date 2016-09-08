@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Package xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10" xmlns:mp="http://schemas.microsoft.com/appx/2014/phone/manifest" xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10" IgnorableNamespaces="uap mp">
-  <Identity Name="0a704c10-8091-45b7-9335-7ace6a2e4196" Publisher="CN=TeemuTapanila" Version="1.0.0.0" />
+  <Identity Name="0a704c10-8091-45b7-9335-7ace6a2e4196" Publisher="CN=User" Version="1.0.0.0" />
   <mp:PhoneIdentity PhoneProductId="0a704c10-8091-45b7-9335-7ace6a2e4196" PhonePublisherId="00000000-0000-0000-0000-000000000000" />
   <Properties>
     <DisplayName>SharpCaster.Simple</DisplayName>
