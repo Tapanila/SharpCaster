@@ -53,12 +53,12 @@
     </Reference>
     <Reference Include="Mono.Android" />
     <Reference Include="mscorlib" />
-    <Reference Include="Rssdp, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Rssdp.1.0.0.12\lib\monoandroid\Rssdp.dll</HintPath>
+    <Reference Include="Rssdp.Native, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Rssdp-sharpcaster.1.0.0.13\lib\monoandroid\Rssdp.Native.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Rssdp.Portable, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Rssdp.1.0.0.12\lib\monoandroid\Rssdp.Portable.dll</HintPath>
+      <HintPath>..\packages\Rssdp-sharpcaster.1.0.0.13\lib\monoandroid\Rssdp.Portable.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Sockets.Plugin, Version=2.0.2.0, Culture=neutral, processorArchitecture=MSIL">
@@ -112,7 +112,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\SharpCaster\SharpCaster.Portable\SharpCaster.Portable.csproj">
+    <ProjectReference Include="..\SharpCaster\SharpCaster.Portable.csproj">
       <Project>{56d42483-550d-4817-844b-6c27d880130f}</Project>
       <Name>SharpCaster.Portable</Name>
     </ProjectReference>

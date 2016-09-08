@@ -51,12 +51,12 @@
       <HintPath>..\packages\protobuf-net-sharpcaster.2.0.0.668\lib\portable46-net451+win81+wpa81\protobuf-net.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Rssdp.NetFx40, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Rssdp.1.0.0.12\lib\net40\Rssdp.NetFx40.dll</HintPath>
+    <Reference Include="Rssdp.Native, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Rssdp-sharpcaster.1.0.0.13\lib\net40\Rssdp.Native.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Rssdp.Portable, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Rssdp.1.0.0.12\lib\net40\Rssdp.Portable.dll</HintPath>
+      <HintPath>..\packages\Rssdp-sharpcaster.1.0.0.13\lib\net40\Rssdp.Portable.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Sockets.Plugin, Version=2.0.2.0, Culture=neutral, processorArchitecture=MSIL">
@@ -92,10 +92,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
-    <None Include="packages.config" />
+    <None Include="packages.config">
+      <SubType>Designer</SubType>
+    </None>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\SharpCaster\SharpCaster.Portable\SharpCaster.Portable.csproj">
+    <ProjectReference Include="..\SharpCaster\SharpCaster.Portable.csproj">
       <Project>{56d42483-550d-4817-844b-6c27d880130f}</Project>
       <Name>SharpCaster.Portable</Name>
     </ProjectReference>

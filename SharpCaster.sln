@@ -9,7 +9,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpCaster.Simple", "Sharp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpCaster.Console", "SharpCaster.Console\SharpCaster.Console.csproj", "{22C1BAC2-C7F6-4092-99A6-2F0474E410AC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpCaster.Portable", "SharpCaster\SharpCaster.Portable\SharpCaster.Portable.csproj", "{56D42483-550D-4817-844B-6C27D880130F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpCaster.Portable", "SharpCaster\SharpCaster.Portable.csproj", "{56D42483-550D-4817-844B-6C27D880130F}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpCaster.Simple.Android", "SharpCaster.Simple.Android\SharpCaster.Simple.Android.csproj", "{A682556B-7487-4DB7-BE0B-EAAA112F2789}"
 EndProject

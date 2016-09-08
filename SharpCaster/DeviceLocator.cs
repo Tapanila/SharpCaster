@@ -22,7 +22,7 @@ namespace SharpCaster
         {
             using (var deviceLocator = new SsdpDeviceLocator())
             {
-                var foundDevices = await deviceLocator.SearchAsync("urn:dial-multiscreen-org:device:dial:1");
+                var foundDevices = await deviceLocator.SearchAsync("urn:dial-multiscreen-org:device:dial:1", TimeSpan.FromMilliseconds(5000));
 
                 foreach (var foundDevice in foundDevices)
                 {
