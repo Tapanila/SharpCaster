@@ -4,7 +4,7 @@
 
 ### This project is on beta stage
 
-SharpCaster is Chromecast C# SDK for Windows, Windows Phone and .NET 4.5.1+ platforms.
+SharpCaster is Chromecast C# SDK for Windows, Windows Phone, .NET 4.5.1, Xamarin.iOS and Xamarin.Android platforms.
 
 ## The nuget package  [![NuGet Status](http://img.shields.io/nuget/v/SharpCaster.svg?style=flat)](https://www.nuget.org/packages/SharpCaster/)
 
@@ -16,18 +16,24 @@ https://nuget.org/packages/SharpCaster/
 
 ## Finding chromecast devices from network
 ```cs
-DeviceLocator deviceLocator = new DeviceLocator();
-var cancellationTokenSource = new CancellationTokenSource();
-cancellationTokenSource.CancelAfter(5000);
-List<Chromecast> chromecasts = await deviceLocator.LocateDevicesAsync(cancellationTokenSource.Token);
+ObservableCollection<Chromecast> chromecasts = await ChromecastService.Current.StartLocatingDevices();
 ```
 ## Connecting to chromecast device, launch application and load media
 ```cs
 var chromecast = chromecasts.First();
-var client = new ChromeCastClient();
-client.Connected += async delegate { await client.LaunchApplication("B3419EF5"); };
-client.ApplicationStarted += async delegate { await client.LoadMedia("http://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/dash/BigBuckBunny.mpd"); };
+SharpCasterDemoController _controller;
+ChromecastService.ChromeCastClient.ConnectedChanged += async delegate { if (_controller == null)_controller = await ChromecastService.ChromeCastClient.LaunchSharpCaster(); };
+ChromecastService.ChromeCastClient.ApplicationStarted += 
+async delegate { 
+	while (_controller == null)
+	{
+		await Task.Delay(500);
+	}
+
+	await _controller.LoadMedia("https://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/mp4/DesigningForGoogleCast.mp4", "video/mp4");
+};
 client.ConnectChromecast(chromecast.DeviceUri);
+ChromecastService.ConnectToChromecast(chromecast);
 ```    
 
 ## SharpCaster Simple
