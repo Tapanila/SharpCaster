@@ -129,7 +129,7 @@ test:
 artifacts:
 
   # pushing all *.nupkg files in build directory recursively
-  - path: '**\*.nupkg'
+  - path: '**\SharpCaster*.nupkg'
     name: Nuget
 
 #---------------------------------#
