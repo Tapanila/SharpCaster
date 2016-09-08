@@ -22,8 +22,8 @@ ObservableCollection<Chromecast> chromecasts = await ChromecastService.Current.S
 ```cs
 var chromecast = chromecasts.First();
 SharpCasterDemoController _controller;
-ChromecastService.ChromeCastClient.ConnectedChanged += async delegate { if (_controller == null)_controller = await ChromecastService.ChromeCastClient.LaunchSharpCaster(); };
-ChromecastService.ChromeCastClient.ApplicationStarted += 
+ChromecastService.Current.ChromeCastClient.ConnectedChanged += async delegate { if (_controller == null)_controller = await ChromecastService.Current.ChromeCastClient.LaunchSharpCaster(); };
+ChromecastService.Current.ChromeCastClient.ApplicationStarted += 
 async delegate { 
 	while (_controller == null)
 	{
@@ -32,8 +32,7 @@ async delegate {
 
 	await _controller.LoadMedia("https://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/mp4/DesigningForGoogleCast.mp4", "video/mp4");
 };
-client.ConnectChromecast(chromecast.DeviceUri);
-ChromecastService.ConnectToChromecast(chromecast);
+ChromecastService.Current.ConnectToChromecast(chromecast);
 ```    
 
 ## SharpCaster Simple
