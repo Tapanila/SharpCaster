@@ -33,11 +33,11 @@
     </metadata>
     <files>	
 		<file
-			src="SharpCaster\bin\Release\SharpCaster.pdb"
+			src="bin\Release\SharpCaster.pdb"
 			target="lib\portable151-net451+netcore451+wpa81\SharpCaster.pdb" 
 			/>
 		<file
-			src="SharpCaster\bin\Release\SharpCaster.dll"
+			src="bin\Release\SharpCaster.dll"
 			target="lib\portable151-net451+netcore451+wpa81\SharpCaster.dll" 
 			/>
     </files>
