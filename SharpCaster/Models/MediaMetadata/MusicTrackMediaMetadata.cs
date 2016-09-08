@@ -22,14 +22,12 @@ namespace SharpCaster.Models.ChromecastRequests
         public List<ImageData> Images { get; set; }
 
         [IgnoreDataMember]
-        public override string ContentType
-        {
-            get { return "audio/mp3"; }
-        }
+        public override string ContentType { get; set; }
 
         public MusicTrackMediaMetadata() : base(3)
         {
             Images = new List<ImageData>();
+            ContentType = "audio/mp3";
         }
     }
 }

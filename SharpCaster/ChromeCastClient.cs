@@ -12,6 +12,7 @@ using SharpCaster.Models.ChromecastStatus;
 using SharpCaster.Models.MediaStatus;
 using SharpCaster.Interfaces;
 using SharpCaster.Services;
+using System.Runtime.InteropServices;
 
 namespace SharpCaster
 {
@@ -34,6 +35,7 @@ namespace SharpCaster
         private bool _connected;
 
         public event EventHandler Connected;
+        public event EventHandler Disconnected;
         public event EventHandler<ChromecastApplication> ApplicationStarted;
         public event EventHandler<MediaStatus> MediaStatusChanged;
         public event EventHandler<ChromecastStatus> ChromecastStatusChanged;
@@ -83,18 +85,6 @@ namespace SharpCaster
             await SetVolume(Volume.level - 0.05f);
         }
 
-        private async void HeartbeatChannel_MessageReceived(object sender, ChromecastSSLClientDataReceivedArgs e)
-        {
-            if (_connected || e.Message.GetJsonType() != "PONG") return;
-            //Wait 100 milliseconds before sending GET_STATUS because chromecast was sending CLOSE back without a wait
-            await Task.Delay(100);
-            GetChromecastStatus();
-            //Wait 100 milliseconds to make sure that the status of Chromecast device is received before notifying we have connected to it
-            await Task.Delay(100);
-            _connected = true;
-            Connected?.Invoke(this, EventArgs.Empty);
-        }
-
         public async Task Seek(double seconds)
         {
             await Write(MessageFactory.Seek(_currentApplicationTransportId, _currentMediaSessionId, seconds).ToProto());
@@ -118,25 +108,29 @@ namespace SharpCaster
             var reqJson = req.ToJson();
             await _mediaChannel.Write(MessageFactory.Load(_currentApplicationTransportId, reqJson));
         }
+        
+        private async void HeartbeatChannel_MessageReceived(object sender, ChromecastSSLClientDataReceivedArgs e)
+        {
+            if (_connected || e.Message.GetJsonType() != "PONG") return;
+            //Wait 100 milliseconds before sending GET_STATUS because chromecast was sending CLOSE back without a wait
+            await Task.Delay(100);
+            GetChromecastStatus();
+            //Wait 100 milliseconds to make sure that the status of Chromecast device is received before notifying we have connected to it
+            await Task.Delay(100);
+            _connected = true;
+            Connected?.Invoke(this, EventArgs.Empty);
+        }
 
         private void MediaChannel_MessageReceived(object sender, ChromecastSSLClientDataReceivedArgs e)
         {
             var json = e.Message.PayloadUtf8;
+            Debug.WriteLine(json);
             var response = JsonConvert.DeserializeObject<MediaStatusResponse>(json);
             if (response.status?.Count < 1) return;
             MediaStatus = response.status.First();
             MediaStatusChanged?.Invoke(this, MediaStatus);
             if (MediaStatus.volume != null) UpdateVolume(MediaStatus.volume);
             _currentMediaSessionId = MediaStatus.mediaSessionId;
-        }
-
-        private void UpdateVolume(Volume volume)
-        {
-            if (Volume != null &&
-                !(Math.Abs(Volume.level - volume.level) > 0.01f) &&
-                Volume.muted == volume.muted) return;
-            Volume = volume;
-            VolumeChanged?.Invoke(this, Volume);
         }
 
         private async void ReceiverChannel_MessageReceived(object sender, ChromecastSSLClientDataReceivedArgs e)
@@ -148,6 +142,15 @@ namespace SharpCaster
             ChromecastStatusChanged?.Invoke(this, ChromecastStatus);
             UpdateVolume(ChromecastStatus.Volume);
             await ConnectToApplication(_chromecastApplicationId);
+        }
+
+        private void UpdateVolume(Volume volume)
+        {
+            if (Volume != null &&
+                !(Math.Abs(Volume.level - volume.level) > 0.01f) &&
+                Volume.muted == volume.muted) return;
+            Volume = volume;
+            VolumeChanged?.Invoke(this, Volume);
         }
 
         private async Task<bool> ConnectToApplication(string applicationId)
@@ -206,17 +209,34 @@ namespace SharpCaster
 
                 var entireMessageArray = entireMessage.ToArray();
                 var castMessage = entireMessageArray.ToCastMessage();
-                if (castMessage == null) return;
+
+                if (castMessage == null)
+                {
+                    return;
+                }
+
                 Debug.WriteLine("Received: " + castMessage.GetJsonType());
-                if (string.IsNullOrEmpty(castMessage.Namespace)) return;
+
+                if (string.IsNullOrEmpty(castMessage.Namespace))
+                {
+                    return;
+                }
+
                 ReceivedMessage(castMessage);
             }
             catch (Exception ex)
             {
+                // TODO: Catch disconnect - HResult = 0x80072745 -
+                // catch this (remote device disconnect) ex = {"An established connection was aborted
+                // by the software in your host machine. (Exception from HRESULT: 0x80072745)"}
+                if (ex.InnerException != null && ex.InnerException.Message.Contains("0x80072745"))
+                {
+                    Disconnected?.Invoke(this, EventArgs.Empty);
+                }
+
                 // Log these bytes
                 Debug.WriteLine(ex);
             }
-
         }
 
         private void ReceivedMessage(CastMessage castMessage)
@@ -237,6 +257,22 @@ namespace SharpCaster
         internal async Task Write(byte[] bytes)
         {
             await ChromecastSocketService.Write(bytes);
+        }
+
+        public void AddChannel(string channelNamespace)
+        {
+            var existChannel = Channels?.Where(x => x.Namespace.Equals(channelNamespace, StringComparison.OrdinalIgnoreCase)).FirstOrDefault();
+            if (existChannel == null)
+            {
+                var channel = CreateChannel(channelNamespace);
+                channel.MessageReceived += Channel_MessageReceived;
+            }
+        }
+
+        private void Channel_MessageReceived(object sender, ChromecastSSLClientDataReceivedArgs e)
+        {
+            var json = e.Message.PayloadUtf8;
+            Debug.WriteLine(json);
         }
     }
 }

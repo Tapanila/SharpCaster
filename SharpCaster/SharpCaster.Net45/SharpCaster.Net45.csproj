@@ -69,7 +69,7 @@
     <Compile Include="..\Models\ChromecastRequests\*.cs">
       <Link>Models\ChromecastRequests\ThisTextDoesntMatter</Link>
     </Compile>
-    <Compile Include="..\JsonConverters\PlayerStateEnumConverter.cs">
+    <Compile Include="..\JsonConverters\*.cs">
       <Link>JsonConverters\ThisTextDoesntMatter</Link>
     </Compile>
     <Compile Include="..\Models\MediaStatus\*.cs">

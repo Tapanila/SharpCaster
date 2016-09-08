@@ -7,17 +7,31 @@ namespace SharpCaster.Models.MediaStatus
     public class MediaStatus
     {
         public long mediaSessionId { get; set; }
+
         public int playbackRate { get; set; }
+
         [JsonProperty("playerState")]
         [JsonConverter(typeof(PlayerStateEnumConverter))]
         public PlayerState PlayerState { get; set; }
+
         public double currentTime { get; set; }
+
         public int supportedMediaCommands { get; set; }
+
         public Volume volume { get; set; }
+
         public List<int> activeTrackIds { get; set; }
+
         public Media media { get; set; }
+
         public int currentItemId { get; set; }
+
+        [JsonProperty("idleReason")]
+        [JsonConverter(typeof(IdleReasonEnumConverter))]
+        public IdleReason IdleReason { get; set; }
+
         public List<Item> items { get; set; }
+
         public string repeatMode { get; set; }
     }
 
@@ -27,5 +41,14 @@ namespace SharpCaster.Models.MediaStatus
         Idle,
         Paused,
         Playing
+    }
+
+    public enum IdleReason
+    {
+        NONE,
+        CANCELLED,
+        INTERRUPTED,
+        FINISHED,
+        ERROR
     }
 }
