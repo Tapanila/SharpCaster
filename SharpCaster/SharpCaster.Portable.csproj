@@ -41,6 +41,8 @@
     <Compile Include="Extensions\ByteArrayExtension.cs" />
     <Compile Include="Extensions\ChromeCastClientExtension.cs" />
     <Compile Include="Extensions\StreamExtension.cs" />
+    <Compile Include="Interfaces\IController.cs" />
+    <Compile Include="Interfaces\IMediaController.cs" />
     <Compile Include="Models\Chromecast.cs" />
     <Compile Include="Models\CustomTypes\*.cs" />
     <Compile Include="Models\Metadata\GenericMediaMetadata.cs" />

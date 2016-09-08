@@ -95,7 +95,26 @@ namespace SharpCaster
 
         private ChromecastApplication _runningApplication;
 
-        public IChromecastSocketService ChromecastSocketService {get; set; }
+
+        private Dictionary<string, IController> _controllerDictionaryBackingField { get; set; }
+
+        private Dictionary<string, IController> GetControllerDictionary()
+        {
+            if (_controllerDictionaryBackingField == null)
+            {
+                var controllers = new List<IController>
+                                    {
+                                        (IController)new PlexController(this),
+                                        (IController)new YouTubeController(this),
+                                        (IController)new SharpCasterDemoController(this)
+                                    };
+                _controllerDictionaryBackingField = controllers.ToDictionary(controller => controller.ApplicationId);
+            }
+
+            return _controllerDictionaryBackingField;
+        }
+
+        public IChromecastSocketService ChromecastSocketService { get; set; }
 
         public ConnectionChannel ConnectionChannel;
         public MediaChannel MediaChannel;
@@ -105,8 +124,8 @@ namespace SharpCaster
         public string ChromecastApplicationId;
         public string CurrentApplicationSessionId = "";
         public string CurrentApplicationTransportId = "";
-        public long CurrentMediaSessionId;
-        
+        public int CurrentMediaSessionId;
+
         public event EventHandler ConnectedChanged;
         public event EventHandler<ChromecastApplication> ApplicationStarted;
         public event EventHandler<MediaStatus> MediaStatusChanged;
@@ -127,13 +146,24 @@ namespace SharpCaster
             MediaChannel = new MediaChannel(this);
             Channels.Add(MediaChannel);
         }
-        
-        
+
+
         public async void ConnectChromecast(Uri uri)
         {
             await ChromecastSocketService.Initialize(uri.Host, ChromecastPort, ConnectionChannel, HeartbeatChannel, ReadPacket);
         }
 
+        public IController GetControllerForCurrentApp()
+        {
+            var currentAppId = RunningApplication?.AppId;
+            var controllerDictionary = GetControllerDictionary();
+            if (currentAppId == null || controllerDictionary.Keys.Contains(currentAppId))
+            {
+                throw new KeyNotFoundException("No controller was found for the current applicationId");
+            }
+
+            return controllerDictionary[currentAppId];
+        }
 
         private void ReadPacket(Stream stream, bool parsed)
         {
@@ -150,7 +180,7 @@ namespace SharpCaster
                 {
                     entireMessage = stream.ParseData();
                 }
-                
+
                 var entireMessageArray = entireMessage.ToArray();
                 var castMessage = entireMessageArray.ToCastMessage();
                 if (string.IsNullOrEmpty(castMessage?.Namespace)) return;

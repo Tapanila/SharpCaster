@@ -175,9 +175,9 @@ namespace SharpCaster.Simple
                         secondsTimer.Stop();
                         break;
                 }
-                Position = e.currentTime;
-                if (e.media != null)
-                    Length = e.media.duration;
+                Position = e.CurrentTime;
+                if (e.Media != null)
+                    Length = e.Media.duration;
             });
         }
 

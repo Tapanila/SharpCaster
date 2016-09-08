@@ -4,45 +4,45 @@ using SharpCaster.Extensions;
 
 namespace SharpCaster.Controllers
 {
-    public class PlexController : BaseController
+    public class PlexController : BaseMediaController
     {
         public PlexController(ChromeCastClient client) : base(client, "9AC194DC")
         {
         }
 
-        public async Task Play()
+        public override async Task Play()
         {
             await Client.Channels.GetPlexChannel().Play();
         }
 
-        public async Task Pause()
+        public override async Task Pause()
         {
             await Client.Channels.GetPlexChannel().Pause();
         }
 
-        public async Task Seek(double seconds)
+        public override async Task Seek(double seconds)
         {
             await Client.Channels.GetPlexChannel().Seek(seconds);
         }
 
-        public async Task Stop()
+        public override async Task Stop()
         {
             await Client.Channels.GetPlexChannel().Stop();
         }
 
-        public async Task Next()
+        public override async Task Next()
         {
             await Client.Channels.GetPlexChannel().Next();
         }
 
-        public async Task Previous()
+        public override async Task Previous()
         {
             await Client.Channels.GetPlexChannel().Previous();
         }
 
-        public async Task Load()
-        {
-            throw new NotImplementedException();
+        //public async Task Load()
+        //{
+        //    throw new NotImplementedException();
 
             //await Client.MediaChannel
 
@@ -86,6 +86,6 @@ namespace SharpCaster.Controllers
             //   "autoplay":true,
             //   "currentTime":0
             //}
-        }
+        //}
     }
 }
