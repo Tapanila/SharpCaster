@@ -1,4 +1,4 @@
-﻿using System.Threading;
+﻿using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using SharpCaster.Models;
 
@@ -13,7 +13,6 @@ namespace SharpCaster.Services
         public DeviceLocator DeviceLocator { get; }
         public ChromeCastClient ChromeCastClient { get; }
         public Chromecast ConnectedChromecast { get; set; }
-        private CancellationTokenSource _cancellationTokenSource;
 
         public ChromecastService()
         {
@@ -24,20 +23,14 @@ namespace SharpCaster.Services
   
         public void ConnectToChromecast(Chromecast chromecast)
         {
-            StopLocatingDevices();
             ConnectedChromecast = chromecast;
             ChromeCastClient.ConnectChromecast(chromecast.DeviceUri);
         }
         
-        public void StopLocatingDevices()
-        {
-            _cancellationTokenSource.Cancel();
-        }
 
-        public async Task StartLocatingDevices()
+        public async Task<ObservableCollection<Chromecast>> StartLocatingDevices()
         {
-            _cancellationTokenSource = new CancellationTokenSource();
-            await DeviceLocator.LocateDevicesAsync(_cancellationTokenSource.Token);
+            return await DeviceLocator.LocateDevicesAsync();
         }
     }
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using SharpCaster.Channels;
 using SharpCaster.Controllers;
 using SharpCaster.Extensions;

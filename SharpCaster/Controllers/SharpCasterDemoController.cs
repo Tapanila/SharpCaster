@@ -1,6 +1,7 @@
 ﻿using System.Threading.Tasks;
 using SharpCaster.Models.ChromecastRequests;
 using SharpCaster.Models.MediaStatus;
+using SharpCaster.Models.Metadata;
 
 namespace SharpCaster.Controllers
 {
@@ -15,7 +16,7 @@ namespace SharpCaster.Controllers
         public async Task LoadMedia(
             string mediaUrl,
             string contentType = "application/vnd.ms-sstr+xml",
-            Metadata metadata = null,
+            IMetadata metadata = null,
             string streamType = "BUFFERED",
             double duration = 0D,
             object customData = null,
