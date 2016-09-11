@@ -38,3 +38,10 @@ ChromecastService.Current.ConnectToChromecast(chromecast);
 ## SharpCaster Simple
 
 ![SharpCaster Simple demo](https://raw.githubusercontent.com/tapanila/SharpCaster/master/Assets/SharpCaster.Simple.Demo.gif)
+
+## Contributing
+Contributing is encouraged! Please submit pull requests, open issues etc. However, to ensure we end up with a good result and to make my life a little easier, could I please request that;
+
+* All changes be made in a feature branch, not in master, and please don't submit PR's directly against master.
+
+Thanks! I look forward to merge your contribution.
