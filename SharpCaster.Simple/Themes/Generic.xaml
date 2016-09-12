@@ -1,0 +1,166 @@
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controllers="using:SharpCaster.Simple.Controllers">
+
+    <Style TargetType="controllers:CastButton">
+        <Setter Property="Foreground" Value="Black" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="controllers:CastButton">
+                    <Grid x:Name="RootGrid" Background="Transparent">
+                        <VisualStateManager.VisualStateGroups>
+                            <VisualStateGroup x:Name="InteractiveStates">
+                                <VisualState x:Name="Unavailable">
+                                    <Storyboard>
+                                        <ObjectAnimationUsingKeyFrames Storyboard.TargetProperty="Visibility" Storyboard.TargetName="CastIcon">
+                                            <DiscreteObjectKeyFrame KeyTime="0" Value="Collapsed"/>
+                                        </ObjectAnimationUsingKeyFrames>
+                                    </Storyboard>
+                                </VisualState>
+                                <VisualState x:Name="Disconnected"/>
+                                <VisualState x:Name="Connecting">
+                                    <Storyboard RepeatBehavior="Forever" Duration="0:0:1.5" AutoReverse="True">
+                                        <ObjectAnimationUsingKeyFrames Storyboard.TargetProperty="Visibility" Storyboard.TargetName="CastIcon">
+                                            <DiscreteObjectKeyFrame KeyTime="0" Value="Collapsed"/>
+                                        </ObjectAnimationUsingKeyFrames>
+                                        <ObjectAnimationUsingKeyFrames Storyboard.TargetProperty="Visibility" Storyboard.TargetName="Loading0">
+                                            <DiscreteObjectKeyFrame KeyTime="0" Value="Visible"/>
+                                        </ObjectAnimationUsingKeyFrames>
+                                        <ObjectAnimationUsingKeyFrames Storyboard.TargetProperty="Visibility" Storyboard.TargetName="Loading1">
+                                            <DiscreteObjectKeyFrame KeyTime="0" Value="Visible"/>
+                                        </ObjectAnimationUsingKeyFrames>
+                                        <ObjectAnimationUsingKeyFrames Storyboard.TargetProperty="Visibility" Storyboard.TargetName="Loading2">
+                                            <DiscreteObjectKeyFrame KeyTime="0" Value="Visible"/>
+                                        </ObjectAnimationUsingKeyFrames>
+                                        <ObjectAnimationUsingKeyFrames Storyboard.TargetProperty="Visibility" Storyboard.TargetName="LoadingRectangle">
+                                            <DiscreteObjectKeyFrame KeyTime="0" Value="Visible"/>
+                                        </ObjectAnimationUsingKeyFrames>
+                                        <ObjectAnimationUsingKeyFrames Storyboard.TargetProperty="Opacity" Storyboard.TargetName="Loading0">
+                                            <DiscreteObjectKeyFrame KeyTime="0:0:0" Value="1.0"/>
+                                            <DiscreteObjectKeyFrame KeyTime="0:0:0.5" Value="0.3"/>
+                                        </ObjectAnimationUsingKeyFrames>
+                                        <ObjectAnimationUsingKeyFrames Storyboard.TargetProperty="Opacity" Storyboard.TargetName="Loading1">
+                                            <DiscreteObjectKeyFrame KeyTime="0:0:0.5" Value="1.0"/>
+                                            <DiscreteObjectKeyFrame KeyTime="0:0:1" Value="0.3"/>
+                                        </ObjectAnimationUsingKeyFrames>
+                                        <ObjectAnimationUsingKeyFrames Storyboard.TargetProperty="Opacity" Storyboard.TargetName="Loading2">
+                                            <DiscreteObjectKeyFrame KeyTime="0:0:1" Value="1.0"/>
+                                        </ObjectAnimationUsingKeyFrames>
+                                    </Storyboard>
+                                    
+                                </VisualState>
+                                <VisualState x:Name="Connected">
+                                    <Storyboard>
+                                        <ObjectAnimationUsingKeyFrames Storyboard.TargetProperty="Fill" Storyboard.TargetName="CastIcon">
+                                            <DiscreteObjectKeyFrame KeyTime="0" Value="Purple"/>
+                                        </ObjectAnimationUsingKeyFrames>
+                                    </Storyboard>    
+                                </VisualState>
+                            </VisualStateGroup>
+                        </VisualStateManager.VisualStateGroups>
+
+                        <Path
+                            Data="M1 18 L1 21 L4 21 C4 19.34 2.66 18 1 18 L1 18 Z M1 14 L1 16 C3.76 16 6 18.24 6 21 L8 21 C8 17.13 4.87 14 1 14 L1 14 Z M1 10 L1 12 C5.97 12 10 16.03 10 21 L12 21 C12 14.92 7.07 10 1 10 L1 10 Z M21 3 L3 3 C1.9 3 1 3.9 1 5 L1 8 L3 8 L3 5 L21 5 L21 19 L14 19 L14 21 L21 21 C22.1 21 23 20.1 23 19 L23 5 C23 3.9 22.1 3 21 3 L21 3 Z"
+                            x:Name="CastIcon"
+		                    Fill="{TemplateBinding Foreground}"
+		                    StrokeThickness="1"                            
+		                />
+
+                        <Path x:Name="Loading0"
+                              Visibility="Collapsed"
+                              Fill="{TemplateBinding Foreground}"
+                              StrokeThickness="1"
+                              Opacity="0.3"
+                              Data="M1 18 L1 21 L4 21 C4 19.34 2.66 18 1 18 L1 18 Z"
+                              />
+                        <Path x:Name="Loading1"
+                              Visibility="Collapsed"
+                              Fill="{TemplateBinding Foreground}"
+                              StrokeThickness="1"
+                              Opacity="0.3"
+                              Data="M1 14 L1 16 C3.76 16 6 18.24 6 21 L8 21 C8 17.13 4.87 14 1 14 L1 14 Z"
+                              />
+                        <Path x:Name="Loading2"
+                              Visibility="Collapsed"
+                              Fill="{TemplateBinding Foreground}"
+                              StrokeThickness="1"
+                              Opacity="0.3"
+                              Data="M1 10 L1 12 C5.97 12 10 16.03 10 21 L12 21 C12 14.92 7.07 10 1 10 L1 10 Z"
+                              />
+                        <Path x:Name="LoadingRectangle"
+                              Visibility="Collapsed"
+                              Fill="{TemplateBinding Foreground}"
+                              StrokeThickness="1"
+                              Data="M21 3 L3 3 C1.9 3 1 3.9 1 5 L1 8 L3 8 L3 5 L21 5 L21 19 L14 19 L14 21 L21 21 C22.1 21 23 20.1 23 19 L23 5 C23 3.9 22.1 3 21 3 L21 3 Z"/>
+
+
+                    </Grid>
+
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="controllers:CastDialog">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="controllers:CastDialog">
+                    <Grid
+                        Background="LightGray"
+                        >
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <TextBlock Text="Cast to" Grid.Row="0"/>
+                        <ListView Grid.Row="1" ItemsSource="{Binding Chromecasts}" x:Name="ChromecastListView">
+                            <ListView.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding FriendlyName}"/>
+                                </DataTemplate>
+                            </ListView.ItemTemplate>
+                        </ListView>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="controllers:CastPlayer">
+        <Setter Property="Height" Value="160" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="controllers:CastPlayer">
+                    <Grid Height="{TemplateBinding Height}" x:Name="RootGrid" Background="Transparent">
+                        <VisualStateManager.VisualStateGroups>
+                            <VisualStateGroup x:Name="InteractiveStates">
+                                <VisualState x:Name="Playing"/>
+                                <VisualState x:Name="Paused"/>
+                                <VisualState x:Name="Stopped"/>
+                            </VisualStateGroup>
+                        </VisualStateManager.VisualStateGroups>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="10*"/>
+                            <ColumnDefinition Width="80*"/>
+                            <ColumnDefinition Width="10*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="95*"/>
+                            <RowDefinition Height="5*"/>
+                        </Grid.RowDefinitions>
+                        <Image
+                            Grid.Column="0"
+                            Grid.Row="0"
+                            Source="{TemplateBinding PosterImageSource}"/>
+                        <StackPanel Grid.Row="0" Grid.Column="1">
+                            <TextBlock Text="{TemplateBinding Title}" FontSize="24" FontWeight="Bold" />
+                            <TextBlock Text="{TemplateBinding Description}" FontSize="18"/>
+                        </StackPanel>
+                        <Button Grid.Row="0" Grid.Column="2" Content="Play/Pause"/>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+</ResourceDictionary>

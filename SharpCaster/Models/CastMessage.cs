@@ -1,5 +1,4 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using Newtonsoft.Json;
 using ProtoBuf;
 using SharpCaster.Extensions;
@@ -34,7 +33,7 @@ namespace SharpCaster.Models
         [ProtoMember(4, IsRequired = true, Name = "namespace")]
         public string Namespace;
         [ProtoMember(5, IsRequired = true, Name = "payload_type")]
-        public int PayloadType = 0;
+        public int PayloadType;
         [ProtoMember(6, IsRequired = false, Name = "payload_utf8")]
         public string PayloadUtf8;
         [ProtoMember(7, IsRequired = false, Name = "payload_binary")]
@@ -62,10 +61,7 @@ namespace SharpCaster.Models
                 var buffer = bufStream.ToArray().AddHeader();
                 return buffer;
             }
-            else
-            {
-                return bufStream.ToArray();
-            }
+            return bufStream.ToArray();
         }
     }
 }
