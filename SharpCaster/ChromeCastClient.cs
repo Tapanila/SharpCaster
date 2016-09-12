@@ -12,6 +12,7 @@ using SharpCaster.Models.ChromecastStatus;
 using SharpCaster.Models.MediaStatus;
 using SharpCaster.Interfaces;
 using SharpCaster.Services;
+using System.Runtime.InteropServices;
 
 namespace SharpCaster
 {

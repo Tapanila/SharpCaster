@@ -41,6 +41,10 @@ namespace SharpCaster.Models.MediaStatus
 
         [JsonProperty("repeatMode")]
         public string RepeatMode { get; set; }
+
+        [JsonProperty("idleReason")]
+        [JsonConverter(typeof(IdleReasonEnumConverter))]
+        public IdleReason IdleReason { get; set; }
     }
 
     public enum PlayerState
@@ -49,5 +53,14 @@ namespace SharpCaster.Models.MediaStatus
         Idle,
         Paused,
         Playing
+    }
+
+    public enum IdleReason
+    {
+        NONE,
+        CANCELLED,
+        INTERRUPTED,
+        FINISHED,
+        ERROR
     }
 }

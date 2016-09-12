@@ -41,6 +41,11 @@ namespace SharpCaster.Models
 
         public string GetJsonType()
         {
+            if (string.IsNullOrEmpty(PayloadUtf8))
+            {
+                return string.Empty;
+            }
+
             dynamic stuff = JsonConvert.DeserializeObject(PayloadUtf8);
 
             return stuff.type;
