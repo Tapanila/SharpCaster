@@ -1,11 +1,13 @@
 using System.Runtime.Serialization;
+using SharpCaster.Models.MediaStatus;
+using SharpCaster.Models.Metadata;
 
 namespace SharpCaster.Models.ChromecastRequests
 {
     [DataContract]
     public class MediaData
     {
-        public MediaData(string url, string contentType, Metadata metadata = null, string streamType = "BUFFERED", double duration = 0d, object customData = null)
+        public MediaData(string url, string contentType, IMetadata metadata = null, string streamType = "BUFFERED", double duration = 0d, object customData = null, Track[] tracks = null)
         {
             Url = url;
             ContentType = contentType;
@@ -13,6 +15,7 @@ namespace SharpCaster.Models.ChromecastRequests
             Duration = duration;
             Metadata = metadata;
             CustomData = customData;
+            Tracks = tracks;
         }
 
         [DataMember(Name = "contentId")]
@@ -22,7 +25,7 @@ namespace SharpCaster.Models.ChromecastRequests
         public string ContentType { get; set; }
 
         [DataMember(Name = "metadata")]
-        public Metadata Metadata { get; set; }
+        public IMetadata Metadata { get; set; }
 
         ///-------------------------------------------------------------------------------------------------
         /// <summary>
@@ -41,5 +44,8 @@ namespace SharpCaster.Models.ChromecastRequests
 
         [DataMember(Name = "customData")]
         public object CustomData { get; set; }
+
+        [DataMember(Name = "tracks")]
+        public Track[] Tracks { get; set; }
     }
 }

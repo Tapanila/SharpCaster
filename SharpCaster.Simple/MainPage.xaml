@@ -5,7 +5,7 @@
     xmlns:local="using:SharpCaster.Simple"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:controllers="using:SharpCaster.Controllers"
+    xmlns:controllers="using:SharpCaster.Simple.Controllers"
     mc:Ignorable="d">
 
     <Grid>
@@ -18,7 +18,7 @@
             Grid.Row="0"
             Orientation="Horizontal"
          >
-            <controllers:CastButton ChromecastService="{Binding ChromecastService}" />
+            <controllers:CastButton Chromecasts="{Binding Chromecasts}" ConnectedToChromecast="{Binding ConnectedToChromecast}" />
             <Button Content="Stop Application" Click="StopApplication" />
             <Button Content="Load media" Click="LoadMedia" />
             <Button Content="Play/Pause" Click="PlayPause"/>

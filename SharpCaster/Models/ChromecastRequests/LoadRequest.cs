@@ -6,7 +6,7 @@ namespace SharpCaster.Models.ChromecastRequests
     public class LoadRequest : RequestWithId
     {
         public LoadRequest(string sessionId, MediaData media, bool autoPlay, double currentTime,
-            object customData = null)
+            object customData = null, int[] activeTrackIds = null)
             : base("LOAD")
         {
             SessionId = sessionId;
@@ -14,6 +14,7 @@ namespace SharpCaster.Models.ChromecastRequests
             AutoPlay = autoPlay;
             CurrentTime = currentTime;
             Customdata = customData;
+            ActiveTrackIds = activeTrackIds;
         }
 
         [DataMember(Name = "sessionId")]
@@ -31,7 +32,7 @@ namespace SharpCaster.Models.ChromecastRequests
         [DataMember(Name = "customData")]
         public object Customdata { get; }
 
-        //[DataMember(Name = "supportedMediaCommands")]
-        //public int SupportedMediaCommands { get { return 15; } }
+        [DataMember(Name = "activeTrackIds")]
+        public int[] ActiveTrackIds { get; set; }
     }
 }

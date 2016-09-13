@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+using SharpCaster.Models.Metadata;
 
 namespace SharpCaster.Models.MediaStatus
 {
@@ -8,7 +8,7 @@ namespace SharpCaster.Models.MediaStatus
         public string contentType { get; set; }
         public string streamType { get; set; }
         public double duration { get; set; }
-        public GenericMediaMetadata metadata { get; set; }
+        public IMetadata metadata { get; set; }
         public object customData { get; set; }
     }
 }
