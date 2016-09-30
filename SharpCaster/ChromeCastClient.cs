@@ -12,6 +12,7 @@ using SharpCaster.Models.ChromecastStatus;
 using SharpCaster.Models.MediaStatus;
 using SharpCaster.Interfaces;
 using SharpCaster.Services;
+using System.Runtime.InteropServices;
 
 namespace SharpCaster
 {
@@ -189,6 +190,10 @@ namespace SharpCaster
             }
             catch (Exception ex)
             {
+                // TODO: Catch disconnect - HResult = 0x80072745 -
+                // catch this (remote device disconnect) ex = {"An established connection was aborted
+                // by the software in your host machine. (Exception from HRESULT: 0x80072745)"}
+
                 // Log these bytes
                 Debug.WriteLine(ex);
             }

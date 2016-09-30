@@ -16,7 +16,7 @@
     <AndroidResgenFile>Resources\Resource.Designer.cs</AndroidResgenFile>
     <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
     <AndroidUseLatestPlatformSdk>True</AndroidUseLatestPlatformSdk>
-    <TargetFrameworkVersion>v6.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v7.0</TargetFrameworkVersion>
     <AndroidManifest>Properties\AndroidManifest.xml</AndroidManifest>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
@@ -53,20 +53,20 @@
     </Reference>
     <Reference Include="Mono.Android" />
     <Reference Include="mscorlib" />
-    <Reference Include="Rssdp.Native, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Rssdp-sharpcaster.1.0.0.13\lib\monoandroid\Rssdp.Native.dll</HintPath>
+    <Reference Include="Rssdp.Native, Version=2.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Rssdp.2.0.0.1\lib\monoandroid\Rssdp.Native.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Rssdp.Portable, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Rssdp-sharpcaster.1.0.0.13\lib\monoandroid\Rssdp.Portable.dll</HintPath>
+    <Reference Include="Rssdp.Portable, Version=2.0.0.1, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Rssdp.2.0.0.1\lib\monoandroid\Rssdp.Portable.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Sockets.Plugin, Version=2.0.2.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\rda.SocketsForPCL.2.0.2\lib\MonoAndroid10\Sockets.Plugin.dll</HintPath>
+      <HintPath>..\packages\Sharpcaster.SocketsForPCL.2.0.4\lib\MonoAndroid10\Sockets.Plugin.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Sockets.Plugin.Abstractions, Version=2.0.2.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\rda.SocketsForPCL.2.0.2\lib\MonoAndroid10\Sockets.Plugin.Abstractions.dll</HintPath>
+      <HintPath>..\packages\Sharpcaster.SocketsForPCL.2.0.4\lib\MonoAndroid10\Sockets.Plugin.Abstractions.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
@@ -91,7 +91,9 @@
   <ItemGroup>
     <None Include="app.config" />
     <None Include="GettingStarted.Xamarin" />
-    <None Include="packages.config" />
+    <None Include="packages.config">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="Resources\AboutResources.txt" />
     <None Include="Assets\AboutAssets.txt" />
   </ItemGroup>

@@ -13,6 +13,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpCaster.Portable", "Sha
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpCaster.Simple.Android", "SharpCaster.Simple.Android\SharpCaster.Simple.Android.csproj", "{A682556B-7487-4DB7-BE0B-EAAA112F2789}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{4F2078D2-2836-491F-9C08-0E3C85919E9B}"
+	ProjectSection(SolutionItems) = preProject
+		appveyor.yml = appveyor.yml
+		SharpCaster\SharpCaster.nuspec = SharpCaster\SharpCaster.nuspec
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
