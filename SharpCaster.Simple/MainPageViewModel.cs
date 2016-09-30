@@ -14,6 +14,7 @@ using SharpCaster.Models;
 using SharpCaster.Models.MediaStatus;
 using SharpCaster.Services;
 using SharpCaster.Simple.Annotations;
+using SharpCaster.Models.ChromecastRequests;
 
 namespace SharpCaster.Simple
 {
