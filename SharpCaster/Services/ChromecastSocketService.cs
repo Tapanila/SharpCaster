@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 using SharpCaster.Channels;
 using SharpCaster.Interfaces;
@@ -14,7 +15,7 @@ namespace SharpCaster.Services
         public async Task Initialize(string host, string port, ConnectionChannel connectionChannel, HeartbeatChannel heartbeatChannel, Action<Stream, bool> packetReader)
         {
             if (_client == null) _client = new TcpSocketClient();
-            await _client.ConnectAsync(host, int.Parse(port), true);
+            await _client.ConnectAsync(host, int.Parse(port), true, default(CancellationToken), true);
 
 
             connectionChannel.OpenConnection();

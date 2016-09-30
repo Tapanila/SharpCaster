@@ -145,7 +145,11 @@ namespace SharpCaster.Simple
 
         private async void LoadChromecasts()
         {
-            Chromecasts = await _chromecastService.StartLocatingDevices();
+            var foundChromecasts = await _chromecastService.StartLocatingDevices();
+            foreach (var foundChromecast in foundChromecasts)
+            {
+                Chromecasts.Add(foundChromecast);
+            }
         }
         
         private async void ChromeCastClient_Connected(object sender, EventArgs e)
