@@ -3,7 +3,7 @@
 ### Currently Supported Platforms
 * .Net Framework 4.5.1
 * Xamarin.iOS Unified
-* Xamarin.Android (Only tested with emulator)
+* Xamarin.Android
 * WinRT (Windows Store Apps 8.1)
 * UWP 10+ (Windows 10 Universal Programs)
 
