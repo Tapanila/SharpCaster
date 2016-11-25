@@ -1,4 +1,5 @@
-﻿using System.Collections.ObjectModel;
+﻿using System;
+using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using SharpCaster.Models;
 
@@ -6,9 +7,8 @@ namespace SharpCaster.Services
 {
     public class ChromecastService
     {
-        private static ChromecastService _instance;
-
-        public static ChromecastService Current => _instance ?? (_instance = new ChromecastService());
+        private static readonly Lazy<ChromecastService> _current = new Lazy<ChromecastService>(() => new ChromecastService());
+        public static ChromecastService Current => _current.Value;
 
         public DeviceLocator DeviceLocator { get; }
         public ChromeCastClient ChromeCastClient { get; }
