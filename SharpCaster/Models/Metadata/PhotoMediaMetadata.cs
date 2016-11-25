@@ -9,6 +9,10 @@ namespace SharpCaster.Models.Metadata
     //Fields: https://developers.google.com/cast/docs/reference/chrome/chrome.cast.media.PhotoMediaMetadata
     public class PhotoMediaMetadata : IMetadata
     {
+        public PhotoMediaMetadata()
+        {
+            metadataType = MetadataType.PHOTO;
+        }
         public string artist { get; set; }
         public string creationDateTime { get; set; }
         public int height { get; set; }

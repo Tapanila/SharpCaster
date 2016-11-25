@@ -9,6 +9,10 @@ namespace SharpCaster.Models.Metadata
     //Fields: https://developers.google.com/cast/docs/reference/chrome/chrome.cast.media.MovieMediaMetadata
     public class MovieMediaMetadata : IMetadata
     {
+        public MovieMediaMetadata()
+        {
+            metadataType = MetadataType.MOVIE;
+        }
         public List<ChromecastImage> images { get; set; }
         [JsonConverter(typeof(MetadataTypeEnumConverter))]
         public MetadataType metadataType { get; set; }
