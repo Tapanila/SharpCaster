@@ -10,6 +10,9 @@
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Chromecast SDK for Windows, Windows Phone, .NET 4.5.1, Xamarin.iOS and Xamarin.Android</description>
     <releaseNotes>
+      0.3.2
+      Fixed nuget package dependencies list
+      Added better handling of metadata
       0.3.1
       Fixed connection issues with Chromecast.
       Added IdleReason enum to MediaStatus
