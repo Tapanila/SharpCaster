@@ -51,12 +51,12 @@
       <HintPath>..\packages\protobuf-net-sharpcaster.2.0.0.668\lib\portable46-net451+win81+wpa81\protobuf-net.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Rssdp.Native, Version=2.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Rssdp.2.0.0.1\lib\net40\Rssdp.Native.dll</HintPath>
+    <Reference Include="Rssdp.Native, Version=2.0.0.2, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Rssdp.2.0.0.5\lib\net40\Rssdp.Native.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Rssdp.Portable, Version=2.0.0.1, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Rssdp.2.0.0.1\lib\net40\Rssdp.Portable.dll</HintPath>
+    <Reference Include="Rssdp.Portable, Version=2.0.0.4, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Rssdp.2.0.0.5\lib\net40\Rssdp.Portable.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Sockets.Plugin, Version=2.0.2.0, Culture=neutral, processorArchitecture=MSIL">

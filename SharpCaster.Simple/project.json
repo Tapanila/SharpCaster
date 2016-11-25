@@ -5,7 +5,7 @@
     "Microsoft.NETCore.UniversalWindowsPlatform": "5.2.2",
     "Newtonsoft.Json": "9.0.1",
     "protobuf-net-sharpcaster": "2.0.0.668",
-    "Rssdp": "2.0.0.1",
+    "Rssdp": "2.0.0.5",
     "sharpcaster.SocketsForPCL": "2.0.4"
   },
   "frameworks": {
