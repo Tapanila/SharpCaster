@@ -44,13 +44,17 @@
     <Compile Include="Interfaces\IController.cs" />
     <Compile Include="Interfaces\IMediaController.cs" />
     <Compile Include="JsonConverters\IdleReasonEnumConverter.cs" />
+    <Compile Include="JsonConverters\MetadataTypeConverter.cs" />
+    <Compile Include="JsonConverters\MetadataTypeEnumConverter.cs" />
     <Compile Include="Models\Chromecast.cs" />
     <Compile Include="Models\CustomTypes\*.cs" />
+    <Compile Include="Models\Enums\MetadataTypeEnum.cs" />
     <Compile Include="Models\Metadata\GenericMediaMetadata.cs" />
     <Compile Include="Models\Metadata\IMetadata.cs" />
     <Compile Include="Models\Metadata\MovieMediaMetadata.cs" />
     <Compile Include="Models\Metadata\MusicTrackMediaMetadata.cs" />
     <Compile Include="Models\Metadata\PhotoMediaMetadata.cs" />
+    <Compile Include="Models\Metadata\TvShowMediaMetadata.cs" />
     <Compile Include="Services\ChromeCastService.cs" />
     <Compile Include="Interfaces\IChromecastService.cs" />
     <Compile Include="Interfaces\IChromecastSocketService.cs" />

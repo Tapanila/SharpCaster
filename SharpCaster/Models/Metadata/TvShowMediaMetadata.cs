@@ -6,14 +6,16 @@ using SharpCaster.Models.MediaStatus;
 
 namespace SharpCaster.Models.Metadata
 {
-    //Fields: https://developers.google.com/cast/docs/reference/chrome/chrome.cast.media.MovieMediaMetadata
-    public class MovieMediaMetadata : IMetadata
+    //Fields: https://developers.google.com/cast/docs/reference/chrome/chrome.cast.media.TvShowMediaMetadata
+    public class TvShowMediaMetadata : IMetadata
     {
+        public int episode { get; set; }
         public List<ChromecastImage> images { get; set; }
         [JsonConverter(typeof(MetadataTypeEnumConverter))]
         public MetadataType metadataType { get; set; }
-        public string releaseDate { get; set; }
-        public string subtitle { get; set; }
+        public string originalAirdate { get; set; }
+        public int season { get; set; }
+        public string seriesTitle { get; set; }
         public string title { get; set; }
     }
 }

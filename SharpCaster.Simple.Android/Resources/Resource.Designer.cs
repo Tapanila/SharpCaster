@@ -26,6 +26,8 @@ namespace SharpCaster.Simple.Android
 		
 		public static void UpdateIdValues()
 		{
+			global::Rssdp.Resource.String.ApplicationName = global::SharpCaster.Simple.Android.Resource.String.ApplicationName;
+			global::Rssdp.Resource.String.Hello = global::SharpCaster.Simple.Android.Resource.String.Hello;
 		}
 		
 		public partial class Attribute

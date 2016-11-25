@@ -1,4 +1,7 @@
 ﻿using System.Collections.Generic;
+using Newtonsoft.Json;
+using SharpCaster.JsonConverters;
+using SharpCaster.Models.Enums;
 using SharpCaster.Models.MediaStatus;
 
 namespace SharpCaster.Models.Metadata
@@ -13,7 +16,8 @@ namespace SharpCaster.Models.Metadata
         public int latitude { get; set; }
         public string location { get; set; }
         public int longitude { get; set; }
-        public int metadataType { get; set; }
+        [JsonConverter(typeof(MetadataTypeEnumConverter))]
+        public MetadataType metadataType { get; set; }
         public string title { get; set; }
         public int width { get; set; }
     }
