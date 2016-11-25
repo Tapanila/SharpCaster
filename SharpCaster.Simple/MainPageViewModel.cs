@@ -15,6 +15,7 @@ using SharpCaster.Models.MediaStatus;
 using SharpCaster.Services;
 using SharpCaster.Simple.Annotations;
 using SharpCaster.Models.ChromecastRequests;
+using SharpCaster.Models.Metadata;
 
 namespace SharpCaster.Simple
 {
@@ -243,7 +244,10 @@ namespace SharpCaster.Simple
                 TrackContentId =
                     "https://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/tracks/DesigningForGoogleCast-en.vtt"
             };
-            await _controller.LoadMedia("https://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/mp4/DesigningForGoogleCast.mp4", "video/mp4", null, "BUFFERED", 0D, null, new[] { track }, new[] { 100 });
+
+            var metadata = new GenericMediaMetadata { title = title};
+
+            await _controller.LoadMedia("https://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/mp4/DesigningForGoogleCast.mp4", "video/mp4", metadata, "BUFFERED", 0D, null, new[] { track }, new[] { 100 });
         }
 
         public async Task Seek(double seconds)

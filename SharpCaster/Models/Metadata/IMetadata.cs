@@ -1,4 +1,7 @@
 ﻿using System.Collections.Generic;
+using Newtonsoft.Json;
+using SharpCaster.JsonConverters;
+using SharpCaster.Models.Enums;
 using SharpCaster.Models.MediaStatus;
 
 namespace SharpCaster.Models.Metadata
@@ -6,7 +9,8 @@ namespace SharpCaster.Models.Metadata
     public interface IMetadata
     {
         List<ChromecastImage> images { get; set; }
-        int metadataType { get; set; }
+        [JsonConverter(typeof(MetadataTypeEnumConverter))]
+        MetadataType metadataType { get; set; }
         string title { get; set; }
     }
 }
