@@ -5,16 +5,6 @@ namespace SharpCaster.Models
 {
     public static class MessageFactory
     {
-        public static class DialConstants
-        {
-            public const string DialMultiScreenUrn = "urn:dial-multiscreen-org:service:dial:1";
-            public const string DialConnectionUrn = "urn:x-cast:com.google.cast.tp.connection";
-            public const string DialHeartbeatUrn = "urn:x-cast:com.google.cast.tp.heartbeat";
-            public const string DialReceiverUrn = "urn:x-cast:com.google.cast.receiver";
-            public const string DialMediaUrn = "urn:x-cast:com.google.cast.media";
-            public const string YouTubeUrn = "urn:x-cast:com.google.youtube.mdx";
-            public const string PlexUrn = "urn:x-cast:plex";
-        }
 
         private static readonly string UniqueSourceID = "client-" + new Random((int)DateTime.Now.Ticks).Next() % 9999;
 

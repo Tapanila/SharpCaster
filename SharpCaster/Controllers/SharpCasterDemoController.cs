@@ -30,4 +30,14 @@ namespace SharpCaster.Controllers
                     activeTrackIds, autoPlay, currentTime);
         }
     }
+
+    public static class SharpCasterDemoControllerExtension
+    {
+        public static async Task<SharpCasterDemoController> LaunchSharpCaster(this ChromeCastClient client)
+        {
+            var controller = new SharpCasterDemoController(client);
+            await controller.LaunchApplication();
+            return controller;
+        }
+    }
 }

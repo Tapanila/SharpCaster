@@ -1,6 +1,5 @@
-﻿using System;
-using System.Threading.Tasks;
-using SharpCaster.Extensions;
+﻿using System.Threading.Tasks;
+using SharpCaster.Channels;
 
 namespace SharpCaster.Controllers
 {
@@ -87,5 +86,16 @@ namespace SharpCaster.Controllers
             //   "currentTime":0
             //}
         //}
+    }
+
+    public static class PlexControllerExtensions
+    {
+        public static async Task<PlexController> LaunchPlex(this ChromeCastClient client)
+        {
+            client.Channels.Add(new PlexChannel(client));
+            var controller = new PlexController(client);
+            await controller.LaunchApplication();
+            return controller;
+        }
     }
 }

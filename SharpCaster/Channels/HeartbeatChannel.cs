@@ -8,7 +8,7 @@ namespace SharpCaster.Channels
     public class HeartbeatChannel : ChromecastChannel
     {
         public HeartbeatChannel(ChromeCastClient client) : 
-            base(client, MessageFactory.DialConstants.DialHeartbeatUrn)
+            base(client, "urn:x-cast:com.google.cast.tp.heartbeat")
         {
             
             MessageReceived += HeartbeatChannel_MessageReceived;
