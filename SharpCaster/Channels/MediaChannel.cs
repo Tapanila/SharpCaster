@@ -11,7 +11,7 @@ namespace SharpCaster.Channels
     public class MediaChannel : ChromecastChannel
     {
         public MediaChannel(ChromeCastClient client) 
-            :base(client, MessageFactory.DialConstants.DialMediaUrn)
+            :base(client, "urn:x-cast:com.google.cast.media")
         {
             MessageReceived += OnMessageReceived;
         }

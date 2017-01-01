@@ -6,7 +6,7 @@ namespace SharpCaster.Channels
     public class ConnectionChannel : ChromecastChannel
     {
         public ConnectionChannel(ChromeCastClient client) :
-            base(client, MessageFactory.DialConstants.DialConnectionUrn)
+            base(client, "urn:x-cast:com.google.cast.tp.connection")
         {
         }
 

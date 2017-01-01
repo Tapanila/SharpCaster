@@ -1,14 +1,14 @@
-﻿using System;
+﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
 using SharpCaster.Models;
-using SharpCaster.Models.CustomTypes;
 
 namespace SharpCaster.Channels
 {
     public class PlexChannel : ChromecastChannel
     {
-        public PlexChannel(ChromeCastClient client) : base(client, MessageFactory.DialConstants.PlexUrn)
+        public static string Urn = "urn:x-cast:plex";
+        public PlexChannel(ChromeCastClient client) : base(client, Urn)
         {
         }
 
@@ -140,5 +140,13 @@ namespace SharpCaster.Channels
         //    //74 69 74 6C 65 73 22 2C  22 69 64 22 3A 34 38 32   titles","id":482
         //    //7D 7D                                              }}
         //}
+    }
+
+    public static class PlexChannelExtension
+    {
+        public static PlexChannel GetPlexChannel(this IEnumerable<IChromecastChannel> channels)
+        {
+            return (PlexChannel)channels.First(x => x.Namespace == PlexChannel.Urn);
+        }
     }
 }
