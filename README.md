@@ -4,7 +4,6 @@
 * .Net Framework 4.5.1
 * Xamarin.iOS Unified
 * Xamarin.Android
-* WinRT (Windows Store Apps 8.1)
 * UWP 10+ (Windows 10 Universal Programs)
 
 [![Build status](https://ci.appveyor.com/api/projects/status/myew8u24ry7dbdm0/branch/master?svg=true)](https://ci.appveyor.com/project/tapanila/sharpcaster)
