@@ -13,7 +13,7 @@
     <DefaultLanguage>en-US</DefaultLanguage>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{786C830F-07A1-408B-BD7F-6EE04809D6DB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
-    <TargetFrameworkProfile>Profile44</TargetFrameworkProfile>
+    <TargetFrameworkProfile>Profile151</TargetFrameworkProfile>
     <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
@@ -108,11 +108,11 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="Rssdp.Native, Version=2.0.0.2, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Rssdp.2.0.7-beta\lib\portable-net45+win+wpa81+wp80\Rssdp.Native.dll</HintPath>
+      <HintPath>..\packages\Rssdp.2.0.0.5\lib\portable-net45+win+wpa81+wp80\Rssdp.Native.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Rssdp.Portable, Version=2.0.0.4, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Rssdp.2.0.7-beta\lib\portable-net45+win+wpa81+wp80\Rssdp.Portable.dll</HintPath>
+      <HintPath>..\packages\Rssdp.2.0.0.5\lib\portable-net45+win+wpa81+wp80\Rssdp.Portable.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Sockets.Plugin, Version=2.0.2.0, Culture=neutral, processorArchitecture=MSIL">
