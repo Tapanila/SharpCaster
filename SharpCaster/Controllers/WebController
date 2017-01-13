@@ -17,4 +17,20 @@ namespace SharpCaster.Controllers
             ScreenIdChanged?.Invoke(this, s);
         }
     }
+    
+    public static class WebControllerExtensions
+    {
+        public static async Task<WebController> LaunchWeb(this ChromeCastClient client)
+        {
+            client.Channels.Add(new WebChannel(client));
+            var controller = new WebController(client);
+            await controller.LaunchApplication();
+            return controller;
+        }
+        
+        public static WebChannel GetWebChannel(this IEnumerable<IChromecastChannel> channels)
+        {
+            return (WebChannel)channels.First(x => x.Namespace == MessageFactory.DialConstants.WebUrl);
+        }        
+    }    
 }
