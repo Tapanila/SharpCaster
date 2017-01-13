@@ -4,7 +4,7 @@ using Newtonsoft.Json;
 namespace SharpCaster.Models.ChromecastRequests
 {
     [DataContract]
-    public class UrlRequest : RequestWithId 
+    public class WebRequest : RequestWithId 
     {
         public  UrlRequest(string appId, string strUrl) : base("loc")
         {
