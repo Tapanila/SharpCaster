@@ -31,7 +31,7 @@ namespace SharpCaster.Channels
 
         public async Task LoadUrl(string strUrl)
         {
-            var req = new UrlRequest(Client.CurrentApplicationSessionId, strUrl);
+            var req = new WebRequest(Client.CurrentApplicationSessionId, strUrl);
 
             var reqJson = req.ToJson();
             await Write(MessageFactory.Load(Client.CurrentApplicationTransportId, reqJson));
