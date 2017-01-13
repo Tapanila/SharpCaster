@@ -37,40 +37,6 @@ namespace SharpCaster.Channels
             await Write(MessageFactory.Load(Client.CurrentApplicationTransportId, reqJson));
         }
 
-        public async Task GetMediaStatus()
-        {
-            await Write(MessageFactory.MediaStatus(Client.CurrentApplicationTransportId));
-        }
-
-        public async void GetChromecastStatus()
-        {
-            await Write(MessageFactory.Status());
-        }
-
-        public async Task Play()
-        {
-            //Plex uses the same messages as the Google Media messages but on its own namespace
-            var castMessage = MessageFactory.Play(Client.CurrentApplicationTransportId, Client.CurrentMediaSessionId);
-
-            await Write(castMessage);
-        }
-
-        public async Task Pause()
-        {
-            //Plex uses the same messages as the Google Media messages but on its own namespace
-            var castMessage = MessageFactory.Pause(Client.CurrentApplicationTransportId, Client.CurrentMediaSessionId);
-            
-            await Write(castMessage);
-        }
-
-        public async Task Seek(double seconds)
-        {
-            //Plex uses the same messages as the Google Media messages but on its own namespace
-            var castMessage = MessageFactory.Seek(Client.CurrentApplicationTransportId, Client.CurrentMediaSessionId, seconds);
-
-            await Write(castMessage);
-        }
-
         public async Task StopApplication()
         {
             await Write(MessageFactory.StopApplication(Client.CurrentApplicationSessionId));
@@ -79,16 +45,6 @@ namespace SharpCaster.Channels
         public async Task Stop()
         {
             await Write(MessageFactory.StopMedia(Client.CurrentMediaSessionId));
-        }
-
-        public async Task Next()
-        {
-            await Write(MessageFactory.Next(Client.CurrentApplicationTransportId, Client.CurrentMediaSessionId));
-        }
-
-        public async Task Previous()
-        {
-            await Write(MessageFactory.Previous(Client.CurrentApplicationTransportId, Client.CurrentMediaSessionId));
         }
     }
 }
