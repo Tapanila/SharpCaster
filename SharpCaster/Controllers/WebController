@@ -1,0 +1,20 @@
+using System;
+using System.Threading.Tasks;
+using SharpCaster.Extensions;
+
+namespace SharpCaster.Controllers
+{
+    public class WebController : BaseController, IController 
+    {
+        public event EventHandler<string> ScreenIdChanged;
+        public WebController(ChromeCastClient client) : base(client, "5CB45E5A")
+        {
+            client.Channels.GetWebChannel().ScreenIdChanged += OnScreenIdChanged;
+        }
+
+        private void OnScreenIdChanged(object sender, string s)
+        {
+            ScreenIdChanged?.Invoke(this, s);
+        }
+    }
+}
