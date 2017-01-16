@@ -2,10 +2,9 @@ using System;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using SharpCaster.Models;
-using SharpCaster.Models.CustomTypes;
-using SharpCaster.Models.ChromecastRequests;
 using SharpCaster.Models.MediaStatus;
 using System.Linq;
+using SharpCaster.Models.ChromecastRequests;
 
 namespace SharpCaster.Channels
 {
@@ -13,7 +12,7 @@ namespace SharpCaster.Channels
     {
         public event EventHandler<string> ScreenIdChanged;
 
-        public WebChannel(ChromeCastClient client) : base(client, MessageFactory.DialConstants.WebUrl)
+        public WebChannel(ChromeCastClient client) : base(client, "urn:x-cast:com.url.cast")
         {
             MessageReceived += OnMessageReceived;
         }
