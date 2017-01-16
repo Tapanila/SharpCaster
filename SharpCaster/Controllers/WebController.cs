@@ -1,6 +1,9 @@
 using System;
 using System.Threading.Tasks;
 using SharpCaster.Extensions;
+using SharpCaster.Channels;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace SharpCaster.Controllers
 {
@@ -30,7 +33,7 @@ namespace SharpCaster.Controllers
         
         public static WebChannel GetWebChannel(this IEnumerable<IChromecastChannel> channels)
         {
-            return (WebChannel)channels.First(x => x.Namespace == MessageFactory.DialConstants.WebUrl);
+            return (WebChannel)channels.First(x => x.Namespace == "urn:x-cast:com.url.cast");
         }        
     }    
 }
