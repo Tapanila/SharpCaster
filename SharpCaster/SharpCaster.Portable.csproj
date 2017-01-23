@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -46,6 +46,7 @@
     <Compile Include="JsonConverters\MetadataTypeConverter.cs" />
     <Compile Include="JsonConverters\MetadataTypeEnumConverter.cs" />
     <Compile Include="Models\Chromecast.cs" />
+    <Compile Include="Models\ChromecastRequests\WebRequest.cs" />
     <Compile Include="Models\CustomTypes\*.cs" />
     <Compile Include="Models\Enums\MetadataTypeEnum.cs" />
     <Compile Include="Models\Metadata\GenericMediaMetadata.cs" />
@@ -92,7 +93,15 @@
     <Compile Include="Models\MediaStatus\Track.cs" />
     <Compile Include="Models\ChromecastStatus\*.cs" />
     <Compile Include="JsonConverters\PlayerStateEnumConverter.cs" />
-    <Compile Include="Channels\*.cs" />
+    <Compile Include="Channels\ChromecastChannel.cs" />
+    <Compile Include="Channels\ConnectionChannel.cs" />
+    <Compile Include="Channels\HeartbeatChannel.cs" />
+    <Compile Include="Channels\IChromecastChannel.cs" />
+    <Compile Include="Channels\MediaChannel.cs" />
+    <Compile Include="Channels\PlexChannel.cs" />
+    <Compile Include="Channels\ReceiverChannel.cs" />
+    <Compile Include="Channels\WebChannel.cs" />
+    <Compile Include="Channels\YouTubeChannel.cs" />
     <Compile Include="Properties\Annotations.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Controllers\*.cs" />

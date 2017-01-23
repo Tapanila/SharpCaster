@@ -21,10 +21,10 @@ namespace SharpCaster.Services
         }
 
   
-        public void ConnectToChromecast(Chromecast chromecast)
+        public async Task ConnectToChromecast(Chromecast chromecast)
         {
             ConnectedChromecast = chromecast;
-            ChromeCastClient.ConnectChromecast(chromecast.DeviceUri);
+            await ChromeCastClient.ConnectChromecast(chromecast.DeviceUri);
         }
         
 

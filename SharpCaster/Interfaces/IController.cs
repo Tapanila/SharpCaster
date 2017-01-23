@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 
-namespace SharpCaster.Controllers
+namespace SharpCaster.Interfaces
 {
     public interface  IController
     {
