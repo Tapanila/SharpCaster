@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using SharpCaster.Channels;
 using SharpCaster.Controllers;
 using SharpCaster.Extensions;
@@ -147,7 +148,7 @@ namespace SharpCaster
         }
 
 
-        public async void ConnectChromecast(Uri uri)
+        public async Task ConnectChromecast(Uri uri)
         {
             await ChromecastSocketService.Initialize(uri.Host, ChromecastPort, ConnectionChannel, HeartbeatChannel, ReadPacket);
         }
