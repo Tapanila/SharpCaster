@@ -1,24 +1,21 @@
-using System;
 using System.Threading.Tasks;
-using SharpCaster.Extensions;
 using SharpCaster.Channels;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace SharpCaster.Controllers
 {
-    public class WebController : BaseController, IController 
+    public class WebController : BaseController
     {
-        public event EventHandler<string> ScreenIdChanged;
-        public WebController(ChromeCastClient client) : base(client, "5CB45E5A")
+        public static string WebAppId = "5CB45E5A";
+        public WebController(ChromeCastClient client) : base(client, WebAppId)
         {
-            client.Channels.GetWebChannel().ScreenIdChanged += OnScreenIdChanged;
+            
         }
 
-        private void OnScreenIdChanged(object sender, string s)
+        public async Task LoadUrl(string url, string type = "iframe")
         {
-            ScreenIdChanged?.Invoke(this, s);
+            await Client.Channels.GetWebChannel().LoadUrl(url, type);
         }
+        
     }
     
     public static class WebControllerExtensions
@@ -29,11 +26,6 @@ namespace SharpCaster.Controllers
             var controller = new WebController(client);
             await controller.LaunchApplication();
             return controller;
-        }
-        
-        public static WebChannel GetWebChannel(this IEnumerable<IChromecastChannel> channels)
-        {
-            return (WebChannel)channels.First(x => x.Namespace == "urn:x-cast:com.url.cast");
-        }        
+        }  
     }    
 }

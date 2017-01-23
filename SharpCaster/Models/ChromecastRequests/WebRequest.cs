@@ -6,7 +6,7 @@ namespace SharpCaster.Models.ChromecastRequests
     [DataContract]
     public class WebRequest : RequestWithId 
     {
-        public WebRequest(string appId, string strUrl) : base("loc")
+        public WebRequest(string appId, string strUrl, string type) : base(type)
         {
             ApplicationId = appId;
             Url = strUrl;
