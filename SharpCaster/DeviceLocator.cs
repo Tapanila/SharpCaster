@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Rssdp;
+using Rssdp.Infrastructure;
 using SharpCaster.Annotations;
 using SharpCaster.Models;
 
@@ -20,7 +21,17 @@ namespace SharpCaster
 
         public async Task<ObservableCollection<Chromecast>> LocateDevicesAsync()
         {
-            using (var deviceLocator = new SsdpDeviceLocator())
+            return await LocateDevicesAsync(new SsdpDeviceLocator());
+        }
+
+        public async Task<ObservableCollection<Chromecast>> LocateDevicesAsync(string localIpAdress)
+        {
+            return await LocateDevicesAsync(new SsdpDeviceLocator(new SsdpCommunicationsServer(new SocketFactory(localIpAdress))));
+        }
+
+        private async Task<ObservableCollection<Chromecast>> LocateDevicesAsync(SsdpDeviceLocator deviceLocator)
+        {
+            using (deviceLocator)
             {
                 var foundDevices = await deviceLocator.SearchAsync("urn:dial-multiscreen-org:device:dial:1", TimeSpan.FromMilliseconds(5000));
 
@@ -39,6 +50,9 @@ namespace SharpCaster
             }
             return DiscoveredDevices;
         }
+
+
+
 
         public event PropertyChangedEventHandler PropertyChanged;
 

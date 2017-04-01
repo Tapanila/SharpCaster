@@ -32,5 +32,10 @@ namespace SharpCaster.Services
         {
             return await DeviceLocator.LocateDevicesAsync();
         }
+
+        public async Task<ObservableCollection<Chromecast>> StartLocatingDevices(string localIpAdress)
+        {
+            return await DeviceLocator.LocateDevicesAsync(localIpAdress);
+        }
     }
 }
