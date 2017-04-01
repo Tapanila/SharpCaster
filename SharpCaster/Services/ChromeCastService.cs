@@ -21,16 +21,21 @@ namespace SharpCaster.Services
         }
 
   
-        public void ConnectToChromecast(Chromecast chromecast)
+        public async Task ConnectToChromecast(Chromecast chromecast)
         {
             ConnectedChromecast = chromecast;
-            ChromeCastClient.ConnectChromecast(chromecast.DeviceUri);
+            await ChromeCastClient.ConnectChromecast(chromecast.DeviceUri);
         }
         
 
         public async Task<ObservableCollection<Chromecast>> StartLocatingDevices()
         {
             return await DeviceLocator.LocateDevicesAsync();
+        }
+
+        public async Task<ObservableCollection<Chromecast>> StartLocatingDevices(string localIpAdress)
+        {
+            return await DeviceLocator.LocateDevicesAsync(localIpAdress);
         }
     }
 }

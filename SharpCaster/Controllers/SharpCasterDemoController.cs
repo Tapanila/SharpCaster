@@ -7,9 +7,9 @@ namespace SharpCaster.Controllers
 {
     public class SharpCasterDemoController : BaseMediaController
     {
-
+        public static string SharpCasterApplicationId = "B3419EF5";
         public SharpCasterDemoController(ChromeCastClient client)
-            : base(client, "B3419EF5")
+            : base(client, SharpCasterApplicationId)
         {
         }
 

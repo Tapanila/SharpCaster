@@ -10,6 +10,9 @@
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Chromecast SDK for Windows, Windows Phone, .NET 4.5.1, Xamarin.iOS and Xamarin.Android</description>
     <releaseNotes>
+      0.3.5
+      Supports casting a web page to chromecast
+      Added support to specify specific IP address when locationg devices.
       0.3.4
       Had problems with 0.3.3 so rolled back changes related to BCL Libraries
       0.3.3
