@@ -8,7 +8,7 @@
 
 [![Build status](https://ci.appveyor.com/api/projects/status/myew8u24ry7dbdm0/branch/master?svg=true)](https://ci.appveyor.com/project/tapanila/sharpcaster)
 
-### This project is on beta stage
+### This project is on beta stage (There might be breaking changes and supported platforms might change)
 
 SharpCaster is Chromecast C# SDK for Windows, Windows Phone, .NET 4.5.1, Xamarin.iOS and Xamarin.Android platforms.
 
