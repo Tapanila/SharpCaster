@@ -16,7 +16,7 @@ namespace SharpCaster.Channels
             Namespace = ns;
             Client = client;
         }
-
+        
         public async Task Write(CastMessage message, bool includeNameSpace = true)
         {
             if (includeNameSpace)
@@ -24,7 +24,7 @@ namespace SharpCaster.Channels
                 message.Namespace = Namespace;
             }
             var bytes = message.ToProto();
-            await Client.ChromecastSocketService.Write(bytes);
+            await Client.ChromecastSocketService.Write(bytes, Client.CancellationTokenSource.Token);
         }
 
         public void OnMessageReceived(ChromecastSSLClientDataReceivedArgs e)
