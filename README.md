@@ -23,6 +23,8 @@ https://nuget.org/packages/SharpCaster/
 ## Finding chromecast devices from network
 ```cs
 ObservableCollection<Chromecast> chromecasts = await ChromecastService.Current.StartLocatingDevices();
+//If that does not return devices on desktop then you can use this, Where 192.168.1.2 is your machines local ip
+ObservableCollection<Chromecast> chromecasts = await ChromecastService.Current.StartLocatingDevices("192.168.1.2);
 ```
 ## Connecting to chromecast device, launch application and load media
 ```cs
