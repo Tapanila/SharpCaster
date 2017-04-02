@@ -17,8 +17,7 @@ namespace SharpCaster.Services
             if (_client == null) _client = new TcpSocketClient();
             await _client.ConnectAsync(host, int.Parse(port), true, default(CancellationToken), true);
 
-
-            connectionChannel.OpenConnection();
+            await connectionChannel.OpenConnection();
             heartbeatChannel.StartHeartbeat();
 
             await Task.Run(async () =>
