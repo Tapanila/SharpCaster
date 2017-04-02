@@ -1,6 +1,6 @@
 ﻿namespace SharpCaster.Models.Enums
 {
-    public enum MetadataType
+    public enum MetadataTypeEnum
     {
         GENERIC,
         MOVIE,

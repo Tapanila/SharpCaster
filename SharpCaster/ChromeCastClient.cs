@@ -184,6 +184,7 @@ namespace SharpCaster
                 var entireMessageArray = entireMessage.ToArray();
                 var castMessage = entireMessageArray.ToCastMessage();
                 if (string.IsNullOrEmpty(castMessage?.Namespace)) return;
+
                 Debug.WriteLine("Received: " + castMessage.GetJsonType());
                 ReceivedMessage(castMessage);
             }

@@ -11,7 +11,7 @@ namespace SharpCaster.Models.Metadata
     {
         public MusicTrackMediaMetadata()
         {
-            metadataType = MetadataType.MUSIC_TRACK;
+            metadataType = MetadataTypeEnum.MUSIC_TRACK;
         }
         public string albumArtist { get; set; }
         public string albumName { get; set; }
@@ -20,7 +20,7 @@ namespace SharpCaster.Models.Metadata
         public int discNumber { get; set; }
         public List<ChromecastImage> images { get; set; }
         [JsonConverter(typeof(MetadataTypeEnumConverter))]
-        public MetadataType metadataType { get; set; }
+        public MetadataTypeEnum metadataType { get; set; }
         public string releaseDate { get; set; }
         public string songName { get; set; }
         public string title { get; set; }

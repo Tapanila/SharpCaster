@@ -11,11 +11,11 @@ namespace SharpCaster.Models.Metadata
     {
         public MovieMediaMetadata()
         {
-            metadataType = MetadataType.MOVIE;
+            metadataType = MetadataTypeEnum.MOVIE;
         }
         public List<ChromecastImage> images { get; set; }
         [JsonConverter(typeof(MetadataTypeEnumConverter))]
-        public MetadataType metadataType { get; set; }
+        public MetadataTypeEnum metadataType { get; set; }
         public string releaseDate { get; set; }
         public string subtitle { get; set; }
         public string title { get; set; }

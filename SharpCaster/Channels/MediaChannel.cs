@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using SharpCaster.Models;
@@ -16,11 +17,19 @@ namespace SharpCaster.Channels
             MessageReceived += OnMessageReceived;
         }
 
+        public event EventHandler<ChromecastMediaError> ErrorReceived;
+
+
         private void OnMessageReceived(object sender, ChromecastSSLClientDataReceivedArgs chromecastSSLClientDataReceivedArgs)
         {
             var json = chromecastSSLClientDataReceivedArgs.Message.PayloadUtf8;
             var response = JsonConvert.DeserializeObject<MediaStatusResponse>(json);
-            if (response.status == null) return; //TODO: Should probably raise LOAD_FAILED event
+            if (response.status == null)
+            {
+                var errorMessage = JsonConvert.DeserializeObject<ChromecastMediaError>(json);
+                ErrorReceived?.Invoke(this, errorMessage);
+                return;
+            }
             if (response.status.Count == 0) return; //Initializing
             Client.MediaStatus = response.status.First();
             if (Client.MediaStatus.Volume != null) Client.Volume = Client.MediaStatus.Volume;
