@@ -21,21 +21,20 @@ namespace SharpCaster.Services
             connectionChannel.OpenConnection();
             heartbeatChannel.StartHeartbeat();
 
-            await Task.Run(() =>
+            await Task.Run(async () =>
             {
                 while (true)
                 {
                     var sizeBuffer = new byte[4];
-                    byte[] messageBuffer = { };
                     // First message should contain the size of message
-                    _client.ReadStream.Read(sizeBuffer, 0, sizeBuffer.Length);
+                    await _client.ReadStream.ReadAsync(sizeBuffer, 0, sizeBuffer.Length);
                     // The message is little-endian (that is, little end first),
                     // reverse the byte array.
                     Array.Reverse(sizeBuffer);
                     //Retrieve the size of message
                     var messageSize = BitConverter.ToInt32(sizeBuffer, 0);
-                    messageBuffer = new byte[messageSize];
-                    _client.ReadStream.Read(messageBuffer, 0, messageBuffer.Length);
+                    var messageBuffer = new byte[messageSize];
+                    await _client.ReadStream.ReadAsync(messageBuffer, 0, messageBuffer.Length);
                     var answer = new MemoryStream(messageBuffer.Length);
                     answer.Write(messageBuffer, 0, messageBuffer.Length);
                     answer.Position = 0;
@@ -44,10 +43,9 @@ namespace SharpCaster.Services
             });
         }
 
-        public Task Write(byte[] bytes)
+        public async Task Write(byte[] bytes)
         {
-            _client.WriteStream.Write(bytes, 0, bytes.Length);
-            return Task.Delay(0);
+            await _client.WriteStream.WriteAsync(bytes, 0, bytes.Length);
         }
     }
 }
