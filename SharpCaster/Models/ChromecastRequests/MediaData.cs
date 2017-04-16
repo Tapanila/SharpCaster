@@ -1,4 +1,6 @@
 using System.Runtime.Serialization;
+using Newtonsoft.Json;
+using SharpCaster.JsonConverters;
 using SharpCaster.Models.MediaStatus;
 using SharpCaster.Models.Metadata;
 
@@ -7,7 +9,7 @@ namespace SharpCaster.Models.ChromecastRequests
     [DataContract]
     public class MediaData
     {
-        public MediaData(string url, string contentType, IMetadata metadata = null, string streamType = "BUFFERED", double duration = 0d, object customData = null, Track[] tracks = null)
+        public MediaData(string url, string contentType, IMetadata metadata = null, StreamType streamType = StreamType.BUFFERED, double duration = 0d, object customData = null, Track[] tracks = null)
         {
             Url = url;
             ContentType = contentType;
@@ -37,7 +39,8 @@ namespace SharpCaster.Models.ChromecastRequests
         /// </value>
         ///-------------------------------------------------------------------------------------------------
         [DataMember(Name = "streamType")]
-        public string StreamType { get; set; }
+        [JsonConverter(typeof(StreamTypeConverter))]
+        public StreamType StreamType { get; set; }
 
         [DataMember(Name = "duration")]
         public double Duration { get; set; }
@@ -47,5 +50,12 @@ namespace SharpCaster.Models.ChromecastRequests
 
         [DataMember(Name = "tracks")]
         public Track[] Tracks { get; set; }
+    }
+
+    public enum StreamType
+    {
+        NONE,
+        BUFFERED,
+        LIVE
     }
 }

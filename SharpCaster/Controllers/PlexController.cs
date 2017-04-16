@@ -1,5 +1,6 @@
 ﻿using System.Threading.Tasks;
 using SharpCaster.Channels;
+using SharpCaster.Extensions;
 
 namespace SharpCaster.Controllers
 {
@@ -92,7 +93,7 @@ namespace SharpCaster.Controllers
     {
         public static async Task<PlexController> LaunchPlex(this ChromeCastClient client)
         {
-            client.Channels.Add(new PlexChannel(client));
+            client.MakeSureChannelExist(new PlexChannel(client));
             var controller = new PlexController(client);
             await controller.LaunchApplication();
             return controller;

@@ -1,5 +1,7 @@
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using SharpCaster.Channels;
+using SharpCaster.Extensions;
 
 namespace SharpCaster.Controllers
 {
@@ -22,7 +24,7 @@ namespace SharpCaster.Controllers
     {
         public static async Task<WebController> LaunchWeb(this ChromeCastClient client)
         {
-            client.Channels.Add(new WebChannel(client));
+            client.MakeSureChannelExist(new WebChannel(client));
             var controller = new WebController(client);
             await controller.LaunchApplication();
             return controller;

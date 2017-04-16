@@ -11,8 +11,8 @@ namespace SharpCaster.Channels
 {
     public class MediaChannel : ChromecastChannel
     {
-        public MediaChannel(ChromeCastClient client) 
-            :base(client, "urn:x-cast:com.google.cast.media")
+        public MediaChannel(ChromeCastClient client, string nameSpace = "urn:x-cast:com.google.cast.media")
+            : base(client, nameSpace)
         {
             MessageReceived += OnMessageReceived;
         }
@@ -72,11 +72,31 @@ namespace SharpCaster.Channels
             await Write(MessageFactory.Previous(Client.CurrentApplicationTransportId, Client.CurrentMediaSessionId));
         }
 
+        [System.Obsolete("This overload of LoadMedia is deprecated, please use other overload instead.")]
         public async Task LoadMedia(
             string mediaUrl,
             string contentType = "application/vnd.ms-sstr+xml",
             IMetadata metadata = null,
             string streamType = "BUFFERED",
+            double duration = 0D,
+            object customData = null,
+            Track[] tracks = null,
+            int[] activeTrackIds = null,
+            bool autoPlay = true,
+            double currentTime = 0.0)
+        {
+            StreamType parsedStreamType;
+
+            Enum.TryParse(streamType, out parsedStreamType);
+            await LoadMedia(mediaUrl, contentType, metadata, parsedStreamType, duration, customData, tracks, activeTrackIds,
+                autoPlay, currentTime);
+        }
+
+        public async Task LoadMedia(
+            string mediaUrl,
+            string contentType = "application/vnd.ms-sstr+xml",
+            IMetadata metadata = null,
+            StreamType streamType = StreamType.BUFFERED,
             double duration = 0D,
             object customData = null,
             Track[] tracks = null,

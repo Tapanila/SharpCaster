@@ -39,6 +39,7 @@
     <Compile Include="ChromeCastClient.cs" />
     <Compile Include="DeviceLocator.cs" />
     <Compile Include="Extensions\ByteArrayExtension.cs" />
+    <Compile Include="Extensions\ChromecastChannelExtensions.cs" />
     <Compile Include="Extensions\StreamExtension.cs" />
     <Compile Include="Interfaces\IController.cs" />
     <Compile Include="Interfaces\IMediaController.cs" />
@@ -47,6 +48,7 @@
     <Compile Include="JsonConverters\MediaErrorTypeEnumConverter.cs" />
     <Compile Include="JsonConverters\MetadataTypeConverter.cs" />
     <Compile Include="JsonConverters\MetadataTypeEnumConverter.cs" />
+    <Compile Include="JsonConverters\StreamTypeConverter.cs" />
     <Compile Include="Models\Chromecast.cs" />
     <Compile Include="Models\ChromecastRequests\WebRequest.cs" />
     <Compile Include="Models\CustomTypes\*.cs" />
