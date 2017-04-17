@@ -1,0 +1,12 @@
+﻿// Copyright 2014 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+syntax = "proto3";
+package extensions.api.cast_channel.proto;
+message AuthorityKeys {
+	message Key {
+		bytes fingerprint = 1;
+		bytes public_key = 2;
+	}
+	repeated Key keys = 1;
+}

@@ -1,4 +1,5 @@
 ﻿using System;
+using Extensions.Api.CastChannel;
 
 namespace SharpCaster.Models
 {

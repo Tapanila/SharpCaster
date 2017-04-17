@@ -1,5 +1,7 @@
 using System;
 using System.Threading.Tasks;
+using Extensions.Api.CastChannel;
+using Google.Protobuf;
 using SharpCaster.Models;
 
 namespace SharpCaster.Channels

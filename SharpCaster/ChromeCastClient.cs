@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Extensions.Api.CastChannel;
 using SharpCaster.Channels;
 using SharpCaster.Controllers;
 using SharpCaster.Extensions;
