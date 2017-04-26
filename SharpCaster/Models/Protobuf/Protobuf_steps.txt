@@ -17,6 +17,8 @@ to
 	private global::Extensions.Api.CastChannel.SignatureAlgorithm signatureAlgorithm_ = SignatureAlgorithm.RsassaPkcs1V15;
 because it had a different default value that is not possible to set in the proto file anymore (not sure whether this works)
 
+Also I changed the WriteTo() and CalculateSize() methods of the classes in CastChannel.cs to include fields even when they have default values.
+
 Generated CastMessage is partial and can be extended.
 I modified the SharpCaster's CastMessage to a partial class that implements 
 	CastMessage(string destinationId, string sourceId)
@@ -24,3 +26,4 @@ I modified the SharpCaster's CastMessage to a partial class that implements
 with defaults
 	DestinationId = "receiver-0";
 	SourceId = "sender-0";
+
