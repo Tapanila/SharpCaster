@@ -10,6 +10,13 @@
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Chromecast SDK for Windows, Windows Phone, .NET 4.5.1, Xamarin.iOS and Xamarin.Android</description>
     <releaseNotes>
+      0.4.0
+      Updated dependencies
+      Added more error handling
+      Swapped to new protobuf library
+      Able to disconnect from chromecast
+      Better test cases for protobuf messages
+      Added more filtering to search of chromecast devices
       0.3.5
       Supports casting a web page to chromecast
       Added support to specify specific IP address when locationg devices.
@@ -37,12 +44,9 @@
     <tags>Chromecast, GoogleCast</tags>
     <dependencies>
       <dependency id="Newtonsoft.Json" version="9.0.1" />
-      <dependency id="Protobuf-net-SharpCaster" version="2.0.0.668" />
-      <dependency id="Rssdp" version="2.0.0.5" />
+      <dependency id="Google.Protobuf" version="3.3.0" />
+      <dependency id="Rssdp" version="3.5.4" />
       <dependency id="Sharpcaster.SocketsForPCL" version="2.0.4"/>
-      <dependency id="Microsoft.Bcl" version="1.1.10" />
-      <dependency id="Microsoft.Bcl.Async" version="1.0.168" />
-      <dependency id="Microsoft.Bcl.Build" version="1.0.21"/>
     </dependencies>
   </metadata>
   <files>

@@ -30,6 +30,7 @@ namespace SharpCaster.Channels
         {
             Task.Run(async () =>
             {
+                //TODO: This should stop if we receive an disconnect or close from socket
                 while (true)
                 {
                     await Write(MessageFactory.Ping);

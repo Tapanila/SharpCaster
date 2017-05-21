@@ -5,8 +5,8 @@ namespace SharpCaster.Models.ChromecastRequests
     [DataContract]
     public class StopApplicationRequest : RequestWithId
     {
-        public StopApplicationRequest(string sessionId)
-            : base("STOP")
+        public StopApplicationRequest(string sessionId, int? requestId = null)
+            : base("STOP", requestId)
         {
             SessionId = sessionId;
         }

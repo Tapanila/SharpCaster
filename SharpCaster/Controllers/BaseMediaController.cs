@@ -3,9 +3,9 @@ using SharpCaster.Interfaces;
 
 namespace SharpCaster.Controllers
 {
-    public class BaseMediaController : BaseController, IMediaController
+    public abstract class BaseMediaController : BaseController, IMediaController
     {
-        public BaseMediaController(ChromeCastClient client, string applicationId)
+        protected BaseMediaController(ChromeCastClient client, string applicationId)
             : base(client, applicationId)
         {
             

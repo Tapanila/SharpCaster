@@ -5,7 +5,7 @@ namespace SharpCaster.Test
 {
     public class DeviceLocatorTest
     {
-        private ChromecastService _chromecastService;
+        private readonly ChromecastService _chromecastService;
         public DeviceLocatorTest()
         {
             _chromecastService = ChromecastService.Current;

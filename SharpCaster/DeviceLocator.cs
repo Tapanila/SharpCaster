@@ -33,8 +33,10 @@ namespace SharpCaster
         {
             using (deviceLocator)
             {
-                var foundDevices = await deviceLocator.SearchAsync("urn:dial-multiscreen-org:device:dial:1", TimeSpan.FromMilliseconds(5000));
-
+                var deviceType = "urn:dial-multiscreen-org:device:dial:1";
+                deviceLocator.NotificationFilter = deviceType;
+                var foundDevices = await deviceLocator.SearchAsync(deviceType, TimeSpan.FromMilliseconds(5000));
+                
                 foreach (var foundDevice in foundDevices)
                 {
                     var fullDevice = await foundDevice.GetDeviceInfo();

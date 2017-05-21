@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Linq;
 using SharpCaster.Controllers;
 using SharpCaster.Services;
 using Xunit;
@@ -12,7 +8,7 @@ namespace SharpCaster.Test
 {
     public class ChromecastTester
     {
-        private ChromecastService _chromecastService;
+        private readonly ChromecastService _chromecastService;
         public ChromecastTester()
         {
             _chromecastService = ChromecastService.Current;

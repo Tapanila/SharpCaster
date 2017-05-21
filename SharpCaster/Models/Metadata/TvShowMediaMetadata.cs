@@ -11,12 +11,12 @@ namespace SharpCaster.Models.Metadata
     {
         public TvShowMediaMetadata()
         {
-            metadataType = MetadataType.TV_SHOW;
+            metadataType = MetadataTypeEnum.TV_SHOW;
         }
         public int episode { get; set; }
         public List<ChromecastImage> images { get; set; }
         [JsonConverter(typeof(MetadataTypeEnumConverter))]
-        public MetadataType metadataType { get; set; }
+        public MetadataTypeEnum metadataType { get; set; }
         public string originalAirdate { get; set; }
         public int season { get; set; }
         public string seriesTitle { get; set; }

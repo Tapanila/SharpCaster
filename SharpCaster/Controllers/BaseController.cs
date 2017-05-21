@@ -3,7 +3,7 @@ using SharpCaster.Interfaces;
 
 namespace SharpCaster.Controllers
 {
-    public class BaseController : IController
+    public abstract class BaseController : IController
     {
         public string ApplicationId { get; set; }
         public async Task LaunchApplication()
@@ -13,7 +13,7 @@ namespace SharpCaster.Controllers
 
         protected readonly ChromeCastClient Client;
 
-        public BaseController(ChromeCastClient client, string applicationId)
+        protected BaseController(ChromeCastClient client, string applicationId)
         {
             Client = client;
             ApplicationId = applicationId;

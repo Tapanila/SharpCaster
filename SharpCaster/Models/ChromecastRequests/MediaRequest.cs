@@ -4,7 +4,7 @@ namespace SharpCaster.Models.ChromecastRequests
 {
     public class MediaRequest : RequestWithId
     {
-        public MediaRequest(string requestType, long mediaSessionId) : base(requestType)
+        public MediaRequest(string requestType, long mediaSessionId, int? requestId = null) : base(requestType, requestId)
         {
             MediaSessionId = mediaSessionId;
         }

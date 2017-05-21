@@ -19,20 +19,20 @@ namespace SharpCaster.JsonConverters
             JObject jObject = JObject.Load(reader);
             
             var value = jObject.GetValue("metadataType").ToString();
-            MetadataType metadataType;
+            MetadataTypeEnum metadataType;
 
             Enum.TryParse(value, out metadataType);
             switch (metadataType)
             {
-                case MetadataType.GENERIC:
+                case MetadataTypeEnum.GENERIC:
                     return jObject.ToObject<GenericMediaMetadata>();
-                case MetadataType.MOVIE:
+                case MetadataTypeEnum.MOVIE:
                     return jObject.ToObject<MovieMediaMetadata>();
-                case MetadataType.TV_SHOW:
+                case MetadataTypeEnum.TV_SHOW:
                     return jObject.ToObject<TvShowMediaMetadata>();
-                case MetadataType.MUSIC_TRACK:
+                case MetadataTypeEnum.MUSIC_TRACK:
                     return jObject.ToObject<MusicTrackMediaMetadata>();
-                case MetadataType.PHOTO:
+                case MetadataTypeEnum.PHOTO:
                     return jObject.ToObject<PhotoMediaMetadata>();
                 default:
                     throw new ArgumentOutOfRangeException();

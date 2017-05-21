@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
+using Extensions.Api.CastChannel;
 using SharpCaster.Channels;
 using SharpCaster.Controllers;
 using SharpCaster.Extensions;
@@ -72,8 +74,9 @@ namespace SharpCaster
             get { return _connected; }
             set
             {
-                if (_connected != value) ConnectedChanged?.Invoke(this, EventArgs.Empty);
+                if (_connected == value) return;
                 _connected = value;
+                ConnectedChanged?.Invoke(this, EventArgs.Empty);
             }
         }
 
@@ -100,16 +103,14 @@ namespace SharpCaster
 
         private Dictionary<string, IController> GetControllerDictionary()
         {
-            if (_controllerDictionaryBackingField == null)
+            if (_controllerDictionaryBackingField != null) return _controllerDictionaryBackingField;
+            var controllers = new List<IController>
             {
-                var controllers = new List<IController>
-                                    {
-                                        (IController)new PlexController(this),
-                                        (IController)new YouTubeController(this),
-                                        (IController)new SharpCasterDemoController(this)
-                                    };
-                _controllerDictionaryBackingField = controllers.ToDictionary(controller => controller.ApplicationId);
-            }
+                new PlexController(this),
+                new YouTubeController(this),
+                new SharpCasterDemoController(this)
+            };
+            _controllerDictionaryBackingField = controllers.ToDictionary(controller => controller.ApplicationId);
 
             return _controllerDictionaryBackingField;
         }
@@ -120,7 +121,6 @@ namespace SharpCaster
         public MediaChannel MediaChannel;
         public HeartbeatChannel HeartbeatChannel;
         public ReceiverChannel ReceiverChannel;
-        private const string ChromecastPort = "8009";
         public string ChromecastApplicationId;
         public string CurrentApplicationSessionId = "";
         public string CurrentApplicationTransportId = "";
@@ -132,6 +132,9 @@ namespace SharpCaster
         public event EventHandler<ChromecastStatus> ChromecastStatusChanged;
         public event EventHandler<Volume> VolumeChanged;
         public List<IChromecastChannel> Channels;
+
+        private const string ChromecastPort = "8009";
+        public CancellationTokenSource CancellationTokenSource;
 
         public ChromeCastClient()
         {
@@ -150,7 +153,16 @@ namespace SharpCaster
 
         public async Task ConnectChromecast(Uri uri)
         {
-            await ChromecastSocketService.Initialize(uri.Host, ChromecastPort, ConnectionChannel, HeartbeatChannel, ReadPacket);
+            CancellationTokenSource = new CancellationTokenSource();
+            await ChromecastSocketService.Initialize(uri.Host, ChromecastPort, ConnectionChannel, HeartbeatChannel, ReadPacket, CancellationTokenSource.Token);
+        }
+
+        public async Task DisconnectChromecast()
+        {
+            CancellationTokenSource.Cancel();
+            await ChromecastSocketService.Disconnect();
+            CurrentApplicationSessionId = "";
+            CurrentApplicationTransportId = "";
         }
 
         public IController GetControllerForCurrentApp()
@@ -165,7 +177,7 @@ namespace SharpCaster
             return controllerDictionary[currentAppId];
         }
 
-        private void ReadPacket(Stream stream, bool parsed)
+        private async void ReadPacket(Stream stream, bool parsed, CancellationToken cancellationToken)
         {
             try
             {
@@ -173,17 +185,18 @@ namespace SharpCaster
                 if (parsed)
                 {
                     var buffer = new byte[stream.Length];
-                    stream.Read(buffer, 0, buffer.Length);
+                    await stream.ReadAsync(buffer, 0, buffer.Length, cancellationToken);
                     entireMessage = buffer;
                 }
                 else
                 {
-                    entireMessage = stream.ParseData();
+                    entireMessage = await stream.ParseData(cancellationToken);
                 }
 
                 var entireMessageArray = entireMessage.ToArray();
                 var castMessage = entireMessageArray.ToCastMessage();
                 if (string.IsNullOrEmpty(castMessage?.Namespace)) return;
+
                 Debug.WriteLine("Received: " + castMessage.GetJsonType());
                 ReceivedMessage(castMessage);
             }

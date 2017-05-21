@@ -10,44 +10,64 @@ namespace SharpCaster.Services
 {
     public class ChromecastSocketService : IChromecastSocketService
     {
+        private static readonly object LockObject = new object();
         private TcpSocketClient _client;
 
-        public async Task Initialize(string host, string port, ConnectionChannel connectionChannel, HeartbeatChannel heartbeatChannel, Action<Stream, bool> packetReader)
+        public async Task Initialize(string host, string port, ConnectionChannel connectionChannel, HeartbeatChannel heartbeatChannel, Action<Stream, bool, CancellationToken> packetReader, CancellationToken cancellationToken)
         {
             if (_client == null) _client = new TcpSocketClient();
-            await _client.ConnectAsync(host, int.Parse(port), true, default(CancellationToken), true);
+            await _client.ConnectAsync(host, int.Parse(port), true, cancellationToken, true);
 
-
-            connectionChannel.OpenConnection();
+            await connectionChannel.OpenConnection();
             heartbeatChannel.StartHeartbeat();
 
-            await Task.Run(() =>
+            await Task.Run(async () =>
             {
                 while (true)
                 {
                     var sizeBuffer = new byte[4];
-                    byte[] messageBuffer = { };
                     // First message should contain the size of message
-                    _client.ReadStream.Read(sizeBuffer, 0, sizeBuffer.Length);
+                    await _client.ReadStream.ReadAsync(sizeBuffer, 0, sizeBuffer.Length, cancellationToken);
                     // The message is little-endian (that is, little end first),
                     // reverse the byte array.
                     Array.Reverse(sizeBuffer);
                     //Retrieve the size of message
                     var messageSize = BitConverter.ToInt32(sizeBuffer, 0);
-                    messageBuffer = new byte[messageSize];
-                    _client.ReadStream.Read(messageBuffer, 0, messageBuffer.Length);
+                    var messageBuffer = new byte[messageSize];
+                    await _client.ReadStream.ReadAsync(messageBuffer, 0, messageBuffer.Length, cancellationToken);
                     var answer = new MemoryStream(messageBuffer.Length);
-                    answer.Write(messageBuffer, 0, messageBuffer.Length);
+                    await answer.WriteAsync(messageBuffer, 0, messageBuffer.Length, cancellationToken);
                     answer.Position = 0;
-                    packetReader(answer, true);
+                    packetReader(answer, true, cancellationToken);
                 }
-            });
+            }, cancellationToken);
         }
 
-        public Task Write(byte[] bytes)
+        #pragma warning disable 1998
+        public async Task Write(byte[] bytes, CancellationToken cancellationToken)
+        #pragma warning restore 1998
         {
-            _client.WriteStream.Write(bytes, 0, bytes.Length);
-            return Task.Delay(0);
+            if (_client == null) return;
+            
+            lock (LockObject)
+            {
+                if (cancellationToken.IsCancellationRequested) return;
+                try
+                {
+                    _client.WriteStream.Write(bytes, 0, bytes.Length);
+                }
+                catch (IOException)
+                {
+                    //We have been disconnected from chromecast
+                    //TODO: Raise an disconnected event
+                }
+            }
+        }
+
+        public async Task Disconnect()
+        {
+            await _client.DisconnectAsync();
+            _client = null;
         }
     }
 }

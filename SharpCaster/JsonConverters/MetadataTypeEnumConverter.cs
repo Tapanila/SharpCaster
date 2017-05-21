@@ -8,22 +8,22 @@ namespace SharpCaster.JsonConverters
     {
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
         {
-            var metadataType = (MetadataType)value;
+            var metadataType = (MetadataTypeEnum)value;
             switch (metadataType)
             {
-                case MetadataType.GENERIC:
+                case MetadataTypeEnum.GENERIC:
                     writer.WriteValue(0);
                     break;
-                case MetadataType.MOVIE:
+                case MetadataTypeEnum.MOVIE:
                     writer.WriteValue(1);
                     break;
-                case MetadataType.TV_SHOW:
+                case MetadataTypeEnum.TV_SHOW:
                     writer.WriteValue(2);
                     break;
-                case MetadataType.MUSIC_TRACK:
+                case MetadataTypeEnum.MUSIC_TRACK:
                     writer.WriteValue(3);
                     break;
-                case MetadataType.PHOTO:
+                case MetadataTypeEnum.PHOTO:
                     writer.WriteValue(4);
                     break;
                 default:
@@ -34,7 +34,7 @@ namespace SharpCaster.JsonConverters
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
         {
             var enumString = (Int64)reader.Value;
-            MetadataType metadataType;
+            MetadataTypeEnum metadataType;
 
             Enum.TryParse(enumString.ToString(), out metadataType);
 

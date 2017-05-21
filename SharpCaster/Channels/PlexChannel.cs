@@ -1,54 +1,13 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
-using SharpCaster.Models;
 
 namespace SharpCaster.Channels
 {
-    public class PlexChannel : ChromecastChannel
+    public class PlexChannel : MediaChannel
     {
         public static string Urn = "urn:x-cast:plex";
         public PlexChannel(ChromeCastClient client) : base(client, Urn)
         {
-        }
-
-        public async Task Play()
-        {
-            //Plex uses the same messages as the Google Media messages but on its own namespace
-            var castMessage = MessageFactory.Play(Client.CurrentApplicationTransportId, Client.CurrentMediaSessionId);
-
-            await Write(castMessage);
-        }
-
-        public async Task Pause()
-        {
-            //Plex uses the same messages as the Google Media messages but on its own namespace
-            var castMessage = MessageFactory.Pause(Client.CurrentApplicationTransportId, Client.CurrentMediaSessionId);
-            
-            await Write(castMessage);
-        }
-
-        public async Task Seek(double seconds)
-        {
-            //Plex uses the same messages as the Google Media messages but on its own namespace
-            var castMessage = MessageFactory.Seek(Client.CurrentApplicationTransportId, Client.CurrentMediaSessionId, seconds);
-
-            await Write(castMessage);
-        }
-
-        public async Task Stop()
-        {
-            await Write(MessageFactory.StopMedia(Client.CurrentMediaSessionId));
-        }
-
-        public async Task Next()
-        {
-            await Write(MessageFactory.Next(Client.CurrentApplicationTransportId, Client.CurrentMediaSessionId));
-        }
-
-        public async Task Previous()
-        {
-            await Write(MessageFactory.Previous(Client.CurrentApplicationTransportId, Client.CurrentMediaSessionId));
         }
 
         //public async Task SkipTo()

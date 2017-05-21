@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using SharpCaster.Channels;
+using SharpCaster.Extensions;
 
 namespace SharpCaster.Controllers
 {
@@ -22,7 +23,7 @@ namespace SharpCaster.Controllers
     {
         public static async Task<YouTubeController> LaunchYouTube(this ChromeCastClient client)
         {
-            client.Channels.Add(new YouTubeChannel(client));
+            client.MakeSureChannelExist(new YouTubeChannel(client));
             var controller = new YouTubeController(client);
             await controller.LaunchApplication();
             return controller;

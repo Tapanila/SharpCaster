@@ -10,7 +10,7 @@ namespace SharpCaster.Models.Metadata
     {
         List<ChromecastImage> images { get; set; }
         [JsonConverter(typeof(MetadataTypeEnumConverter))]
-        MetadataType metadataType { get; set; }
+        MetadataTypeEnum metadataType { get; set; }
         string title { get; set; }
     }
 }

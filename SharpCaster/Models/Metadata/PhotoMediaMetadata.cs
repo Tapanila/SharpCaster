@@ -11,7 +11,7 @@ namespace SharpCaster.Models.Metadata
     {
         public PhotoMediaMetadata()
         {
-            metadataType = MetadataType.PHOTO;
+            metadataType = MetadataTypeEnum.PHOTO;
         }
         public string artist { get; set; }
         public string creationDateTime { get; set; }
@@ -21,7 +21,7 @@ namespace SharpCaster.Models.Metadata
         public string location { get; set; }
         public int longitude { get; set; }
         [JsonConverter(typeof(MetadataTypeEnumConverter))]
-        public MetadataType metadataType { get; set; }
+        public MetadataTypeEnum metadataType { get; set; }
         public string title { get; set; }
         public int width { get; set; }
     }

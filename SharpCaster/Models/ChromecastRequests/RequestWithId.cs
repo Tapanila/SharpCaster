@@ -5,10 +5,10 @@ namespace SharpCaster.Models.ChromecastRequests
     [DataContract]
     public abstract class RequestWithId : Request
     {
-        protected RequestWithId(string requestType)
+        protected RequestWithId(string requestType, int? requestId = null)
             : base(requestType)
         {
-            RequestId = RequestIdProvider.GetNext();
+            RequestId = requestId ?? RequestIdProvider.GetNext();
         }
 
         [DataMember(Name = "requestId")]

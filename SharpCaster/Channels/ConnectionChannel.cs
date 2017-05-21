@@ -10,7 +10,7 @@ namespace SharpCaster.Channels
         {
         }
 
-        public async void OpenConnection()
+        public async Task OpenConnection()
         {
             await Write(MessageFactory.Connect());
         }
