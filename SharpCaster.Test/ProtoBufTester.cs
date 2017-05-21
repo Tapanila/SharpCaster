@@ -1,6 +1,4 @@
-﻿using System.Linq;
-using System.Text;
-using Google.Protobuf;
+﻿using System.Text;
 using SharpCaster.Models;
 using Xunit;
 
@@ -13,9 +11,7 @@ namespace SharpCaster.Test
         {
             var connectMessage = MessageFactory.Connect();
             connectMessage.Namespace = "urn:x-cast:com.google.cast.tp.connection";
-
             var bytes = connectMessage.ToProto();
-            
             var expectedBytes = new byte[]
             {
                 0, 0, 0, 88, 8, 0, 18, 8, 115, 101, 110, 100, 101, 114, 45, 48, 26, 10, 114, 101, 99, 101, 105, 118,
@@ -23,7 +19,6 @@ namespace SharpCaster.Test
                 111, 103, 108, 101, 46, 99, 97, 115, 116, 46, 116, 112, 46, 99, 111, 110, 110, 101, 99, 116, 105, 111,
                 110, 40, 0, 50, 18, 123, 34, 116, 121, 112, 101, 34, 58, 34, 67, 79, 78, 78, 69, 67, 84, 34, 125
             };
-
             Assert.Equal(bytes, expectedBytes);
         }
 
@@ -32,7 +27,12 @@ namespace SharpCaster.Test
         {
             var pingMessage = MessageFactory.Ping;
             var bytes = pingMessage.ToProto();
-            Assert.Equal(bytes, new byte[] { 0, 0, 0, 43, 8, 0, 18, 8, 115, 101, 110, 100, 101, 114, 45, 48, 26, 10, 114, 101, 99, 101, 105, 118, 101, 114, 45, 48, 40, 0, 50, 15, 123, 34, 116, 121, 112, 101, 34, 58, 34, 80, 73, 78, 71, 34, 125 });
+            var expectedBytes = new byte[]
+            {
+                0, 0, 0, 43, 8, 0, 18, 8, 115, 101, 110, 100, 101, 114, 45, 48, 26, 10, 114, 101, 99, 101, 105, 118, 101,
+                114, 45, 48, 40, 0, 50, 15, 123, 34, 116, 121, 112, 101, 34, 58, 34, 80, 73, 78, 71, 34, 125
+            };
+            Assert.Equal(bytes, expectedBytes);
         }
 
         [Fact]
@@ -40,23 +40,41 @@ namespace SharpCaster.Test
         {
             var closeMessage = MessageFactory.Close;
             var bytes = closeMessage.ToProto();
-            Assert.Equal(bytes, new byte[] { 0, 0, 0, 44, 8, 0, 18, 8, 115, 101, 110, 100, 101, 114, 45, 48, 26, 10, 114, 101, 99, 101, 105, 118, 101, 114, 45, 48, 40, 0, 50, 16, 123, 34, 116, 121, 112, 101, 34, 58, 34, 67, 76, 79, 83, 69, 34, 125 });
+            var expectedBytes = new byte[]
+            {
+                0, 0, 0, 44, 8, 0, 18, 8, 115, 101, 110, 100, 101, 114, 45, 48, 26, 10, 114, 101, 99, 101, 105, 118, 101,
+                114, 45, 48, 40, 0, 50, 16, 123, 34, 116, 121, 112, 101, 34, 58, 34, 67, 76, 79, 83, 69, 34, 125
+            };
+            Assert.Equal(bytes, expectedBytes);
         }
 
-        [Fact(Skip = "RequestId of VolumeRequest changes every time")]
+        [Fact]
         public void Volume_Level_Should_Be_Serialized_Well()
         {
-            var volumeLevel = MessageFactory.Volume(0.7);
+            var volumeLevel = MessageFactory.Volume(0.7, 100);
             var bytes = volumeLevel.ToProto();
-            Assert.Equal(bytes, new byte[] { 0, 0, 0, 94, 8, 0, 18, 8, 115, 101, 110, 100, 101, 114, 45, 48, 26, 10, 114, 101, 99, 101, 105, 118, 101, 114, 45, 48, 40, 0, 50, 66, 123, 34, 118, 111, 108, 117, 109, 101, 34, 58, 123, 34, 108, 101, 118, 101, 108, 34, 58, 48, 46, 55, 125, 44, 34, 114, 101, 113, 117, 101, 115, 116, 73, 100, 34, 58, 53, 53, 52, 55, 54, 51, 57, 50, 53, 44, 34, 116, 121, 112, 101, 34, 58, 34, 83, 69, 84, 95, 86, 79, 76, 85, 77, 69, 34, 125 });
+            var expectedBytes = new byte[]
+            {
+                0, 0, 0, 88, 8, 0, 18, 8, 115, 101, 110, 100, 101, 114, 45, 48, 26, 10, 114, 101, 99, 101, 105, 118, 101,
+                114, 45, 48, 40, 0, 50, 60, 123, 34, 118, 111, 108, 117, 109, 101, 34, 58, 123, 34, 108, 101, 118, 101,
+                108, 34, 58, 48, 46, 55, 125, 44, 34, 114, 101, 113, 117, 101, 115, 116, 73, 100, 34, 58, 49, 48, 48, 44,
+                34, 116, 121, 112, 101, 34, 58, 34, 83, 69, 84, 95, 86, 79, 76, 85, 77, 69, 34, 125
+            };
+            Assert.Equal(bytes, expectedBytes);
         }
-
-        [Fact(Skip = "RequestId of VolumeRequest changes every time")]
+        [Fact]
         public void Volume_Mute_Should_Be_Serialized_Well()
         {
-            var volumeMuted = MessageFactory.Volume(true);
+            var volumeMuted = MessageFactory.Volume(true, 100);
             var bytes = volumeMuted.ToProto();
-            Assert.Equal(bytes, new byte[] { 0, 0, 0, 96, 8, 0, 18, 8, 115, 101, 110, 100, 101, 114, 45, 48, 26, 10, 114, 101, 99, 101, 105, 118, 101, 114, 45, 48, 40, 0, 50, 68, 123, 34, 118, 111, 108, 117, 109, 101, 34, 58, 123, 34, 109, 117, 116, 101, 100, 34, 58, 116, 114, 117, 101, 125, 44, 34, 114, 101, 113, 117, 101, 115, 116, 73, 100, 34, 58, 50, 48, 51, 53, 51, 56, 52, 49, 53, 56, 44, 34, 116, 121, 112, 101, 34, 58, 34, 83, 69, 84, 95, 86, 79, 76, 85, 77, 69, 34, 125 });
+            var expectedBytes = new byte[]
+            {
+                0, 0, 0, 89, 8, 0, 18, 8, 115, 101, 110, 100, 101, 114, 45, 48, 26, 10, 114, 101, 99, 101, 105, 118, 101,
+                114, 45, 48, 40, 0, 50, 61, 123, 34, 118, 111, 108, 117, 109, 101, 34, 58, 123, 34, 109, 117, 116, 101,
+                100, 34, 58, 116, 114, 117, 101, 125, 44, 34, 114, 101, 113, 117, 101, 115, 116, 73, 100, 34, 58, 49, 48,
+                48, 44, 34, 116, 121, 112, 101, 34, 58, 34, 83, 69, 84, 95, 86, 79, 76, 85, 77, 69, 34, 125
+            };
+            Assert.Equal(bytes, expectedBytes);
         }
 
         private static string PrintBytes(byte[] byteArray)
