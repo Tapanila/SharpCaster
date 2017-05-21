@@ -6,6 +6,8 @@
 
 This folder contains the altered versions; the original versions are in the Source folder
 
+Install Google.Protobuf.Tools nuget package.
+
 Ran these commands in the Protobuf folder using the Google.Protobuf.Tools nuget package:
 ..\..\..\packages\Google.Protobuf.Tools.3.2.0\tools\windows_x64\protoc.exe --csharp_out=. .\authority_keys.proto
 ..\..\..\packages\Google.Protobuf.Tools.3.2.0\tools\windows_x64\protoc.exe --csharp_out=. .\cast_channel.proto
