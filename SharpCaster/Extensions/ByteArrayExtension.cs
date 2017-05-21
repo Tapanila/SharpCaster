@@ -1,8 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
-using ProtoBuf;
-using SharpCaster.Models;
+using Extensions.Api.CastChannel;
 
 namespace SharpCaster.Extensions
 {
@@ -20,10 +19,7 @@ namespace SharpCaster.Extensions
         {
             try
             {
-                Stream bufStream = new MemoryStream();
-                bufStream.Write(array, 0, array.Length);
-                bufStream.Position = 0;
-                var msg = Serializer.Deserialize<CastMessage>(bufStream);
+                var msg = CastMessage.Parser.ParseFrom(array);
                 return msg;
             }
             catch (Exception)
@@ -33,3 +29,5 @@ namespace SharpCaster.Extensions
         }
     }
 }
+
+

@@ -1,4 +1,5 @@
 ﻿using System;
+using Extensions.Api.CastChannel;
 using SharpCaster.Models.ChromecastRequests;
 
 namespace SharpCaster.Models

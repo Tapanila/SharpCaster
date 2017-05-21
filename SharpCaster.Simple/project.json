@@ -1,5 +1,6 @@
 ﻿{
   "dependencies": {
+    "Google.Protobuf": "3.2.0",
     "Microsoft.Bcl.Build": "1.0.21",
     "Microsoft.Net.Http": "2.2.29",
     "Microsoft.NETCore.UniversalWindowsPlatform": "5.2.2",
