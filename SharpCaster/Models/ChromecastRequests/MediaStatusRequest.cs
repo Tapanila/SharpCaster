@@ -6,7 +6,7 @@ namespace SharpCaster.Models.ChromecastRequests
     public class MediaStatusRequest : RequestWithId
 
     {
-        public MediaStatusRequest() : base("GET_STATUS")
+        public MediaStatusRequest(int? requestId = null) : base("GET_STATUS", requestId)
         {
         }
     }

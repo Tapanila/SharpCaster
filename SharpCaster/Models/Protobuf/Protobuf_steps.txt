@@ -1,0 +1,31 @@
+﻿Altered proto files:
+- updated syntax proto2 to proto3
+- removed optimize_for
+- removed required/optional statements
+- added extra zero fields for enums that had no zero value
+
+This folder contains the altered versions; the original versions are in the Source folder
+
+Install Google.Protobuf.Tools nuget package.
+
+Ran these commands in the Protobuf folder using the Google.Protobuf.Tools nuget package:
+..\..\..\packages\Google.Protobuf.Tools.3.2.0\tools\windows_x64\protoc.exe --csharp_out=. .\authority_keys.proto
+..\..\..\packages\Google.Protobuf.Tools.3.2.0\tools\windows_x64\protoc.exe --csharp_out=. .\cast_channel.proto
+..\..\..\packages\Google.Protobuf.Tools.3.2.0\tools\windows_x64\protoc.exe --csharp_out=. .\logging.proto
+
+In CastChannel.cs: changed 2 times
+	private global::Extensions.Api.CastChannel.SignatureAlgorithm signatureAlgorithm_ = 0;
+to
+	private global::Extensions.Api.CastChannel.SignatureAlgorithm signatureAlgorithm_ = SignatureAlgorithm.RsassaPkcs1V15;
+because it had a different default value that is not possible to set in the proto file anymore (not sure whether this works)
+
+Also I changed the WriteTo() and CalculateSize() methods of the classes in CastChannel.cs to include fields even when they have default values.
+
+Generated CastMessage is partial and can be extended.
+I modified the SharpCaster's CastMessage to a partial class that implements 
+	CastMessage(string destinationId, string sourceId)
+	CastMessage()
+with defaults
+	DestinationId = "receiver-0";
+	SourceId = "sender-0";
+

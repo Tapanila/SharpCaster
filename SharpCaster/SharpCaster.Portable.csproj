@@ -62,6 +62,8 @@
     <Compile Include="Models\Metadata\MusicTrackMediaMetadata.cs" />
     <Compile Include="Models\Metadata\PhotoMediaMetadata.cs" />
     <Compile Include="Models\Metadata\TvShowMediaMetadata.cs" />
+    <Compile Include="Models\Protobuf\CastChannel.cs" />
+    <Compile Include="Models\Protobuf\Logging.cs" />
     <Compile Include="Services\ChromeCastService.cs" />
     <Compile Include="Interfaces\IChromecastService.cs" />
     <Compile Include="Interfaces\IChromecastSocketService.cs" />
@@ -115,20 +117,16 @@
     <Compile Include="Services\ChromecastSocketService.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="Google.Protobuf, Version=3.3.0.0, Culture=neutral, PublicKeyToken=a7d26565bac4d604, processorArchitecture=MSIL">
+      <HintPath>..\packages\Google.Protobuf.3.3.0\lib\netstandard1.0\Google.Protobuf.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.9.0.1\lib\portable-net45+wp80+win8+wpa81\Newtonsoft.Json.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="protobuf-net, Version=2.0.0.668, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\protobuf-net-sharpcaster.2.0.0.668\lib\portable46-net451+win81+wpa81\protobuf-net.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Rssdp.Native, Version=2.0.0.2, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Rssdp.2.0.0.5\lib\portable-net45+win+wpa81+wp80\Rssdp.Native.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Rssdp.Portable, Version=2.0.0.4, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Rssdp.2.0.0.5\lib\portable-net45+win+wpa81+wp80\Rssdp.Portable.dll</HintPath>
+    <Reference Include="Rssdp, Version=3.5.4.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Rssdp.3.5.4\lib\portable-net45+win+wpa81+wp80\Rssdp.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Sockets.Plugin, Version=2.0.2.0, Culture=neutral, processorArchitecture=MSIL">
@@ -142,9 +140,19 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
+    <None Include="Models\Protobuf\logging.proto" />
+    <None Include="Models\Protobuf\cast_channel.proto" />
+    <None Include="Models\Protobuf\Source\authority_keys.proto" />
+    <None Include="Models\Protobuf\Source\cast_channel.proto" />
+    <None Include="Models\Protobuf\Source\logging.proto" />
     <None Include="packages.config">
       <SubType>Designer</SubType>
     </None>
+  </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <Content Include="Models\Protobuf\Protobuf_steps.txt" />
+    <Content Include="Models\Protobuf\Source\README.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
 </Project>
