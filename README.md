@@ -1,3 +1,4 @@
+![Icon](https://raw.githubusercontent.com/Tapanila/SharpCaster/master/Assets/sharpcaster-logo-64x64.png)
 # SharpCaster
 
 ### Currently Supported Platforms
