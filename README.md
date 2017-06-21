@@ -1,3 +1,4 @@
+![Icon](https://raw.githubusercontent.com/Tapanila/SharpCaster/master/Assets/sharpcaster-logo-64x64.png)
 # SharpCaster
 
 ### Currently Supported Platforms
@@ -8,7 +9,7 @@
 
 [![Build status](https://ci.appveyor.com/api/projects/status/myew8u24ry7dbdm0/branch/master?svg=true)](https://ci.appveyor.com/project/tapanila/sharpcaster)
 
-### This project is on beta stage
+### This project is on beta stage (There might be breaking changes and supported platforms might change)
 
 SharpCaster is Chromecast C# SDK for Windows, Windows Phone, .NET 4.5.1, Xamarin.iOS and Xamarin.Android platforms.
 
@@ -23,6 +24,8 @@ https://nuget.org/packages/SharpCaster/
 ## Finding chromecast devices from network
 ```cs
 ObservableCollection<Chromecast> chromecasts = await ChromecastService.Current.StartLocatingDevices();
+//If that does not return devices on desktop then you can use this, Where 192.168.1.2 is your machines local ip
+ObservableCollection<Chromecast> chromecasts = await ChromecastService.Current.StartLocatingDevices("192.168.1.2);
 ```
 ## Connecting to chromecast device, launch application and load media
 ```cs
