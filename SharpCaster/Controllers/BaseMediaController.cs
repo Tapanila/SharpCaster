@@ -5,7 +5,7 @@ namespace SharpCaster.Controllers
 {
     public abstract class BaseMediaController : BaseController, IMediaController
     {
-        protected BaseMediaController(ChromeCastClient client, string applicationId)
+        protected BaseMediaController(ChromecastClient client, string applicationId)
             : base(client, applicationId)
         {
             

@@ -8,7 +8,7 @@ namespace SharpCaster.Controllers
     public class YouTubeController : BaseMediaController
     {
         public event EventHandler<string> ScreenIdChanged;
-        public YouTubeController(ChromeCastClient client) : base(client, "233637DE")
+        public YouTubeController(ChromecastClient client) : base(client, "233637DE")
         {
             client.Channels.GetYouTubeChannel().ScreenIdChanged += OnScreenIdChanged;
         }
@@ -21,7 +21,7 @@ namespace SharpCaster.Controllers
 
     public static class YouTubeControllerExtensions
     {
-        public static async Task<YouTubeController> LaunchYouTube(this ChromeCastClient client)
+        public static async Task<YouTubeController> LaunchYouTube(this ChromecastClient client)
         {
             client.MakeSureChannelExist(new YouTubeChannel(client));
             var controller = new YouTubeController(client);

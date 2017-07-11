@@ -11,7 +11,7 @@ namespace SharpCaster.Channels
     {
         public static string Urn = "urn:x-cast:com.google.youtube.mdx";
         public event EventHandler<string> ScreenIdChanged;
-        public YouTubeChannel(ChromeCastClient client) : base(client, Urn)
+        public YouTubeChannel(ChromecastClient client) : base(client, Urn)
         {
             MessageReceived += YouTubeChannel_MessageReceived;
         }

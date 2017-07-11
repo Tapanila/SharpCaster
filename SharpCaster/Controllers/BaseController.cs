@@ -11,9 +11,9 @@ namespace SharpCaster.Controllers
             await Client.ReceiverChannel.LaunchApplication(ApplicationId);
         }
 
-        protected readonly ChromeCastClient Client;
+        protected readonly ChromecastClient Client;
 
-        protected BaseController(ChromeCastClient client, string applicationId)
+        protected BaseController(ChromecastClient client, string applicationId)
         {
             Client = client;
             ApplicationId = applicationId;

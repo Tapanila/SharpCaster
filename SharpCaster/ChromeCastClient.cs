@@ -17,7 +17,7 @@ using SharpCaster.Services;
 
 namespace SharpCaster
 {
-    public class ChromeCastClient
+    public class ChromecastClient
     {
         public Volume Volume
         {
@@ -136,7 +136,7 @@ namespace SharpCaster
         private const string ChromecastPort = "8009";
         public CancellationTokenSource CancellationTokenSource;
 
-        public ChromeCastClient()
+        public ChromecastClient()
         {
             ChromecastSocketService = new ChromecastSocketService();
             Channels = new List<IChromecastChannel>();
@@ -150,6 +150,10 @@ namespace SharpCaster
             Channels.Add(MediaChannel);
         }
 
+        public async Task ConnectChromecast(ChromecastInformation chromecastInformation)
+        {
+            await ConnectChromecast(chromecastInformation.DeviceUri);
+        }
 
         public async Task ConnectChromecast(Uri uri)
         {

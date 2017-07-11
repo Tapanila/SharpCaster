@@ -6,7 +6,7 @@ namespace SharpCaster.Channels
     public class PlexChannel : MediaChannel
     {
         public static string Urn = "urn:x-cast:plex";
-        public PlexChannel(ChromeCastClient client) : base(client, Urn)
+        public PlexChannel(ChromecastClient client) : base(client, Urn)
         {
         }
 

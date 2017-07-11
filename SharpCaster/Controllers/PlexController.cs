@@ -6,7 +6,7 @@ namespace SharpCaster.Controllers
 {
     public class PlexController : BaseMediaController
     {
-        public PlexController(ChromeCastClient client) : base(client, "9AC194DC")
+        public PlexController(ChromecastClient client) : base(client, "9AC194DC")
         {
         }
 
@@ -91,7 +91,7 @@ namespace SharpCaster.Controllers
 
     public static class PlexControllerExtensions
     {
-        public static async Task<PlexController> LaunchPlex(this ChromeCastClient client)
+        public static async Task<PlexController> LaunchPlex(this ChromecastClient client)
         {
             client.MakeSureChannelExist(new PlexChannel(client));
             var controller = new PlexController(client);

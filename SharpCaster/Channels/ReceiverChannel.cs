@@ -9,7 +9,7 @@ namespace SharpCaster.Channels
 {
     public class ReceiverChannel : ChromecastChannel 
     {
-        public ReceiverChannel(ChromeCastClient client) :
+        public ReceiverChannel(ChromecastClient client) :
             base(client, "urn:x-cast:com.google.cast.receiver")
         {
             MessageReceived += ReceiverChannel_MessageReceived;
