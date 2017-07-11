@@ -9,7 +9,7 @@ namespace SharpCaster.Controllers
     public class SharpCasterDemoController : BaseMediaController
     {
         public static string SharpCasterApplicationId = "B3419EF5";
-        public SharpCasterDemoController(ChromeCastClient client)
+        public SharpCasterDemoController(ChromecastClient client)
             : base(client, SharpCasterApplicationId)
         {
         }
@@ -52,7 +52,7 @@ namespace SharpCaster.Controllers
 
     public static class SharpCasterDemoControllerExtension
     {
-        public static async Task<SharpCasterDemoController> LaunchSharpCaster(this ChromeCastClient client)
+        public static async Task<SharpCasterDemoController> LaunchSharpCaster(this ChromecastClient client)
         {
             var controller = new SharpCasterDemoController(client);
             await controller.LaunchApplication();

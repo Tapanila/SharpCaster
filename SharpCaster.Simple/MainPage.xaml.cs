@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SharpCaster.Models;
+using System;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
@@ -15,6 +16,12 @@ namespace SharpCaster.Simple
             InitializeComponent();
             MainPageViewModel = new MainPageViewModel();
             DataContext = MainPageViewModel;
+            castButton.ChromecastSelected += CastButton_ChromecastSelected;
+        }
+
+        private void CastButton_ChromecastSelected(object sender, ChromecastInformation e)
+        {
+            MainPageViewModel.Chromecast = e;
         }
 
         private async void LoadMedia(object sender, RoutedEventArgs e)

@@ -7,7 +7,7 @@ namespace SharpCaster.Channels
 {
     public class HeartbeatChannel : ChromecastChannel
     {
-        public HeartbeatChannel(ChromeCastClient client) : 
+        public HeartbeatChannel(ChromecastClient client) : 
             base(client, "urn:x-cast:com.google.cast.tp.heartbeat")
         {
             

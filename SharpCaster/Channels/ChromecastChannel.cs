@@ -8,12 +8,12 @@ namespace SharpCaster.Channels
 {
     public abstract class ChromecastChannel : IChromecastChannel
     {
-        protected ChromeCastClient Client { get; }
+        protected ChromecastClient Client { get; }
         public string Namespace { get;}
 
         public event EventHandler<ChromecastSSLClientDataReceivedArgs> MessageReceived;
 
-        protected ChromecastChannel(ChromeCastClient client, string ns)
+        protected ChromecastChannel(ChromecastClient client, string ns)
         {
             Namespace = ns;
             Client = client;

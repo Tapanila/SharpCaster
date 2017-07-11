@@ -6,9 +6,10 @@ using System.Threading.Tasks;
 
 namespace SharpCaster.Models
 {
-    public class Chromecast
+    public class ChromecastInformation
     {
         public Uri DeviceUri { get; set; }
         public string FriendlyName { get; set; }
+        public Guid SsdpUuid { get; internal set; }
     }
 }

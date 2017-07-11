@@ -11,7 +11,7 @@ namespace SharpCaster.Channels
 {
     public class MediaChannel : ChromecastChannel
     {
-        public MediaChannel(ChromeCastClient client, string nameSpace = "urn:x-cast:com.google.cast.media")
+        public MediaChannel(ChromecastClient client, string nameSpace = "urn:x-cast:com.google.cast.media")
             : base(client, nameSpace)
         {
             MessageReceived += OnMessageReceived;

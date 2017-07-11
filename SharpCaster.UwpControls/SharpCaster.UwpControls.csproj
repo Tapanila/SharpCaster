@@ -1,25 +1,43 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
-    <ProjectGuid>{ACEEBB84-183A-41C7-A911-9C05D2B2C9CF}</ProjectGuid>
-    <OutputType>AppContainerExe</OutputType>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{EEFB5430-FC1E-445E-BF13-A0EAFE705B2E}</ProjectGuid>
+    <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>SharpCaster.Simple</RootNamespace>
-    <AssemblyName>SharpCaster.Simple</AssemblyName>
+    <RootNamespace>SharpCaster.UwpControls</RootNamespace>
+    <AssemblyName>SharpCaster.UwpControls</AssemblyName>
     <DefaultLanguage>en-US</DefaultLanguage>
     <TargetPlatformIdentifier>UAP</TargetPlatformIdentifier>
-    <TargetPlatformVersion>10.0.14393.0</TargetPlatformVersion>
+    <TargetPlatformVersion Condition=" '$(TargetPlatformVersion)' == '' ">10.0.14393.0</TargetPlatformVersion>
     <TargetPlatformMinVersion>10.0.14393.0</TargetPlatformMinVersion>
     <MinimumVisualStudioVersion>14</MinimumVisualStudioVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{A5A43C5B-DE2A-4C0C-9213-0A381AF9435A};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
-    <PackageCertificateKeyFile>SharpCaster.Simple_TemporaryKey.pfx</PackageCertificateKeyFile>
-    <PackageCertificateThumbprint>D53124E8A1028FD1C19A75448E447A53A0310A24</PackageCertificateThumbprint>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE;NETFX_CORE;WINDOWS_UWP</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE;NETFX_CORE;WINDOWS_UWP</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
+    <PlatformTarget>x86</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <OutputPath>bin\x86\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE;NETFX_CORE;WINDOWS_UWP</DefineConstants>
@@ -28,9 +46,9 @@
     <PlatformTarget>x86</PlatformTarget>
     <UseVSHostingProcess>false</UseVSHostingProcess>
     <ErrorReport>prompt</ErrorReport>
-    <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
+    <PlatformTarget>x86</PlatformTarget>
     <OutputPath>bin\x86\Release\</OutputPath>
     <DefineConstants>TRACE;NETFX_CORE;WINDOWS_UWP</DefineConstants>
     <Optimize>true</Optimize>
@@ -39,10 +57,9 @@
     <PlatformTarget>x86</PlatformTarget>
     <UseVSHostingProcess>false</UseVSHostingProcess>
     <ErrorReport>prompt</ErrorReport>
-    <Prefer32Bit>true</Prefer32Bit>
-    <UseDotNetNativeToolchain>true</UseDotNetNativeToolchain>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|ARM'">
+    <PlatformTarget>ARM</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <OutputPath>bin\ARM\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE;NETFX_CORE;WINDOWS_UWP</DefineConstants>
@@ -51,9 +68,9 @@
     <PlatformTarget>ARM</PlatformTarget>
     <UseVSHostingProcess>false</UseVSHostingProcess>
     <ErrorReport>prompt</ErrorReport>
-    <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|ARM'">
+    <PlatformTarget>ARM</PlatformTarget>
     <OutputPath>bin\ARM\Release\</OutputPath>
     <DefineConstants>TRACE;NETFX_CORE;WINDOWS_UWP</DefineConstants>
     <Optimize>true</Optimize>
@@ -62,10 +79,9 @@
     <PlatformTarget>ARM</PlatformTarget>
     <UseVSHostingProcess>false</UseVSHostingProcess>
     <ErrorReport>prompt</ErrorReport>
-    <Prefer32Bit>true</Prefer32Bit>
-    <UseDotNetNativeToolchain>true</UseDotNetNativeToolchain>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <PlatformTarget>x64</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <OutputPath>bin\x64\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE;NETFX_CORE;WINDOWS_UWP</DefineConstants>
@@ -74,9 +90,9 @@
     <PlatformTarget>x64</PlatformTarget>
     <UseVSHostingProcess>false</UseVSHostingProcess>
     <ErrorReport>prompt</ErrorReport>
-    <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <PlatformTarget>x64</PlatformTarget>
     <OutputPath>bin\x64\Release\</OutputPath>
     <DefineConstants>TRACE;NETFX_CORE;WINDOWS_UWP</DefineConstants>
     <Optimize>true</Optimize>
@@ -85,68 +101,43 @@
     <PlatformTarget>x64</PlatformTarget>
     <UseVSHostingProcess>false</UseVSHostingProcess>
     <ErrorReport>prompt</ErrorReport>
-    <Prefer32Bit>true</Prefer32Bit>
-    <UseDotNetNativeToolchain>true</UseDotNetNativeToolchain>
+  </PropertyGroup>
+  <PropertyGroup>
+    <RestoreProjectStyle>PackageReference</RestoreProjectStyle>
   </PropertyGroup>
   <ItemGroup>
-    <!-- A reference to the entire .Net Framework and Windows SDK are automatically included -->
-    <Content Include="ApplicationInsights.config">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <None Include="packages.config">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="project.json" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="App.xaml.cs">
-      <DependentUpon>App.xaml</DependentUpon>
+    <Compile Include="CastButton.cs" />
+    <Compile Include="CastPlayer.cs" />
+    <Compile Include="ChromecastPicker.xaml.cs">
+      <DependentUpon>ChromecastPicker.xaml</DependentUpon>
     </Compile>
-    <Compile Include="MainPage.xaml.cs">
-      <DependentUpon>MainPage.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="MainPageViewModel.cs" />
-    <Compile Include="Properties\Annotations.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="Properties\SharpCaster.UwpControls.rd.xml" />
   </ItemGroup>
   <ItemGroup>
-    <AppxManifest Include="Package.appxmanifest">
-      <SubType>Designer</SubType>
-    </AppxManifest>
-    <None Include="SharpCaster.Simple_TemporaryKey.pfx" />
+    <PackageReference Include="Google.Protobuf">
+      <Version>3.3.0</Version>
+    </PackageReference>
+    <PackageReference Include="Microsoft.NETCore.UniversalWindowsPlatform">
+      <Version>5.4.0</Version>
+    </PackageReference>
+    <PackageReference Include="Newtonsoft.Json">
+      <Version>10.0.3</Version>
+    </PackageReference>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Properties\Default.rd.xml" />
-    <Content Include="Assets\LockScreenLogo.scale-200.png" />
-    <Content Include="Assets\SplashScreen.scale-200.png" />
-    <Content Include="Assets\Square150x150Logo.scale-200.png" />
-    <Content Include="Assets\Square44x44Logo.scale-200.png" />
-    <Content Include="Assets\Square44x44Logo.targetsize-24_altform-unplated.png" />
-    <Content Include="Assets\StoreLogo.png" />
-    <Content Include="Assets\Wide310x150Logo.scale-200.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <ApplicationDefinition Include="App.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </ApplicationDefinition>
-    <Page Include="MainPage.xaml">
+    <Page Include="ChromecastPicker.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Themes\Generic.xaml">
-      <Generator>MSBuild:Compile</Generator>
+    <Page Include="Themes\generic.xaml">
       <SubType>Designer</SubType>
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\SharpCaster.UwpControls\SharpCaster.UwpControls.csproj">
-      <Project>{eefb5430-fc1e-445e-bf13-a0eafe705b2e}</Project>
-      <Name>SharpCaster.UwpControls</Name>
-    </ProjectReference>
     <ProjectReference Include="..\SharpCaster\SharpCaster.Portable.csproj">
-      <Project>{56d42483-550d-4817-844b-6c27d880130f}</Project>
+      <Project>{56D42483-550D-4817-844B-6C27D880130F}</Project>
       <Name>SharpCaster.Portable</Name>
     </ProjectReference>
   </ItemGroup>

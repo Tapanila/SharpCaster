@@ -9,37 +9,40 @@ using Windows.UI.Popups;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Media;
 using SharpCaster.Controllers;
-using SharpCaster.Extensions;
 using SharpCaster.Models;
 using SharpCaster.Models.MediaStatus;
-using SharpCaster.Services;
 using SharpCaster.Simple.Annotations;
-using SharpCaster.Models.ChromecastRequests;
 using SharpCaster.Models.Metadata;
 
 namespace SharpCaster.Simple
 {
     public class MainPageViewModel : INotifyPropertyChanged
     {
-        readonly ChromecastService _chromecastService = ChromecastService.Current;
         public event PropertyChangedEventHandler PropertyChanged;
         private DispatcherTimer secondsTimer;
         private SharpCasterDemoController _controller;
 
-        public ChromecastService ChromecastService => _chromecastService;
-
-        public ObservableCollection<Chromecast> Chromecasts
-        {
-            get { return _chromecasts; }
+        public ChromecastInformation _chromecast { get; set; }
+        public ChromecastInformation Chromecast { get { return _chromecast; }
             set
             {
-                _chromecasts = value;
-                OnPropertyChanged();
-            }
-        }
+                if (_chromecastClient != null)
+                {
+                    _chromecastClient.DisconnectChromecast();
+                }
 
-        private ObservableCollection<Chromecast> _chromecasts;
+                _chromecast = value;
 
+                _chromecastClient = new ChromecastClient();
+                _chromecastClient.ApplicationStarted += Client_ApplicationStarted;
+                _chromecastClient.VolumeChanged += _client_VolumeChanged;
+                _chromecastClient.MediaStatusChanged += ChromeCastClient_MediaStatusChanged;
+                _chromecastClient.ConnectedChanged += ChromeCastClient_Connected;
+                _chromecastClient.ConnectChromecast(_chromecast);
+            } }
+
+        private ChromecastClient _chromecastClient { get; set; }
+                
         public bool ConnectedToChromecast
         {
             get
@@ -135,32 +138,19 @@ namespace SharpCaster.Simple
 
         public MainPageViewModel()
         {
-            Chromecasts = new ObservableCollection<Chromecast>();
-            _chromecastService.ChromeCastClient.ApplicationStarted += Client_ApplicationStarted;
-            _chromecastService.ChromeCastClient.VolumeChanged += _client_VolumeChanged;
-            _chromecastService.ChromeCastClient.MediaStatusChanged += ChromeCastClient_MediaStatusChanged;
-            _chromecastService.ChromeCastClient.ConnectedChanged += ChromeCastClient_Connected;
             secondsTimer = new DispatcherTimer {Interval = TimeSpan.FromSeconds(1)};
             secondsTimer.Tick += SecondsTimer_Tick;
-            LoadChromecasts();
         }
+        
 
-        private async void LoadChromecasts()
-        {
-            var foundChromecasts = await _chromecastService.StartLocatingDevices();
-            foreach (var foundChromecast in foundChromecasts)
-            {
-                Chromecasts.Add(foundChromecast);
-            }
-        }
         
         private async void ChromeCastClient_Connected(object sender, EventArgs e)
         {
             await ExecuteOnUiThread(() =>
             {
-                ConnectedToChromecast = true;
+                ConnectedToChromecast = true;                
             });
-            _controller = await _chromecastService.ChromeCastClient.LaunchSharpCaster();
+            _controller = await _chromecastClient.LaunchSharpCaster();
         }
 
         private void SecondsTimer_Tick(object sender, object e)
@@ -214,7 +204,7 @@ namespace SharpCaster.Simple
 
         public async Task PlayPause()
         {
-            if (_chromecastService.ChromeCastClient.MediaStatus != null && _chromecastService.ChromeCastClient.MediaStatus.PlayerState == PlayerState.Paused)
+            if (_chromecastClient?.MediaStatus != null && _chromecastClient?.MediaStatus.PlayerState == PlayerState.Paused)
             {
                 await _controller.Play();
             }
@@ -258,12 +248,12 @@ namespace SharpCaster.Simple
 
         public async Task MuteUnmute()
         {
-            await _controller.SetMute(!_chromecastService.ChromeCastClient.Volume.muted);
+            await _controller.SetMute(!_chromecastClient.Volume.muted);
         }
 
         public async Task SetVolume(double newValue)
         {
-            if (Math.Abs(_chromecastService.ChromeCastClient.Volume.level - (newValue/100)) < 0.01) return;
+            if (Math.Abs(_chromecastClient.Volume.level - (newValue/100)) < 0.01) return;
             await _controller.SetVolume((float) (newValue / 100));
         }
 

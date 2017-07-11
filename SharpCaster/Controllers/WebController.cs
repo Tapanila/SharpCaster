@@ -8,7 +8,7 @@ namespace SharpCaster.Controllers
     public class WebController : BaseController
     {
         public static string WebAppId = "5CB45E5A";
-        public WebController(ChromeCastClient client) : base(client, WebAppId)
+        public WebController(ChromecastClient client) : base(client, WebAppId)
         {
             
         }
@@ -22,7 +22,7 @@ namespace SharpCaster.Controllers
     
     public static class WebControllerExtensions
     {
-        public static async Task<WebController> LaunchWeb(this ChromeCastClient client)
+        public static async Task<WebController> LaunchWeb(this ChromecastClient client)
         {
             client.MakeSureChannelExist(new WebChannel(client));
             var controller = new WebController(client);

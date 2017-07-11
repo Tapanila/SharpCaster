@@ -10,7 +10,7 @@ namespace SharpCaster.Channels
     {
         public static string Urn = "urn:x-cast:com.url.cast";
 
-        public WebChannel(ChromeCastClient client) : base(client, Urn)
+        public WebChannel(ChromecastClient client) : base(client, Urn)
         {
         }
 

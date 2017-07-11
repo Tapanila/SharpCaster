@@ -5,7 +5,7 @@ namespace SharpCaster.Extensions
 {
     public static class ChromecastClientExtensions
     {
-        public static void MakeSureChannelExist(this ChromeCastClient client, IEnumerable<IChromecastChannel> channels)
+        public static void MakeSureChannelExist(this ChromecastClient client, IEnumerable<IChromecastChannel> channels)
         {
             foreach (var channel in channels)
             {
@@ -16,7 +16,7 @@ namespace SharpCaster.Extensions
             }
         }
 
-        public static void MakeSureChannelExist(this ChromeCastClient client, IChromecastChannel channel)
+        public static void MakeSureChannelExist(this ChromecastClient client, IChromecastChannel channel)
         {
             client.MakeSureChannelExist(new List<IChromecastChannel> {channel});
         }

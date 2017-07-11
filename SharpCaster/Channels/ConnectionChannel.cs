@@ -5,7 +5,7 @@ namespace SharpCaster.Channels
 {
     public class ConnectionChannel : ChromecastChannel
     {
-        public ConnectionChannel(ChromeCastClient client) :
+        public ConnectionChannel(ChromecastClient client) :
             base(client, "urn:x-cast:com.google.cast.tp.connection")
         {
         }

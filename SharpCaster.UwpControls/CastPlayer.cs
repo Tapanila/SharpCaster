@@ -2,7 +2,7 @@
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Media;
 
-namespace SharpCaster.Simple.Controllers
+namespace SharpCaster.UwpControls
 {
     public sealed class CastPlayer : Control
     {
