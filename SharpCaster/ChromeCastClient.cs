@@ -1,222 +1,249 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
+﻿using Sharpcaster.Core.Channels;
+using Sharpcaster.Core.Interfaces;
+using Sharpcaster.Core.Models;
+using System;
 using System.IO;
-using System.Linq;
+using System.Net.Security;
+using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using Extensions.Api.CastChannel;
-using SharpCaster.Channels;
-using SharpCaster.Controllers;
-using SharpCaster.Extensions;
-using SharpCaster.Models;
-using SharpCaster.Models.ChromecastStatus;
-using SharpCaster.Models.MediaStatus;
-using SharpCaster.Interfaces;
-using SharpCaster.Services;
+using static Extensions.Api.CastChannel.CastMessage.Types;
+using System.Text;
+using Newtonsoft.Json;
+using Sharpcaster.Core.Messages;
+using System.Collections.Generic;
+using System.Linq;
+using Sharpcaster.Extensions;
+using System.Collections.Concurrent;
+using System.Reflection;
+using Sharpcaster.Core.Models.ChromecastStatus;
+using System.Diagnostics;
+using Microsoft.Extensions.DependencyInjection;
 
-namespace SharpCaster
+namespace Sharpcaster
 {
-    public class ChromeCastClient
+    public class ChromecastClient: IChromecastClient
     {
-        public Volume Volume
+        private const int RECEIVE_TIMEOUT = 30000;
+        private static readonly object LockObject = new object();
+        private TcpClient _client;
+        private Stream _stream;
+        private ChromecastReceiver _receiver;
+        private TaskCompletionSource<bool> ReceiveTcs { get; set; }
+        private ILogger _logger;
+        private SemaphoreSlim SendSemaphoreSlim { get; } = new SemaphoreSlim(1, 1);
+
+        private IDictionary<string, Type> MessageTypes { get; set; }
+        private IEnumerable<IChromecastChannel> Channels { get; set; }
+        private ConcurrentDictionary<int, object> WaitingTasks { get; } = new ConcurrentDictionary<int, object>();
+
+        public ChromecastClient()
         {
-            get
+            var serviceCollection = new ServiceCollection();
+            serviceCollection.AddTransient<IChromecastChannel, ConnectionChannel>();
+            serviceCollection.AddTransient<IChromecastChannel, HeartbeatChannel>();
+            serviceCollection.AddTransient<IChromecastChannel, ReceiverChannel>();
+            //services.AddTransient<IChromecastChannel, MediaChannel>();
+            var messageInterfaceType = typeof(IMessage);
+            foreach (var type in (from t in typeof(IConnectionChannel).GetTypeInfo().Assembly.GetTypes()
+                                  where t.GetTypeInfo().IsClass && !t.GetTypeInfo().IsAbstract && messageInterfaceType.IsAssignableFrom(t)
+                                  select t))
             {
-                return _volume;
+                serviceCollection.AddTransient(messageInterfaceType, type);
             }
-            set
-            {
-                if (_volume != null &&
-                    !(Math.Abs(_volume.level - value.level) > 0.01f) &&
-                    _volume.muted == value.muted) return;
-                _volume = value;
-                VolumeChanged?.Invoke(this, _volume);
-            }
+            Init(serviceCollection);
         }
 
-        private Volume _volume;
-
-        public ChromecastStatus ChromecastStatus
+        /// <summary>
+        /// Initializes a new instance of Sender class
+        /// </summary>
+        /// <param name="serviceCollection">collection of service descriptors</param>
+        public ChromecastClient(IServiceCollection serviceCollection)
         {
-            get
-            {
-                return _chromecastStatus;
-            }
-            set
-            {
-                if (_chromecastStatus == value) return;
-                _chromecastStatus = value;
-                ChromecastStatusChanged?.Invoke(this, _chromecastStatus);
-            }
+            Init(serviceCollection);
         }
 
-        private ChromecastStatus _chromecastStatus;
-
-        public MediaStatus MediaStatus
+        private void Init(IServiceCollection serviceCollection)
         {
-            get
+            var serviceProvider = serviceCollection.BuildServiceProvider();
+            var channels = serviceProvider.GetServices<IChromecastChannel>();
+            var messages = serviceProvider.GetServices<IMessage>();
+            MessageTypes = messages.Where(t => !String.IsNullOrEmpty(t.Type)).ToDictionary(m => m.Type, m => m.GetType());
+            Channels = channels;
+            foreach (var channel in channels)
             {
-                return _mediaStatus;
-            }
-            set
-            {
-                if (_mediaStatus == value) return;
-                _mediaStatus = value;
-                MediaStatusChanged?.Invoke(this, _mediaStatus);
-            }
-        }
-
-        private MediaStatus _mediaStatus;
-
-        public bool Connected
-        {
-            get { return _connected; }
-            set
-            {
-                if (_connected == value) return;
-                _connected = value;
-                ConnectedChanged?.Invoke(this, EventArgs.Empty);
+                channel.Client = this;
             }
         }
 
-        private bool _connected;
 
-        public ChromecastApplication RunningApplication
+        public async Task<ChromecastStatus> ConnectChromecast(ChromecastReceiver chromecastReceiver)
         {
-            get
+            await Dispose();
+
+            _receiver = chromecastReceiver;
+            _client = new TcpClient();
+            await _client.ConnectAsync(chromecastReceiver.DeviceUri.Host, chromecastReceiver.Port);
+            //Open SSL stream to Chromecast and bypass all SSL validation
+            var secureStream = new SslStream(_client.GetStream(), true, (sender, certificate, chain, sslPolicyErrors) => true);
+            await secureStream.AuthenticateAsClientAsync(chromecastReceiver.DeviceUri.Host);
+            _stream = secureStream;
+
+            ReceiveTcs = new TaskCompletionSource<bool>();
+            Receive();
+            await GetChannel<IConnectionChannel>().ConnectAsync();
+            return await GetChannel<IReceiverChannel>().GetChromecastStatusAsync();
+        }
+
+        private void Receive()
+        {
+            Task.Run(async () =>
             {
-                return _runningApplication;
+                try
+                {
+                    while (true)
+                    {
+                        //First 4 bytes contains the length of the message
+                        var buffer = await _stream.ReadAsync(4);
+                        if (BitConverter.IsLittleEndian)
+                        {
+                            Array.Reverse(buffer);
+                        }
+                        var length = BitConverter.ToInt32(buffer, 0);
+                        CastMessage castMessage;
+                        using (var ms = new MemoryStream())
+                        {
+                            await ms.WriteAsync(await _stream.ReadAsync(length), 0, length);
+                            ms.Position = 0;
+                            castMessage = CastMessage.Parser.ParseFrom(ms);
+                        }
+                        var payload = (castMessage.PayloadType == PayloadType.Binary ?
+                            Encoding.UTF8.GetString(castMessage.PayloadBinary.ToByteArray()) : castMessage.PayloadUtf8);
+                        if (_logger != null)
+                        {
+                            await _logger?.Log($"RECEIVED: {castMessage.Namespace} : {payload}");
+                        }
+
+                        var channel = Channels.FirstOrDefault(c => c.Namespace == castMessage.Namespace);
+                        if (channel != null)
+                        {
+                            var message = JsonConvert.DeserializeObject<MessageWithId>(payload);
+                            if (MessageTypes.TryGetValue(message.Type, out Type type))
+                            {
+                                try
+                                {
+                                    var response = (IMessage)JsonConvert.DeserializeObject(payload, type);
+                                    await channel.OnMessageReceivedAsync(response);
+                                    TaskCompletionSourceInvoke(message, "SetResult", response);
+                                }
+                                catch (Exception ex)
+                                {
+                                    TaskCompletionSourceInvoke(message, "SetException", ex, new Type[] { typeof(Exception) });
+                                }
+                            } else
+                            {
+                                Debugger.Break();
+                            }
+                        }
+                    }
+                }
+                catch (Exception)
+                {
+                    //await Dispose(false);
+                    ReceiveTcs.SetResult(true);
+                }
+            });
+        }
+
+        private void TaskCompletionSourceInvoke(MessageWithId message, string method, object parameter, Type[] types = null)
+        {
+            if (message.HasRequestId && WaitingTasks.TryRemove(message.RequestId, out object tcs))
+            {
+                var tcsType = tcs.GetType();
+                (types == null ? tcsType.GetMethod(method) : tcsType.GetMethod(method, types)).Invoke(tcs, new object[] { parameter });
             }
-            set
-            {
-                if (_runningApplication == value) return;
-                _runningApplication = value;
-                ApplicationStarted?.Invoke(this, _runningApplication);
-            }
         }
 
-        private ChromecastApplication _runningApplication;
-
-
-        private Dictionary<string, IController> _controllerDictionaryBackingField { get; set; }
-
-        private Dictionary<string, IController> GetControllerDictionary()
+        private Task Dispose()
         {
-            if (_controllerDictionaryBackingField != null) return _controllerDictionaryBackingField;
-            var controllers = new List<IController>
-            {
-                new PlexController(this),
-                new YouTubeController(this),
-                new SharpCasterDemoController(this)
-            };
-            _controllerDictionaryBackingField = controllers.ToDictionary(controller => controller.ApplicationId);
-
-            return _controllerDictionaryBackingField;
+            return Task.FromResult(true);
+            //throw new NotImplementedException();
         }
 
-        public IChromecastSocketService ChromecastSocketService { get; set; }
-
-        public ConnectionChannel ConnectionChannel;
-        public MediaChannel MediaChannel;
-        public HeartbeatChannel HeartbeatChannel;
-        public ReceiverChannel ReceiverChannel;
-        public string ChromecastApplicationId;
-        public string CurrentApplicationSessionId = "";
-        public string CurrentApplicationTransportId = "";
-        public int CurrentMediaSessionId;
-
-        public event EventHandler ConnectedChanged;
-        public event EventHandler<ChromecastApplication> ApplicationStarted;
-        public event EventHandler<MediaStatus> MediaStatusChanged;
-        public event EventHandler<ChromecastStatus> ChromecastStatusChanged;
-        public event EventHandler<Volume> VolumeChanged;
-        public List<IChromecastChannel> Channels;
-
-        private const string ChromecastPort = "8009";
-        public CancellationTokenSource CancellationTokenSource;
-
-        public ChromeCastClient()
+        
+       
+        public void Disconnect()
         {
-            ChromecastSocketService = new ChromecastSocketService();
-            Channels = new List<IChromecastChannel>();
-            ConnectionChannel = new ConnectionChannel(this);
-            Channels.Add(ConnectionChannel);
-            HeartbeatChannel = new HeartbeatChannel(this);
-            Channels.Add(HeartbeatChannel);
-            ReceiverChannel = new ReceiverChannel(this);
-            Channels.Add(ReceiverChannel);
-            MediaChannel = new MediaChannel(this);
-            Channels.Add(MediaChannel);
+            _stream.Dispose();
+            _client.Dispose();
+            _client = null;
         }
 
-
-        public async Task ConnectChromecast(Uri uri)
+        public async Task SendAsync(string ns, IMessage message, string destinationId)
         {
-            CancellationTokenSource = new CancellationTokenSource();
-            await ChromecastSocketService.Initialize(uri.Host, ChromecastPort, ConnectionChannel, HeartbeatChannel, ReadPacket, CancellationTokenSource.Token);
+            var castMessage = CreateCastMessage(ns, destinationId);
+            castMessage.PayloadUtf8 = JsonConvert.SerializeObject(message);
+            await SendAsync(castMessage);
         }
 
-        public async Task DisconnectChromecast()
+        private async Task SendAsync(CastMessage castMessage)
         {
-            CancellationTokenSource.Cancel();
-            await ChromecastSocketService.Disconnect();
-            CurrentApplicationSessionId = "";
-            CurrentApplicationTransportId = "";
-        }
-
-        public IController GetControllerForCurrentApp()
-        {
-            var currentAppId = RunningApplication?.AppId;
-            var controllerDictionary = GetControllerDictionary();
-            if (currentAppId == null || controllerDictionary.Keys.Contains(currentAppId))
-            {
-                throw new KeyNotFoundException("No controller was found for the current applicationId");
-            }
-
-            return controllerDictionary[currentAppId];
-        }
-
-        private async void ReadPacket(Stream stream, bool parsed, CancellationToken cancellationToken)
-        {
+            await SendSemaphoreSlim.WaitAsync();
             try
             {
-                IEnumerable<byte> entireMessage;
-                if (parsed)
+                if (_logger != null)
                 {
-                    var buffer = new byte[stream.Length];
-                    await stream.ReadAsync(buffer, 0, buffer.Length, cancellationToken);
-                    entireMessage = buffer;
-                }
-                else
-                {
-                    entireMessage = await stream.ParseData(cancellationToken);
+                    await _logger.Log($"SENT    : {castMessage.DestinationId}: {castMessage.PayloadUtf8}");
                 }
 
-                var entireMessageArray = entireMessage.ToArray();
-                var castMessage = entireMessageArray.ToCastMessage();
-                if (string.IsNullOrEmpty(castMessage?.Namespace)) return;
-
-                Debug.WriteLine("Received: " + castMessage.GetJsonType());
-                ReceivedMessage(castMessage);
+                byte[] message = castMessage.ToProto();
+                var networkStream = _stream;
+                await networkStream.WriteAsync(message, 0, message.Length);
+                await networkStream.FlushAsync();
             }
-            catch (Exception ex)
+            finally
             {
-                // TODO: Catch disconnect - HResult = 0x80072745 -
-                // catch this (remote device disconnect) ex = {"An established connection was aborted
-                // by the software in your host machine. (Exception from HRESULT: 0x80072745)"}
-
-                // Log these bytes
-                Debug.WriteLine(ex);
+                SendSemaphoreSlim.Release();
             }
         }
 
-        private void ReceivedMessage(CastMessage castMessage)
+        private CastMessage CreateCastMessage(string ns, string destinationId)
         {
-            foreach (var channel in Channels.Where(i => i.Namespace == castMessage.Namespace))
+            return new CastMessage()
             {
-                channel.OnMessageReceived(new ChromecastSSLClientDataReceivedArgs(castMessage));
-            }
+                Namespace = ns,
+                SourceId = "Sender-0",
+                DestinationId = destinationId
+            };
+        }
+
+        public async Task<TResponse> SendAsync<TResponse>(string ns, IMessageWithId message, string destinationId) where TResponse : IMessageWithId
+        {
+            var taskCompletionSource = new TaskCompletionSource<TResponse>();
+            WaitingTasks[message.RequestId] = taskCompletionSource;
+            await SendAsync(ns, message, destinationId);
+            return await taskCompletionSource.Task.TimeoutAfter(RECEIVE_TIMEOUT);
+        }
+
+        public Task DisconnectAsync()
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Gets a channel
+        /// </summary>
+        /// <typeparam name="TChannel">channel type</typeparam>
+        /// <returns>a channel</returns>
+        public TChannel GetChannel<TChannel>() where TChannel : IChromecastChannel
+        {
+            return Channels.OfType<TChannel>().FirstOrDefault();
+        }
+
+        public async Task<ChromecastStatus> LaunchApplicationAsync(string applicationId)
+        {
+            return await GetChannel<ReceiverChannel>().LaunchApplicationAsync(applicationId);
         }
     }
 }
