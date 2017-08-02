@@ -15,16 +15,6 @@ namespace Sharpcaster.Core.Channels
         {
         }
 
-        /// <summary>
-        /// Checks the connection is well established
-        /// </summary>
-        /// <param name="ns">namespace</param>
-        /// <returns>an application object</returns>
-        public Task<ChromecastApplication> EnsureConnection(string ns)
-        {
-            throw new NotImplementedException();
-        }
-
         public async Task<ChromecastStatus> GetChromecastStatusAsync()
         {
             return (await SendAsync<ReceiverStatusMessage>(new GetStatusMessage())).Status;
@@ -33,6 +23,25 @@ namespace Sharpcaster.Core.Channels
         public async Task<ChromecastStatus> LaunchApplicationAsync(string applicationId)
         {
             return (await SendAsync<ReceiverStatusMessage>(new LaunchMessage() { ApplicationId = applicationId })).Status;
+        }
+
+        public async Task<ChromecastStatus> SetMute(bool muted)
+        {
+            return (await SendAsync<ReceiverStatusMessage>(new SetVolumeMessage() { Volume = new Models.Volume() { Muted = muted } })).Status;
+        }
+
+        public async Task<ChromecastStatus> SetVolume(double level)
+        {
+            if (level < 0 || level > 1.0)
+            {
+                throw new ArgumentException("level must be between 0.0 and 1.0", nameof(level));
+            }
+            return (await SendAsync<ReceiverStatusMessage>(new SetVolumeMessage() { Volume = new Models.Volume() { Level = level } })).Status;
+        }
+
+        public async Task<ChromecastStatus> StopApplication(string sessionId)
+        {
+            return (await SendAsync<ReceiverStatusMessage>(new StopMessage() { SessionId = sessionId })).Status;
         }
     }
 }

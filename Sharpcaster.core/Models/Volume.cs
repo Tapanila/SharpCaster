@@ -1,12 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Runtime.Serialization;
 
 namespace Sharpcaster.Core.Models
 {
+    [DataContract]
     public class Volume
     {
-        public float level { get; set; }
-        public bool muted { get; set; }
+        [DataMember(Name = "level")]
+        public double? Level { get; set; }
+
+        [DataMember(Name = "muted")]
+        public bool? Muted { get; set; }
     }
 }

@@ -1,7 +1,4 @@
 ﻿using Sharpcaster.Core.Models.ChromecastStatus;
-using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Sharpcaster.Core.Interfaces
@@ -18,12 +15,9 @@ namespace Sharpcaster.Core.Interfaces
         /// <returns>receiver status</returns>
         Task<ChromecastStatus> LaunchApplicationAsync(string applicationId);
 
-        /// <summary>
-        /// Checks the connection is well established
-        /// </summary>
-        /// <param name="ns">namespace</param>
-        /// <returns>an application object</returns>
-        Task<ChromecastApplication> EnsureConnection(string ns);
         Task<ChromecastStatus> GetChromecastStatusAsync();
+        Task<ChromecastStatus> StopApplication(string sessionId);
+        Task<ChromecastStatus> SetVolume(double level);
+        Task<ChromecastStatus> SetMute(bool muted);
     }
 }
