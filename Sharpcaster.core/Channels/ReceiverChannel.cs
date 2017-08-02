@@ -1,14 +1,14 @@
 ﻿using Sharpcaster.Core.Interfaces;
 using System;
-using System.Collections.Generic;
-using System.Text;
 using Sharpcaster.Core.Models.ChromecastStatus;
 using System.Threading.Tasks;
-using Sharpcaster.Core.Messages.Chromecast;
 using Sharpcaster.Core.Messages.Receiver;
 
 namespace Sharpcaster.Core.Channels
 {
+    /// <summary>
+    /// ReceiverChannel, Receives ChromecastStatus, volume, starting and stopping application
+    /// </summary>
     public class ReceiverChannel : StatusChannel<ReceiverStatusMessage, ChromecastStatus>, IReceiverChannel
     {
         public ReceiverChannel() : base("receiver")

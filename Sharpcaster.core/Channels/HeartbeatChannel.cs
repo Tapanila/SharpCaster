@@ -2,6 +2,7 @@
 using Sharpcaster.Core.Messages.Heartbeat;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -25,11 +26,14 @@ namespace Sharpcaster.Core.Channels
         /// <param name="message">message to process</param>
         public override async Task OnMessageReceivedAsync(IMessage message)
         {
-            switch (message)
+            if (message is PingMessage)
             {
-                case PingMessage pingMessage:
-                    await SendAsync(new PongMessage());
-                    break;
+                await SendAsync(new PongMessage());
+            }
+            else
+            {
+                //TODO: Remove this if we don't hit this
+                Debugger.Break();
             }
         }
     }

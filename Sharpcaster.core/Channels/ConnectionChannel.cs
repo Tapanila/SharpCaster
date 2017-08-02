@@ -1,16 +1,13 @@
 ﻿using Sharpcaster.Core.Interfaces;
-using Sharpcaster.Core.Messages.Chromecast;
 using Sharpcaster.Core.Messages.Connection;
+using Sharpcaster.Core.Messages.Receiver;
 using Sharpcaster.Core.Models.ChromecastStatus;
-using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Sharpcaster.Core.Channels
 {
     /// <summary>
-    /// Connection channel
+    /// Connection channel, Responsible for opening connection to Chromecast and receiving Closed message
     /// </summary>
     public class ConnectionChannel : ChromecastChannel, IConnectionChannel
     {
@@ -22,12 +19,19 @@ namespace Sharpcaster.Core.Channels
         }
 
         /// <summary>
-        /// Connects 
+        /// Connects to chromecast
         /// </summary>
-        /// <param name="destinationId">destination identifier</param>
-        public async Task ConnectAsync(string destinationId)
+        public async Task ConnectAsync()
         {
-            await SendAsync(new ConnectMessage(), destinationId);
+            await SendAsync(new ConnectMessage());
+        }
+
+        /// <summary>
+        /// Connects to running chromecast application 
+        /// </summary>
+        public async Task ConnectAsync(string transportId)
+        {
+            await SendAsync(new ConnectMessage(), transportId);
         }
 
         /// <summary>

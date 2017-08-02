@@ -12,6 +12,7 @@ namespace Sharpcaster.Core.Interfaces
         /// Connects 
         /// </summary>
         /// <param name="destinationId">destination identifier</param>
-        Task ConnectAsync(string destinationId = "receiver-0");
+        Task ConnectAsync();
+        Task ConnectAsync(string transportId);
     }
 }

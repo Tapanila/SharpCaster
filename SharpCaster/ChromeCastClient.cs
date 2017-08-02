@@ -24,7 +24,7 @@ using Sharpcaster.Logging;
 
 namespace Sharpcaster
 {
-    public class ChromecastClient: IChromecastClient
+    public class ChromecastClient : IChromecastClient
     {
         private const int RECEIVE_TIMEOUT = 30000;
         private static readonly object LockObject = new object();
@@ -136,7 +136,8 @@ namespace Sharpcaster
                                 {
                                     TaskCompletionSourceInvoke(message, "SetException", ex, new Type[] { typeof(Exception) });
                                 }
-                            } else
+                            }
+                            else
                             {
                                 Debugger.Break();
                             }
@@ -166,8 +167,8 @@ namespace Sharpcaster
             //throw new NotImplementedException();
         }
 
-        
-       
+
+
         public void Disconnect()
         {
             _stream.Dispose();
@@ -233,9 +234,39 @@ namespace Sharpcaster
             return Channels.OfType<TChannel>().FirstOrDefault();
         }
 
-        public async Task<ChromecastStatus> LaunchApplicationAsync(string applicationId)
+        public async Task<ChromecastStatus> LaunchApplicationAsync(string applicationId, bool joinExistingApplicationSession = true)
         {
-            return await GetChannel<ReceiverChannel>().LaunchApplicationAsync(applicationId);
+            if (joinExistingApplicationSession)
+            {
+                var status = GetChromecastStatus();
+                var runningApplication = status?.Applications?.FirstOrDefault(x => x.AppId == applicationId);
+                if (runningApplication != null)
+                {
+                    await GetChannel<IConnectionChannel>().ConnectAsync(runningApplication.TransportId);
+                    return await GetChannel<IReceiverChannel>().GetChromecastStatusAsync();
+                }
+            }
+            return await GetChannel<IReceiverChannel>().LaunchApplicationAsync(applicationId);
+        }
+
+        private IEnumerable<IChromecastChannel> GetStatusChannels()
+        {
+            var statusChannelType = typeof(IStatusChannel<>);
+            return Channels.Where(c => c.GetType().GetInterfaces().Any(i => i.GetTypeInfo().IsGenericType && i.GetGenericTypeDefinition() == statusChannelType));
+        }
+
+        /// <summary>
+        /// Gets the differents statuses
+        /// </summary>
+        /// <returns>a dictionnary of namespace/status</returns>
+        public IDictionary<string, object> GetStatuses()
+        {
+            return GetStatusChannels().ToDictionary(c => c.Namespace, c => c.GetType().GetProperty("Status").GetValue(c));
+        }
+
+        public ChromecastStatus GetChromecastStatus()
+        {
+            return GetStatuses().First(x => x.Key == GetChannel<ReceiverChannel>().Namespace).Value as ChromecastStatus;
         }
     }
 }
