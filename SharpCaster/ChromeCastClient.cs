@@ -20,6 +20,7 @@ using System.Reflection;
 using Sharpcaster.Core.Models.ChromecastStatus;
 using System.Diagnostics;
 using Microsoft.Extensions.DependencyInjection;
+using Sharpcaster.Logging;
 
 namespace Sharpcaster
 {
@@ -31,7 +32,7 @@ namespace Sharpcaster
         private Stream _stream;
         private ChromecastReceiver _receiver;
         private TaskCompletionSource<bool> ReceiveTcs { get; set; }
-        private ILogger _logger;
+        public static readonly ILog Logger = LogProvider.For<ChromecastClient>();
         private SemaphoreSlim SendSemaphoreSlim { get; } = new SemaphoreSlim(1, 1);
 
         private IDictionary<string, Type> MessageTypes { get; set; }
@@ -70,7 +71,9 @@ namespace Sharpcaster
             var channels = serviceProvider.GetServices<IChromecastChannel>();
             var messages = serviceProvider.GetServices<IMessage>();
             MessageTypes = messages.Where(t => !String.IsNullOrEmpty(t.Type)).ToDictionary(m => m.Type, m => m.GetType());
+            Logger.Info(MessageTypes.Keys.ToString(","));
             Channels = channels;
+            Logger.Info(Channels.ToString(","));
             foreach (var channel in channels)
             {
                 channel.Client = this;
@@ -111,19 +114,11 @@ namespace Sharpcaster
                             Array.Reverse(buffer);
                         }
                         var length = BitConverter.ToInt32(buffer, 0);
-                        CastMessage castMessage;
-                        using (var ms = new MemoryStream())
-                        {
-                            await ms.WriteAsync(await _stream.ReadAsync(length), 0, length);
-                            ms.Position = 0;
-                            castMessage = CastMessage.Parser.ParseFrom(ms);
-                        }
+                        var castMessage = CastMessage.Parser.ParseFrom(await _stream.ReadAsync(length));
+                        //Payload can either be Binary or UTF8 json
                         var payload = (castMessage.PayloadType == PayloadType.Binary ?
                             Encoding.UTF8.GetString(castMessage.PayloadBinary.ToByteArray()) : castMessage.PayloadUtf8);
-                        if (_logger != null)
-                        {
-                            await _logger?.Log($"RECEIVED: {castMessage.Namespace} : {payload}");
-                        }
+                        Logger.Info($"RECEIVED: {castMessage.Namespace} : {payload}");
 
                         var channel = Channels.FirstOrDefault(c => c.Namespace == castMessage.Namespace);
                         if (channel != null)
@@ -192,10 +187,7 @@ namespace Sharpcaster
             await SendSemaphoreSlim.WaitAsync();
             try
             {
-                if (_logger != null)
-                {
-                    await _logger.Log($"SENT    : {castMessage.DestinationId}: {castMessage.PayloadUtf8}");
-                }
+                Logger.Info($"SENT    : {castMessage.DestinationId}: {castMessage.PayloadUtf8}");
 
                 byte[] message = castMessage.ToProto();
                 var networkStream = _stream;

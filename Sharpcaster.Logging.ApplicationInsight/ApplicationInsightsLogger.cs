@@ -1,31 +1,30 @@
 ﻿using Microsoft.ApplicationInsights;
-using Microsoft.ApplicationInsights.Extensibility;
-using Sharpcaster.Core.Interfaces;
-using System;
+using Serilog;
 using System.Threading.Tasks;
 
 namespace Sharpcaster.Logging.ApplicationInsight
 {
-    public class ApplicationInsightLogger : ILogger
+    public class ApplicationInsightLogger
     {
+        private ILogger _logger;
         private TelemetryClient _telemetryClient;
         public ApplicationInsightLogger()
         {
-            Initialize(new TelemetryConfiguration("64d1e5b2-f91a-4d3c-9442-83e46a7b0e13"));
+            _telemetryClient = new TelemetryClient()
+            {
+                InstrumentationKey = "64d1e5b2-f91a-4d3c-9442-83e46a7b0e13"
+            };
+            _logger = new LoggerConfiguration()
+                .WriteTo.ApplicationInsightsEvents(_telemetryClient)
+                .CreateLogger();
+ 
+            Log.Logger = _logger;
         }
 
-        public ApplicationInsightLogger(TelemetryConfiguration telemetryConfiguration)
+        public async Task Flush()
         {
-            Initialize(telemetryConfiguration);
-        }
-
-        private void Initialize(TelemetryConfiguration telemetryConfiguration)
-        {
-            _telemetryClient = new TelemetryClient(telemetryConfiguration);
-        }
-        public async Task Log(string message)
-        {
-            _telemetryClient.TrackEvent(message);
+            _telemetryClient.Flush();
+            await Task.Delay(1000);
         }
     }
 }
