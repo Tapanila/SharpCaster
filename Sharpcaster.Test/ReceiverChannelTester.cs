@@ -41,10 +41,10 @@ namespace Sharpcaster.Test
             await client.ConnectChromecast(chromecast);
 
             var status = await client.GetChannel<ReceiverChannel>().SetVolume(0.1);
-            Assert.Equal(status.Volume.Level, 0.1);
+            Assert.Equal(status.Volume.Level.Value, 0.1, precision:1);
             
             status = await client.GetChannel<ReceiverChannel>().SetVolume(1.0);
-            Assert.Equal(status.Volume.Level, 1.0);
+            Assert.Equal(status.Volume.Level.Value, 1.0, precision: 1);
         }
 
         [Fact]

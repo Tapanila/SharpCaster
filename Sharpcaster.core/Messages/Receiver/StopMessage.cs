@@ -7,9 +7,7 @@ namespace Sharpcaster.Core.Messages.Receiver
 {
 
     [DataContract]
-    public class StopMessage : MessageWithId
+    public class StopMessage : MessageWithSession
     {   
-        [DataMember(Name = "sessionId")]
-        public string SessionId { get; set; }
     }
 }

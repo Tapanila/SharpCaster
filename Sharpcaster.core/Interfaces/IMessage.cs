@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Sharpcaster.Core.Interfaces
+﻿namespace Sharpcaster.Core.Interfaces
 {
     /// <summary>
     /// Interface for a message
