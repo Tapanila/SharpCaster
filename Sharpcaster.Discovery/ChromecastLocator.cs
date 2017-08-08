@@ -17,34 +17,43 @@ namespace Sharpcaster.Discovery
         public event EventHandler<ChromecastReceiver> ChromecastReceivedFound;
         private IList<ChromecastReceiver> DiscoveredDevices { get; set; }
         private ServiceBrowser _serviceBrowser;
+        private SemaphoreSlim ServiceAddedSemaphoreSlim { get; } = new SemaphoreSlim(1, 1);
         public MdnsChromecastLocator()
         {
             DiscoveredDevices = new List<ChromecastReceiver>();
             _serviceBrowser = new ServiceBrowser();
             _serviceBrowser.ServiceAdded += OnServiceAdded;
         }
-        
+
 
         private void OnServiceAdded(object sender, ServiceAnnouncementEventArgs e)
         {
-            var txtValues = e.Announcement.Txt
-                .Select(i => i.Split('='))
-                .ToDictionary(y => y[0], y => y[1]);
-            if (!txtValues.ContainsKey("fn")) return;
-            var ip = e.Announcement.Addresses[0];
-            Uri.TryCreate("https://" + ip, UriKind.Absolute, out Uri myUri);
-            var chromecast = new ChromecastReceiver
+            ServiceAddedSemaphoreSlim.Wait();
+            try
             {
-                DeviceUri = myUri,
-                Name = txtValues["fn"],
-                Model = txtValues["md"],
-                Version = txtValues["ve"],
-                ExtraInformation = txtValues,
-                Status = txtValues["rs"],
-                Port = e.Announcement.Port
-            };
-            ChromecastReceivedFound?.Invoke(this, chromecast);
-            DiscoveredDevices.Add(chromecast);
+                var txtValues = e.Announcement.Txt
+                    .Select(i => i.Split('='))
+                    .ToDictionary(y => y[0], y => y[1]);
+                if (!txtValues.ContainsKey("fn")) return;
+                var ip = e.Announcement.Addresses[0];
+                Uri.TryCreate("https://" + ip, UriKind.Absolute, out Uri myUri);
+                var chromecast = new ChromecastReceiver
+                {
+                    DeviceUri = myUri,
+                    Name = txtValues["fn"],
+                    Model = txtValues["md"],
+                    Version = txtValues["ve"],
+                    ExtraInformation = txtValues,
+                    Status = txtValues["rs"],
+                    Port = e.Announcement.Port
+                };
+                ChromecastReceivedFound?.Invoke(this, chromecast);
+                DiscoveredDevices.Add(chromecast);
+            }
+            finally
+            {
+                ServiceAddedSemaphoreSlim.Release();
+            }
         }
         /// <summary>
         /// Find the available chromecast receivers
