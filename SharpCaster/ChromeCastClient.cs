@@ -21,6 +21,8 @@ using Sharpcaster.Core.Models.ChromecastStatus;
 using System.Diagnostics;
 using Microsoft.Extensions.DependencyInjection;
 using Sharpcaster.Logging;
+using Sharpcaster.Core.Models.Media;
+using Sharpcaster.Core.Messages.Media;
 
 namespace Sharpcaster
 {
@@ -48,7 +50,7 @@ namespace Sharpcaster
             serviceCollection.AddTransient<IChromecastChannel, MediaChannel>();
             var messageInterfaceType = typeof(IMessage);
             foreach (var type in (from t in typeof(IConnectionChannel).GetTypeInfo().Assembly.GetTypes()
-                                  where t.GetTypeInfo().IsClass && !t.GetTypeInfo().IsAbstract && messageInterfaceType.IsAssignableFrom(t)
+                                  where t.GetTypeInfo().IsClass && !t.GetTypeInfo().IsAbstract && messageInterfaceType.IsAssignableFrom(t) && t.GetTypeInfo().GetCustomAttribute<ReceptionMessageAttribute>() != null
                                   select t))
             {
                 serviceCollection.AddTransient(messageInterfaceType, type);
@@ -71,6 +73,7 @@ namespace Sharpcaster
             var channels = serviceProvider.GetServices<IChromecastChannel>();
             var messages = serviceProvider.GetServices<IMessage>();
             MessageTypes = messages.Where(t => !String.IsNullOrEmpty(t.Type)).ToDictionary(m => m.Type, m => m.GetType());
+
             Logger.Info(MessageTypes.Keys.ToString(","));
             Channels = channels;
             Logger.Info(Channels.ToString(","));
@@ -152,12 +155,20 @@ namespace Sharpcaster
             });
         }
 
-        private void TaskCompletionSourceInvoke(MessageWithId message, string method, object parameter, Type[] types = null)
+        private async void TaskCompletionSourceInvoke(MessageWithId message, string method, object parameter, Type[] types = null)
         {
             if (message.HasRequestId && WaitingTasks.TryRemove(message.RequestId, out object tcs))
             {
                 var tcsType = tcs.GetType();
                 (types == null ? tcsType.GetMethod(method) : tcsType.GetMethod(method, types)).Invoke(tcs, new object[] { parameter });
+            } else
+            {
+                //This is just to handle media status messages. Where we want to update the status of media but we are not expecting an update
+                if(message.Type == "MEDIA_STATUS")
+                {
+                    var statusMessage = parameter as MediaStatusMessage;
+                    await GetChannel<MediaChannel>().OnMessageReceivedAsync(statusMessage);
+                }
             }
         }
 
@@ -267,6 +278,11 @@ namespace Sharpcaster
         public ChromecastStatus GetChromecastStatus()
         {
             return GetStatuses().First(x => x.Key == GetChannel<ReceiverChannel>().Namespace).Value as ChromecastStatus;
+        }
+
+        public MediaStatus GetMediaStatus()
+        {
+            return GetStatuses().First(x => x.Key == GetChannel<MediaChannel>().Namespace).Value as MediaStatus;
         }
     }
 }

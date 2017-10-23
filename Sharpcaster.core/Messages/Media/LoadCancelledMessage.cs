@@ -7,6 +7,7 @@ namespace Sharpcaster.Core.Messages.Media
     /// Load cancelled message
     /// </summary>
     [DataContract]
+    [ReceptionMessage]
     class LoadCancelledMessage : MessageWithId
     {
         [OnDeserializing]

@@ -15,8 +15,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Messages\Media\" />
-    <Folder Include="Models\Media\" />
     <Folder Include="Models\Protobuf\" />
   </ItemGroup>
 

@@ -7,6 +7,7 @@ namespace Sharpcaster.Core.Messages.Media
     /// Invalid request message
     /// </summary>
     [DataContract]
+    [ReceptionMessage]
     class InvalidRequestMessage : MessageWithId
     {
         /// <summary>

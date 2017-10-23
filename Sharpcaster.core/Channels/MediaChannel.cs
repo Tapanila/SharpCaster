@@ -1,6 +1,5 @@
 ﻿using Sharpcaster.Core.Interfaces;
 using Sharpcaster.Core.Messages.Media;
-using Sharpcaster.Core.Messages.Receiver;
 using Sharpcaster.Core.Models.ChromecastStatus;
 using Sharpcaster.Core.Models.Media;
 using System;
@@ -39,8 +38,9 @@ namespace Sharpcaster.Core.Channels
 
         private async Task<MediaStatus> SendAsync(MediaSessionMessage message)
         {
+            var chromecastStatus = Client.GetChromecastStatus();
             message.MediaSessionId = Status?.First().MediaSessionId ?? throw new ArgumentNullException("MediaSessionId");
-            return await SendAsync(message, null);
+            return await SendAsync(message, chromecastStatus.Applications[0]);
         }
 
         /// <summary>
@@ -70,6 +70,7 @@ namespace Sharpcaster.Core.Channels
         /// <returns>media status</returns>
         public async Task<MediaStatus> PauseAsync()
         {
+
             return await SendAsync(new PauseMessage());
         }
 
@@ -79,8 +80,7 @@ namespace Sharpcaster.Core.Channels
         /// <returns>media status</returns>
         public async Task<MediaStatus> StopAsync()
         {
-            throw new NotImplementedException();
-            //return await SendAsync(new StopMessage());
+            return await SendAsync(new StopMessage());
         }
 
         /// <summary>

@@ -9,6 +9,7 @@ namespace Sharpcaster.Core.Messages.Heartbeat
     /// Ping message
     /// </summary>
     [DataContract]
+    [ReceptionMessage]
     class PingMessage : Message
     {
     }

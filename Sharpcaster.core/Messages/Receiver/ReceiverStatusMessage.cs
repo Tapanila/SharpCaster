@@ -11,6 +11,7 @@ namespace Sharpcaster.Core.Messages.Receiver
     /// Receiver status message
     /// </summary>
     [DataContract]
+    [ReceptionMessage]
     public class ReceiverStatusMessage : StatusMessage<ChromecastStatus>
     {
     }

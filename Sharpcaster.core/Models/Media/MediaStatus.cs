@@ -1,4 +1,6 @@
-﻿using System.Runtime.Serialization;
+﻿using Newtonsoft.Json;
+using System.Runtime.Serialization;
+using Sharpcaster.Core.Converters;
 
 namespace Sharpcaster.Core.Models.Media
 {
@@ -23,8 +25,9 @@ namespace Sharpcaster.Core.Models.Media
         /// <summary>
         /// Gets or sets the player state
         /// </summary>
-        [DataMember(Name = "playerState")]
-        public string PlayerState { get; set; }
+        [DataMember(Name ="playerState")]
+        [JsonConverter(typeof(PlayerStateEnumConverter))]
+        public PlayerStateType PlayerState { get; set; }
 
         /// <summary>
         /// Gets or sets the current time
