@@ -29,6 +29,12 @@ namespace Sharpcaster
     public class ChromecastClient : IChromecastClient
     {
         private const int RECEIVE_TIMEOUT = 30000;
+
+        /// <summary>
+        /// Raised when the sender is disconnected
+        /// </summary>
+        public event EventHandler Disconnected;
+
         private static readonly object LockObject = new object();
         private TcpClient _client;
         private Stream _stream;
@@ -172,21 +178,6 @@ namespace Sharpcaster
             }
         }
 
-        private Task Dispose()
-        {
-            return Task.FromResult(true);
-            //throw new NotImplementedException();
-        }
-
-
-
-        public void Disconnect()
-        {
-            _stream.Dispose();
-            _client.Dispose();
-            _client = null;
-        }
-
         public async Task SendAsync(string ns, IMessage message, string destinationId)
         {
             var castMessage = CreateCastMessage(ns, destinationId);
@@ -230,11 +221,62 @@ namespace Sharpcaster
             return await taskCompletionSource.Task.TimeoutAfter(RECEIVE_TIMEOUT);
         }
 
-        public Task DisconnectAsync()
+        public async Task DisconnectAsync()
         {
-            throw new NotImplementedException();
+            foreach (var channel in GetStatusChannels())
+            {
+                channel.GetType().GetProperty("Status").SetValue(channel, null);
+            }
+            await Dispose();
         }
 
+
+        private async Task Dispose()
+        {
+            await Dispose(true);
+        }
+
+        private async Task Dispose(bool waitReceiveTask)
+        {
+            if (_client != null)
+            {
+                WaitingTasks.Clear();
+                Dispose(_stream, () => _stream = null);
+                Dispose(_client, () => _client = null);
+                if (waitReceiveTask && ReceiveTcs != null)
+                {
+                    await ReceiveTcs.Task;
+                }
+                OnDisconnected();
+            }
+        }
+        
+        private void Dispose(IDisposable disposable, Action action)
+        {
+            if (disposable != null)
+            {
+                try
+                {
+                    disposable.Dispose();
+                }
+                catch (Exception ex) {
+                    Logger.InfoException("Error on disposing.", ex, null);
+                }
+                finally
+                {
+                    action();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Raises the Disconnected event
+        /// </summary>
+        protected virtual void OnDisconnected()
+        {
+            Disconnected?.Invoke(this, EventArgs.Empty);
+        }
+        
         /// <summary>
         /// Gets a channel
         /// </summary>
