@@ -23,6 +23,8 @@ jobs:
       run: dotnet restore SharpCaster.sln
     - name: Build
       run: dotnet build --no-restore --configuration Release SharpCaster.sln
+    - name: Package
+      run: dotnet pack Sharpcaster/Sharpcaster.csproj
     - name: Push
       run:  dotnet nuget push "**/*.nupkg" -s nuget.org
 
