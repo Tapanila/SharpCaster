@@ -17,7 +17,14 @@ jobs:
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: 5.0.x
+      env:
+        NUGET_AUTH_TOKEN: ${{ secrets.NUGET }}
     - name: Restore dependencies
       run: dotnet restore SharpCaster.sln
     - name: Build
       run: dotnet build --no-restore --configuration Release SharpCaster.sln 
+    - name: Package
+      run: dotnet pack Sharpcaster/Sharpcaster.csproj
+    - name: Push
+      run:  dotnet nuget push *.nupkg
+
