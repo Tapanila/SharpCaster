@@ -20,6 +20,4 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore SharpCaster.sln
     - name: Build
-      run: dotnet build --no-restore SharpCaster.sln
-    - name: Test
-      run: dotnet test --no-build --verbosity normal SharpCaster.sln
+      run: dotnet build --no-restore --configuration Release SharpCaster.sln 
