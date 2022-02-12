@@ -23,8 +23,6 @@ jobs:
       run: dotnet restore SharpCaster.sln
     - name: Build
       run: dotnet build --no-restore --configuration Release SharpCaster.sln
-    - name: Add Nuget Source
-      run: dotnet nuget add source https://api.nuget.org/v3/index.json -n nuget.org
     - name: Push
       run:  dotnet nuget push "**/*.nupkg" -s nuget.org
 
