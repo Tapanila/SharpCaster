@@ -26,5 +26,5 @@ jobs:
     - name: Package
       run: dotnet pack Sharpcaster/Sharpcaster.csproj
     - name: Push
-      run:  dotnet nuget push *.nupkg
+      run:  dotnet nuget push "**/*.nupkg"
 
