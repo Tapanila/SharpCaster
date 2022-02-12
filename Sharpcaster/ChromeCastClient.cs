@@ -1,4 +1,4 @@
-﻿using Sharpcaster.Core.Channels;
+using Sharpcaster.Core.Channels;
 using Sharpcaster.Core.Interfaces;
 using Sharpcaster.Core.Models;
 using System;
