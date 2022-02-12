@@ -20,7 +20,6 @@ using System.Reflection;
 using Sharpcaster.Core.Models.ChromecastStatus;
 using System.Diagnostics;
 using Microsoft.Extensions.DependencyInjection;
-using Sharpcaster.Logging;
 using Sharpcaster.Core.Models.Media;
 using Sharpcaster.Core.Messages.Media;
 
@@ -40,7 +39,6 @@ namespace Sharpcaster
         private Stream _stream;
         private ChromecastReceiver _receiver;
         private TaskCompletionSource<bool> ReceiveTcs { get; set; }
-        public static readonly ILog Logger = LogProvider.For<ChromecastClient>();
         private SemaphoreSlim SendSemaphoreSlim { get; } = new SemaphoreSlim(1, 1);
 
         private IDictionary<string, Type> MessageTypes { get; set; }
@@ -80,9 +78,9 @@ namespace Sharpcaster
             var messages = serviceProvider.GetServices<IMessage>();
             MessageTypes = messages.Where(t => !String.IsNullOrEmpty(t.Type)).ToDictionary(m => m.Type, m => m.GetType());
 
-            Logger.Info(MessageTypes.Keys.ToString(","));
+            Console.WriteLine(MessageTypes.Keys.ToString(","));
             Channels = channels;
-            Logger.Info(Channels.ToString(","));
+            Console.WriteLine(Channels.ToString(","));
             foreach (var channel in channels)
             {
                 channel.Client = this;
@@ -127,7 +125,7 @@ namespace Sharpcaster
                         //Payload can either be Binary or UTF8 json
                         var payload = (castMessage.PayloadType == PayloadType.Binary ?
                             Encoding.UTF8.GetString(castMessage.PayloadBinary.ToByteArray()) : castMessage.PayloadUtf8);
-                        Logger.Info($"RECEIVED: {castMessage.Namespace} : {payload}");
+                        Console.WriteLine($"RECEIVED: {castMessage.Namespace} : {payload}");
 
                         var channel = Channels.FirstOrDefault(c => c.Namespace == castMessage.Namespace);
                         if (channel != null)
@@ -190,7 +188,7 @@ namespace Sharpcaster
             await SendSemaphoreSlim.WaitAsync();
             try
             {
-                Logger.Info($"SENT    : {castMessage.DestinationId}: {castMessage.PayloadUtf8}");
+                Console.WriteLine($"SENT    : {castMessage.DestinationId}: {castMessage.PayloadUtf8}");
 
                 byte[] message = castMessage.ToProto();
                 var networkStream = _stream;
@@ -260,7 +258,7 @@ namespace Sharpcaster
                     disposable.Dispose();
                 }
                 catch (Exception ex) {
-                    Logger.InfoException("Error on disposing.", ex, null);
+                    Console.WriteLine("Error on disposing.", ex, null);
                 }
                 finally
                 {
