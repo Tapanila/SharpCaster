@@ -2,16 +2,13 @@
 # SharpCaster
 
 ### Currently Supported Platforms
-* .Net Framework 4.5.1
-* Xamarin.iOS Unified
-* Xamarin.Android
-* UWP 10+ (Windows 10 Universal Programs)
+* ![.NET Standard 2.0](https://docs.microsoft.com/en-us/dotnet/standard/net-standard?tabs=net-standard-2-0)
 
-[![Build status](https://ci.appveyor.com/api/projects/status/myew8u24ry7dbdm0/branch/master?svg=true)](https://ci.appveyor.com/project/tapanila/sharpcaster)
+[![.NET](https://github.com/Tapanila/SharpCaster/actions/workflows/dotnet.yml/badge.svg)](https://github.com/Tapanila/SharpCaster/actions/workflows/dotnet.yml)
 
 ### This project is on beta stage (There might be breaking changes and supported platforms might change)
 
-SharpCaster is Chromecast C# SDK for Windows, Windows Phone, .NET 4.5.1, Xamarin.iOS and Xamarin.Android platforms.
+SharpCaster is Chromecast C# SDK any platform support .net standard 2.0.
 
 ## The nuget package  [![NuGet Status](http://img.shields.io/nuget/v/SharpCaster.svg?style=flat)](https://www.nuget.org/packages/SharpCaster/)
 
@@ -51,6 +48,6 @@ ChromecastService.Current.ConnectToChromecast(chromecast);
 ## Contributing
 Contributing is encouraged! Please submit pull requests, open issues etc. However, to ensure we end up with a good result and to make my life a little easier, could I please request that;
 
-* All changes be made in a feature branch, not in master, and please don't submit PR's directly against master.
+* All changes be made in a feature branch, not in master
 
 Thanks! I look forward to merge your contribution.
