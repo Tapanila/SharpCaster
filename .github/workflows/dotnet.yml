@@ -23,14 +23,16 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore SharpCaster.sln
     - name: tag
+      id: tag
       run: |
-          return gh release view -q .name --json name
+          version = "$(gh release view -q .name --json name)"
+          echo 'VERSION='$version >> $GITHUB_ENV
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     - name: Build
-      run: dotnet build --no-restore --configuration Release /p:Version=${{ steps.tag.outputs.result }} SharpCaster.sln
+      run: dotnet build --no-restore --configuration Release /p:Version=${{ steps.tag.outputs.VERSION }} SharpCaster.sln
     - name: Package
-      run: dotnet pack --configuration Release /p:Version=${{ steps.tag.outputs.result }} Sharpcaster/Sharpcaster.csproj
+      run: dotnet pack --configuration Release /p:Version=${{ steps.tag.outputs.VERSION }} Sharpcaster/Sharpcaster.csproj
     - name: Push
       if: github.event_name == 'release' && github.event.action == 'created'
       run:  dotnet nuget push "**/*.nupkg" -k $NUGET_AUTH_TOKEN -s nuget.org
