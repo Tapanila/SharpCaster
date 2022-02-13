@@ -2,6 +2,9 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <PackageId>Sharpcaster</PackageId>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://github.com/Tapanila/SharpCaster/</RepositoryUrl>
   </PropertyGroup>
 
   <ItemGroup>

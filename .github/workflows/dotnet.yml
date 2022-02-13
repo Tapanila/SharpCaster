@@ -19,11 +19,14 @@ jobs:
         dotnet-version: 5.0.x
     - name: Restore dependencies
       run: dotnet restore SharpCaster.sln
+    - name: Set VERSION variable from tag
+      run: echo "VERSION=${GITHUB_REF/refs\/tags\/v/}" >> $GITHUB_ENV
     - name: Build
-      run: dotnet build --no-restore --configuration Release SharpCaster.sln
+      run: dotnet build --no-restore --configuration Release /p:Version=${VERSION} SharpCaster.sln
     - name: Package
-      run: dotnet pack Sharpcaster/Sharpcaster.csproj
+      run: dotnet pack --configuration Release /p:Version=${VERSION} Sharpcaster/Sharpcaster.csproj
     - name: Push
+      if: github.ref == 'refs/heads/main'
       run:  dotnet nuget push "**/*.nupkg" -k $NUGET_AUTH_TOKEN -s nuget.org
       env:
         NUGET_AUTH_TOKEN: ${{ secrets.NUGET }}
