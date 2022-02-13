@@ -22,13 +22,11 @@ jobs:
         dotnet-version: 5.0.x
     - name: Restore dependencies
       run: dotnet restore SharpCaster.sln
-    - name: Extract tag name
-      id: tag
-      uses: actions/github-script@0.2.0
-      with:
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-        script: |
+    - name: tag
+      run: |
           return gh release view -q .name --json name
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     - name: Build
       run: dotnet build --no-restore --configuration Release /p:Version=${{ steps.tag.outputs.result }} SharpCaster.sln
     - name: Package
