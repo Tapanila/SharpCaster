@@ -5,6 +5,8 @@ on:
     branches: [ main ]
   pull_request:
     branches: [ main ]
+  release:
+    types: [published]
   workflow_dispatch:
 
 jobs:
@@ -25,14 +27,14 @@ jobs:
       uses: actions/github-script@0.2.0
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
-        scrit: |
+        script: |
           return gh release view -q .name --json name
     - name: Build
       run: dotnet build --no-restore --configuration Release /p:Version=${{ steps.tag.outputs.result }} SharpCaster.sln
     - name: Package
       run: dotnet pack --configuration Release /p:Version=${{ steps.tag.outputs.result }} Sharpcaster/Sharpcaster.csproj
     - name: Push
-      if: github.ref == 'refs/heads/main'
+      if: github.event_name == 'release' && github.event.action == 'created'
       run:  dotnet nuget push "**/*.nupkg" -k $NUGET_AUTH_TOKEN -s nuget.org
       env:
         NUGET_AUTH_TOKEN: ${{ secrets.NUGET }}
