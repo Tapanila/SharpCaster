@@ -25,8 +25,7 @@ jobs:
       uses: actions/github-script@0.2.0
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
-        script: |
-          return context.payload.ref.replace(/\/refs\/tags\//, '');
+      run: return gh release view -q .name --json name
     - name: Build
       run: dotnet build --no-restore --configuration Release /p:Version=${{ steps.tag.outputs.result }} SharpCaster.sln
     - name: Package
