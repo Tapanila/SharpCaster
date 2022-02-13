@@ -34,7 +34,7 @@ jobs:
     - name: Package
       run: dotnet pack --configuration Release /p:Version=$VERSION Sharpcaster/Sharpcaster.csproj
     - name: Push
-      if: github.event_name == 'release' && github.event.action == 'created'
+      if: startsWith(github.ref, 'refs/tags/')
       run:  dotnet nuget push "**/*.nupkg" -k $NUGET_AUTH_TOKEN -s nuget.org
       env:
         NUGET_AUTH_TOKEN: ${{ secrets.NUGET }}
