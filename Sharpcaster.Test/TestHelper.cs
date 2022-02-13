@@ -1,9 +1,7 @@
-﻿using Sharpcaster.Core.Interfaces;
-using Sharpcaster.Core.Models;
+﻿using Sharpcaster.Interfaces;
+using Sharpcaster.Models;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -13,14 +11,14 @@ namespace Sharpcaster.Test
     {
         public async static Task<ChromecastReceiver> FindChromecast()
         {
-            IChromecastLocator locator = new Discovery.MdnsChromecastLocator();
+            IChromecastLocator locator = new MdnsChromecastLocator();
             var chromecasts = await locator.FindReceiversAsync();
-            return chromecasts.First();
+            return chromecasts.First( x => x.Name == "📺 Living Room");
         }
 
         public async static Task<ChromecastReceiver> FindChromecast(string name, double timeoutSeconds)
         {
-            IChromecastLocator locator = new Discovery.MdnsChromecastLocator();
+            IChromecastLocator locator = new MdnsChromecastLocator();
             var cts = new CancellationTokenSource();
             cts.CancelAfter(TimeSpan.FromSeconds(timeoutSeconds));
             var chromecasts = await locator.FindReceiversAsync(cts.Token);

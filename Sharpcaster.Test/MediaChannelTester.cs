@@ -1,11 +1,8 @@
-﻿using Sharpcaster.Core.Interfaces;
-using Sharpcaster.Core.Models.Media;
+﻿using Sharpcaster.Interfaces;
+using Sharpcaster.Models.Media;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using Xunit;
 
 namespace Sharpcaster.Test
@@ -31,7 +28,7 @@ namespace Sharpcaster.Test
         public async void TestLoadingAndPausingMedia()
         {
             AutoResetEvent _autoResetEvent = new AutoResetEvent(false);
-            
+
             var chromecast = await TestHelper.FindChromecast();
             var client = new ChromecastClient();
             await client.ConnectChromecast(chromecast);
@@ -55,7 +52,7 @@ namespace Sharpcaster.Test
             };
 
             mediaStatus = await client.GetChannel<IMediaChannel>().LoadAsync(media);
-            
+
             //This checks that within 5000 ms we have loaded video and were able to pause it
             Assert.True(_autoResetEvent.WaitOne(5000));
         }

@@ -1,27 +1,27 @@
-using Sharpcaster.Core.Channels;
-using Sharpcaster.Core.Interfaces;
-using Sharpcaster.Core.Models;
+using Extensions.Api.CastChannel;
+using Microsoft.Extensions.DependencyInjection;
+using Newtonsoft.Json;
+using Sharpcaster.Channels;
+using Sharpcaster.Extensions;
+using Sharpcaster.Interfaces;
+using Sharpcaster.Messages;
+using Sharpcaster.Messages.Media;
+using Sharpcaster.Models;
+using Sharpcaster.Models.ChromecastStatus;
+using Sharpcaster.Models.Media;
 using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Net.Security;
 using System.Net.Sockets;
+using System.Reflection;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Extensions.Api.CastChannel;
 using static Extensions.Api.CastChannel.CastMessage.Types;
-using System.Text;
-using Newtonsoft.Json;
-using Sharpcaster.Core.Messages;
-using System.Collections.Generic;
-using System.Linq;
-using Sharpcaster.Extensions;
-using System.Collections.Concurrent;
-using System.Reflection;
-using Sharpcaster.Core.Models.ChromecastStatus;
-using System.Diagnostics;
-using Microsoft.Extensions.DependencyInjection;
-using Sharpcaster.Core.Models.Media;
-using Sharpcaster.Core.Messages.Media;
 
 namespace Sharpcaster
 {
@@ -165,10 +165,11 @@ namespace Sharpcaster
             {
                 var tcsType = tcs.GetType();
                 (types == null ? tcsType.GetMethod(method) : tcsType.GetMethod(method, types)).Invoke(tcs, new object[] { parameter });
-            } else
+            }
+            else
             {
                 //This is just to handle media status messages. Where we want to update the status of media but we are not expecting an update
-                if(message.Type == "MEDIA_STATUS")
+                if (message.Type == "MEDIA_STATUS")
                 {
                     var statusMessage = parameter as MediaStatusMessage;
                     await GetChannel<MediaChannel>().OnMessageReceivedAsync(statusMessage);
@@ -248,7 +249,7 @@ namespace Sharpcaster
                 OnDisconnected();
             }
         }
-        
+
         private void Dispose(IDisposable disposable, Action action)
         {
             if (disposable != null)
@@ -257,7 +258,8 @@ namespace Sharpcaster
                 {
                     disposable.Dispose();
                 }
-                catch (Exception ex) {
+                catch (Exception ex)
+                {
                     Console.WriteLine("Error on disposing.", ex, null);
                 }
                 finally
@@ -274,7 +276,7 @@ namespace Sharpcaster
         {
             Disconnected?.Invoke(this, EventArgs.Empty);
         }
-        
+
         /// <summary>
         /// Gets a channel
         /// </summary>

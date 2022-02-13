@@ -1,7 +1,4 @@
-﻿using Sharpcaster.Core.Channels;
-using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using Sharpcaster.Channels;
 using Xunit;
 
 namespace Sharpcaster.Test
@@ -41,8 +38,8 @@ namespace Sharpcaster.Test
             await client.ConnectChromecast(chromecast);
 
             var status = await client.GetChannel<ReceiverChannel>().SetVolume(0.1);
-            Assert.Equal(0.1, status.Volume.Level.Value, precision:1);
-            
+            Assert.Equal(0.1, status.Volume.Level.Value, precision: 1);
+
             status = await client.GetChannel<ReceiverChannel>().SetVolume(1.0);
             Assert.Equal(1.0, status.Volume.Level.Value, precision: 1);
         }

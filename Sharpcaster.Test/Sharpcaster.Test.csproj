@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
@@ -14,8 +14,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Sharpcaster.core\Sharpcaster.Core.csproj" />
-    <ProjectReference Include="..\Sharpcaster.Discovery\Sharpcaster.Discovery.csproj" />
     <ProjectReference Include="..\Sharpcaster\Sharpcaster.csproj" />
   </ItemGroup>
 
