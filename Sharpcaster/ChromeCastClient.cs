@@ -289,6 +289,7 @@ namespace Sharpcaster
 
         public async Task<ChromecastStatus> LaunchApplicationAsync(string applicationId, bool joinExistingApplicationSession = true)
         {
+
             if (joinExistingApplicationSession)
             {
                 var status = GetChromecastStatus();
@@ -299,7 +300,9 @@ namespace Sharpcaster
                     return await GetChannel<IReceiverChannel>().GetChromecastStatusAsync();
                 }
             }
-            return await GetChannel<IReceiverChannel>().LaunchApplicationAsync(applicationId);
+            var newApplication = await GetChannel<IReceiverChannel>().LaunchApplicationAsync(applicationId);
+            await GetChannel<IConnectionChannel>().ConnectAsync(newApplication.Applications.First().TransportId);
+            return await GetChannel<IReceiverChannel>().GetChromecastStatusAsync();
         }
 
         private IEnumerable<IChromecastChannel> GetStatusChannels()

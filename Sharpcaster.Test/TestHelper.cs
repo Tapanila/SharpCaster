@@ -13,7 +13,7 @@ namespace Sharpcaster.Test
         {
             IChromecastLocator locator = new MdnsChromecastLocator();
             var chromecasts = await locator.FindReceiversAsync();
-            return chromecasts.First( x => x.Name == "📺 Living Room");
+            return chromecasts.First();
         }
 
         public async static Task<ChromecastReceiver> FindChromecast(string name, double timeoutSeconds)

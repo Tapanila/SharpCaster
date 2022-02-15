@@ -25,6 +25,24 @@ namespace Sharpcaster.Test
         }
 
         [Fact]
+        public async void StartApplicationAThenStartBAndLoadMedia()
+        {
+            var chromecast = await TestHelper.FindChromecast();
+            var client = new ChromecastClient();
+            await client.ConnectChromecast(chromecast);
+            _ = await client.LaunchApplicationAsync("A9BCCB7C");
+
+            await client.DisconnectAsync();
+            await client.ConnectChromecast(chromecast);
+            _ = await client.LaunchApplicationAsync("B3419EF5");
+            var media = new Media
+            {
+                ContentUrl = "https://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/mp4/DesigningForGoogleCast.mp4"
+            };
+            _ = await client.GetChannel<IMediaChannel>().LoadAsync(media);
+        }
+
+        [Fact]
         public async void TestLoadingAndPausingMedia()
         {
             AutoResetEvent _autoResetEvent = new AutoResetEvent(false);
