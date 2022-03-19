@@ -31,8 +31,20 @@ namespace Sharpcaster
             ServiceAddedSemaphoreSlim.Wait();
             try
             {
+                var txtValuess = e.Announcement.Txt;
+                if (txtValuess == null)
+                {
+                    return;
+                }
+
                 var txtValues = e.Announcement.Txt
-                    .Select(i => i.Split('='))
+                    .Select(i => {
+                        if (!string.IsNullOrEmpty(i))
+                        {
+                            return i.Split('=');
+                        }
+                        return new string[] { "", "" };
+                    })
                     .ToDictionary(y => y[0], y => y[1]);
                 if (!txtValues.ContainsKey("fn")) return;
                 var ip = e.Announcement.Addresses[0];
