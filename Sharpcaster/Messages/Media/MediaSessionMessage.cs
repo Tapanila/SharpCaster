@@ -6,7 +6,7 @@ namespace Sharpcaster.Messages.Media
     /// Media session message
     /// </summary>
     [DataContract]
-    abstract class MediaSessionMessage : MessageWithId
+    public abstract class MediaSessionMessage : MessageWithId
     {
         /// <summary>
         /// Gets or sets the media session identifier
