@@ -25,8 +25,20 @@ using static Extensions.Api.CastChannel.CastMessage.Types;
 
 namespace Sharpcaster
 {
+
     public class ChromecastClient : IChromecastClient
     {
+        private class ConsoleWrapper : IConsoleWrapper {
+            public void WriteLine(string line) {
+                Console.WriteLine("CC: " + line);
+            }
+
+            public void WriteLine(string line, Exception ex, object p) {
+                Console.WriteLine(line, ex, p); 
+            }
+        }
+
+
         private const int RECEIVE_TIMEOUT = 30000;
 
         /// <summary>
@@ -44,6 +56,8 @@ namespace Sharpcaster
         private IDictionary<string, Type> MessageTypes { get; set; }
         private IEnumerable<IChromecastChannel> Channels { get; set; }
         private ConcurrentDictionary<int, object> WaitingTasks { get; } = new ConcurrentDictionary<int, object>();
+
+        private IConsoleWrapper CcConsole { get; set; }
 
         public ChromecastClient()
         {
@@ -78,9 +92,14 @@ namespace Sharpcaster
             var messages = serviceProvider.GetServices<IMessage>();
             MessageTypes = messages.Where(t => !String.IsNullOrEmpty(t.Type)).ToDictionary(m => m.Type, m => m.GetType());
 
-            Console.WriteLine(MessageTypes.Keys.ToString(","));
+            CcConsole = serviceProvider.GetService<IConsoleWrapper>();
+            if (CcConsole == null) {
+                CcConsole = new ConsoleWrapper();
+            }
+
+            CcConsole.WriteLine(MessageTypes.Keys.ToString(","));
             Channels = channels;
-            Console.WriteLine(Channels.ToString(","));
+            CcConsole.WriteLine(Channels.ToString(","));
             foreach (var channel in channels)
             {
                 channel.Client = this;
@@ -125,7 +144,7 @@ namespace Sharpcaster
                         //Payload can either be Binary or UTF8 json
                         var payload = (castMessage.PayloadType == PayloadType.Binary ?
                             Encoding.UTF8.GetString(castMessage.PayloadBinary.ToByteArray()) : castMessage.PayloadUtf8);
-                        Console.WriteLine($"RECEIVED: {castMessage.Namespace} : {payload}");
+                        CcConsole.WriteLine($"RECEIVED: {castMessage.Namespace} : {payload}");
 
                         var channel = Channels.FirstOrDefault(c => c.Namespace == castMessage.Namespace);
                         if (channel != null)
@@ -189,7 +208,7 @@ namespace Sharpcaster
             await SendSemaphoreSlim.WaitAsync();
             try
             {
-                Console.WriteLine($"SENT    : {castMessage.DestinationId}: {castMessage.PayloadUtf8}");
+                CcConsole.WriteLine($"SENT    : {castMessage.DestinationId}: {castMessage.PayloadUtf8}");
 
                 byte[] message = castMessage.ToProto();
                 var networkStream = _stream;
@@ -260,7 +279,7 @@ namespace Sharpcaster
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine("Error on disposing.", ex, null);
+                    CcConsole.WriteLine("Error on disposing.", ex, null);
                 }
                 finally
                 {
