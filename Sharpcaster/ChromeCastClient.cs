@@ -92,9 +92,9 @@ namespace Sharpcaster
                 });
             }
             _logger = loggerFactory?.CreateLogger<ChromecastClient>();
-            _logger?.LogTrace(MessageTypes.Keys.ToString(","));
+            _logger?.LogDebug(MessageTypes.Keys.ToString(","));
             Channels = channels;
-            _logger?.LogTrace(Channels.ToString(","));
+            _logger?.LogDebug(Channels.ToString(","));
             foreach (var channel in channels)
             {
                 channel.Client = this;
@@ -274,7 +274,7 @@ namespace Sharpcaster
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogTrace("Error on disposing.", ex, null);
+                    _logger.LogError("Error on disposing.", ex, null);
                 }
                 finally
                 {
