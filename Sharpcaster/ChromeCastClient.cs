@@ -82,15 +82,19 @@ namespace Sharpcaster
             MessageTypes = messages.Where(t => !String.IsNullOrEmpty(t.Type)).ToDictionary(m => m.Type, m => m.GetType());
             ILoggerFactory loggerFactory = serviceProvider.GetService<ILoggerFactory>();
             if (loggerFactory == null) {
-                loggerFactory = LoggerFactory.Create(builder =>
-                {
-                    // Default logging to Console and with trace detail of sharpcaster messages.
-                    builder.AddFilter("Microsoft", LogLevel.Warning)
-                           .AddFilter("System", LogLevel.Warning)
-                           .AddFilter("Sharpcaster", LogLevel.Trace)
-                           .AddConsole();
-                });
+                try {
+                    loggerFactory = LoggerFactory.Create(builder => {
+                        // Default logging to Console and with trace detail of sharpcaster messages.
+                        builder.AddFilter("Microsoft", LogLevel.Warning)
+                               .AddFilter("System", LogLevel.Warning)
+                               .AddFilter("Sharpcaster", LogLevel.Trace)
+                               .AddConsole();
+                    });
+                } catch (Exception ex) {
+                    // ignore. No Logging available
+                }
             }
+
             _logger = loggerFactory?.CreateLogger<ChromecastClient>();
             _logger?.LogDebug(MessageTypes.Keys.ToString(","));
             Channels = channels;
@@ -139,7 +143,7 @@ namespace Sharpcaster
                         //Payload can either be Binary or UTF8 json
                         var payload = (castMessage.PayloadType == PayloadType.Binary ?
                             Encoding.UTF8.GetString(castMessage.PayloadBinary.ToByteArray()) : castMessage.PayloadUtf8);
-                        _logger.LogTrace($"RECEIVED: {castMessage.Namespace} : {payload}");
+                        _logger?.LogTrace($"RECEIVED: {castMessage.Namespace} : {payload}");
 
                         var channel = Channels.FirstOrDefault(c => c.Namespace == castMessage.Namespace);
                         if (channel != null)
@@ -274,7 +278,7 @@ namespace Sharpcaster
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError("Error on disposing.", ex, null);
+                    _logger?.LogError("Error on disposing.", ex, null);
                 }
                 finally
                 {
