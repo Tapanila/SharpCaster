@@ -6,7 +6,7 @@ namespace Sharpcaster.Messages.Receiver
     /// Get status message
     /// </summary>
     [DataContract]
-    class GetStatusMessage : MessageWithId
+    public class GetStatusMessage : MessageWithId
     {
     }
 }

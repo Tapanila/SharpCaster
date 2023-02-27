@@ -1,5 +1,7 @@
 using Extensions.Api.CastChannel;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Console;
 using Newtonsoft.Json;
 using Sharpcaster.Channels;
 using Sharpcaster.Extensions;
@@ -35,6 +37,7 @@ namespace Sharpcaster
         public event EventHandler Disconnected;
 
         private static readonly object LockObject = new object();
+        private ILogger _logger = null;
         private TcpClient _client;
         private Stream _stream;
         private ChromecastReceiver _receiver;
@@ -77,10 +80,25 @@ namespace Sharpcaster
             var channels = serviceProvider.GetServices<IChromecastChannel>();
             var messages = serviceProvider.GetServices<IMessage>();
             MessageTypes = messages.Where(t => !String.IsNullOrEmpty(t.Type)).ToDictionary(m => m.Type, m => m.GetType());
+            ILoggerFactory loggerFactory = serviceProvider.GetService<ILoggerFactory>();
+            if (loggerFactory == null) {
+                try {
+                    loggerFactory = LoggerFactory.Create(builder => {
+                        // Default logging to Console and with trace detail of sharpcaster messages.
+                        builder.AddFilter("Microsoft", LogLevel.Warning)
+                               .AddFilter("System", LogLevel.Warning)
+                               .AddFilter("Sharpcaster", LogLevel.Trace)
+                               .AddConsole();
+                    });
+                } catch (Exception ex) {
+                    // ignore. No Logging available
+                }
+            }
 
-            Console.WriteLine(MessageTypes.Keys.ToString(","));
+            _logger = loggerFactory?.CreateLogger<ChromecastClient>();
+            _logger?.LogDebug(MessageTypes.Keys.ToString(","));
             Channels = channels;
-            Console.WriteLine(Channels.ToString(","));
+            _logger?.LogDebug(Channels.ToString(","));
             foreach (var channel in channels)
             {
                 channel.Client = this;
@@ -125,7 +143,7 @@ namespace Sharpcaster
                         //Payload can either be Binary or UTF8 json
                         var payload = (castMessage.PayloadType == PayloadType.Binary ?
                             Encoding.UTF8.GetString(castMessage.PayloadBinary.ToByteArray()) : castMessage.PayloadUtf8);
-                        Console.WriteLine($"RECEIVED: {castMessage.Namespace} : {payload}");
+                        _logger?.LogTrace($"RECEIVED: {castMessage.Namespace} : {payload}");
 
                         var channel = Channels.FirstOrDefault(c => c.Namespace == castMessage.Namespace);
                         if (channel != null)
@@ -189,7 +207,7 @@ namespace Sharpcaster
             await SendSemaphoreSlim.WaitAsync();
             try
             {
-                Console.WriteLine($"SENT    : {castMessage.DestinationId}: {castMessage.PayloadUtf8}");
+                _logger?.LogTrace($"SENT    : {castMessage.DestinationId}: {castMessage.PayloadUtf8}");
 
                 byte[] message = castMessage.ToProto();
                 var networkStream = _stream;
@@ -260,7 +278,7 @@ namespace Sharpcaster
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine("Error on disposing.", ex, null);
+                    _logger?.LogError("Error on disposing.", ex, null);
                 }
                 finally
                 {
