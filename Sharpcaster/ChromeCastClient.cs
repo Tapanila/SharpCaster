@@ -1,7 +1,6 @@
 using Extensions.Api.CastChannel;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Console;
 using Newtonsoft.Json;
 using Sharpcaster.Channels;
 using Sharpcaster.Extensions;
@@ -36,11 +35,9 @@ namespace Sharpcaster
         /// </summary>
         public event EventHandler Disconnected;
 
-        private static readonly object LockObject = new object();
         private ILogger _logger = null;
         private TcpClient _client;
         private Stream _stream;
-        private ChromecastReceiver _receiver;
         private TaskCompletionSource<bool> ReceiveTcs { get; set; }
         private SemaphoreSlim SendSemaphoreSlim { get; } = new SemaphoreSlim(1, 1);
 
@@ -79,26 +76,23 @@ namespace Sharpcaster
             var serviceProvider = serviceCollection.BuildServiceProvider();
             var channels = serviceProvider.GetServices<IChromecastChannel>();
             var messages = serviceProvider.GetServices<IMessage>();
-            MessageTypes = messages.Where(t => !String.IsNullOrEmpty(t.Type)).ToDictionary(m => m.Type, m => m.GetType());
-            ILoggerFactory loggerFactory = serviceProvider.GetService<ILoggerFactory>();
-            if (loggerFactory == null) {
-                try {
-                    loggerFactory = LoggerFactory.Create(builder => {
-                        // Default logging to Console and with trace detail of sharpcaster messages.
-                        builder.AddFilter("Microsoft", LogLevel.Warning)
-                               .AddFilter("System", LogLevel.Warning)
-                               .AddFilter("Sharpcaster", LogLevel.Trace)
-                               .AddConsole();
-                    });
-                } catch (Exception ex) {
-                    // ignore. No Logging available
+            
+            MessageTypes = messages.Where(t => !string.IsNullOrEmpty(t.Type)).ToDictionary(m => m.Type, m => m.GetType());
+            Channels = channels;
+
+            _logger = serviceProvider.GetService<ILogger>();
+            if (_logger == null)
+            {
+                var loggerFactory = serviceProvider.GetService<ILoggerFactory>();
+                if (loggerFactory != null)
+                {
+                    _logger = loggerFactory.CreateLogger<ChromecastClient>();
                 }
             }
 
-            _logger = loggerFactory?.CreateLogger<ChromecastClient>();
             _logger?.LogDebug(MessageTypes.Keys.ToString(","));
-            Channels = channels;
             _logger?.LogDebug(Channels.ToString(","));
+
             foreach (var channel in channels)
             {
                 channel.Client = this;
@@ -110,7 +104,6 @@ namespace Sharpcaster
         {
             await Dispose();
 
-            _receiver = chromecastReceiver;
             _client = new TcpClient();
             await _client.ConnectAsync(chromecastReceiver.DeviceUri.Host, chromecastReceiver.Port);
             //Open SSL stream to Chromecast and bypass all SSL validation
