@@ -13,7 +13,7 @@
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="7.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="7.0.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-    <PackageReference Include="Tmds.MDns" Version="0.7.1" />
+    <PackageReference Include="Tmds.MDns" Version="0.8.0" />
   </ItemGroup>
 
 </Project>
