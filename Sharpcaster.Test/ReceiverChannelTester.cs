@@ -40,8 +40,8 @@ namespace Sharpcaster.Test
             var status = await client.GetChannel<ReceiverChannel>().SetVolume(0.1);
             Assert.Equal(0.1, status.Volume.Level.Value, precision: 1);
 
-            status = await client.GetChannel<ReceiverChannel>().SetVolume(1.0);
-            Assert.Equal(1.0, status.Volume.Level.Value, precision: 1);
+            status = await client.GetChannel<ReceiverChannel>().SetVolume(0.3);
+            Assert.Equal(0.3, status.Volume.Level.Value, precision: 1);
         }
 
         [Fact]
