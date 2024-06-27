@@ -6,7 +6,7 @@ namespace Sharpcaster.Messages.Media
     /// Load message
     /// </summary>
     [DataContract]
-    class LoadMessage : MessageWithSession
+    public class LoadMessage : MessageWithSession
     {
         /// <summary>
         /// Gets or sets the media

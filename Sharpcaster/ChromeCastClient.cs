@@ -1,5 +1,6 @@
 using Extensions.Api.CastChannel;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Sharpcaster.Channels;
 using Sharpcaster.Extensions;
@@ -46,10 +47,9 @@ namespace Sharpcaster
         /// </summary>
         public event EventHandler Disconnected;
 
-        private static readonly object LockObject = new object();
+        private ILogger _logger = null;
         private TcpClient _client;
         private Stream _stream;
-        private ChromecastReceiver _receiver;
         private TaskCompletionSource<bool> ReceiveTcs { get; set; }
         private SemaphoreSlim SendSemaphoreSlim { get; } = new SemaphoreSlim(1, 1);
 
@@ -90,16 +90,23 @@ namespace Sharpcaster
             var serviceProvider = serviceCollection.BuildServiceProvider();
             var channels = serviceProvider.GetServices<IChromecastChannel>();
             var messages = serviceProvider.GetServices<IMessage>();
-            MessageTypes = messages.Where(t => !String.IsNullOrEmpty(t.Type)).ToDictionary(m => m.Type, m => m.GetType());
+            
+            MessageTypes = messages.Where(t => !string.IsNullOrEmpty(t.Type)).ToDictionary(m => m.Type, m => m.GetType());
+            Channels = channels;
 
-            CcConsole = serviceProvider.GetService<IConsoleWrapper>();
-            if (CcConsole == null) {
-                CcConsole = new ConsoleWrapper();
+            _logger = serviceProvider.GetService<ILogger>();
+            if (_logger == null)
+            {
+                var loggerFactory = serviceProvider.GetService<ILoggerFactory>();
+                if (loggerFactory != null)
+                {
+                    _logger = loggerFactory.CreateLogger<ChromecastClient>();
+                }
             }
 
-            CcConsole.WriteLine(MessageTypes.Keys.ToString(","));
-            Channels = channels;
-            CcConsole.WriteLine(Channels.ToString(","));
+            _logger?.LogDebug(MessageTypes.Keys.ToString(","));
+            _logger?.LogDebug(Channels.ToString(","));
+
             foreach (var channel in channels)
             {
                 channel.Client = this;
@@ -111,7 +118,6 @@ namespace Sharpcaster
         {
             await Dispose();
 
-            _receiver = chromecastReceiver;
             _client = new TcpClient();
             await _client.ConnectAsync(chromecastReceiver.DeviceUri.Host, chromecastReceiver.Port);
             //Open SSL stream to Chromecast and bypass all SSL validation
@@ -144,7 +150,7 @@ namespace Sharpcaster
                         //Payload can either be Binary or UTF8 json
                         var payload = (castMessage.PayloadType == PayloadType.Binary ?
                             Encoding.UTF8.GetString(castMessage.PayloadBinary.ToByteArray()) : castMessage.PayloadUtf8);
-                        CcConsole.WriteLine($"RECEIVED: {castMessage.Namespace} : {payload}");
+                        _logger?.LogTrace($"RECEIVED: {castMessage.Namespace} : {payload}");
 
                         var channel = Channels.FirstOrDefault(c => c.Namespace == castMessage.Namespace);
                         if (channel != null)
@@ -208,7 +214,7 @@ namespace Sharpcaster
             await SendSemaphoreSlim.WaitAsync();
             try
             {
-                CcConsole.WriteLine($"SENT    : {castMessage.DestinationId}: {castMessage.PayloadUtf8}");
+                _logger?.LogTrace($"SENT    : {castMessage.DestinationId}: {castMessage.PayloadUtf8}");
 
                 byte[] message = castMessage.ToProto();
                 var networkStream = _stream;
@@ -279,7 +285,7 @@ namespace Sharpcaster
                 }
                 catch (Exception ex)
                 {
-                    CcConsole.WriteLine("Error on disposing.", ex, null);
+                    _logger?.LogError("Error on disposing.", ex, null);
                 }
                 finally
                 {
