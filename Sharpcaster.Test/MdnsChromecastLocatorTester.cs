@@ -2,14 +2,16 @@
 using Sharpcaster.Models;
 using System;
 using System.Threading;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace Sharpcaster.Test
 {
+    [Collection("SingleCollection")]
     public class MdnsChromecastLocatorTester
     {
         [Fact]
-        public async void SearchChromecasts()
+        public async Task SearchChromecasts()
         {
             IChromecastLocator locator = new MdnsChromecastLocator();
             var chromecasts = await locator.FindReceiversAsync();
@@ -17,7 +19,7 @@ namespace Sharpcaster.Test
         }
 
         [Fact]
-        public async void SearchChromecastsTrickerEvent()
+        public async Task SearchChromecastsTrickerEvent()
         {
             int counter = 0;
             IChromecastLocator locator = new MdnsChromecastLocator();
@@ -31,7 +33,7 @@ namespace Sharpcaster.Test
         }
 
         [Fact]
-        public async void SearchChromecastsWithTooShortTimeout()
+        public async Task SearchChromecastsWithTooShortTimeout()
         {
             IChromecastLocator locator = new MdnsChromecastLocator();
             CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
@@ -42,7 +44,7 @@ namespace Sharpcaster.Test
 
 
         [Fact]
-        public async void SearchChromecastsCancellationToken()
+        public async Task SearchChromecastsCancellationToken()
         {
             IChromecastLocator locator = new MdnsChromecastLocator();
             var source = new CancellationTokenSource(TimeSpan.FromMilliseconds(1500));

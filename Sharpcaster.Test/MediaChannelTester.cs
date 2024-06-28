@@ -3,14 +3,16 @@ using Sharpcaster.Models.Media;
 using System;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace Sharpcaster.Test
 {
+    [Collection("SingleCollection")]
     public class MediaChannelTester
     {
         [Fact]
-        public async void TestLoadingMedia()
+        public async Task TestLoadingMedia()
         {
             var chromecast = await TestHelper.FindChromecast();
             var client = new ChromecastClient();
@@ -25,12 +27,12 @@ namespace Sharpcaster.Test
         }
 
         [Fact]
-        public async void StartApplicationAThenStartBAndLoadMedia()
+        public async Task StartApplicationAThenStartBAndLoadMedia()
         {
             var chromecast = await TestHelper.FindChromecast();
             var client = new ChromecastClient();
             await client.ConnectChromecast(chromecast);
-            _ = await client.LaunchApplicationAsync("A9BCCB7C");
+            _ = await client.LaunchApplicationAsync("A9BCCB7C", false);
 
             await client.DisconnectAsync();
             await client.ConnectChromecast(chromecast);
@@ -43,7 +45,7 @@ namespace Sharpcaster.Test
         }
 
         [Fact]
-        public async void TestLoadingAndPausingMedia()
+        public async Task TestLoadingAndPausingMedia()
         {
             AutoResetEvent _autoResetEvent = new AutoResetEvent(false);
 
@@ -51,7 +53,7 @@ namespace Sharpcaster.Test
             var client = new ChromecastClient();
             await client.ConnectChromecast(chromecast);
 
-            var status = await client.LaunchApplicationAsync("B3419EF5");
+            var status = await client.LaunchApplicationAsync("B3419EF5", false);
 
             var media = new Media
             {
@@ -62,7 +64,7 @@ namespace Sharpcaster.Test
             //We are setting up an event to listen to status change. Because we don't know when the video has started to play
             client.GetChannel<IMediaChannel>().StatusChanged += async (object sender, EventArgs e) =>
             {
-                if (client.GetChannel<IMediaChannel>().Status.First().PlayerState == PlayerStateType.Playing)
+                if (client.GetChannel<IMediaChannel>().Status.FirstOrDefault()?.PlayerState == PlayerStateType.Playing)
                 {
                     mediaStatus = await client.GetChannel<IMediaChannel>().PauseAsync();
                     _autoResetEvent.Set();
@@ -76,7 +78,7 @@ namespace Sharpcaster.Test
         }
 
         [Fact]
-        public async void TestLoadingAndStoppingMedia()
+        public async Task TestLoadingAndStoppingMedia()
         {
             AutoResetEvent _autoResetEvent = new AutoResetEvent(false);
 
@@ -84,7 +86,7 @@ namespace Sharpcaster.Test
             var client = new ChromecastClient();
             await client.ConnectChromecast(chromecast);
 
-            var status = await client.LaunchApplicationAsync("B3419EF5");
+            var status = await client.LaunchApplicationAsync("B3419EF5",false);
 
             var media = new Media
             {
@@ -95,7 +97,7 @@ namespace Sharpcaster.Test
             //We are setting up an event to listen to status change. Because we don't know when the video has started to play
             client.GetChannel<IMediaChannel>().StatusChanged += async (object sender, EventArgs e) =>
             {
-                if (client.GetChannel<IMediaChannel>().Status.First().PlayerState == PlayerStateType.Playing)
+                if (client.GetChannel<IMediaChannel>().Status.FirstOrDefault()?.PlayerState == PlayerStateType.Playing)
                 {
                     mediaStatus = await client.GetChannel<IMediaChannel>().StopAsync();
                     _autoResetEvent.Set();

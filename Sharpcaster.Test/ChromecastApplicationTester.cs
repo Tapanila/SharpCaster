@@ -1,11 +1,13 @@
-﻿using Xunit;
+﻿using System.Threading.Tasks;
+using Xunit;
 
 namespace Sharpcaster.Test
 {
+    [Collection("SingleCollection")]
     public class ChromecastApplicationTester
     {
         [Fact]
-        public async void ConnectToChromecastAndLaunchApplication()
+        public async Task ConnectToChromecastAndLaunchApplication()
         {
             var chromecast = await TestHelper.FindChromecast();
             var client = new ChromecastClient();
@@ -17,7 +19,7 @@ namespace Sharpcaster.Test
         }
 
         [Fact]
-        public async void ConnectToChromecastAndLaunchApplicationTwice()
+        public async Task ConnectToChromecastAndLaunchApplicationTwice()
         {
             var chromecast = await TestHelper.FindChromecast();
             var client = new ChromecastClient();
@@ -35,7 +37,7 @@ namespace Sharpcaster.Test
 
 
         [Fact]
-        public async void ConnectToChromecastAndLaunchApplicationTwiceWithoutJoining()
+        public async Task ConnectToChromecastAndLaunchApplicationTwiceWithoutJoining()
         {
             var chromecast = await TestHelper.FindChromecast();
             var client = new ChromecastClient();
@@ -55,7 +57,7 @@ namespace Sharpcaster.Test
         }
 
         [Fact]
-        public async void ConnectToChromecastAndLaunchApplicationAThenLaunchApplicationB()
+        public async Task ConnectToChromecastAndLaunchApplicationAThenLaunchApplicationB()
         {
             var chromecast = await TestHelper.FindChromecast();
             var client = new ChromecastClient();
@@ -73,7 +75,7 @@ namespace Sharpcaster.Test
         }
 
         [Fact]
-        public async void ConnectToChromecastAndLaunchApplicationOnceAndJoinIt()
+        public async Task ConnectToChromecastAndLaunchApplicationOnceAndJoinIt()
         {
             var chromecast = await TestHelper.FindChromecast();
             var client = new ChromecastClient();

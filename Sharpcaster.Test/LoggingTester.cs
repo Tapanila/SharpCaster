@@ -15,6 +15,7 @@ using Xunit;
 
 namespace Sharpcaster.Test
 {
+    [Collection("SingleCollection")]
     public class LoggingTester
     {
         
