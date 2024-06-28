@@ -184,7 +184,7 @@ namespace Sharpcaster
             });
         }
 
-        private async void TaskCompletionSourceInvoke(MessageWithId message, string method, object parameter, Type[] types = null)
+        private void TaskCompletionSourceInvoke(MessageWithId message, string method, object parameter, Type[] types = null)
         {
             if (message.HasRequestId && WaitingTasks.TryRemove(message.RequestId, out object tcs))
             {
@@ -193,12 +193,16 @@ namespace Sharpcaster
             }
             else
             {
-                //This is just to handle media status messages. Where we want to update the status of media but we are not expecting an update
-                if (message.Type == "MEDIA_STATUS")
-                {
-                    var statusMessage = parameter as MediaStatusMessage;
-                    await GetChannel<MediaChannel>().OnMessageReceivedAsync(statusMessage);
-                }
+                // I think this duplicates the OnMessageReceived Event already called in line 164 !!! 
+                // So a mediaStatus changed event will be triggered twice if received as 'not requested' Message.
+                // All Unit tests do succeed without this lines. So I remove them (and the async !!! for the time beeing....
+
+                // //This is just to handle media status messages. Where we want to update the status of media but we are not expecting an update
+                //if (message.Type == "MEDIA_STATUS")
+                //{
+                //    var statusMessage = parameter as MediaStatusMessage;
+                //    await GetChannel<MediaChannel>().OnMessageReceivedAsync(statusMessage);
+                //}
             }
         }
 

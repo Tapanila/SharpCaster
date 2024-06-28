@@ -1,6 +1,7 @@
 ﻿using Sharpcaster.Interfaces;
 using Sharpcaster.Models.Media;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -61,20 +62,31 @@ namespace Sharpcaster.Test
             };
 
             MediaStatus mediaStatus;
+            String runSequence = "R";
+
             //We are setting up an event to listen to status change. Because we don't know when the video has started to play
             client.GetChannel<IMediaChannel>().StatusChanged += async (object sender, EventArgs e) =>
             {
+                //runSequence += ".";
                 if (client.GetChannel<IMediaChannel>().Status.FirstOrDefault()?.PlayerState == PlayerStateType.Playing)
                 {
+                    runSequence += "p";
                     mediaStatus = await client.GetChannel<IMediaChannel>().PauseAsync();
+                    Assert.Equal(PlayerStateType.Paused, mediaStatus.PlayerState);
+                    runSequence += "P";
                     _autoResetEvent.Set();
-                }
+                } 
             };
 
+            runSequence += "1";
             mediaStatus = await client.GetChannel<IMediaChannel>().LoadAsync(media);
+            runSequence += "2";
 
             //This checks that within 5000 ms we have loaded video and were able to pause it
             Assert.True(_autoResetEvent.WaitOne(5000));
+            runSequence += "3";
+
+            Assert.Equal("R1p2P3", runSequence);
         }
 
         [Fact]
