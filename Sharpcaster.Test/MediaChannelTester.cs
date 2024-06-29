@@ -19,11 +19,63 @@ namespace Sharpcaster.Test
         }
 
         [Fact]
+        public async Task TestLoadingMediaQueue() {
+            var chromecast = await TestHelper.FindChromecast();
+            //ChromecastClient client = new ChromecastClient();
+            ChromecastClient client = TestHelper.GetClientWithConsoleLogging(output, true);
+            await client.ConnectChromecast(chromecast);
+            _ = await client.LaunchApplicationAsync("B3419EF5");
+
+            Item[] MyCd = new Item[4];
+            MyCd[0] = new Item() {
+                Media = new Media {
+                    ContentUrl = "http://www.openmusicarchive.org/audio/Frankie%20by%20Mississippi%20John%20Hurt.mp3"
+                },
+                Autoplay = true
+            };
+
+            MyCd[1] = new Item() {
+                Media = new Media {
+                    ContentUrl = "http://www.openmusicarchive.org/audio/Mississippi%20Boweavil%20Blues%20by%20The%20Masked%20Marvel.mp3"
+                },
+                Autoplay = true
+            };
+            MyCd[2] = new Item() {
+                Media = new Media {
+                    ContentUrl = "http://www.openmusicarchive.org/audio/The%20Wild%20Wagoner%20by%20Jilson%20Setters.mp3"
+                },
+                Autoplay = true
+            };
+            MyCd[3] = new Item() {
+                Media = new Media {
+                    ContentUrl = "http://www.openmusicarchive.org/audio/Drunkards%20Special%20by%20Coley%20Jones.mp3"
+                },
+                Autoplay = true
+            };
+
+            MediaStatus status = await client.GetChannel<IMediaChannel>().QueueLoadAsync(MyCd);
+
+
+            Assert.Equal(PlayerStateType.Playing, status.PlayerState);
+            Assert.Equal(2,status.Items.Count());           // The status message only contains the next (and if available Prev) Track/QueueItem!
+            Assert.Equal(status.CurrentItemId, status.Items[0].ItemId);
+
+            // Logging Tests -> Check we only got to PLAYING once!
+            Assert.NotEmpty(TestHelper.LogContent);
+            Assert.Single(TestHelper.LogContent.Where((line) => line.Contains("\"playerState\":\"PLAYING\"")).ToList());
+
+
+            //status = await client.GetChannel<IMediaChannel>().LoadAsync(media2, true);
+
+
+        }
+
+        [Fact]
         public async Task TestLoadingMedia()
         {
             var chromecast = await TestHelper.FindChromecast();
-            ChromecastClient client = TestHelper.GetClientWithConsoleLogging(output, true); ///new ChromecastClient();
             //ChromecastClient client = new ChromecastClient();
+            ChromecastClient client = TestHelper.GetClientWithConsoleLogging(output, true); 
             await client.ConnectChromecast(chromecast);
             _ = await client.LaunchApplicationAsync("B3419EF5");
 
@@ -32,8 +84,15 @@ namespace Sharpcaster.Test
                 ContentUrl = "https://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/mp4/DesigningForGoogleCast.mp4"
             };
 
-            _ = await client.GetChannel<IMediaChannel>().LoadAsync(media);
+            MediaStatus status = await client.GetChannel<IMediaChannel>().LoadAsync(media);
+
+            Assert.Equal(PlayerStateType.Playing, status.PlayerState);
+            Assert.Single(status.Items);
+            Assert.Equal(status.CurrentItemId, status.Items[0].ItemId);
+
+            // Logging Tests -> Check we only got to PLAYING once!
             Assert.NotEmpty(TestHelper.LogContent);
+            Assert.Single(TestHelper.LogContent.Where((line)=>line.Contains("\"playerState\":\"PLAYING\"")).ToList());
         }
 
         [Fact]

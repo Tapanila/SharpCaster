@@ -2,6 +2,7 @@
 using Sharpcaster.Messages.Media;
 using Sharpcaster.Models.ChromecastStatus;
 using Sharpcaster.Models.Media;
+using Sharpcaster.queue.messages;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -51,7 +52,7 @@ namespace Sharpcaster.Channels
         public async Task<MediaStatus> LoadAsync(Media media, bool autoPlay = true)
         {
             var status = Client.GetChromecastStatus();
-            return await SendAsync(new LoadMessage() { SessionId = status.Applications[0].SessionId, Media = media, AutoPlay = autoPlay }, status.Applications[0]);
+            return await SendAsync(new LoadMessage() { SessionId = status.Applications[0].SessionId, Media = media , AutoPlay = autoPlay }, status.Applications[0]);
         }
 
         /// <summary>
@@ -91,5 +92,14 @@ namespace Sharpcaster.Channels
         {
             return await SendAsync(new SeekMessage() { CurrentTime = seconds });
         }
+
+
+
+        public async Task<MediaStatus> QueueLoadAsync(Item[] items) {
+            var app = Client.GetChromecastStatus().Applications[0];
+            var r = await SendAsync<MediaStatusMessage>(new QueueLoadMessage() { SessionId = app.SessionId, Items = items }, app.TransportId);
+            return r?.Status?.FirstOrDefault();
+        }
+
     }
 }

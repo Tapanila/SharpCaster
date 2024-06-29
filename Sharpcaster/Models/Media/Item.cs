@@ -11,7 +11,7 @@ namespace Sharpcaster.Models.Media
         /// <summary>
         /// Gets or sets the item identifier
         /// </summary>
-        [DataMember(Name = "itemId")]
+        [DataMember(Name = "itemId", EmitDefaultValue = false)]
         public int ItemId { get; set; }
 
         /// <summary>
@@ -25,5 +25,15 @@ namespace Sharpcaster.Models.Media
         /// </summary>
         [DataMember(Name = "autoplay")]
         public bool Autoplay { get; set; }
+
+
+        [DataMember(Name = "orderId")]
+        public long OrderId { get; set; }
+
+        [DataMember(Name = "startTime")]
+        public long StartTime { get; set; }
+
+        //[DataMember(Name = "preloadTime")]
+
     }
 }

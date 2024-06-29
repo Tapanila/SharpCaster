@@ -76,5 +76,13 @@ namespace Sharpcaster.Models.Media
         /// </summary>
         [DataMember(Name = "repeatMode")]
         public string RepeatMode { get; set; }
+
+        [DataMember(Name = "queueData")]
+        public QueueData QueueData { get; set; }
+
+
+        [DataMember(Name = "items")]
+        public Item[] Items { get; set; }
+
     }
 }

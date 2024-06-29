@@ -41,5 +41,9 @@ namespace Sharpcaster.Interfaces
         /// <param name="seconds">time in seconds</param>
         /// <returns>media status</returns>
         Task<MediaStatus> SeekAsync(double seconds);
+
+
+
+        Task<MediaStatus> QueueLoadAsync(Item[] items);
     }
 }
