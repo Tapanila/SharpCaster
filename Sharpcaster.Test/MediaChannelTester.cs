@@ -6,17 +6,24 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Sharpcaster.Test
 {
     [Collection("SingleCollection")]
     public class MediaChannelTester
     {
+        private ITestOutputHelper output;
+        public MediaChannelTester(ITestOutputHelper outputHelper) { 
+            output = outputHelper;
+        }
+
         [Fact]
         public async Task TestLoadingMedia()
         {
             var chromecast = await TestHelper.FindChromecast();
-            var client = new ChromecastClient();
+            ChromecastClient client = TestHelper.GetClientWithConsoleLogging(output, true); ///new ChromecastClient();
+            //ChromecastClient client = new ChromecastClient();
             await client.ConnectChromecast(chromecast);
             _ = await client.LaunchApplicationAsync("B3419EF5");
 
@@ -24,7 +31,9 @@ namespace Sharpcaster.Test
             {
                 ContentUrl = "https://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/mp4/DesigningForGoogleCast.mp4"
             };
+
             _ = await client.GetChannel<IMediaChannel>().LoadAsync(media);
+            Assert.NotEmpty(TestHelper.LogContent);
         }
 
         [Fact]
