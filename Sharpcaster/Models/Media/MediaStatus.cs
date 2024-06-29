@@ -63,7 +63,7 @@ namespace Sharpcaster.Models.Media
         /// Gets or sets the current item identifier
         /// </summary>
         [DataMember(Name = "currentItemId")]
-        public int CurrentItemId { get; set; }
+        public int CurrentItemId { get; set; } = -1;
 
         /// <summary>
         /// Gets or sets the extended status

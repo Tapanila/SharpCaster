@@ -2,13 +2,11 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace Sharpcaster.Interfaces
-{
+namespace Sharpcaster.Interfaces {
     /// <summary>
     /// Interface for the media channel
     /// </summary>
-    public interface IMediaChannel : IStatusChannel<IEnumerable<MediaStatus>>, IChromecastChannel
-    {
+    public interface IMediaChannel : IStatusChannel<IEnumerable<MediaStatus>>, IChromecastChannel {
         /// <summary>
         /// Loads a media
         /// </summary>
@@ -45,5 +43,8 @@ namespace Sharpcaster.Interfaces
 
 
         Task<MediaStatus> QueueLoadAsync(Item[] items);
+        Task<MediaStatus> QueueNextAsync(long mediaSessionId);
+        Task<MediaStatus> QueuePrevAsync(long mediaSessionId);
+
     }
 }

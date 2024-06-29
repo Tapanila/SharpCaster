@@ -2,7 +2,7 @@
 using Sharpcaster.Models.Media;
 using System.Runtime.Serialization;
 
-namespace Sharpcaster.queue.messages {
+namespace Sharpcaster.Messages.Media {
 
     [DataContract]
     public class QueueLoadMessage : MessageWithSession

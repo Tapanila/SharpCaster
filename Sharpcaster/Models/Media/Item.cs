@@ -24,7 +24,7 @@ namespace Sharpcaster.Models.Media
         /// Gets or sets a value indicating whether autoplay is enabled or not
         /// </summary>
         [DataMember(Name = "autoplay")]
-        public bool Autoplay { get; set; }
+        public bool Autoplay { get; set; } = true;
 
 
         [DataMember(Name = "orderId")]
