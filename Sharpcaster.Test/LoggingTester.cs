@@ -63,7 +63,7 @@ namespace Sharpcaster.Test
             }
 
             var client = new ChromecastClient(serviceCollection);
-            Assert.True(logMessageFirst == "[RECEIVER_STATUS,INVALID_REQUEST,LOAD_CANCELLED,LOAD_FAILED,MEDIA_STATUS,PING,CLOSE]");
+            Assert.Equal("[RECEIVER_STATUS,INVALID_REQUEST,LOAD_CANCELLED,LOAD_FAILED,MEDIA_STATUS,QUEUE_CHANGE,QUEUE_ITEM_IDS,QUEUE_ITEMS,PING,CLOSE]",logMessageFirst);
         }
     }
 }
