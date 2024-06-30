@@ -198,8 +198,7 @@ namespace Sharpcaster
                 // All Unit tests do succeed without this lines. So I remove them (and the async !!! for the time beeing....
 
                 // //This is just to handle media status messages. Where we want to update the status of media but we are not expecting an update
-                //if (message.Type == "MEDIA_STATUS")
-                //{
+                //if (message.Type == "MEDIA_STATUS") {
                 //    var statusMessage = parameter as MediaStatusMessage;
                 //    await GetChannel<MediaChannel>().OnMessageReceivedAsync(statusMessage);
                 //}
