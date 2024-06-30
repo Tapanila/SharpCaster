@@ -29,16 +29,6 @@ namespace Sharpcaster
 
     public class ChromecastClient : IChromecastClient
     {
-        private class ConsoleWrapper : IConsoleWrapper {
-            public void WriteLine(string line) {
-                Console.WriteLine("CC: " + line);
-            }
-
-            public void WriteLine(string line, Exception ex, object p) {
-                Console.WriteLine(line, ex, p); 
-            }
-        }
-
 
         private const int RECEIVE_TIMEOUT = 30000;
 
@@ -56,8 +46,6 @@ namespace Sharpcaster
         private IDictionary<string, Type> MessageTypes { get; set; }
         private IEnumerable<IChromecastChannel> Channels { get; set; }
         private ConcurrentDictionary<int, object> WaitingTasks { get; } = new ConcurrentDictionary<int, object>();
-
-        private IConsoleWrapper CcConsole { get; set; }
 
         public ChromecastClient(ILogger logger = null, ILoggerFactory loggerFactory = null)
         {
@@ -178,6 +166,8 @@ namespace Sharpcaster
                             }
                             else
                             {
+                                _logger?.LogError("The received Message of Type '{ty}' can not be converted to its response Type." +
+                                    " An implementing IMessage class is missing!", message.Type);
                                 Debugger.Break();
                             }
                         }
