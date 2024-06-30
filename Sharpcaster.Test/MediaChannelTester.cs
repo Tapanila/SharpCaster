@@ -28,32 +28,7 @@ namespace Sharpcaster.Test
 
             AutoResetEvent _autoResetEvent = new AutoResetEvent(false);
             IMediaChannel mediaChannel = client.GetChannel<IMediaChannel>();
-
-
-           
-
-            Item[] MyCd = new Item[4];
-            MyCd[0] = new Item() {
-                Media = new Media {
-                    ContentUrl = "http://www.openmusicarchive.org/audio/Frankie%20by%20Mississippi%20John%20Hurt.mp3"
-                }
-            };
-
-            MyCd[1] = new Item() {
-                Media = new Media {
-                    ContentUrl = "http://www.openmusicarchive.org/audio/Mississippi%20Boweavil%20Blues%20by%20The%20Masked%20Marvel.mp3"
-                }
-            };
-            MyCd[2] = new Item() {
-                Media = new Media {
-                    ContentUrl = "http://www.openmusicarchive.org/audio/The%20Wild%20Wagoner%20by%20Jilson%20Setters.mp3"
-                }
-            };
-            MyCd[3] = new Item() {
-                Media = new Media {
-                    ContentUrl = "http://www.openmusicarchive.org/audio/Drunkards%20Special%20by%20Coley%20Jones.mp3"
-                }
-            };
+            Item[] MyCd = CreateTestCd();
 
             int testSequenceCount = 0;
 
@@ -61,7 +36,7 @@ namespace Sharpcaster.Test
             mediaChannel.StatusChanged += async (object sender, EventArgs e) => {
                 try {
                     MediaStatus status = mediaChannel.Status.FirstOrDefault();
-                    int currentItemId = status?.CurrentItemId??-1;
+                    int currentItemId = status?.CurrentItemId ?? -1;
                     //output.WriteLine("Test Event Handler received: '" + ((status?.PlayerState.ToString()) ?? "<null>") + "'.");
 
                     if (currentItemId != -1 && status.PlayerState == PlayerStateType.Playing) {
@@ -83,9 +58,10 @@ namespace Sharpcaster.Test
                                 output.WriteLine("test Sequence finished");
                                 _autoResetEvent.Set();
                             }
-                            
+
                         } else if (status?.Items?.ToList()?.Where(i => i.ItemId == currentItemId).FirstOrDefault()?.Media?.ContentUrl?.Equals(MyCd[1].Media.ContentUrl) ?? false) {
                             output.WriteLine("2nd Test Track started playin. listen for some seconds....");
+                            testSequenceCount++;
                             await Task.Delay(6000);
                             output.WriteLine("Lets goto back to first one");
                             status = await mediaChannel.QueuePrevAsync(status.MediaSessionId);
@@ -113,6 +89,38 @@ namespace Sharpcaster.Test
 
         }
 
+        [Fact]
+        public async Task TestLoadMediaQueueAndCheckContent() {
+            var chromecast = await TestHelper.FindChromecast();
+            //ChromecastClient client = new ChromecastClient();
+            ChromecastClient client = TestHelper.GetClientWithConsoleLogging(output);
+            await client.ConnectChromecast(chromecast);
+            _ = await client.LaunchApplicationAsync("B3419EF5");
+
+            Item[] MyCd = CreateTestCd();
+
+            MediaStatus status = await client.GetChannel<IMediaChannel>().QueueLoadAsync(MyCd);
+
+            Assert.Equal(PlayerStateType.Playing, status.PlayerState);
+            Assert.Equal(2, status.Items.Count());           // The status message only contains the next (and if available Prev) Track/QueueItem!
+            Assert.Equal(status.CurrentItemId, status.Items[0].ItemId);
+
+            await Task.Delay(2000);
+
+            int[] ids = await client.GetChannel<IMediaChannel>().QueueGetItemIdsAsync(status.MediaSessionId);
+
+            Assert.Equal(4, ids.Length);
+
+            foreach (int id in ids) {
+                Item[] items = await client.GetChannel<IMediaChannel>().QueueGetItemsAsync(status.MediaSessionId, new int[] {id});
+                Assert.Single(items);
+            }
+
+            Item[] items2 = await client.GetChannel<IMediaChannel>().QueueGetItemsAsync(status.MediaSessionId, ids);
+            Assert.Equal(4, items2.Length);
+        }
+
+
 
         [Fact]
         public async Task TestLoadingMediaQueue() {
@@ -122,28 +130,7 @@ namespace Sharpcaster.Test
             await client.ConnectChromecast(chromecast);
             _ = await client.LaunchApplicationAsync("B3419EF5");
 
-            Item[] MyCd = new Item[4];
-            MyCd[0] = new Item() {
-                Media = new Media {
-                    ContentUrl = "http://www.openmusicarchive.org/audio/Frankie%20by%20Mississippi%20John%20Hurt.mp3"
-                }
-            };
-
-            MyCd[1] = new Item() {
-                Media = new Media {
-                    ContentUrl = "http://www.openmusicarchive.org/audio/Mississippi%20Boweavil%20Blues%20by%20The%20Masked%20Marvel.mp3"
-                }
-            };
-            MyCd[2] = new Item() {
-                Media = new Media {
-                    ContentUrl = "http://www.openmusicarchive.org/audio/The%20Wild%20Wagoner%20by%20Jilson%20Setters.mp3"
-                }
-            };
-            MyCd[3] = new Item() {
-                Media = new Media {
-                    ContentUrl = "http://www.openmusicarchive.org/audio/Drunkards%20Special%20by%20Coley%20Jones.mp3"
-                }
-            };
+            Item[] MyCd = CreateTestCd();
 
             MediaStatus status = await client.GetChannel<IMediaChannel>().QueueLoadAsync(MyCd);
 
@@ -273,5 +260,35 @@ namespace Sharpcaster.Test
             //This checks that within 5000 ms we have loaded video and were able to pause it
             Assert.True(_autoResetEvent.WaitOne(5000));
         }
+
+
+
+        private static Item[] CreateTestCd() {
+            Item[] MyCd = new Item[4];
+            MyCd[0] = new Item() {
+                Media = new Media {
+                    ContentUrl = "http://www.openmusicarchive.org/audio/Frankie%20by%20Mississippi%20John%20Hurt.mp3"
+                }
+            };
+
+            MyCd[1] = new Item() {
+                Media = new Media {
+                    ContentUrl = "http://www.openmusicarchive.org/audio/Mississippi%20Boweavil%20Blues%20by%20The%20Masked%20Marvel.mp3"
+                }
+            };
+            MyCd[2] = new Item() {
+                Media = new Media {
+                    ContentUrl = "http://www.openmusicarchive.org/audio/The%20Wild%20Wagoner%20by%20Jilson%20Setters.mp3"
+                }
+            };
+            MyCd[3] = new Item() {
+                Media = new Media {
+                    ContentUrl = "http://www.openmusicarchive.org/audio/Drunkards%20Special%20by%20Coley%20Jones.mp3"
+                }
+            };
+            return MyCd;
+        }
+
     }
+
 }

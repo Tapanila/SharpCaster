@@ -100,10 +100,10 @@ namespace Sharpcaster.Channels
             return r?.Status?.FirstOrDefault();
         }
 
-
+        
         public async Task<MediaStatus> QueueNextAsync(long mediaSessionId) {
             var app = Client.GetChromecastStatus().Applications[0];
-            var r = await SendAsync<MediaStatusMessage>(new QueueNextMessage() { MediaSessionId = mediaSessionId }, app.TransportId);
+            var r = await SendAsync<MediaStatusMessage>(new QueueNextMessage() { MediaSessionId = mediaSessionId }, app.TransportId); 
             return r?.Status?.FirstOrDefault();
         }
 
@@ -113,6 +113,18 @@ namespace Sharpcaster.Channels
             return r?.Status?.FirstOrDefault();
         }
 
+
+        public async Task<Item[]> QueueGetItemsAsync(long mediaSessionId, int[] ids = null) {
+            var app = Client.GetChromecastStatus().Applications[0];
+            var r = await SendAsync<QueueItemsMessage>(new QueueGetItemsMessage() { MediaSessionId = mediaSessionId, Ids = ids }, app.TransportId);
+            return r?.Items;
+        }
+
+        public async Task<int[]> QueueGetItemIdsAsync(long mediaSessionId) {
+            var app = Client.GetChromecastStatus().Applications[0];
+            var r = await SendAsync<QueueItemIdsMessage>(new QueueGetItemIdsMessage() { MediaSessionId = mediaSessionId }, app.TransportId);
+            return r?.Ids;
+        }
 
     }
 }
