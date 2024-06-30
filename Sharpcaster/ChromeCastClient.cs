@@ -59,9 +59,16 @@ namespace Sharpcaster
 
         private IConsoleWrapper CcConsole { get; set; }
 
-        public ChromecastClient()
+        public ChromecastClient(ILogger logger = null, ILoggerFactory loggerFactory = null)
         {
             var serviceCollection = new ServiceCollection();
+            if (logger != null) {
+                serviceCollection.AddSingleton<ILogger>(logger);
+            }
+            if (loggerFactory != null) {
+                serviceCollection.AddSingleton<ILoggerFactory>(loggerFactory);
+            }
+
             serviceCollection.AddTransient<IChromecastChannel, ConnectionChannel>();
             serviceCollection.AddTransient<IChromecastChannel, HeartbeatChannel>();
             serviceCollection.AddTransient<IChromecastChannel, ReceiverChannel>();
