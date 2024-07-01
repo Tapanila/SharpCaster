@@ -86,7 +86,9 @@ namespace Sharpcaster.Test
             //This keeps the test running untill all eventhandler sequenc srteps are finished. If something goes wrong we get a very slow timeout here.
             Assert.True(_autoResetEvent.WaitOne(20000));
 
+            await Task.Delay(1000); // let the log finish ....
 
+            output.WriteLine("TestLoadingMediaQueueAndNavigateNextPrev finished");
         }
 
         [Fact]
@@ -118,6 +120,10 @@ namespace Sharpcaster.Test
 
             Item[] items2 = await client.GetChannel<IMediaChannel>().QueueGetItemsAsync(status.MediaSessionId, ids);
             Assert.Equal(4, items2.Length);
+
+            await Task.Delay(1000); // let the log finish ....
+
+            output.WriteLine("TestLoadMediaQueueAndCheckContent finished");
         }
 
 
@@ -135,9 +141,12 @@ namespace Sharpcaster.Test
             MediaStatus status = await client.GetChannel<IMediaChannel>().QueueLoadAsync(MyCd);
 
             Assert.Equal(PlayerStateType.Playing, status.PlayerState);
-            Assert.Equal(2,status.Items.Count());           // The status message only contains the next (and if available Prev) Track/QueueItem!
+            Assert.Equal(2, status.Items.Count());           // The status message only contains the next (and if available Prev) Track/QueueItem!
             Assert.Equal(status.CurrentItemId, status.Items[0].ItemId);
 
+            await Task.Delay(1000); // let the log finish ....
+
+            output.WriteLine("TestLoadingMediaQueue finished");
         }
 
         [Fact]
@@ -163,13 +172,16 @@ namespace Sharpcaster.Test
             // Logging Tests -> Check we only got to PLAYING once!
             Assert.NotEmpty(TestHelper.LogContent);
             Assert.Single(TestHelper.LogContent.Where((line)=>line.Contains("\"playerState\":\"PLAYING\"")).ToList());
+
+            await Task.Delay(2000); // let the log finish ....
+            output.WriteLine("TestLoadingMedia finished");
         }
 
         [Fact]
         public async Task StartApplicationAThenStartBAndLoadMedia()
         {
             var chromecast = await TestHelper.FindChromecast();
-            var client = new ChromecastClient();
+            var client = TestHelper.GetClientWithConsoleLogging(output);
             await client.ConnectChromecast(chromecast);
             _ = await client.LaunchApplicationAsync("A9BCCB7C", false);
 
@@ -181,6 +193,9 @@ namespace Sharpcaster.Test
                 ContentUrl = "https://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/mp4/DesigningForGoogleCast.mp4"
             };
             _ = await client.GetChannel<IMediaChannel>().LoadAsync(media);
+
+            await Task.Delay(1000); // let the log finish ....
+            output.WriteLine("StartApplicationAThenStartBAndLoadMedia finished");
         }
 
         [Fact]
@@ -189,7 +204,7 @@ namespace Sharpcaster.Test
             AutoResetEvent _autoResetEvent = new AutoResetEvent(false);
 
             var chromecast = await TestHelper.FindChromecast();
-            var client = new ChromecastClient();
+            var client = TestHelper.GetClientWithConsoleLogging(output);
             await client.ConnectChromecast(chromecast);
 
             var status = await client.LaunchApplicationAsync("B3419EF5", false);
@@ -229,6 +244,9 @@ namespace Sharpcaster.Test
             runSequence += "3";
 
             Assert.Equal("R1p2P3", runSequence);
+
+            await Task.Delay(1000); // let the log finish ....
+            output.WriteLine("TestLoadingAndPausingMedia finished");
         }
 
         [Fact]
@@ -237,7 +255,7 @@ namespace Sharpcaster.Test
             AutoResetEvent _autoResetEvent = new AutoResetEvent(false);
 
             var chromecast = await TestHelper.FindChromecast();
-            var client = new ChromecastClient();
+            var client = TestHelper.GetClientWithConsoleLogging(output);
             await client.ConnectChromecast(chromecast);
 
             var status = await client.LaunchApplicationAsync("B3419EF5",false);
@@ -248,14 +266,19 @@ namespace Sharpcaster.Test
             };
 
             MediaStatus mediaStatus;
+            bool firstPlay = true;
+
             //We are setting up an event to listen to status change. Because we don't know when the video has started to play
             client.GetChannel<IMediaChannel>().StatusChanged += async (object sender, EventArgs e) =>
             {
                 try {
                     if (client.GetChannel<IMediaChannel>().Status.FirstOrDefault()?.PlayerState == PlayerStateType.Playing) {
-                        await Task.Delay(2000); // Listen for some time
-                        mediaStatus = await client.GetChannel<IMediaChannel>().StopAsync();
-                        _autoResetEvent.Set();
+                        if (firstPlay) {
+                            firstPlay = false;
+                            await Task.Delay(2000); // Listen for some time
+                            mediaStatus = await client.GetChannel<IMediaChannel>().StopAsync();
+                            _autoResetEvent.Set();
+                        }
                     }
                 } catch (Exception ex) {
                     output.WriteLine("Exception in Event Handler: " + ex.ToString());   
@@ -267,8 +290,8 @@ namespace Sharpcaster.Test
             //This checks that within 5000 ms we have loaded video and were able to pause it
             Assert.True(_autoResetEvent.WaitOne(5000));
 
-           
-
+            await Task.Delay(1000); // let the log finish ....
+            output.WriteLine("TestLoadingAndStoppingMedia finished");
 
         }
 
