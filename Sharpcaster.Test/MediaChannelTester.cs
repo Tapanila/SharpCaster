@@ -22,59 +22,59 @@ namespace Sharpcaster.Test
 
         [Fact]
         public async Task TestWaitForDeviceStopDuringPlayback() {
+          
             //   To get this test Passing, you have to manually operate the used Chromecast device!
             //   I use it with a JBL speaker device. This device has 5 buttons. (ON/OFF, Vol-, Vol+, Play/Pause, (and WLAN-Connect))
             //   Vol+/- and Play/Pause do operate and trigger 'unasked' MediaStatusChanged events which work as designed.
             //
-            //   Pessing the Stop key during Playback causes the device to send:
+            //   Pressing the ON/OFF key during Playback causes the device to send:
             //       1. on media channel MediaStatus -> changed to 'Paused'
             //       2. on receiver channel a ReceiverStatus Message -> the applications array is omitted (set to NULL) here.
-            //       3. on connection chanel a close message.
+            //       3. on connection channel a close message.
             // 
             //   after the test media starts playing you have 20 seconds to press the device stop button. Then this should pass as green!
             //
             ChromecastClient client = await TestHelper.CreateConnectAndLoadAppClient(output);
+            if (TestHelper.CurrentReceiver.Model == "JBL Playlist") {
 
-            var media = new Media {
-                ContentUrl = "https://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/mp4/DesigningForGoogleCast.mp4"
-            };
+                var media = new Media {
+                    ContentUrl = "https://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/mp4/DesigningForGoogleCast.mp4"
+                };
 
+                AutoResetEvent _disconnectReceived = new AutoResetEvent(false);
+                IMediaChannel mediaChannel = client.GetChannel<IMediaChannel>();
 
-            AutoResetEvent _disconnectReceived = new AutoResetEvent(false);
-            IMediaChannel mediaChannel = client.GetChannel<IMediaChannel>();
-            //We are setting up an event to listen to status change. Because we don't know when the audio has started to play
-            mediaChannel.StatusChanged += (object sender, EventArgs e) => {
-                try {
-                    MediaStatus status = mediaChannel.Status.FirstOrDefault();
-                    output.WriteLine(status?.PlayerState.ToString()); 
-                } catch (Exception) {
-                }
-            };
+                mediaChannel.StatusChanged += (object sender, EventArgs e) => {
+                    try {
+                        MediaStatus status = mediaChannel.Status.FirstOrDefault();
+                        output.WriteLine(status?.PlayerState.ToString());
+                    } catch (Exception) {
+                    }
+                };
 
-            client.Disconnected += (object sender, EventArgs e) => {
-                try {
-                    _disconnectReceived.Set();
-                    output.WriteLine("Disconnect received.");
-                } catch (Exception) {
-                }
-            };
+                client.Disconnected += (object sender, EventArgs e) => {
+                    try {
+                        _disconnectReceived.Set();
+                        output.WriteLine("Disconnect received.");
+                    } catch (Exception) {
+                    }
+                };
 
-            MediaStatus status = await client.GetChannel<IMediaChannel>().LoadAsync(media);
+                MediaStatus status = await client.GetChannel<IMediaChannel>().LoadAsync(media);
 
-            //This keeps the test running untill all eventhandler sequenc srteps are finished. If something goes wrong we get a very slow timeout here.
-            Assert.True(_disconnectReceived.WaitOne(20000));
+                //This keeps the test running for 20 seconds or until the device initates the wanted stop-disconnect.
+                Assert.True(_disconnectReceived.WaitOne(20000), "Have you manually stopped the device while playback? If you did so, this is a real Error :-) !");
 
-            // To reuse the device now you have to initalte a new connection and reload the app ...
-            client = await TestHelper.CreateConnectAndLoadAppClient(output);
-            status = await client.GetChannel<IMediaChannel>().LoadAsync(media);
-            Assert.Equal(PlayerStateType.Playing, status.PlayerState);
-
+                // To reuse the device now you have to create a new connection and reload the app ...
+                client = await TestHelper.CreateConnectAndLoadAppClient(output);
+                status = await client.GetChannel<IMediaChannel>().LoadAsync(media);
+                Assert.Equal(PlayerStateType.Playing, status.PlayerState);
+            } else {
+                Assert.Fail("This test only runs with a 'JBL Playlist' device and also needs manual operations!");
+            }
         }
 
-        private void Client_Disconnected(object sender, EventArgs e) {
-            throw new NotImplementedException();
-        }
-
+     
         [Fact]
         public async Task TestLoadingMediaQueueAndNavigateNextPrev() {
             ChromecastClient client = await TestHelper.CreateConnectAndLoadAppClient(output);
