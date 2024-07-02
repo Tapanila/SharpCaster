@@ -1,11 +1,17 @@
 ﻿using System.Threading.Tasks;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Sharpcaster.Test
 {
     [Collection("SingleCollection")]
     public class ChromecastApplicationTester
     {
+        private ITestOutputHelper output;
+        public ChromecastApplicationTester(ITestOutputHelper outputHelper) {
+            output = outputHelper;
+        }
+
         [Fact]
         public async Task ConnectToChromecastAndLaunchApplication()
         {
@@ -39,21 +45,25 @@ namespace Sharpcaster.Test
         [Fact]
         public async Task ConnectToChromecastAndLaunchApplicationTwiceWithoutJoining()
         {
-            var chromecast = await TestHelper.FindChromecast();
-            var client = new ChromecastClient();
-            var status = await client.ConnectChromecast(chromecast);
-            status = await client.LaunchApplicationAsync("B3419EF5");
+            var client = await TestHelper.CreateAndConnectClient(output);
+
+            var status = await client.LaunchApplicationAsync("B3419EF5");
 
             var firstLaunchTransportId = status.Applications[0].TransportId;
             await client.DisconnectAsync();
 
-            status = await client.ConnectChromecast(chromecast);
+            status = await client.ConnectChromecast(TestHelper.CurrentReceiver);
             status = await client.LaunchApplicationAsync("B3419EF5", false);
 
             // ??????
             // My JBL Device (almost every time - but not always ) makes a new ID here!!!! (The other device - ChromecastAudio DOES NOT!?)
-            //Assert.Equal(firstLaunchTransportId, status.Applications[0].TransportId);
-            Assert.NotEqual(firstLaunchTransportId, status.Applications[0].TransportId);
+            if (TestHelper.CurrentReceiver.Model.Contains("JBL")) {
+                Assert.NotEqual(firstLaunchTransportId, status.Applications[0].TransportId);
+            } else {
+                Assert.Equal(firstLaunchTransportId, status.Applications[0].TransportId);
+            }
+
+            
         }
 
         [Fact]

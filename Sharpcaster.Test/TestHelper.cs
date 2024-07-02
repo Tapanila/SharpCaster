@@ -1,10 +1,12 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.VisualStudio.TestPlatform.Utilities;
 using Moq;
 using Sharpcaster.Channels;
 using Sharpcaster.Interfaces;
 using Sharpcaster.Messages;
 using Sharpcaster.Models;
+using Sharpcaster.Models.Media;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,35 +19,56 @@ namespace Sharpcaster.Test
 {
     public static class TestHelper
     {
-        public static List<string> LogContent = new List<string>();
         private static ITestOutputHelper TestOutput = null;
+        public static ChromecastReceiver CurrentReceiver { get; private set; }
 
 
         public async static Task<ChromecastReceiver> FindChromecast()
         {
             IChromecastLocator locator = new MdnsChromecastLocator();
             var chromecasts = await locator.FindReceiversAsync();
-            return chromecasts.Where(cc=>cc.Name.StartsWith("B")).First();
+            //CurrentReceiver = chromecasts.Where(cc => cc.Name.StartsWith("B")).First();
+            CurrentReceiver = chromecasts.First();
+            try {
+                TestOutput?.WriteLine("Using Receiver '" + (CurrentReceiver?.Model ?? "<null>") + "' at " + CurrentReceiver?.DeviceUri);
+            } catch {
+                // If a test does not create a new ITestOutputHelper the old one gets used here and throws 
+                // "InvalidOperationException : There is no currently active test."
+            }
+            return CurrentReceiver;
         }
 
-        public async static Task<ChromecastReceiver> FindChromecast(string name, double timeoutSeconds)
-        {
-            IChromecastLocator locator = new MdnsChromecastLocator();
-            var cts = new CancellationTokenSource();
-            cts.CancelAfter(TimeSpan.FromSeconds(timeoutSeconds));
-            var chromecasts = await locator.FindReceiversAsync(cts.Token);
-            return chromecasts.First(x => x.Name == name);
+        //public async static Task<ChromecastReceiver> FindChromecast(string name, double timeoutSeconds)
+        //{
+        //    IChromecastLocator locator = new MdnsChromecastLocator();
+        //    var cts = new CancellationTokenSource();
+        //    cts.CancelAfter(TimeSpan.FromSeconds(timeoutSeconds));
+        //    var chromecasts = await locator.FindReceiversAsync(cts.Token);
+        //    CurrentReceiver = chromecasts.First(x => x.Name == name);
+        //    return CurrentReceiver;
+        //}
+
+
+        public async static Task<ChromecastClient> CreateAndConnectClient(ITestOutputHelper output) {
+            TestOutput = output;
+            var chromecast = await TestHelper.FindChromecast();
+            ChromecastClient cc = GetClientWithTestOutput(output);
+            await cc.ConnectChromecast(chromecast);
+            return cc;
         }
 
-        public static ChromecastClient GetClientWithConsoleLogging(ITestOutputHelper output, bool makeLogAssertable = false) {
+        public async static Task<ChromecastClient> CreateConnectAndLoadAppClient(ITestOutputHelper output) {
+            TestOutput = output;
+            ChromecastClient cc = await CreateAndConnectClient(output);
+            await cc.LaunchApplicationAsync("B3419EF5", false);
+            return cc;
+        }
+
+
+        public static ChromecastClient GetClientWithTestOutput(ITestOutputHelper output) {
 
             TestOutput = output;
             var logger = new Mock<ILogger<ChromecastClient>>();
-
-            if (makeLogAssertable) {
-                // TODO: we need an instabnce per test here, when ever going back to parallel tests?  (-> test server iso real device )....
-                LogContent = new List<string>();
-            }
 
             logger.Setup(x => x.Log(
                 It.IsAny<LogLevel>(),
@@ -62,11 +85,8 @@ namespace Sharpcaster.Test
 
                     var invokeMethod = formatter.GetType().GetMethod("Invoke");
                     var logMessage = (string)invokeMethod?.Invoke(formatter, new[] { state, exception });
-
-                    if (makeLogAssertable) {
-                        LogContent.Add(logMessage);
-                    }
-                    TestOutput.WriteLine(logMessage);
+                   
+                    TestOutput.WriteLine(DateTime.Now.ToLongTimeString() + " " + logMessage);
                 }));
 
             var serviceCollection = new ServiceCollection();
@@ -84,6 +104,31 @@ namespace Sharpcaster.Test
 
             return new ChromecastClient(serviceCollection);
 
+        }
+
+        public static Item[] CreateTestCd() {
+            Item[] MyCd = new Item[4];
+            MyCd[0] = new Item() {
+                Media = new Media {
+                    ContentUrl = "http://www.openmusicarchive.org/audio/Frankie%20by%20Mississippi%20John%20Hurt.mp3"
+                }
+            };
+            MyCd[1] = new Item() {
+                Media = new Media {
+                    ContentUrl = "http://www.openmusicarchive.org/audio/Mississippi%20Boweavil%20Blues%20by%20The%20Masked%20Marvel.mp3"
+                }
+            };
+            MyCd[2] = new Item() {
+                Media = new Media {
+                    ContentUrl = "http://www.openmusicarchive.org/audio/The%20Wild%20Wagoner%20by%20Jilson%20Setters.mp3"
+                }
+            };
+            MyCd[3] = new Item() {
+                Media = new Media {
+                    ContentUrl = "http://www.openmusicarchive.org/audio/Drunkards%20Special%20by%20Coley%20Jones.mp3"
+                }
+            };
+            return MyCd;
         }
 
     }
