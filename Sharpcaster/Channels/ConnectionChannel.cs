@@ -38,11 +38,13 @@ namespace Sharpcaster.Channels
         /// <param name="message">message to process</param>
         public async override Task OnMessageReceivedAsync(IMessage message)
         {
-            // In order to avoid usage deadlocks we need to spawn a new Task here!?
-            _ = Task.Run(async () => {
-                await Client.DisconnectAsync();
-                //await Task.Delay(2000);
-            });
+            if (message is CloseMessage) {
+                // In order to avoid usage deadlocks we need to spawn a new Task here!?
+                _ = Task.Run(async () => {
+                    await Client.DisconnectAsync();
+                    //await Task.Delay(2000);
+                });
+            }
             await base.OnMessageReceivedAsync(message);
         }
     }
