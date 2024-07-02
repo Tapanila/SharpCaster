@@ -27,8 +27,8 @@ namespace Sharpcaster.Test
         {
             IChromecastLocator locator = new MdnsChromecastLocator();
             var chromecasts = await locator.FindReceiversAsync();
-            //CurrentReceiver = chromecasts.Where(cc => cc.Name.StartsWith("B")).First();
-            CurrentReceiver = chromecasts.First();
+            CurrentReceiver = chromecasts.Where(cc => cc.Name.StartsWith("B")).First();
+            //CurrentReceiver = chromecasts.First();
             try {
                 TestOutput?.WriteLine("Using Receiver '" + (CurrentReceiver?.Model ?? "<null>") + "' at " + CurrentReceiver?.DeviceUri);
             } catch {

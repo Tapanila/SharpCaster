@@ -1,4 +1,5 @@
-﻿using Sharpcaster.Interfaces;
+﻿using Sharpcaster.Channels;
+using Sharpcaster.Interfaces;
 using Sharpcaster.Models.Media;
 using System;
 using System.Collections.Generic;
@@ -17,6 +18,61 @@ namespace Sharpcaster.Test
         private ITestOutputHelper output;
         public MediaChannelTester(ITestOutputHelper outputHelper) { 
             output = outputHelper;
+        }
+
+        [Fact]
+        public async Task TestWaitForDeviceStopDuringPlayback() {
+            //   To get this test Passing, you have to manually operate the used Chromecast device!
+            //   I use it with a JBL speaker device. This device has 5 buttons. (ON/OFF, Vol-, Vol+, Play/Pause, (and WLAN-Connect))
+            //   Vol+/- and Play/Pause do operate and trigger 'unasked' MediaStatusChanged events which work as designed.
+            //
+            //   Pessing the Stop key during Playback causes the device to send:
+            //       1. on media channel MediaStatus -> changed to 'Paused'
+            //       2. on receiver channel a ReceiverStatus Message -> the applications array is omitted (set to NULL) here.
+            //       3. on connection chanel a close message.
+            // 
+            //   after the test media starts playing you have 20 seconds to press the device stop button. Then this should pass as green!
+            //
+            ChromecastClient client = await TestHelper.CreateConnectAndLoadAppClient(output);
+
+            var media = new Media {
+                ContentUrl = "https://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/mp4/DesigningForGoogleCast.mp4"
+            };
+
+
+            AutoResetEvent _disconnectReceived = new AutoResetEvent(false);
+            IMediaChannel mediaChannel = client.GetChannel<IMediaChannel>();
+            //We are setting up an event to listen to status change. Because we don't know when the audio has started to play
+            mediaChannel.StatusChanged += (object sender, EventArgs e) => {
+                try {
+                    MediaStatus status = mediaChannel.Status.FirstOrDefault();
+                    output.WriteLine(status?.PlayerState.ToString()); 
+                } catch (Exception) {
+                }
+            };
+
+            client.Disconnected += (object sender, EventArgs e) => {
+                try {
+                    _disconnectReceived.Set();
+                    output.WriteLine("Disconnect received.");
+                } catch (Exception) {
+                }
+            };
+
+            MediaStatus status = await client.GetChannel<IMediaChannel>().LoadAsync(media);
+
+            //This keeps the test running untill all eventhandler sequenc srteps are finished. If something goes wrong we get a very slow timeout here.
+            Assert.True(_disconnectReceived.WaitOne(20000));
+
+            // To reuse the device now you have to initalte a new connection and reload the app ...
+            client = await TestHelper.CreateConnectAndLoadAppClient(output);
+            status = await client.GetChannel<IMediaChannel>().LoadAsync(media);
+            Assert.Equal(PlayerStateType.Playing, status.PlayerState);
+
+        }
+
+        private void Client_Disconnected(object sender, EventArgs e) {
+            throw new NotImplementedException();
         }
 
         [Fact]
