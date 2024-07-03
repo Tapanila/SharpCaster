@@ -1,5 +1,5 @@
 ﻿using Sharpcaster.Messages.Media;
-using Sharpcaster.Models.Media;
+using Sharpcaster.Models.Queue;
 using System.Runtime.Serialization;
 
 namespace Sharpcaster.Messages.Queue
@@ -11,6 +11,6 @@ namespace Sharpcaster.Messages.Queue
     {
 
         [DataMember(Name = "items")]
-        public Item[] Items { get; set; }
+        public QueueItem[] Items { get; set; }
     }
 }

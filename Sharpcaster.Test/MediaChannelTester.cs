@@ -159,11 +159,11 @@ namespace Sharpcaster.Test
             Assert.Equal(4, ids.Length);
 
             foreach (int id in ids) {
-                Item[] items = await client.GetChannel<IMediaChannel>().QueueGetItemsAsync(status.MediaSessionId, new int[] {id});
+                QueueItem[] items = await client.GetChannel<IMediaChannel>().QueueGetItemsAsync(status.MediaSessionId, new int[] {id});
                 Assert.Single(items);
             }
 
-            Item[] items2 = await client.GetChannel<IMediaChannel>().QueueGetItemsAsync(status.MediaSessionId, ids);
+            QueueItem[] items2 = await client.GetChannel<IMediaChannel>().QueueGetItemsAsync(status.MediaSessionId, ids);
             Assert.Equal(4, items2.Length);
             
         }

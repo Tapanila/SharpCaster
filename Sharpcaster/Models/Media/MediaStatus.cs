@@ -83,7 +83,7 @@ namespace Sharpcaster.Models.Media
 
 
         [DataMember(Name = "items")]
-        public Item[] Items { get; set; }
+        public QueueItem[] Items { get; set; }
 
     }
 }

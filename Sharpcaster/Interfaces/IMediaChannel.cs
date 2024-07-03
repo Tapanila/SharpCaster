@@ -43,7 +43,7 @@ namespace Sharpcaster.Interfaces {
         Task<MediaStatus> QueueLoadAsync(QueueItem[] items);
         Task<MediaStatus> QueueNextAsync(long mediaSessionId);
         Task<MediaStatus> QueuePrevAsync(long mediaSessionId);
-        Task<Item[]> QueueGetItemsAsync(long mediaSessionId, int[] ids = null);
+        Task<QueueItem[]> QueueGetItemsAsync(long mediaSessionId, int[] ids = null);
         Task<int[]> QueueGetItemIdsAsync(long mediaSessionId);
     }
 }
