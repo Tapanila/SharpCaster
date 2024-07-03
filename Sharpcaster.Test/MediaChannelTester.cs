@@ -1,6 +1,7 @@
 ﻿using Sharpcaster.Channels;
 using Sharpcaster.Interfaces;
 using Sharpcaster.Models.Media;
+using Sharpcaster.Models.Queue;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -81,7 +82,7 @@ namespace Sharpcaster.Test
 
             AutoResetEvent _autoResetEvent = new AutoResetEvent(false);
             IMediaChannel mediaChannel = client.GetChannel<IMediaChannel>();
-            Item[] MyCd = TestHelper.CreateTestCd();
+            QueueItem[] MyCd = TestHelper.CreateTestCd();
 
             int testSequenceCount = 0;
 
@@ -90,8 +91,7 @@ namespace Sharpcaster.Test
                 try {
                     MediaStatus status = mediaChannel.Status.FirstOrDefault();
                     int currentItemId = status?.CurrentItemId ?? -1;
-                    //output.WriteLine("Test Event Handler received: '" + ((status?.PlayerState.ToString()) ?? "<null>") + "'.");
-
+                   
                     if (currentItemId != -1 && status.PlayerState == PlayerStateType.Playing) {
 
                         if (status?.Items?.ToList()?.Where(i => i.ItemId == currentItemId).FirstOrDefault()?.Media?.ContentUrl?.Equals(MyCd[0].Media.ContentUrl) ?? false) {
@@ -135,7 +135,7 @@ namespace Sharpcaster.Test
             Assert.Equal(2, status.Items.Count());           // The status message only contains the next (and if available Prev) Track/QueueItem!
             Assert.Equal(status.CurrentItemId, status.Items[0].ItemId);
 
-            //This keeps the test running untill all eventhandler sequenc srteps are finished. If something goes wrong we get a very slow timeout here.
+            //This keeps the test running untill all eventhandler sequence steps are finished. If something goes wrong we get a very slow timeout here.
             Assert.True(_autoResetEvent.WaitOne(20000));
 
         }
@@ -144,7 +144,7 @@ namespace Sharpcaster.Test
         public async Task TestLoadMediaQueueAndCheckContent() {
             ChromecastClient client = await TestHelper.CreateConnectAndLoadAppClient(output);
 
-            Item[] MyCd = TestHelper.CreateTestCd();
+            QueueItem[] MyCd = TestHelper.CreateTestCd();
 
             MediaStatus status = await client.GetChannel<IMediaChannel>().QueueLoadAsync(MyCd);
 
@@ -174,7 +174,7 @@ namespace Sharpcaster.Test
         public async Task TestLoadingMediaQueue() {
             ChromecastClient client = await TestHelper.CreateConnectAndLoadAppClient(output);
 
-            Item[] MyCd = TestHelper.CreateTestCd();
+            QueueItem[] MyCd = TestHelper.CreateTestCd();
 
             MediaStatus status = await client.GetChannel<IMediaChannel>().QueueLoadAsync(MyCd);
 

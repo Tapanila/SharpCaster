@@ -1,14 +1,16 @@
-﻿using Sharpcaster.Messages;
+﻿using Sharpcaster.Messages.Media;
 using Sharpcaster.Models.Media;
 using System.Runtime.Serialization;
 
-namespace Sharpcaster.Messages.Media {
+namespace Sharpcaster.Messages.Queue
+{
 
     [DataContract]
-    public class QueueLoadMessage : MessageWithSession
+    [ReceptionMessage]
+    public class QueueItemsMessage : MediaSessionMessage
     {
+
         [DataMember(Name = "items")]
         public Item[] Items { get; set; }
     }
-  
 }

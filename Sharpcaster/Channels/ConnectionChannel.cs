@@ -42,7 +42,6 @@ namespace Sharpcaster.Channels
                 // In order to avoid usage deadlocks we need to spawn a new Task here!?
                 _ = Task.Run(async () => {
                     await Client.DisconnectAsync();
-                    //await Task.Delay(2000);
                 });
             }
             await base.OnMessageReceivedAsync(message);

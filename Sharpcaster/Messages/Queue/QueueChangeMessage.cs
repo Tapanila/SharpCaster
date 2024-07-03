@@ -1,9 +1,7 @@
-﻿
-using Sharpcaster.Messages;
-using System.Collections.Generic;
-using System.Runtime.Serialization;
+﻿using System.Runtime.Serialization;
 
-namespace Sharpcaster.Messages.Media {
+namespace Sharpcaster.Messages.Queue
+{
 
     //TODO: not tested yet. Either implement Queue manipulation Requests or test with 2nd external client!?
 

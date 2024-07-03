@@ -6,7 +6,6 @@ using Sharpcaster.Channels;
 using Sharpcaster.Extensions;
 using Sharpcaster.Interfaces;
 using Sharpcaster.Messages;
-using Sharpcaster.Messages.Media;
 using Sharpcaster.Models;
 using Sharpcaster.Models.ChromecastStatus;
 using Sharpcaster.Models.Media;
@@ -188,18 +187,6 @@ namespace Sharpcaster
                 var tcsType = tcs.GetType();
                 (types == null ? tcsType.GetMethod(method) : tcsType.GetMethod(method, types)).Invoke(tcs, new object[] { parameter });
             }
-            else
-            {
-                // I think this duplicates the OnMessageReceived Event already called in line 164 !!! 
-                // So a mediaStatus changed event will be triggered twice if received as 'not requested' Message.
-                // All Unit tests do succeed without this lines. So I remove them (and the async !!! for the time beeing....
-
-                // //This is just to handle media status messages. Where we want to update the status of media but we are not expecting an update
-                //if (message.Type == "MEDIA_STATUS") {
-                //    var statusMessage = parameter as MediaStatusMessage;
-                //    await GetChannel<MediaChannel>().OnMessageReceivedAsync(statusMessage);
-                //}
-            }
         }
 
         public async Task SendAsync(string ns, IMessage message, string destinationId)
@@ -215,7 +202,6 @@ namespace Sharpcaster
             try
             {
                 _logger?.LogTrace($"SENT    : {castMessage.DestinationId}: {castMessage.PayloadUtf8}");
-
                 byte[] message = castMessage.ToProto();
                 var networkStream = _stream;
                 await networkStream.WriteAsync(message, 0, message.Length);

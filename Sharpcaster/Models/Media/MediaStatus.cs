@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using Sharpcaster.Converters;
+using Sharpcaster.Models.Queue;
 using System.Runtime.Serialization;
 
 namespace Sharpcaster.Models.Media

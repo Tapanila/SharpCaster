@@ -1,4 +1,5 @@
 ﻿using Sharpcaster.Models.Media;
+using Sharpcaster.Models.Queue;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -39,13 +40,9 @@ namespace Sharpcaster.Interfaces {
         /// <param name="seconds">time in seconds</param>
         /// <returns>media status</returns>
         Task<MediaStatus> SeekAsync(double seconds);
-
-
-
-        Task<MediaStatus> QueueLoadAsync(Item[] items);
+        Task<MediaStatus> QueueLoadAsync(QueueItem[] items);
         Task<MediaStatus> QueueNextAsync(long mediaSessionId);
         Task<MediaStatus> QueuePrevAsync(long mediaSessionId);
-
         Task<Item[]> QueueGetItemsAsync(long mediaSessionId, int[] ids = null);
         Task<int[]> QueueGetItemIdsAsync(long mediaSessionId);
     }

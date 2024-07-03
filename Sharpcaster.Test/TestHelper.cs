@@ -1,17 +1,15 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Microsoft.VisualStudio.TestPlatform.Utilities;
 using Moq;
 using Sharpcaster.Channels;
 using Sharpcaster.Interfaces;
 using Sharpcaster.Messages;
 using Sharpcaster.Models;
 using Sharpcaster.Models.Media;
+using Sharpcaster.Models.Queue;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Threading;
 using System.Threading.Tasks;
 using Xunit.Abstractions;
 
@@ -27,7 +25,6 @@ namespace Sharpcaster.Test
         {
             IChromecastLocator locator = new MdnsChromecastLocator();
             var chromecasts = await locator.FindReceiversAsync();
-            //CurrentReceiver = chromecasts.Where(cc => cc.Name.StartsWith("B")).First();
             CurrentReceiver = chromecasts.First();
             try {
                 TestOutput?.WriteLine("Using Receiver '" + (CurrentReceiver?.Model ?? "<null>") + "' at " + CurrentReceiver?.DeviceUri);
@@ -37,17 +34,6 @@ namespace Sharpcaster.Test
             }
             return CurrentReceiver;
         }
-
-        //public async static Task<ChromecastReceiver> FindChromecast(string name, double timeoutSeconds)
-        //{
-        //    IChromecastLocator locator = new MdnsChromecastLocator();
-        //    var cts = new CancellationTokenSource();
-        //    cts.CancelAfter(TimeSpan.FromSeconds(timeoutSeconds));
-        //    var chromecasts = await locator.FindReceiversAsync(cts.Token);
-        //    CurrentReceiver = chromecasts.First(x => x.Name == name);
-        //    return CurrentReceiver;
-        //}
-
 
         public async static Task<ChromecastClient> CreateAndConnectClient(ITestOutputHelper output) {
             TestOutput = output;
@@ -106,24 +92,24 @@ namespace Sharpcaster.Test
 
         }
 
-        public static Item[] CreateTestCd() {
-            Item[] MyCd = new Item[4];
-            MyCd[0] = new Item() {
+        public static QueueItem[] CreateTestCd() {
+            QueueItem[] MyCd = new QueueItem[4];
+            MyCd[0] = new QueueItem() {
                 Media = new Media {
                     ContentUrl = "http://www.openmusicarchive.org/audio/Frankie%20by%20Mississippi%20John%20Hurt.mp3"
                 }
             };
-            MyCd[1] = new Item() {
+            MyCd[1] = new QueueItem() {
                 Media = new Media {
                     ContentUrl = "http://www.openmusicarchive.org/audio/Mississippi%20Boweavil%20Blues%20by%20The%20Masked%20Marvel.mp3"
                 }
             };
-            MyCd[2] = new Item() {
+            MyCd[2] = new QueueItem() {
                 Media = new Media {
                     ContentUrl = "http://www.openmusicarchive.org/audio/The%20Wild%20Wagoner%20by%20Jilson%20Setters.mp3"
                 }
             };
-            MyCd[3] = new Item() {
+            MyCd[3] = new QueueItem() {
                 Media = new Media {
                     ContentUrl = "http://www.openmusicarchive.org/audio/Drunkards%20Special%20by%20Coley%20Jones.mp3"
                 }
