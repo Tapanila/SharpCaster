@@ -75,21 +75,7 @@ namespace Sharpcaster.Test
                     TestOutput.WriteLine(DateTime.Now.ToLongTimeString() + " " + logMessage);
                 }));
 
-            var serviceCollection = new ServiceCollection();
-            serviceCollection.AddTransient<IChromecastChannel, ConnectionChannel>();
-            serviceCollection.AddTransient<IChromecastChannel, HeartbeatChannel>();
-            serviceCollection.AddTransient<IChromecastChannel, ReceiverChannel>();
-            serviceCollection.AddTransient<IChromecastChannel, MediaChannel>();
-            serviceCollection.AddSingleton<ILogger>(logger.Object);
-            var messageInterfaceType = typeof(IMessage);
-            foreach (var type in (from t in typeof(IConnectionChannel).GetTypeInfo().Assembly.GetTypes()
-                                  where t.GetTypeInfo().IsClass && !t.GetTypeInfo().IsAbstract && messageInterfaceType.IsAssignableFrom(t) && t.GetTypeInfo().GetCustomAttribute<ReceptionMessageAttribute>() != null
-                                  select t)) {
-                serviceCollection.AddTransient(messageInterfaceType, type);
-            }
-
-            return new ChromecastClient(serviceCollection);
-
+            return new ChromecastClient(logger: logger.Object);
         }
 
         public static QueueItem[] CreateTestCd() {
