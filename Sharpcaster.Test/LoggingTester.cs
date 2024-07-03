@@ -5,16 +5,13 @@ using Sharpcaster.Channels;
 using Sharpcaster.Interfaces;
 using Sharpcaster.Messages;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
 using Xunit;
 
 namespace Sharpcaster.Test
 {
+    [Collection("SingleCollection")]
     public class LoggingTester
     {
         
@@ -62,7 +59,7 @@ namespace Sharpcaster.Test
             }
 
             var client = new ChromecastClient(serviceCollection);
-            Assert.True(logMessageFirst == "[RECEIVER_STATUS,INVALID_REQUEST,LOAD_CANCELLED,LOAD_FAILED,MEDIA_STATUS,PING,CLOSE]");
+            Assert.Equal("[RECEIVER_STATUS,QUEUE_CHANGE,QUEUE_ITEM_IDS,QUEUE_ITEMS,INVALID_REQUEST,LOAD_CANCELLED,LOAD_FAILED,MEDIA_STATUS,PING,CLOSE]", logMessageFirst);
         }
     }
 }

@@ -6,7 +6,6 @@ using Sharpcaster.Channels;
 using Sharpcaster.Extensions;
 using Sharpcaster.Interfaces;
 using Sharpcaster.Messages;
-using Sharpcaster.Messages.Media;
 using Sharpcaster.Models;
 using Sharpcaster.Models.ChromecastStatus;
 using Sharpcaster.Models.Media;
@@ -26,8 +25,10 @@ using static Extensions.Api.CastChannel.CastMessage.Types;
 
 namespace Sharpcaster
 {
+
     public class ChromecastClient : IChromecastClient
     {
+
         private const int RECEIVE_TIMEOUT = 30000;
 
         /// <summary>
@@ -45,9 +46,16 @@ namespace Sharpcaster
         private IEnumerable<IChromecastChannel> Channels { get; set; }
         private ConcurrentDictionary<int, object> WaitingTasks { get; } = new ConcurrentDictionary<int, object>();
 
-        public ChromecastClient()
+        public ChromecastClient(ILogger logger = null, ILoggerFactory loggerFactory = null)
         {
             var serviceCollection = new ServiceCollection();
+            if (logger != null) {
+                serviceCollection.AddSingleton<ILogger>(logger);
+            }
+            if (loggerFactory != null) {
+                serviceCollection.AddSingleton<ILoggerFactory>(loggerFactory);
+            }
+
             serviceCollection.AddTransient<IChromecastChannel, ConnectionChannel>();
             serviceCollection.AddTransient<IChromecastChannel, HeartbeatChannel>();
             serviceCollection.AddTransient<IChromecastChannel, ReceiverChannel>();
@@ -157,6 +165,8 @@ namespace Sharpcaster
                             }
                             else
                             {
+                                _logger?.LogError("The received Message of Type '{ty}' can not be converted to its response Type." +
+                                    " An implementing IMessage class is missing!", message.Type);
                                 Debugger.Break();
                             }
                         }
@@ -170,21 +180,12 @@ namespace Sharpcaster
             });
         }
 
-        private async void TaskCompletionSourceInvoke(MessageWithId message, string method, object parameter, Type[] types = null)
+        private void TaskCompletionSourceInvoke(MessageWithId message, string method, object parameter, Type[] types = null)
         {
             if (message.HasRequestId && WaitingTasks.TryRemove(message.RequestId, out object tcs))
             {
                 var tcsType = tcs.GetType();
                 (types == null ? tcsType.GetMethod(method) : tcsType.GetMethod(method, types)).Invoke(tcs, new object[] { parameter });
-            }
-            else
-            {
-                //This is just to handle media status messages. Where we want to update the status of media but we are not expecting an update
-                if (message.Type == "MEDIA_STATUS")
-                {
-                    var statusMessage = parameter as MediaStatusMessage;
-                    await GetChannel<MediaChannel>().OnMessageReceivedAsync(statusMessage);
-                }
             }
         }
 
@@ -201,7 +202,6 @@ namespace Sharpcaster
             try
             {
                 _logger?.LogTrace($"SENT    : {castMessage.DestinationId}: {castMessage.PayloadUtf8}");
-
                 byte[] message = castMessage.ToProto();
                 var networkStream = _stream;
                 await networkStream.WriteAsync(message, 0, message.Length);

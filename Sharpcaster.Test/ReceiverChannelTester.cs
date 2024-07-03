@@ -1,12 +1,14 @@
 ﻿using Sharpcaster.Channels;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace Sharpcaster.Test
 {
+    [Collection("SingleCollection")]
     public class ReceiverChannelTester
     {
         [Fact]
-        public async void TestMute()
+        public async Task TestMute()
         {
             var chromecast = await TestHelper.FindChromecast();
 
@@ -18,7 +20,7 @@ namespace Sharpcaster.Test
         }
 
         [Fact]
-        public async void TestUnMute()
+        public async Task TestUnMute()
         {
             var chromecast = await TestHelper.FindChromecast();
 
@@ -30,7 +32,7 @@ namespace Sharpcaster.Test
         }
 
         [Fact]
-        public async void TestVolume()
+        public async Task TestVolume()
         {
             var chromecast = await TestHelper.FindChromecast();
 
@@ -40,12 +42,12 @@ namespace Sharpcaster.Test
             var status = await client.GetChannel<ReceiverChannel>().SetVolume(0.1);
             Assert.Equal(0.1, status.Volume.Level.Value, precision: 1);
 
-            status = await client.GetChannel<ReceiverChannel>().SetVolume(1.0);
-            Assert.Equal(1.0, status.Volume.Level.Value, precision: 1);
+            status = await client.GetChannel<ReceiverChannel>().SetVolume(0.3);
+            Assert.Equal(0.3, status.Volume.Level.Value, precision: 1);
         }
 
         [Fact]
-        public async void TestStoppingApplication()
+        public async Task TestStoppingApplication()
         {
             var chromecast = await TestHelper.FindChromecast();
 

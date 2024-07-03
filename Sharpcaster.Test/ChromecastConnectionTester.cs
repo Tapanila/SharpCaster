@@ -1,11 +1,13 @@
-﻿using Xunit;
+﻿using System.Threading.Tasks;
+using Xunit;
 
 namespace Sharpcaster.Test
 {
+    [Collection("SingleCollection")]
     public class ChromecastConnectionTester
     {
         [Fact]
-        public async void SearchChromecastsAndConnectToIt()
+        public async Task SearchChromecastsAndConnectToIt()
         {
             var chromecast = await TestHelper.FindChromecast();
             var client = new ChromecastClient();

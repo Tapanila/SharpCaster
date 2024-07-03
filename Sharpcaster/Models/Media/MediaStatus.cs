@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using Sharpcaster.Converters;
+using Sharpcaster.Models.Queue;
 using System.Runtime.Serialization;
 
 namespace Sharpcaster.Models.Media
@@ -63,7 +64,7 @@ namespace Sharpcaster.Models.Media
         /// Gets or sets the current item identifier
         /// </summary>
         [DataMember(Name = "currentItemId")]
-        public int CurrentItemId { get; set; }
+        public int CurrentItemId { get; set; } = -1;
 
         /// <summary>
         /// Gets or sets the extended status
@@ -76,5 +77,13 @@ namespace Sharpcaster.Models.Media
         /// </summary>
         [DataMember(Name = "repeatMode")]
         public string RepeatMode { get; set; }
+
+        [DataMember(Name = "queueData")]
+        public QueueData QueueData { get; set; }
+
+
+        [DataMember(Name = "items")]
+        public QueueItem[] Items { get; set; }
+
     }
 }
