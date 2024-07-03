@@ -114,15 +114,24 @@ namespace Sharpcaster
 
             _client = new TcpClient();
             await _client.ConnectAsync(chromecastReceiver.DeviceUri.Host, chromecastReceiver.Port);
+            
             //Open SSL stream to Chromecast and bypass all SSL validation
             var secureStream = new SslStream(_client.GetStream(), true, (sender, certificate, chain, sslPolicyErrors) => true);
             await secureStream.AuthenticateAsClientAsync(chromecastReceiver.DeviceUri.Host);
             _stream = secureStream;
+            
 
             ReceiveTcs = new TaskCompletionSource<bool>();
             Receive();
+            GetChannel<IHeartbeatChannel>().StartTimeoutTimer();
+            GetChannel<IHeartbeatChannel>().StatusChanged += HeartBeatTimedOut;
             await GetChannel<IConnectionChannel>().ConnectAsync();
             return await GetChannel<IReceiverChannel>().GetChromecastStatusAsync();
+        }
+
+        private async void HeartBeatTimedOut(object sender, EventArgs e)
+        {
+            await DisconnectAsync();
         }
 
         private void Receive()
@@ -237,6 +246,8 @@ namespace Sharpcaster
             {
                 channel.GetType().GetProperty("Status").SetValue(channel, null);
             }
+            GetChannel<IHeartbeatChannel>().StopTimeoutTimer();
+            GetChannel<IHeartbeatChannel>().StatusChanged -= HeartBeatTimedOut;
             await Dispose();
         }
 
