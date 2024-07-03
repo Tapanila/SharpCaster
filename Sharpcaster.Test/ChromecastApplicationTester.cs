@@ -1,4 +1,6 @@
-﻿using System.Threading.Tasks;
+﻿using Sharpcaster.Test.customChannel;
+using System;
+using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -87,10 +89,8 @@ namespace Sharpcaster.Test
         [Fact]
         public async Task ConnectToChromecastAndLaunchApplicationOnceAndJoinIt()
         {
-            var chromecast = await TestHelper.FindChromecast();
-            var client = new ChromecastClient();
-            var status = await client.ConnectChromecast(chromecast);
-            status = await client.LaunchApplicationAsync("B3419EF5");
+            var client = await TestHelper.CreateAndConnectClient(output);
+            var status = await client.LaunchApplicationAsync("B3419EF5");
 
             var firstLaunchTransportId = status.Applications[0].TransportId;
 
@@ -99,6 +99,22 @@ namespace Sharpcaster.Test
             
             Assert.Equal(firstLaunchTransportId, status.Applications[0].TransportId);
             
+        }
+
+        //Seems like this isn't really working anymore and just loading a white screen
+        [Fact]
+        public async Task ConnectToChromecastAndLaunchWebPage()
+        {
+            var client = await TestHelper.CreateConnectAndLoadAppClient(output, "5CB45E5A");
+
+            var req = new WebMessage
+            {
+                Type = "loc",
+                Url = "https://www.google.com/"
+            };
+
+
+            await client.SendAsync("urn:x-cast:com.url.cast", req, "receiver-0");
         }
     }
 }

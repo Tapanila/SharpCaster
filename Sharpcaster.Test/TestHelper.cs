@@ -43,10 +43,10 @@ namespace Sharpcaster.Test
             return cc;
         }
 
-        public async static Task<ChromecastClient> CreateConnectAndLoadAppClient(ITestOutputHelper output) {
+        public async static Task<ChromecastClient> CreateConnectAndLoadAppClient(ITestOutputHelper output, string appId = "B3419EF5") {
             TestOutput = output;
             ChromecastClient cc = await CreateAndConnectClient(output);
-            await cc.LaunchApplicationAsync("B3419EF5", false);
+            await cc.LaunchApplicationAsync(appId, false);
             return cc;
         }
 
