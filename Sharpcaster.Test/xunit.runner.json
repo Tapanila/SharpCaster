@@ -1,4 +1,5 @@
 ﻿{
 	"methodDisplay": "method",
-	"parallelAlgorithm": "aggressive"
+	"parallelAlgorithm": "aggressive",
+	"showLiveOutput":  true
 }

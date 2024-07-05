@@ -9,40 +9,94 @@ using Sharpcaster.Models;
 using Sharpcaster.Models.Media;
 using Sharpcaster.Models.Queue;
 using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.ConstrainedExecution;
 using System.Threading.Tasks;
+using System.Xml.Linq;
+using Xunit;
 using Xunit.Abstractions;
+using Sharpcaster.Test.helper;
+using Sharpcaster;
 
-namespace Sharpcaster.Test
-{
+
+
+
+
+
+namespace Sharpcaster.Test {
+
+    public class ChromecastReceiversFilter  {
+
+        public static IEnumerable<object[]> GetAll() {
+            foreach (var cc in ChromecastDevicesFixture.Receivers) {
+                yield return new object[] { cc };
+            }
+        }
+
+        public static IEnumerable<object[]> GetAny() {
+            var rec = ChromecastDevicesFixture.Receivers.First();
+            yield return new object[] { rec };
+        }
+
+        public static IEnumerable<object[]> GetJblSpeaker() {
+            var rec = ChromecastDevicesFixture.Receivers.Where(r => r.Model.StartsWith("JBL")).First();
+            yield return new object[] { rec };
+        }
+
+        public static IEnumerable<object[]> GetDefaultDevice() {
+            var rec = ChromecastDevicesFixture.Receivers.Where(r => ! r.Model.StartsWith("JBL")).First();
+            yield return new object[] { rec };
+        }
+    }
+
+
     public static class TestHelper
     {
+        private static List<string> AssertableTestLog = null;
         private static ITestOutputHelper TestOutput = null;
-        public static ChromecastReceiver CurrentReceiver { get; private set; }
+        //public static ChromecastReceiver CurrentReceiver { get; private set; }
 
 
-        public async static Task<ChromecastReceiver> FindChromecast()
+        public static ChromecastReceiver FindChromecast(string receiverName = null)
         {
-            IChromecastLocator locator = new MdnsChromecastLocator();
-            var chromecasts = await locator.FindReceiversAsync();
-            CurrentReceiver = chromecasts.Where(c=>c.Name.StartsWith("B")).First();
+            //IChromecastLocator locator = new MdnsChromecastLocator();
+            ChromecastReceiver receiver = null;
+
+            var chromecasts = ChromecastDevicesFixture.Receivers; //await locator.FindReceiversAsync();
+            if ((receiverName == null) || (receiverName == "*")) {
+                receiver = chromecasts.First();
+            } else {
+                receiver = chromecasts.Where(c => c.Name.StartsWith(receiverName)).First();
+            }
             try {
-                TestOutput?.WriteLine("Using Receiver '" + (CurrentReceiver?.Model ?? "<null>") + "' at " + CurrentReceiver?.DeviceUri);
+                TestOutput?.WriteLine("Using Receiver '" + (receiver?.Model ?? "<null>") + "' at " + receiver?.DeviceUri);
             } catch {
                 // If a test does not create a new ITestOutputHelper the old one gets used here and throws 
                 // "InvalidOperationException : There is no currently active test."
             }
-            return CurrentReceiver;
+            return receiver;
         }
 
-        public async static Task<ChromecastClient> CreateAndConnectClient(ITestOutputHelper output) {
+        public async static Task<ChromecastClient> CreateAndConnectClient(ITestOutputHelper output, string receiverName = null) {
             TestOutput = output;
-            var chromecast = await TestHelper.FindChromecast();
+            var chromecast = TestHelper.FindChromecast(receiverName);
             ChromecastClient cc = GetClientWithTestOutput(output);
             await cc.ConnectChromecast(chromecast);
             return cc;
         }
+
+        public async static Task<ChromecastClient> CreateAndConnectClient(ITestOutputHelper output, ChromecastReceiver receiver) {
+            TestOutput = output;
+            TestOutput?.WriteLine("Using Receiver '" + (receiver.Model) + "' at " + receiver.DeviceUri);
+            ChromecastClient cc = GetClientWithTestOutput(output);
+            await cc.ConnectChromecast(receiver);
+            return cc;
+        }
+
 
         public async static Task<ChromecastClient> CreateConnectAndLoadAppClient(ITestOutputHelper output, string appId = "B3419EF5") {
             TestOutput = output;
@@ -51,9 +105,16 @@ namespace Sharpcaster.Test
             return cc;
         }
 
+        public async static Task<ChromecastClient> CreateConnectAndLoadAppClient(ITestOutputHelper output, ChromecastReceiver receiver, string appId = "B3419EF5") {
+            TestOutput = output;
+            ChromecastClient cc = await CreateAndConnectClient(output, receiver);
+            await cc.LaunchApplicationAsync(appId, false);
+            return cc;
+        }
+
         public async static Task<ChromecastClient> CreateConnectAndLoadAppClient(string appId = "B3419EF5") {
             TestOutput = null;
-            var chromecast = await TestHelper.FindChromecast();
+            var chromecast = TestHelper.FindChromecast();
             ChromecastClient cc = new ChromecastClient();
             await cc.ConnectChromecast(chromecast);
             await cc.LaunchApplicationAsync(appId, false);
@@ -64,6 +125,13 @@ namespace Sharpcaster.Test
         public static ChromecastClient GetClientWithTestOutput(ITestOutputHelper output) {
 
             TestOutput = output;
+            ILoggerFactory lFactory = CreateMockedLoggerFactory();
+
+            return new ChromecastClient(loggerFactory: lFactory);
+        }
+
+        public static ILoggerFactory CreateMockedLoggerFactory(List<string> assertableLog = null) {
+            AssertableTestLog = assertableLog;
             var loggerCC = new Mock<ILogger<ChromecastClient>>();
             loggerCC.Setup(x => x.Log(
                 It.IsAny<LogLevel>(),
@@ -80,8 +148,11 @@ namespace Sharpcaster.Test
 
                     var invokeMethod = formatter.GetType().GetMethod("Invoke");
                     var logMessage = (string)invokeMethod?.Invoke(formatter, new[] { state, exception });
-                   
-                    TestOutput.WriteLine(DateTime.Now.ToLongTimeString() + " " + logMessage);
+
+                    try {
+                        TestOutput?.WriteLine(DateTime.Now.ToLongTimeString() + " " + logMessage);
+                    } catch { }
+                    AssertableTestLog?.Add(logMessage);
                 }));
 
             var loggerHBC = new Mock<ILogger<HeartbeatChannel>>();
@@ -101,7 +172,10 @@ namespace Sharpcaster.Test
                     var invokeMethod = formatter.GetType().GetMethod("Invoke");
                     var logMessage = (string)invokeMethod?.Invoke(formatter, new[] { state, exception });
 
-                    TestOutput.WriteLine(DateTime.Now.ToLongTimeString() + " " + logMessage);
+                    try {
+                        TestOutput?.WriteLine(DateTime.Now.ToLongTimeString() + " " + logMessage);
+                    } catch { }
+                    AssertableTestLog?.Add(logMessage);
                 }));
 
             var loggerFactory = new Mock<ILoggerFactory>();
@@ -117,8 +191,9 @@ namespace Sharpcaster.Test
             }
             )));
 
-            return new ChromecastClient(loggerFactory: loggerFactory.Object);
+            return loggerFactory.Object;
         }
+
 
         public static QueueItem[] CreateTestCd() {
             QueueItem[] MyCd = new QueueItem[4];

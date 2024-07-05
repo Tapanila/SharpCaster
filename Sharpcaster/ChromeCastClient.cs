@@ -46,19 +46,16 @@ namespace Sharpcaster
         private IEnumerable<IChromecastChannel> Channels { get; set; }
         private ConcurrentDictionary<int, object> WaitingTasks { get; } = new ConcurrentDictionary<int, object>();
 
-        public ChromecastClient(ILogger logger = null, ILoggerFactory loggerFactory = null)
+        public ChromecastClient(ILoggerFactory loggerFactory = null)
         {
             var serviceCollection = new ServiceCollection();
-            if (logger != null) {
-                serviceCollection.AddSingleton<ILogger>(logger);
-            }
+            
             if (loggerFactory != null) {
                 serviceCollection.AddSingleton<ILoggerFactory>(loggerFactory);
-                serviceCollection.AddSingleton(typeof(ILogger<>), typeof(Logger<>));        // see https://stackoverflow.com/questions/31751437/how-is-iloggert-resolved-via-di 
+                serviceCollection.AddSingleton(typeof(ILogger<>), typeof(Logger<>));  // see https://stackoverflow.com/questions/31751437/how-is-iloggert-resolved-via-di 
             }                                                                                            
 
             serviceCollection.AddTransient<IChromecastChannel, ConnectionChannel>();
-            //serviceCollection.AddTransient<IHeartbeatChannel, HeartbeatChannel>();
             serviceCollection.AddTransient<IChromecastChannel, HeartbeatChannel>();
             serviceCollection.AddTransient<IChromecastChannel, ReceiverChannel>();
             serviceCollection.AddTransient<IChromecastChannel, MediaChannel>();
@@ -90,16 +87,7 @@ namespace Sharpcaster
             MessageTypes = messages.Where(t => !string.IsNullOrEmpty(t.Type)).ToDictionary(m => m.Type, m => m.GetType());
             Channels = channels;
 
-            _logger = serviceProvider.GetService<ILogger>();
-            if (_logger == null)
-            {
-                var loggerFactory = serviceProvider.GetService<ILoggerFactory>();
-                if (loggerFactory != null)
-                {
-                    _logger = loggerFactory.CreateLogger<ChromecastClient>();
-                }
-            }
-
+            _logger = serviceProvider.GetService<ILogger<ChromecastChannel>>();
             _logger?.LogDebug(MessageTypes.Keys.ToString(","));
             _logger?.LogDebug(Channels.ToString(","));
 
@@ -108,7 +96,6 @@ namespace Sharpcaster
                 channel.Client = this;
             }
         }
-
 
         public async Task<ChromecastStatus> ConnectChromecast(ChromecastReceiver chromecastReceiver)
         {
