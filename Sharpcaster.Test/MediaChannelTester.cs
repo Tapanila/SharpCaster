@@ -203,6 +203,23 @@ namespace Sharpcaster.Test
         }
 
         [Fact]
+        public async Task TestLoadingMediaWithoutLogging() {
+            ChromecastClient client = await TestHelper.CreateConnectAndLoadAppClient();     // No output -> No LoggingFactory mocked
+
+            var media = new Media {
+                ContentUrl = "https://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/mp4/DesigningForGoogleCast.mp4"
+            };
+
+            MediaStatus status = await client.GetChannel<IMediaChannel>().LoadAsync(media);
+
+            Assert.Equal(PlayerStateType.Playing, status.PlayerState);
+            Assert.Single(status.Items);
+            Assert.Equal(status.CurrentItemId, status.Items[0].ItemId);
+
+        }
+
+
+        [Fact]
         public async Task StartApplicationAThenStartBAndLoadMedia()
         {
             var chromecast = await TestHelper.FindChromecast();

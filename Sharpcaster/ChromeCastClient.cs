@@ -54,9 +54,11 @@ namespace Sharpcaster
             }
             if (loggerFactory != null) {
                 serviceCollection.AddSingleton<ILoggerFactory>(loggerFactory);
-            }
+                serviceCollection.AddSingleton(typeof(ILogger<>), typeof(Logger<>));        // see https://stackoverflow.com/questions/31751437/how-is-iloggert-resolved-via-di 
+            }                                                                                            
 
             serviceCollection.AddTransient<IChromecastChannel, ConnectionChannel>();
+            //serviceCollection.AddTransient<IHeartbeatChannel, HeartbeatChannel>();
             serviceCollection.AddTransient<IChromecastChannel, HeartbeatChannel>();
             serviceCollection.AddTransient<IChromecastChannel, ReceiverChannel>();
             serviceCollection.AddTransient<IChromecastChannel, MediaChannel>();
@@ -84,7 +86,7 @@ namespace Sharpcaster
             var serviceProvider = serviceCollection.BuildServiceProvider();
             var channels = serviceProvider.GetServices<IChromecastChannel>();
             var messages = serviceProvider.GetServices<IMessage>();
-            
+
             MessageTypes = messages.Where(t => !string.IsNullOrEmpty(t.Type)).ToDictionary(m => m.Type, m => m.GetType());
             Channels = channels;
 
@@ -101,7 +103,7 @@ namespace Sharpcaster
             _logger?.LogDebug(MessageTypes.Keys.ToString(","));
             _logger?.LogDebug(Channels.ToString(","));
 
-            foreach (var channel in channels)
+            foreach (var channel in Channels)
             {
                 channel.Client = this;
             }

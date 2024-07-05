@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.VisualStudio.TestPlatform.Utilities;
 using Moq;
 using Sharpcaster.Channels;
 using Sharpcaster.Interfaces;
@@ -25,7 +26,7 @@ namespace Sharpcaster.Test
         {
             IChromecastLocator locator = new MdnsChromecastLocator();
             var chromecasts = await locator.FindReceiversAsync();
-            CurrentReceiver = chromecasts.First();
+            CurrentReceiver = chromecasts.Where(c=>c.Name.StartsWith("B")).First();
             try {
                 TestOutput?.WriteLine("Using Receiver '" + (CurrentReceiver?.Model ?? "<null>") + "' at " + CurrentReceiver?.DeviceUri);
             } catch {
@@ -50,13 +51,21 @@ namespace Sharpcaster.Test
             return cc;
         }
 
+        public async static Task<ChromecastClient> CreateConnectAndLoadAppClient(string appId = "B3419EF5") {
+            TestOutput = null;
+            var chromecast = await TestHelper.FindChromecast();
+            ChromecastClient cc = new ChromecastClient();
+            await cc.ConnectChromecast(chromecast);
+            await cc.LaunchApplicationAsync(appId, false);
+            return cc;
+        }
+
 
         public static ChromecastClient GetClientWithTestOutput(ITestOutputHelper output) {
 
             TestOutput = output;
-            var logger = new Mock<ILogger<ChromecastClient>>();
-
-            logger.Setup(x => x.Log(
+            var loggerCC = new Mock<ILogger<ChromecastClient>>();
+            loggerCC.Setup(x => x.Log(
                 It.IsAny<LogLevel>(),
                 It.IsAny<EventId>(),
                 It.IsAny<It.IsAnyType>(),
@@ -75,7 +84,40 @@ namespace Sharpcaster.Test
                     TestOutput.WriteLine(DateTime.Now.ToLongTimeString() + " " + logMessage);
                 }));
 
-            return new ChromecastClient(logger: logger.Object);
+            var loggerHBC = new Mock<ILogger<HeartbeatChannel>>();
+            loggerHBC.Setup(x => x.Log(
+                It.IsAny<LogLevel>(),
+                It.IsAny<EventId>(),
+                It.IsAny<It.IsAnyType>(),
+                It.IsAny<Exception>(),
+                (Func<It.IsAnyType, Exception, string>)It.IsAny<object>()))
+                .Callback(new InvocationAction(invocation => {
+                    var logLevel = (LogLevel)invocation.Arguments[0]; // The first two will always be whatever is specified in the setup above
+                    var eventId = (EventId)invocation.Arguments[1];  // so I'm not sure you would ever want to actually use them
+                    var state = invocation.Arguments[2];
+                    var exception = (Exception)invocation.Arguments[3];
+                    var formatter = invocation.Arguments[4];
+
+                    var invokeMethod = formatter.GetType().GetMethod("Invoke");
+                    var logMessage = (string)invokeMethod?.Invoke(formatter, new[] { state, exception });
+
+                    TestOutput.WriteLine(DateTime.Now.ToLongTimeString() + " " + logMessage);
+                }));
+
+            var loggerFactory = new Mock<ILoggerFactory>();
+
+            loggerFactory.Setup(x => x.CreateLogger(It.IsAny<string>())).Returns
+                (new InvocationFunc(new Func<IInvocation, ILogger>((inv) => {
+                    var name = (string)inv.Arguments[0];
+                    if (name == "Sharpcaster.ChromecastClient") {
+                        return loggerCC.Object;
+                    } else {
+                        return loggerHBC.Object;
+                    }
+            }
+            )));
+
+            return new ChromecastClient(loggerFactory: loggerFactory.Object);
         }
 
         public static QueueItem[] CreateTestCd() {
