@@ -14,7 +14,7 @@ namespace Sharpcaster.Channels
     /// </summary>
     public class HeartbeatChannel : ChromecastChannel, IHeartbeatChannel
     {
-        private ILogger _logger = null;
+        //private ILogger _logger = null;
         private Timer _timer;
 
         /// <summary>
@@ -22,7 +22,7 @@ namespace Sharpcaster.Channels
         /// </summary>
         public HeartbeatChannel(ILogger<HeartbeatChannel> logger = null) : base("tp.heartbeat")
         {
-            _logger = logger; //.CreateLogger("HeartbeatChannel");
+            _logger = logger; 
             _timer = new Timer(10000); // timeout is 10 seconds.
                                        // Because Chromecast only waits for 8 seconds for response
             _timer.Elapsed += TimerElapsed;

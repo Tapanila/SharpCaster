@@ -1,4 +1,5 @@
-﻿using Sharpcaster.Interfaces;
+﻿using Microsoft.Extensions.Logging;
+using Sharpcaster.Interfaces;
 using System.Threading.Tasks;
 
 namespace Sharpcaster.Channels
@@ -9,6 +10,7 @@ namespace Sharpcaster.Channels
     public abstract class ChromecastChannel : IChromecastChannel
     {
         private const string BASE_NAMESPACE = "urn:x-cast:com.google.cast";
+        protected ILogger _logger = null;
 
         /// <summary>
         /// Initialization
@@ -44,7 +46,7 @@ namespace Sharpcaster.Channels
         /// <param name="destinationId">destination identifier</param>
         protected async Task SendAsync(IMessage message, string destinationId = DefaultIdentifiers.DESTINATION_ID)
         {
-            await Client.SendAsync(Namespace, message, destinationId);
+            await Client.SendAsync(_logger, Namespace, message, destinationId);
         }
 
         /// <summary>
@@ -56,7 +58,7 @@ namespace Sharpcaster.Channels
         /// <returns>the result</returns>
         protected async Task<TResponse> SendAsync<TResponse>(IMessageWithId message, string destinationId = DefaultIdentifiers.DESTINATION_ID) where TResponse : IMessageWithId
         {
-            return await Client.SendAsync<TResponse>(Namespace, message, destinationId);
+            return await Client.SendAsync<TResponse>(_logger, Namespace, message, destinationId);
         }
 
         /// <summary>

@@ -122,7 +122,7 @@ namespace Sharpcaster.Test
             };
 
 
-            await client.SendAsync("urn:x-cast:com.url.cast", req, "receiver-0");
+            await client.SendAsync(null, "urn:x-cast:com.url.cast", req, "receiver-0");
         }
     }
 }

@@ -187,19 +187,19 @@ namespace Sharpcaster
             }
         }
 
-        public async Task SendAsync(string ns, IMessage message, string destinationId)
+        public async Task SendAsync(ILogger channelLogger, string ns, IMessage message, string destinationId)
         {
             var castMessage = CreateCastMessage(ns, destinationId);
             castMessage.PayloadUtf8 = JsonConvert.SerializeObject(message);
-            await SendAsync(castMessage);
+            await SendAsync(channelLogger, castMessage);
         }
 
-        private async Task SendAsync(CastMessage castMessage)
+        private async Task SendAsync(ILogger channelLogger, CastMessage castMessage)
         {
             await SendSemaphoreSlim.WaitAsync();
             try
             {
-                _logger?.LogTrace($"SENT    : {castMessage.DestinationId}: {castMessage.PayloadUtf8}");
+                ((channelLogger!=null)?channelLogger:_logger)?.LogTrace($"SENT    : {castMessage.DestinationId}: {castMessage.PayloadUtf8}");
                 byte[] message = castMessage.ToProto();
                 var networkStream = _stream;
                 await networkStream.WriteAsync(message, 0, message.Length);
@@ -221,11 +221,11 @@ namespace Sharpcaster
             };
         }
 
-        public async Task<TResponse> SendAsync<TResponse>(string ns, IMessageWithId message, string destinationId) where TResponse : IMessageWithId
+        public async Task<TResponse> SendAsync<TResponse>(ILogger channelLogger, string ns, IMessageWithId message, string destinationId) where TResponse : IMessageWithId
         {
             var taskCompletionSource = new TaskCompletionSource<TResponse>();
             WaitingTasks[message.RequestId] = taskCompletionSource;
-            await SendAsync(ns, message, destinationId);
+            await SendAsync(channelLogger, ns, message, destinationId);
             return await taskCompletionSource.Task.TimeoutAfter(RECEIVE_TIMEOUT);
         }
 

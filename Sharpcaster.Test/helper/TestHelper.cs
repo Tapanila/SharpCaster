@@ -21,6 +21,8 @@ using Xunit;
 using Xunit.Abstractions;
 using Sharpcaster.Test.helper;
 using Sharpcaster;
+using System.Runtime.CompilerServices;
+using Castle.Components.DictionaryAdapter.Xml;
 
 
 
@@ -122,16 +124,40 @@ namespace Sharpcaster.Test {
         }
 
 
-        public static ChromecastClient GetClientWithTestOutput(ITestOutputHelper output) {
+        public static ChromecastClient GetClientWithTestOutput(ITestOutputHelper output, List<string> assertableLog = null) {
 
             TestOutput = output;
-            ILoggerFactory lFactory = CreateMockedLoggerFactory();
+            ILoggerFactory lFactory = CreateMockedLoggerFactory(assertableLog);
 
             return new ChromecastClient(loggerFactory: lFactory);
         }
 
         public static ILoggerFactory CreateMockedLoggerFactory(List<string> assertableLog = null) {
             AssertableTestLog = assertableLog;
+
+            var loggerGeneric = new Mock<ILogger>();
+            loggerGeneric.Setup(x => x.Log(
+                It.IsAny<LogLevel>(),
+                It.IsAny<EventId>(),
+                It.IsAny<It.IsAnyType>(),
+                It.IsAny<Exception>(),
+                (Func<It.IsAnyType, Exception, string>)It.IsAny<object>()))
+                .Callback(new InvocationAction(invocation => {
+                    var logLevel = (LogLevel)invocation.Arguments[0]; // The first two will always be whatever is specified in the setup above
+                    var eventId = (EventId)invocation.Arguments[1];  // so I'm not sure you would ever want to actually use them
+                    var state = invocation.Arguments[2];
+                    var exception = (Exception)invocation.Arguments[3];
+                    var formatter = invocation.Arguments[4];
+
+                    var invokeMethod = formatter.GetType().GetMethod("Invoke");
+                    var logMessage = (string)invokeMethod?.Invoke(formatter, new[] { state, exception });
+
+                    try {
+                        TestOutput?.WriteLine(DateTime.Now.ToLongTimeString() + " GenericMocked " + logLevel + " " + logMessage);
+                    } catch { }
+                    AssertableTestLog?.Add(logMessage);
+                }));
+
             var loggerCC = new Mock<ILogger<ChromecastClient>>();
             loggerCC.Setup(x => x.Log(
                 It.IsAny<LogLevel>(),
@@ -173,7 +199,7 @@ namespace Sharpcaster.Test {
                     var logMessage = (string)invokeMethod?.Invoke(formatter, new[] { state, exception });
 
                     try {
-                        TestOutput?.WriteLine(DateTime.Now.ToLongTimeString() + " " + logMessage);
+                        TestOutput?.WriteLine(DateTime.Now.ToLongTimeString() +  " HeartbeatChannel " + logLevel + " " + logMessage);
                     } catch { }
                     AssertableTestLog?.Add(logMessage);
                 }));
@@ -185,8 +211,10 @@ namespace Sharpcaster.Test {
                     var name = (string)inv.Arguments[0];
                     if (name == "Sharpcaster.ChromecastClient") {
                         return loggerCC.Object;
-                    } else {
+                    } else if (name == "Sharpcaster.Channels.HeartbeatChannel") {
                         return loggerHBC.Object;
+                    } else {
+                        return loggerGeneric.Object;
                     }
             }
             )));
