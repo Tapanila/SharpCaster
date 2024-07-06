@@ -132,6 +132,35 @@ namespace Sharpcaster.Test {
             return new ChromecastClient(loggerFactory: lFactory);
         }
 
+
+        private static Mock<ILogger<T>> CreateILoggerMock<T>() {
+            Mock<ILogger<T>> retVal = new Mock<ILogger<T>>();
+            retVal.Setup(x => x.Log(
+                It.IsAny<LogLevel>(),
+                It.IsAny<EventId>(),
+                It.IsAny<It.IsAnyType>(),
+                It.IsAny<Exception>(),
+                (Func<It.IsAnyType, Exception, string>)It.IsAny<object>()))
+                .Callback(new InvocationAction(invocation => {
+                    var logLevel = (LogLevel)invocation.Arguments[0]; // The first two will always be whatever is specified in the setup above
+                    var eventId = (EventId)invocation.Arguments[1];  // so I'm not sure you would ever want to actually use them
+                    var state = invocation.Arguments[2];
+                    var exception = (Exception)invocation.Arguments[3];
+                    var formatter = invocation.Arguments[4];
+
+                    var invokeMethod = formatter.GetType().GetMethod("Invoke");
+                    var logMessage = (string)invokeMethod?.Invoke(formatter, new[] { state, exception });
+
+                    try {
+                        TestOutput?.WriteLine(DateTime.Now.ToLongTimeString() + " " + typeof(T).GetGenericArguments().FirstOrDefault()?.Name + " " + logLevel + " " + logMessage);
+                    } catch { }
+                    AssertableTestLog?.Add(logMessage);
+                }));
+
+            return retVal;
+        }
+
+
         public static ILoggerFactory CreateMockedLoggerFactory(List<string> assertableLog = null) {
             AssertableTestLog = assertableLog;
 
@@ -158,51 +187,10 @@ namespace Sharpcaster.Test {
                     AssertableTestLog?.Add(logMessage);
                 }));
 
-            var loggerCC = new Mock<ILogger<ChromecastClient>>();
-            loggerCC.Setup(x => x.Log(
-                It.IsAny<LogLevel>(),
-                It.IsAny<EventId>(),
-                It.IsAny<It.IsAnyType>(),
-                It.IsAny<Exception>(),
-                (Func<It.IsAnyType, Exception, string>)It.IsAny<object>()))
-                .Callback(new InvocationAction(invocation => {
-                    var logLevel = (LogLevel)invocation.Arguments[0]; // The first two will always be whatever is specified in the setup above
-                    var eventId = (EventId)invocation.Arguments[1];  // so I'm not sure you would ever want to actually use them
-                    var state = invocation.Arguments[2];
-                    var exception = (Exception)invocation.Arguments[3];
-                    var formatter = invocation.Arguments[4];
+            //var loggerCC = CreateILoggerMock<ILogger<ChromecastClient>>();
+            //var loggerHBC = CreateILoggerMock<ILogger<HeartbeatChannel>>();
+            //var loggerCCC = CreateILoggerMock<ILogger<ChromecastChannel>>();
 
-                    var invokeMethod = formatter.GetType().GetMethod("Invoke");
-                    var logMessage = (string)invokeMethod?.Invoke(formatter, new[] { state, exception });
-
-                    try {
-                        TestOutput?.WriteLine(DateTime.Now.ToLongTimeString() + " " + logMessage);
-                    } catch { }
-                    AssertableTestLog?.Add(logMessage);
-                }));
-
-            var loggerHBC = new Mock<ILogger<HeartbeatChannel>>();
-            loggerHBC.Setup(x => x.Log(
-                It.IsAny<LogLevel>(),
-                It.IsAny<EventId>(),
-                It.IsAny<It.IsAnyType>(),
-                It.IsAny<Exception>(),
-                (Func<It.IsAnyType, Exception, string>)It.IsAny<object>()))
-                .Callback(new InvocationAction(invocation => {
-                    var logLevel = (LogLevel)invocation.Arguments[0]; // The first two will always be whatever is specified in the setup above
-                    var eventId = (EventId)invocation.Arguments[1];  // so I'm not sure you would ever want to actually use them
-                    var state = invocation.Arguments[2];
-                    var exception = (Exception)invocation.Arguments[3];
-                    var formatter = invocation.Arguments[4];
-
-                    var invokeMethod = formatter.GetType().GetMethod("Invoke");
-                    var logMessage = (string)invokeMethod?.Invoke(formatter, new[] { state, exception });
-
-                    try {
-                        TestOutput?.WriteLine(DateTime.Now.ToLongTimeString() +  " HeartbeatChannel " + logLevel + " " + logMessage);
-                    } catch { }
-                    AssertableTestLog?.Add(logMessage);
-                }));
 
             var loggerFactory = new Mock<ILoggerFactory>();
 
@@ -210,9 +198,17 @@ namespace Sharpcaster.Test {
                 (new InvocationFunc(new Func<IInvocation, ILogger>((inv) => {
                     var name = (string)inv.Arguments[0];
                     if (name == "Sharpcaster.ChromecastClient") {
-                        return loggerCC.Object;
+                        return CreateILoggerMock<ILogger<ChromecastClient>>().Object;
                     } else if (name == "Sharpcaster.Channels.HeartbeatChannel") {
-                        return loggerHBC.Object;
+                        return CreateILoggerMock<ILogger<HeartbeatChannel>>().Object;
+                    } else if (name == "Sharpcaster.Channels.ChromecastChannel") {
+                        return CreateILoggerMock<ILogger<ChromecastChannel>>().Object;
+                    } else if (name == "Sharpcaster.Channels.ConnectionChannel") {
+                        return CreateILoggerMock<ILogger<ConnectionChannel>>().Object;
+                    } else if (name == "Sharpcaster.Channels.MediaChannel") {
+                        return CreateILoggerMock<ILogger<MediaChannel>>().Object;
+                    } else if (name == "Sharpcaster.Channels.ReceiverChannel") {
+                        return CreateILoggerMock<ILogger<ReceiverChannel>>().Object;
                     } else {
                         return loggerGeneric.Object;
                     }

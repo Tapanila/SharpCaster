@@ -12,7 +12,7 @@ namespace Sharpcaster.Test.helper {
     // Define a TestFixture to be used by different test classes
     public class ChromecastDevicesFixture : IDisposable {
 
-        // This needs to be static to be used by the MemberData functions of the CCDevices class allowing to annotate [Theories] with specific list of devices.
+        // This needs to be static to be used by the MemberData functions of the ChromecastReceiversFilter class allowing to annotate [Theories] with specific list of devices.
         public static List<ChromecastReceiver> Receivers = new List<ChromecastReceiver>();
         public static int NumberOfSearches = 0;
 

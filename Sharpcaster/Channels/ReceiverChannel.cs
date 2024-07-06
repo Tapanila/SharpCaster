@@ -1,4 +1,5 @@
-﻿using Sharpcaster.Interfaces;
+﻿using Microsoft.Extensions.Logging;
+using Sharpcaster.Interfaces;
 using Sharpcaster.Messages.Receiver;
 using Sharpcaster.Models.ChromecastStatus;
 using System;
@@ -11,8 +12,9 @@ namespace Sharpcaster.Channels
     /// </summary>
     public class ReceiverChannel : StatusChannel<ReceiverStatusMessage, ChromecastStatus>, IReceiverChannel
     {
-        public ReceiverChannel() : base("receiver")
+        public ReceiverChannel(ILogger<ReceiverChannel> log) : base("receiver")
         {
+            _logger = log;
         }
 
         public async Task<ChromecastStatus> GetChromecastStatusAsync()
