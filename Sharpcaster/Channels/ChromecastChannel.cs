@@ -24,8 +24,9 @@ namespace Sharpcaster.Channels
         /// </summary>
         /// <param name="ns">namespace</param>
         /// <param name="useBaseNamespace">When true add urn:x-cast:com.google.cast to beginning of namespace</param>
-        protected ChromecastChannel(string ns, bool useBaseNamespace = true)
+        protected ChromecastChannel(string ns, ILogger logger = null, bool useBaseNamespace = true)
         {
+            _logger = logger;
             Namespace = $"{BASE_NAMESPACE}.{ns}";
         }
 

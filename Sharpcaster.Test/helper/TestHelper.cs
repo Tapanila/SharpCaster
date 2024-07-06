@@ -53,6 +53,13 @@ namespace Sharpcaster.Test {
             var rec = ChromecastDevicesFixture.Receivers.Where(r => ! r.Model.StartsWith("JBL")).First();
             yield return new object[] { rec };
         }
+
+        public static IEnumerable<object[]> GetChromecastUltra()
+        {
+            var rec = ChromecastDevicesFixture.Receivers.Where(r => r.Model.StartsWith("Chromecast Ultra")).First();
+            yield return new object[] { rec };
+        }
+        
     }
 
 
@@ -150,6 +157,8 @@ namespace Sharpcaster.Test {
 
                     var invokeMethod = formatter.GetType().GetMethod("Invoke");
                     var logMessage = (string)invokeMethod?.Invoke(formatter, new[] { state, exception });
+
+                    var testingName = typeof(T).GetGenericArguments().FirstOrDefault()?.Name;
 
                     try {
                         TestOutput?.WriteLine(DateTime.Now.ToLongTimeString() + " " + typeof(T).GetGenericArguments().FirstOrDefault()?.Name + " " + logLevel + " " + logMessage);

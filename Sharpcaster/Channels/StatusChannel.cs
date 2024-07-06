@@ -1,4 +1,5 @@
-﻿using Sharpcaster.Interfaces;
+﻿using Microsoft.Extensions.Logging;
+using Sharpcaster.Interfaces;
 using System;
 using System.Threading.Tasks;
 
@@ -20,7 +21,7 @@ namespace Sharpcaster.Channels
         /// Initialization
         /// </summary>
         /// <param name="ns">namespace</param>
-        public StatusChannel(string ns) : base(ns)
+        public StatusChannel(string ns, ILogger logger) : base(ns, logger)
         {
         }
 

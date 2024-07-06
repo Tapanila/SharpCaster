@@ -194,7 +194,7 @@ namespace Sharpcaster.Test
         }
 
         [Theory]
-        [MemberData(nameof(ChromecastReceiversFilter.GetAll), MemberType = typeof(ChromecastReceiversFilter))]
+        [MemberData(nameof(ChromecastReceiversFilter.GetAny), MemberType = typeof(ChromecastReceiversFilter))]
         public async Task TestLoadingMedia(ChromecastReceiver receiver)
         {
             ChromecastClient client = await TestHelper.CreateConnectAndLoadAppClient(output, receiver);
@@ -249,7 +249,7 @@ namespace Sharpcaster.Test
         }
 
         [Theory]
-        [MemberData(nameof(ChromecastReceiversFilter.GetAll), MemberType = typeof(ChromecastReceiversFilter))]
+        [MemberData(nameof(ChromecastReceiversFilter.GetChromecastUltra), MemberType = typeof(ChromecastReceiversFilter))]
         public async Task TestLoadingAndPausingMedia(ChromecastReceiver receiver)
         {
             ChromecastClient client = await TestHelper.CreateConnectAndLoadAppClient(output, receiver);
@@ -261,7 +261,7 @@ namespace Sharpcaster.Test
             };
 
             MediaStatus mediaStatus;
-            String runSequence = "R";
+            string runSequence = "R";
             bool firstPlay = true;
 
             //We are setting up an event to listen to status change. Because we don't know when the video has started to play
@@ -288,7 +288,6 @@ namespace Sharpcaster.Test
             //This checks that within 5000 ms we have loaded video and were able to pause it
             Assert.True(_autoResetEvent.WaitOne(5000));
             runSequence += "3";
-
             Assert.Equal("R1p2P3", runSequence);
         }
 

@@ -13,9 +13,8 @@ namespace Sharpcaster.Channels
         /// <summary>
         /// Initializes a new instance of ConnectionChannel class
         /// </summary>
-        public ConnectionChannel(ILogger<ConnectionChannel> log) : base("tp.connection")
+        public ConnectionChannel(ILogger<ConnectionChannel> log) : base("tp.connection", log)
         {
-            _logger = log;
         }
 
         /// <summary>

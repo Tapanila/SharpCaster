@@ -143,10 +143,14 @@ namespace Sharpcaster
                         var payload = (castMessage.PayloadType == PayloadType.Binary ?
                             Encoding.UTF8.GetString(castMessage.PayloadBinary.ToByteArray()) : castMessage.PayloadUtf8);
                         _logger?.LogTrace($"RECEIVED: {castMessage.Namespace} : {payload}");
-
+                        
                         var channel = Channels.FirstOrDefault(c => c.Namespace == castMessage.Namespace);
                         if (channel != null)
                         {
+                            if (channel != GetChannel<IHeartbeatChannel>())
+                            {
+                                GetChannel<IHeartbeatChannel>().StopTimeoutTimer();
+                            }
                             var message = JsonConvert.DeserializeObject<MessageWithId>(payload);
                             if (MessageTypes.TryGetValue(message.Type, out Type type))
                             {
@@ -167,11 +171,15 @@ namespace Sharpcaster
                                     " An implementing IMessage class is missing!", message.Type);
                                 Debugger.Break();
                             }
+                        } else
+                        {
+                            _logger?.LogDebug("Couldn't parse the channel from payload: " + payload);
                         }
                     }
                 }
-                catch (Exception)
+                catch (Exception exception)
                 {
+                    _logger.LogDebug(exception, "Error on receiving message.");
                     //await Dispose(false);
                     ReceiveTcs.SetResult(true);
                 }

@@ -20,9 +20,8 @@ namespace Sharpcaster.Channels
         /// <summary>
         /// Initializes a new instance of MediaChannel class
         /// </summary>
-        public MediaChannel(ILogger<MediaChannel> log) : base("media")
+        public MediaChannel(ILogger<MediaChannel> log) : base("media", log)
         {
-            _logger = log;
         }
 
 
@@ -32,10 +31,11 @@ namespace Sharpcaster.Channels
             {
                 return (await SendAsync<MediaStatusMessage>(message, application.TransportId)).Status?.FirstOrDefault();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                _logger.LogDebug(ex, "Error sending message");
                 Status = null;
-                throw;
+                throw ex;
             }
         }
 
