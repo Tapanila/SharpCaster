@@ -12,7 +12,7 @@ namespace Sharpcaster.Channels
     /// </summary>
     public class ReceiverChannel : StatusChannel<ReceiverStatusMessage, ChromecastStatus>, IReceiverChannel
     {
-        public ReceiverChannel(ILogger<ReceiverChannel> log) : base("receiver", log)
+        public ReceiverChannel(ILogger<ReceiverChannel> logger = null) : base("receiver", logger)
         {
         }
 

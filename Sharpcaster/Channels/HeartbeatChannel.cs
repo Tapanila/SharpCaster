@@ -20,7 +20,7 @@ namespace Sharpcaster.Channels
         /// <summary>
         /// Initializes a new instance of HeartbeatChannel class
         /// </summary>
-        public HeartbeatChannel(ILogger<HeartbeatChannel> logger) : base("tp.heartbeat", logger)
+        public HeartbeatChannel(ILogger<HeartbeatChannel> logger = null) : base("tp.heartbeat", logger)
         {
             _timer = new Timer(10000); // timeout is 10 seconds.
                                        // Because Chromecast only waits for 8 seconds for response
