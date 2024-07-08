@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using Sharpcaster.Interfaces;
 using Sharpcaster.Messages.Heartbeat;
+using Sharpcaster.Models;
 using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
@@ -13,15 +14,14 @@ namespace Sharpcaster.Channels
     /// </summary>
     public class HeartbeatChannel : ChromecastChannel, IHeartbeatChannel
     {
-        private ILogger _logger = null;
+        //private ILogger _logger = null;
         private Timer _timer;
 
         /// <summary>
         /// Initializes a new instance of HeartbeatChannel class
         /// </summary>
-        public HeartbeatChannel(ILogger logger = null) : base("tp.heartbeat")
+        public HeartbeatChannel(ILogger<HeartbeatChannel> logger = null) : base("tp.heartbeat", logger)
         {
-            _logger = logger;
             _timer = new Timer(10000); // timeout is 10 seconds.
                                        // Because Chromecast only waits for 8 seconds for response
             _timer.Elapsed += TimerElapsed;
@@ -36,9 +36,9 @@ namespace Sharpcaster.Channels
         /// <param name="message">message to process</param>
         public override async Task OnMessageReceivedAsync(IMessage message)
         {
-            _logger.LogDebug("Received ping message on Heartbeat channel");
+            _logger?.LogDebug("Received ping message on Heartbeat channel");
             await SendAsync(new PongMessage());
-            _logger.LogDebug("Sent pong message on Heartbeat channel");
+            _logger?.LogDebug("Sent pong message on Heartbeat channel");
             _timer.Stop();
             _timer.Start();
         }
@@ -46,18 +46,18 @@ namespace Sharpcaster.Channels
         public void StartTimeoutTimer()
         {
             _timer.Start();
-            _logger.LogDebug("Started heartbeat timeout timer");
+            _logger?.LogDebug("Started heartbeat timeout timer");
         }
 
         public void StopTimeoutTimer()
         {
             _timer.Stop();
-            _logger.LogDebug("Stopped heartbeat timeout timer");
+            _logger?.LogDebug("Stopped heartbeat timeout timer");
         }
 
         private void TimerElapsed(object sender, ElapsedEventArgs e)
         {
-            _logger.LogDebug("Heartbeat timeout");
+            _logger?.LogDebug("Heartbeat timeout");
             StatusChanged?.Invoke(this, e);
         }
     }

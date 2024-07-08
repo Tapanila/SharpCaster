@@ -46,15 +46,14 @@ namespace Sharpcaster
         private IEnumerable<IChromecastChannel> Channels { get; set; }
         private ConcurrentDictionary<int, object> WaitingTasks { get; } = new ConcurrentDictionary<int, object>();
 
-        public ChromecastClient(ILogger logger = null, ILoggerFactory loggerFactory = null)
+        public ChromecastClient(ILoggerFactory loggerFactory = null)
         {
             var serviceCollection = new ServiceCollection();
-            if (logger != null) {
-                serviceCollection.AddSingleton<ILogger>(logger);
-            }
+            
             if (loggerFactory != null) {
                 serviceCollection.AddSingleton<ILoggerFactory>(loggerFactory);
-            }
+                serviceCollection.AddSingleton(typeof(ILogger<>), typeof(Logger<>));  // see https://stackoverflow.com/questions/31751437/how-is-iloggert-resolved-via-di 
+            }                                                                                            
 
             serviceCollection.AddTransient<IChromecastChannel, ConnectionChannel>();
             serviceCollection.AddTransient<IChromecastChannel, HeartbeatChannel>();
@@ -84,29 +83,19 @@ namespace Sharpcaster
             var serviceProvider = serviceCollection.BuildServiceProvider();
             var channels = serviceProvider.GetServices<IChromecastChannel>();
             var messages = serviceProvider.GetServices<IMessage>();
-            
+
             MessageTypes = messages.Where(t => !string.IsNullOrEmpty(t.Type)).ToDictionary(m => m.Type, m => m.GetType());
             Channels = channels;
 
-            _logger = serviceProvider.GetService<ILogger>();
-            if (_logger == null)
-            {
-                var loggerFactory = serviceProvider.GetService<ILoggerFactory>();
-                if (loggerFactory != null)
-                {
-                    _logger = loggerFactory.CreateLogger<ChromecastClient>();
-                }
-            }
-
+            _logger = serviceProvider.GetService<ILogger<ChromecastChannel>>();
             _logger?.LogDebug(MessageTypes.Keys.ToString(","));
             _logger?.LogDebug(Channels.ToString(","));
 
-            foreach (var channel in channels)
+            foreach (var channel in Channels)
             {
                 channel.Client = this;
             }
         }
-
 
         public async Task<ChromecastStatus> ConnectChromecast(ChromecastReceiver chromecastReceiver)
         {
@@ -154,10 +143,14 @@ namespace Sharpcaster
                         var payload = (castMessage.PayloadType == PayloadType.Binary ?
                             Encoding.UTF8.GetString(castMessage.PayloadBinary.ToByteArray()) : castMessage.PayloadUtf8);
                         _logger?.LogTrace($"RECEIVED: {castMessage.Namespace} : {payload}");
-
+                        
                         var channel = Channels.FirstOrDefault(c => c.Namespace == castMessage.Namespace);
                         if (channel != null)
                         {
+                            if (channel != GetChannel<IHeartbeatChannel>())
+                            {
+                                GetChannel<IHeartbeatChannel>().StopTimeoutTimer();
+                            }
                             var message = JsonConvert.DeserializeObject<MessageWithId>(payload);
                             if (MessageTypes.TryGetValue(message.Type, out Type type))
                             {
@@ -178,11 +171,15 @@ namespace Sharpcaster
                                     " An implementing IMessage class is missing!", message.Type);
                                 Debugger.Break();
                             }
+                        } else
+                        {
+                            _logger?.LogDebug("Couldn't parse the channel from payload: " + payload);
                         }
                     }
                 }
-                catch (Exception)
+                catch (Exception exception)
                 {
+                    _logger.LogDebug(exception, "Error on receiving message.");
                     //await Dispose(false);
                     ReceiveTcs.SetResult(true);
                 }
@@ -198,19 +195,19 @@ namespace Sharpcaster
             }
         }
 
-        public async Task SendAsync(string ns, IMessage message, string destinationId)
+        public async Task SendAsync(ILogger channelLogger, string ns, IMessage message, string destinationId)
         {
             var castMessage = CreateCastMessage(ns, destinationId);
             castMessage.PayloadUtf8 = JsonConvert.SerializeObject(message);
-            await SendAsync(castMessage);
+            await SendAsync(channelLogger, castMessage);
         }
 
-        private async Task SendAsync(CastMessage castMessage)
+        private async Task SendAsync(ILogger channelLogger, CastMessage castMessage)
         {
             await SendSemaphoreSlim.WaitAsync();
             try
             {
-                _logger?.LogTrace($"SENT    : {castMessage.DestinationId}: {castMessage.PayloadUtf8}");
+                ((channelLogger!=null)?channelLogger:_logger)?.LogTrace($"SENT    : {castMessage.DestinationId}: {castMessage.PayloadUtf8}");
                 byte[] message = castMessage.ToProto();
                 var networkStream = _stream;
                 await networkStream.WriteAsync(message, 0, message.Length);
@@ -232,11 +229,11 @@ namespace Sharpcaster
             };
         }
 
-        public async Task<TResponse> SendAsync<TResponse>(string ns, IMessageWithId message, string destinationId) where TResponse : IMessageWithId
+        public async Task<TResponse> SendAsync<TResponse>(ILogger channelLogger, string ns, IMessageWithId message, string destinationId) where TResponse : IMessageWithId
         {
             var taskCompletionSource = new TaskCompletionSource<TResponse>();
             WaitingTasks[message.RequestId] = taskCompletionSource;
-            await SendAsync(ns, message, destinationId);
+            await SendAsync(channelLogger, ns, message, destinationId);
             return await taskCompletionSource.Task.TimeoutAfter(RECEIVE_TIMEOUT);
         }
 

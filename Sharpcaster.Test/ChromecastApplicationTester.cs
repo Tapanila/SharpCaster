@@ -1,4 +1,6 @@
-﻿using Sharpcaster.Test.customChannel;
+﻿using Sharpcaster.Models;
+using Sharpcaster.Test.customChannel;
+using Sharpcaster.Test.helper;
 using System;
 using System.Threading.Tasks;
 using Xunit;
@@ -7,102 +9,108 @@ using Xunit.Abstractions;
 namespace Sharpcaster.Test
 {
     [Collection("SingleCollection")]
-    public class ChromecastApplicationTester
-    {
+    public class ChromecastApplicationTester : IClassFixture<ChromecastDevicesFixture> {
+
         private ITestOutputHelper output;
-        public ChromecastApplicationTester(ITestOutputHelper outputHelper) {
+        public ChromecastApplicationTester(ITestOutputHelper outputHelper, ChromecastDevicesFixture fixture) {
             output = outputHelper;
+            output.WriteLine("Fixture has found " + ChromecastDevicesFixture.Receivers?.Count + " receivers with " + fixture.GetSearchesCnt() + " searche(s).");
         }
 
-        [Fact]
-        public async Task ConnectToChromecastAndLaunchApplication()
+        [Theory]
+        [MemberData(nameof(ChromecastReceiversFilter.GetAll), MemberType = typeof(ChromecastReceiversFilter))]
+        public async Task ConnectToChromecastAndLaunchApplication(ChromecastReceiver receiver)
         {
-            var chromecast = await TestHelper.FindChromecast();
-            var client = new ChromecastClient();
-            var status = await client.ConnectChromecast(chromecast);
-
-            status = await client.LaunchApplicationAsync("B3419EF5");
+            var client = await TestHelper.CreateAndConnectClient(output, receiver);
+            var status = await client.LaunchApplicationAsync("B3419EF5");
 
             Assert.Equal("B3419EF5", status.Applications[0].AppId);
         }
 
-        [Fact]
-        public async Task ConnectToChromecastAndLaunchApplicationTwice()
+        [Theory]
+        [MemberData(nameof(ChromecastReceiversFilter.GetAll), MemberType = typeof(ChromecastReceiversFilter))]
+        public async Task ConnectToChromecastAndLaunchApplicationTwice(ChromecastReceiver receiver)
         {
-            var chromecast = await TestHelper.FindChromecast();
-            var client = new ChromecastClient();
-            var status = await client.ConnectChromecast(chromecast);
-            status = await client.LaunchApplicationAsync("B3419EF5");
+            var client = await TestHelper.CreateAndConnectClient(output, receiver);
+            var status = await client.LaunchApplicationAsync("B3419EF5");
 
             var firstLaunchTransportId = status.Applications[0].TransportId;
             await client.DisconnectAsync();
 
-            status = await client.ConnectChromecast(chromecast);
+            status = await client.ConnectChromecast(receiver);
             status = await client.LaunchApplicationAsync("B3419EF5", true);
 
             Assert.Equal(firstLaunchTransportId, status.Applications[0].TransportId);
         }
 
 
-        [Fact]
-        public async Task ConnectToChromecastAndLaunchApplicationTwiceWithoutJoining()
+        [Theory]
+        [MemberData(nameof(ChromecastReceiversFilter.GetJblSpeaker), MemberType = typeof(ChromecastReceiversFilter))]
+        public async Task ConnectToChromecastAndLaunchApplicationTwiceWithoutJoining1(ChromecastReceiver receiver)
         {
-            var client = await TestHelper.CreateAndConnectClient(output);
-
+            var client = await TestHelper.CreateAndConnectClient(output, receiver);
             var status = await client.LaunchApplicationAsync("B3419EF5");
 
             var firstLaunchTransportId = status.Applications[0].TransportId;
             await client.DisconnectAsync();
 
-            status = await client.ConnectChromecast(TestHelper.CurrentReceiver);
+            status = await client.ConnectChromecast(receiver);
             status = await client.LaunchApplicationAsync("B3419EF5", false);
 
-            // ??????
-            // My JBL Device (almost every time - but not always ) makes a new ID here!!!! (The other device - ChromecastAudio DOES NOT!?)
-            if (TestHelper.CurrentReceiver.Model.Contains("JBL")) {
-                Assert.NotEqual(firstLaunchTransportId, status.Applications[0].TransportId);
-            } else {
-                Assert.Equal(firstLaunchTransportId, status.Applications[0].TransportId);
-            }
 
-            
+            // My JBL Device (almost every time - but not always ) makes a new ID here!!!! (The other device - ChromecastAudio DOES NOT!?)
+            Assert.NotEqual(firstLaunchTransportId, status.Applications[0].TransportId);
         }
 
-        [Fact]
-        public async Task ConnectToChromecastAndLaunchApplicationAThenLaunchApplicationB()
-        {
-            var chromecast = await TestHelper.FindChromecast();
-            var client = new ChromecastClient();
-            var status = await client.ConnectChromecast(chromecast);
-            status = await client.LaunchApplicationAsync("A9BCCB7C"); //Youtube
+        [Theory]
+        [MemberData(nameof(ChromecastReceiversFilter.GetDefaultDevice), MemberType = typeof(ChromecastReceiversFilter))]
+        public async Task ConnectToChromecastAndLaunchApplicationTwiceWithoutJoining2(ChromecastReceiver receiver) {
+            var client = await TestHelper.CreateAndConnectClient(output, receiver);
+            var status = await client.LaunchApplicationAsync("B3419EF5");
 
             var firstLaunchTransportId = status.Applications[0].TransportId;
             await client.DisconnectAsync();
 
-            status = await client.ConnectChromecast(chromecast);
+            status = await client.ConnectChromecast(receiver);
+            status = await client.LaunchApplicationAsync("B3419EF5", false);
 
-            status = await client.LaunchApplicationAsync("B3419EF5"); //My sample Application
+            // My ChromecastAudio device keeps the same transport session here!
+            Assert.Equal(firstLaunchTransportId, status.Applications[0].TransportId);
+        }
+
+
+        [Theory]
+        [MemberData(nameof(ChromecastReceiversFilter.GetAll), MemberType = typeof(ChromecastReceiversFilter))]
+        public async Task ConnectToChromecastAndLaunchApplicationAThenLaunchApplicationB(ChromecastReceiver receiver)
+        {
+            var client = await TestHelper.CreateAndConnectClient(output, receiver);
+            var status = await client.LaunchApplicationAsync("A9BCCB7C");           //Youtube
+
+            var firstLaunchTransportId = status.Applications[0].TransportId;
+            await client.DisconnectAsync();
+
+            status = await client.ConnectChromecast(receiver);
+            status = await client.LaunchApplicationAsync("B3419EF5");               //My sample Application
 
             Assert.NotEqual(firstLaunchTransportId, status.Applications[0].TransportId);
         }
 
-        [Fact]
-        public async Task ConnectToChromecastAndLaunchApplicationOnceAndJoinIt()
+        [Theory]
+        [MemberData(nameof(ChromecastReceiversFilter.GetAll), MemberType = typeof(ChromecastReceiversFilter))]
+        public async Task ConnectToChromecastAndLaunchApplicationOnceAndJoinIt(ChromecastReceiver receiver)
         {
-            var client = await TestHelper.CreateAndConnectClient(output);
+            var client = await TestHelper.CreateAndConnectClient(output, receiver);
             var status = await client.LaunchApplicationAsync("B3419EF5");
 
             var firstLaunchTransportId = status.Applications[0].TransportId;
 
             status = await client.LaunchApplicationAsync("B3419EF5");
-
             
             Assert.Equal(firstLaunchTransportId, status.Applications[0].TransportId);
-            
         }
 
         //Seems like this isn't really working anymore and just loading a white screen
-        [Fact]
+        [Fact(Skip = "Seems like this isn't really working anymore and just loading a white screen")]
         public async Task ConnectToChromecastAndLaunchWebPage()
         {
             var client = await TestHelper.CreateConnectAndLoadAppClient(output, "5CB45E5A");
@@ -114,7 +122,7 @@ namespace Sharpcaster.Test
             };
 
 
-            await client.SendAsync("urn:x-cast:com.url.cast", req, "receiver-0");
+            await client.SendAsync(null, "urn:x-cast:com.url.cast", req, "receiver-0");
         }
     }
 }

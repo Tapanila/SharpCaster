@@ -1,4 +1,5 @@
-﻿using Sharpcaster.Interfaces;
+﻿using Microsoft.Extensions.Logging;
+using Sharpcaster.Interfaces;
 using Sharpcaster.Messages.Media;
 using Sharpcaster.Messages.Queue;
 using Sharpcaster.Models.ChromecastStatus;
@@ -19,7 +20,7 @@ namespace Sharpcaster.Channels
         /// <summary>
         /// Initializes a new instance of MediaChannel class
         /// </summary>
-        public MediaChannel() : base("media")
+        public MediaChannel(ILogger<MediaChannel> logger = null) : base("media", logger)
         {
         }
 
@@ -30,10 +31,11 @@ namespace Sharpcaster.Channels
             {
                 return (await SendAsync<MediaStatusMessage>(message, application.TransportId)).Status?.FirstOrDefault();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                _logger.LogDebug(ex, "Error sending message");
                 Status = null;
-                throw;
+                throw ex;
             }
         }
 
