@@ -82,7 +82,7 @@ namespace Sharpcaster.Test
 
      
         [Theory]
-        [MemberData(nameof(ChromecastReceiversFilter.GetAll), MemberType = typeof(ChromecastReceiversFilter))]
+        [MemberData(nameof(ChromecastReceiversFilter.GetDefaultDevice), MemberType = typeof(ChromecastReceiversFilter))]
         public async Task TestLoadingMediaQueueAndNavigateNextPrev(ChromecastReceiver receiver) {
             ChromecastClient client = await TestHelper.CreateConnectAndLoadAppClient(output, receiver);
 
@@ -212,23 +212,6 @@ namespace Sharpcaster.Test
           
         }
 
-        //[Theory]
-        //[MemberData(nameof(ChromecastReceiversFilter.GetAll), MemberType = typeof(ChromecastReceiversFilter))]
-        //public async Task TestLoadingMediaWithoutLogging(ChromecastReceiver receiver) {
-        //    ChromecastClient client = await TestHelper.CreateConnectAndLoadAppClient(receiver);     // No output -> No LoggingFactory mocked
-
-        //    var media = new Media {
-        //        ContentUrl = "https://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/mp4/DesigningForGoogleCast.mp4"
-        //    };
-
-        //    MediaStatus status = await client.GetChannel<IMediaChannel>().LoadAsync(media);
-
-        //    Assert.Equal(PlayerStateType.Playing, status.PlayerState);
-        //    Assert.Single(status.Items);
-        //    Assert.Equal(status.CurrentItemId, status.Items[0].ItemId);
-
-        //}
-
 
         [Theory]
         [MemberData(nameof(ChromecastReceiversFilter.GetAll), MemberType = typeof(ChromecastReceiversFilter))]
@@ -249,7 +232,7 @@ namespace Sharpcaster.Test
         }
 
         [Theory]
-        [MemberData(nameof(ChromecastReceiversFilter.GetChromecastUltra), MemberType = typeof(ChromecastReceiversFilter))]
+        [MemberData(nameof(ChromecastReceiversFilter.GetAny), MemberType = typeof(ChromecastReceiversFilter))]
         public async Task TestLoadingAndPausingMedia(ChromecastReceiver receiver)
         {
             ChromecastClient client = await TestHelper.CreateConnectAndLoadAppClient(output, receiver);

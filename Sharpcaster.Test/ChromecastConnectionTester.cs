@@ -34,6 +34,7 @@ namespace Sharpcaster.Test
         }
 
         [Theory(Skip = "Test needs manuell interactions -> skipped for autotestings")]
+        //[Theory()]
         //[MemberData(nameof(CCDevices.GetAny), MemberType = typeof(CCDevices))]
         [MemberData(nameof(ChromecastReceiversFilter.GetJblSpeaker), MemberType = typeof(ChromecastReceiversFilter))]
         public async Task SearchChromecastsAndConnectToItThenWaitForItToShutdown(ChromecastReceiver receiver)
@@ -56,9 +57,9 @@ namespace Sharpcaster.Test
         }
 
         [Theory]
-        [MemberData(nameof(ChromecastReceiversFilter.GetChromecastUltra), MemberType = typeof(ChromecastReceiversFilter))]
-        //[MemberData(nameof(CCDevices.GetJblSpeaker), MemberType = typeof(CCDevices))]
-        //[MemberData(nameof(CCDevices.GetAny), MemberType = typeof(CCDevices))]
+        //[MemberData(nameof(ChromecastReceiversFilter.GetChromecastUltra), MemberType = typeof(ChromecastReceiversFilter))]
+        //[MemberData(nameof(ChromecastReceiversFilter.GetJblSpeaker), MemberType = typeof(ChromecastReceiversFilter))]
+        [MemberData(nameof(ChromecastReceiversFilter.GetAny), MemberType = typeof(ChromecastReceiversFilter))]
         public async Task TestingHeartBeat(ChromecastReceiver receiver)
         {
             ChromecastClient client = await TestHelper.CreateConnectAndLoadAppClient(output, receiver);

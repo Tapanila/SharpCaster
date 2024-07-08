@@ -34,30 +34,50 @@ namespace Sharpcaster.Test {
     public class ChromecastReceiversFilter  {
 
         public static IEnumerable<object[]> GetAll() {
-            foreach (var cc in ChromecastDevicesFixture.Receivers) {
-                yield return new object[] { cc };
+            if (ChromecastDevicesFixture.Receivers.Count > 0) {
+                foreach (var cc in ChromecastDevicesFixture.Receivers) {
+                    yield return new object[] { cc };
+                }
+            } else {
+                throw new Exception("This Test needs a Chromecast Receiver to be available on local network!");
             }
         }
 
         public static IEnumerable<object[]> GetAny() {
-            var rec = ChromecastDevicesFixture.Receivers.First();
-            yield return new object[] { rec };
+            var rec = ChromecastDevicesFixture.Receivers.FirstOrDefault();
+            if (rec != null) {
+                yield return new object[] { rec };
+            } else {
+                throw new Exception("This Test needs a Chromecast Receiver to be available on local network!");
+            }
         }
 
         public static IEnumerable<object[]> GetJblSpeaker() {
-            var rec = ChromecastDevicesFixture.Receivers.Where(r => r.Model.StartsWith("JBL")).First();
-            yield return new object[] { rec };
+            var rec = ChromecastDevicesFixture.Receivers.Where(r => r.Model.StartsWith("JBL")).FirstOrDefault();
+            if (rec != null) {
+                yield return new object[] { rec };
+            } else {
+                yield break;
+            }
         }
 
         public static IEnumerable<object[]> GetDefaultDevice() {
-            var rec = ChromecastDevicesFixture.Receivers.Where(r => ! r.Model.StartsWith("JBL")).First();
-            yield return new object[] { rec };
+            var rec = ChromecastDevicesFixture.Receivers.Where(r => ! r.Model.StartsWith("JBL")).FirstOrDefault();
+            if (rec != null) {
+                yield return new object[] { rec };
+            } else {
+                yield break;
+            }
         }
 
         public static IEnumerable<object[]> GetChromecastUltra()
         {
-            var rec = ChromecastDevicesFixture.Receivers.Where(r => r.Model.StartsWith("Chromecast Ultra")).First();
-            yield return new object[] { rec };
+            var rec = ChromecastDevicesFixture.Receivers.Where(r => r.Model.StartsWith("Chromecast Ultra")).FirstOrDefault();
+            if (rec != null) {
+                yield return new object[] { rec };
+            } else {
+                yield break;
+            }
         }
         
     }

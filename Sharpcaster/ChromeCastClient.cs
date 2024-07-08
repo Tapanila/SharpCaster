@@ -87,7 +87,7 @@ namespace Sharpcaster
             MessageTypes = messages.Where(t => !string.IsNullOrEmpty(t.Type)).ToDictionary(m => m.Type, m => m.GetType());
             Channels = channels;
 
-            _logger = serviceProvider.GetService<ILogger<ChromecastChannel>>();
+            _logger = serviceProvider.GetService<ILogger<ChromecastClient>>();
             _logger?.LogDebug(MessageTypes.Keys.ToString(","));
             _logger?.LogDebug(Channels.ToString(","));
 
@@ -142,8 +142,7 @@ namespace Sharpcaster
                         //Payload can either be Binary or UTF8 json
                         var payload = (castMessage.PayloadType == PayloadType.Binary ?
                             Encoding.UTF8.GetString(castMessage.PayloadBinary.ToByteArray()) : castMessage.PayloadUtf8);
-                        _logger?.LogTrace($"RECEIVED: {castMessage.Namespace} : {payload}");
-                        
+
                         var channel = Channels.FirstOrDefault(c => c.Namespace == castMessage.Namespace);
                         if (channel != null)
                         {
@@ -151,6 +150,8 @@ namespace Sharpcaster
                             {
                                 GetChannel<IHeartbeatChannel>().StopTimeoutTimer();
                             }
+                            channel._logger?.LogTrace($"RECEIVED: {payload}");
+                            
                             var message = JsonConvert.DeserializeObject<MessageWithId>(payload);
                             if (MessageTypes.TryGetValue(message.Type, out Type type))
                             {
@@ -168,12 +169,12 @@ namespace Sharpcaster
                             else
                             {
                                 _logger?.LogError("The received Message of Type '{ty}' can not be converted to its response Type." +
-                                    " An implementing IMessage class is missing!", message.Type);
+                                   " An implementing IMessage class is missing!", message.Type);
                                 Debugger.Break();
                             }
                         } else
                         {
-                            _logger?.LogDebug("Couldn't parse the channel from payload: " + payload);
+                            _logger?.LogError($"Couldn't parse the channel from: {castMessage.Namespace}  :  {payload}");
                         }
                     }
                 }
@@ -317,6 +318,8 @@ namespace Sharpcaster
                 {
                     await GetChannel<IConnectionChannel>().ConnectAsync(runningApplication.TransportId);
                     return await GetChannel<IReceiverChannel>().GetChromecastStatusAsync();
+                } else {
+                    // another AppId is running
                 }
             }
             var newApplication = await GetChannel<IReceiverChannel>().LaunchApplicationAsync(applicationId);
