@@ -28,6 +28,7 @@ namespace Sharpcaster.Test
 
         [Fact]
         public void TestLogging() {
+            var TestHelper = new TestHelper();
             List<string> logLines = new List<string>();
             var client = TestHelper.GetClientWithTestOutput(output, assertableLog: logLines);
 

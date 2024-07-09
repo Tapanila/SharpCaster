@@ -83,14 +83,23 @@ namespace Sharpcaster.Test {
     }
 
 
-    public static class TestHelper
+    public class TestContext {
+        public List<string> AssertableTestLog = null;
+        public ITestOutputHelper TestOutput = null;
+    }
+
+
+    public class TestHelper
     {
-        private static List<string> AssertableTestLog = null;
-        private static ITestOutputHelper TestOutput = null;
+
+        
+
+        public  List<string> AssertableTestLog = null;
+        private ITestOutputHelper TestOutput = null;
         //public static ChromecastReceiver CurrentReceiver { get; private set; }
 
 
-        public static ChromecastReceiver FindChromecast(string receiverName = null)
+        public ChromecastReceiver FindChromecast(string receiverName = null)
         {
             //IChromecastLocator locator = new MdnsChromecastLocator();
             ChromecastReceiver receiver = null;
@@ -110,15 +119,15 @@ namespace Sharpcaster.Test {
             return receiver;
         }
 
-        public async static Task<ChromecastClient> CreateAndConnectClient(ITestOutputHelper output, string receiverName = null) {
+        public async Task<ChromecastClient> CreateAndConnectClient(ITestOutputHelper output, string receiverName = null) {
             TestOutput = output;
-            var chromecast = TestHelper.FindChromecast(receiverName);
+            var chromecast = FindChromecast(receiverName);
             ChromecastClient cc = GetClientWithTestOutput(output);
             await cc.ConnectChromecast(chromecast);
             return cc;
         }
 
-        public async static Task<ChromecastClient> CreateAndConnectClient(ITestOutputHelper output, ChromecastReceiver receiver) {
+        public async Task<ChromecastClient> CreateAndConnectClient(ITestOutputHelper output, ChromecastReceiver receiver) {
             TestOutput = output;
             TestOutput?.WriteLine("Using Receiver '" + (receiver.Model) + "' at " + receiver.DeviceUri);
             ChromecastClient cc = GetClientWithTestOutput(output);
@@ -127,23 +136,23 @@ namespace Sharpcaster.Test {
         }
 
 
-        public async static Task<ChromecastClient> CreateConnectAndLoadAppClient(ITestOutputHelper output, string appId = "B3419EF5") {
+        public async Task<ChromecastClient> CreateConnectAndLoadAppClient(ITestOutputHelper output, string appId = "B3419EF5") {
             TestOutput = output;
             ChromecastClient cc = await CreateAndConnectClient(output);
             await cc.LaunchApplicationAsync(appId, false);
             return cc;
         }
 
-        public async static Task<ChromecastClient> CreateConnectAndLoadAppClient(ITestOutputHelper output, ChromecastReceiver receiver, string appId = "B3419EF5") {
+        public async Task<ChromecastClient> CreateConnectAndLoadAppClient(ITestOutputHelper output, ChromecastReceiver receiver, string appId = "B3419EF5") {
             TestOutput = output;
             ChromecastClient cc = await CreateAndConnectClient(output, receiver);
             await cc.LaunchApplicationAsync(appId, false);
             return cc;
         }
 
-        public async static Task<ChromecastClient> CreateConnectAndLoadAppClient(string appId = "B3419EF5") {
+        public async Task<ChromecastClient> CreateConnectAndLoadAppClient(string appId = "B3419EF5") {
             TestOutput = null;
-            var chromecast = TestHelper.FindChromecast();
+            var chromecast = FindChromecast();
             ChromecastClient cc = new ChromecastClient();
             await cc.ConnectChromecast(chromecast);
             await cc.LaunchApplicationAsync(appId, false);
@@ -151,7 +160,7 @@ namespace Sharpcaster.Test {
         }
 
 
-        public static ChromecastClient GetClientWithTestOutput(ITestOutputHelper output, List<string> assertableLog = null) {
+        public ChromecastClient GetClientWithTestOutput(ITestOutputHelper output, List<string> assertableLog = null) {
 
             TestOutput = output;
             ILoggerFactory lFactory = CreateMockedLoggerFactory(assertableLog);
@@ -160,7 +169,7 @@ namespace Sharpcaster.Test {
         }
 
 
-        private static Mock<ILogger<T>> CreateILoggerMock<T>() {
+        private Mock<ILogger<T>> CreateILoggerMock<T>() {
             Mock<ILogger<T>> retVal = new Mock<ILogger<T>>();
             retVal.Setup(x => x.Log(
                 It.IsAny<LogLevel>(),
@@ -190,7 +199,7 @@ namespace Sharpcaster.Test {
         }
 
 
-        public static ILoggerFactory CreateMockedLoggerFactory(List<string> assertableLog = null) {
+        public ILoggerFactory CreateMockedLoggerFactory(List<string> assertableLog = null) {
             AssertableTestLog = assertableLog;
 
             var loggerGeneric = new Mock<ILogger>();
@@ -248,7 +257,7 @@ namespace Sharpcaster.Test {
         }
 
 
-        public static QueueItem[] CreateTestCd() {
+        public QueueItem[] CreateTestCd() {
             QueueItem[] MyCd = new QueueItem[4];
             MyCd[0] = new QueueItem() {
                 Media = new Media {

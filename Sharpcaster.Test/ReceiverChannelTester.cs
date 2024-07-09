@@ -19,8 +19,8 @@ namespace Sharpcaster.Test
 
         [Theory]
         [MemberData(nameof(ChromecastReceiversFilter.GetAll), MemberType = typeof(ChromecastReceiversFilter))]
-        public async Task TestMute(ChromecastReceiver receiver)
-        {
+        public async Task TestMute(ChromecastReceiver receiver) {
+            var TestHelper = new TestHelper();
             var client = await TestHelper.CreateAndConnectClient(output, receiver);
 
             var status = await client.GetChannel<ReceiverChannel>().SetMute(true);
@@ -30,8 +30,8 @@ namespace Sharpcaster.Test
 
         [Theory]
         [MemberData(nameof(ChromecastReceiversFilter.GetAll), MemberType = typeof(ChromecastReceiversFilter))]
-        public async Task TestUnMute(ChromecastReceiver receiver)
-        {
+        public async Task TestUnMute(ChromecastReceiver receiver) {
+            var TestHelper = new TestHelper();
             var client = await TestHelper.CreateAndConnectClient(output, receiver);
 
             var status = await client.GetChannel<ReceiverChannel>().SetMute(false);
@@ -40,8 +40,8 @@ namespace Sharpcaster.Test
 
         [Theory]
         [MemberData(nameof(ChromecastReceiversFilter.GetAll), MemberType = typeof(ChromecastReceiversFilter))]
-        public async Task TestVolume(ChromecastReceiver receiver)
-        {
+        public async Task TestVolume(ChromecastReceiver receiver) {
+            var TestHelper = new TestHelper();
             var client = await TestHelper.CreateAndConnectClient(output, receiver);
            
             var status = await client.GetChannel<ReceiverChannel>().SetVolume(0.1);
@@ -57,8 +57,8 @@ namespace Sharpcaster.Test
 
         [Theory]
         [MemberData(nameof(ChromecastReceiversFilter.GetAll), MemberType = typeof(ChromecastReceiversFilter))]
-        public async Task TestStoppingApplication(ChromecastReceiver receiver)
-        {
+        public async Task TestStoppingApplication(ChromecastReceiver receiver) {
+            var TestHelper = new TestHelper();
             var client = await TestHelper.CreateAndConnectClient(output, receiver);
 
             var status = await client.LaunchApplicationAsync("B3419EF5");
