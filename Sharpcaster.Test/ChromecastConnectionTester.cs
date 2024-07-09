@@ -37,7 +37,7 @@ namespace Sharpcaster.Test
         [Theory(Skip = "Test needs manuell interactions -> skipped for autotestings")]
         //[Theory()]
         //[MemberData(nameof(CCDevices.GetAny), MemberType = typeof(CCDevices))]
-        [MemberData(nameof(ChromecastReceiversFilter.GetJblSpeaker), MemberType = typeof(ChromecastReceiversFilter))]
+        [MemberData(nameof(ChromecastReceiversFilter.GetAny), MemberType = typeof(ChromecastReceiversFilter))]
         public async Task SearchChromecastsAndConnectToItThenWaitForItToShutdown(ChromecastReceiver receiver)
         {
             var TestHelper = new TestHelper();

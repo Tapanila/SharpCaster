@@ -120,6 +120,7 @@ namespace Sharpcaster
 
         private async void HeartBeatTimedOut(object sender, EventArgs e)
         {
+            _logger.LogError("Heartbeat timeout - Disconnecting client.");
             await DisconnectAsync();
         }
 
@@ -164,6 +165,7 @@ namespace Sharpcaster
                                 }
                                 catch (Exception ex)
                                 {
+                                    _logger?.LogError($"Exception processing the Response: {ex.Message}");
                                     TaskCompletionSourceInvoke(ref tcs, message, "SetException", ex, new Type[] { typeof(Exception) });
                                 }
                             }
@@ -181,7 +183,7 @@ namespace Sharpcaster
                 }
                 catch (Exception exception)
                 {
-                    _logger.LogDebug(exception, "Error on receiving message.");
+                    _logger.LogError($"Error in receive loop: {exception.Message}");
                     //await Dispose(false);
                     ReceiveTcs.SetResult(true);
                 }
@@ -285,7 +287,7 @@ namespace Sharpcaster
                 }
                 catch (Exception ex)
                 {
-                    _logger?.LogError("Error on disposing.", ex, null);
+                    _logger?.LogError($"Error on disposing. {ex.Message}");
                 }
                 finally
                 {
