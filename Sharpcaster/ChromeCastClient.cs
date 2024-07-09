@@ -155,15 +155,16 @@ namespace Sharpcaster
                             var message = JsonConvert.DeserializeObject<MessageWithId>(payload);
                             if (MessageTypes.TryGetValue(message.Type, out Type type))
                             {
+                                object tcs = null;
                                 try
                                 {
                                     var response = (IMessage)JsonConvert.DeserializeObject(payload, type);
                                     await channel.OnMessageReceivedAsync(response);
-                                    TaskCompletionSourceInvoke(message, "SetResult", response);
+                                    TaskCompletionSourceInvoke(ref tcs, message, "SetResult", response);
                                 }
                                 catch (Exception ex)
                                 {
-                                    TaskCompletionSourceInvoke(message, "SetException", ex, new Type[] { typeof(Exception) });
+                                    TaskCompletionSourceInvoke(ref tcs, message, "SetException", ex, new Type[] { typeof(Exception) });
                                 }
                             }
                             else
@@ -187,10 +188,14 @@ namespace Sharpcaster
             });
         }
 
-        private void TaskCompletionSourceInvoke(MessageWithId message, string method, object parameter, Type[] types = null)
+        private void TaskCompletionSourceInvoke(ref object tcs, MessageWithId message, string method, object parameter, Type[] types = null)
         {
-            if (message.HasRequestId && WaitingTasks.TryRemove(message.RequestId, out object tcs))
-            {
+            if (tcs == null) {
+                if (message.HasRequestId && WaitingTasks.TryRemove(message.RequestId, out object newtcs)) {
+                    tcs = newtcs;
+                }
+            }
+            if (tcs != null) {
                 var tcsType = tcs.GetType();
                 (types == null ? tcsType.GetMethod(method) : tcsType.GetMethod(method, types)).Invoke(tcs, new object[] { parameter });
             }
