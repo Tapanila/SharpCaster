@@ -6,7 +6,7 @@ namespace Sharpcaster.Messages.Connection
     /// Connect message
     /// </summary>
     [DataContract]
-    class ConnectMessage : MessageWithId
+    public class ConnectMessage : MessageWithId
     {
     }
 }
