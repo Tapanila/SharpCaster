@@ -120,7 +120,7 @@ namespace Sharpcaster
 
         private async void HeartBeatTimedOut(object sender, EventArgs e)
         {
-            _logger.LogError("Heartbeat timeout - Disconnecting client.");
+            _logger?.LogError("Heartbeat timeout - Disconnecting client.");
             await DisconnectAsync();
         }
 
@@ -183,7 +183,7 @@ namespace Sharpcaster
                 }
                 catch (Exception exception)
                 {
-                    _logger.LogError($"Error in receive loop: {exception.Message}");
+                    _logger?.LogError($"Error in receive loop: {exception.Message}");
                     //await Dispose(false);
                     ReceiveTcs.SetResult(true);
                 }

@@ -327,9 +327,10 @@ namespace Sharpcaster.Test
         }
 
         [Theory]
-        [MemberData(nameof(ChromecastReceiversFilter.GetChromecastUltra), MemberType = typeof(ChromecastReceiversFilter))]
+        [MemberData(nameof(ChromecastReceiversFilter.GetAny), MemberType = typeof(ChromecastReceiversFilter))]
         public async Task TestFailingLoadMedia(ChromecastReceiver receiver)
         {
+            var TestHelper = new TestHelper();
             ChromecastClient client = await TestHelper.CreateConnectAndLoadAppClient(output, receiver);
             AutoResetEvent _autoResetEvent = new AutoResetEvent(false);
 
