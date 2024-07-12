@@ -7,7 +7,7 @@ namespace Sharpcaster.Messages.Connection
     /// </summary>
     [DataContract]
     [ReceptionMessage]
-    class CloseMessage : Message
+    public class CloseMessage : Message
     {
     }
 }

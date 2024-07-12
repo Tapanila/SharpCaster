@@ -6,7 +6,7 @@ namespace Sharpcaster.Messages.Media
     /// Play message
     /// </summary>
     [DataContract]
-    class PlayMessage : MediaSessionMessage
+    public class PlayMessage : MediaSessionMessage
     {
     }
 }
