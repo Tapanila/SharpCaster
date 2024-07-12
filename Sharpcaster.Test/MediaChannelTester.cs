@@ -151,8 +151,8 @@ namespace Sharpcaster.Test
         }
 
         [Theory]
-        [MemberData(nameof(ChromecastReceiversFilter.GetAll), MemberType = typeof(ChromecastReceiversFilter))]  // This sometimes give a INVALID_MEDIA_SESSION_ID on my Chromecast Audio ....
-        //[MemberData(nameof(ChromecastReceiversFilter.GetJblSpeaker), MemberType = typeof(ChromecastReceiversFilter))]
+        //[MemberData(nameof(ChromecastReceiversFilter.GetAll), MemberType = typeof(ChromecastReceiversFilter))]  // This sometimes give a INVALID_MEDIA_SESSION_ID on my Chromecast Audio ....
+        [MemberData(nameof(ChromecastReceiversFilter.GetAny), MemberType = typeof(ChromecastReceiversFilter))]
         public async Task TestLoadMediaQueueAndCheckContent(ChromecastReceiver receiver) {
             var TestHelper = new TestHelper();
             ChromecastClient client = await TestHelper.CreateConnectAndLoadAppClient(output, receiver);
@@ -325,7 +325,34 @@ namespace Sharpcaster.Test
 
             await client.DisconnectAsync();
         }
-      
+
+        [Theory]
+        [MemberData(nameof(ChromecastReceiversFilter.GetChromecastUltra), MemberType = typeof(ChromecastReceiversFilter))]
+        public async Task TestFailingLoadMedia(ChromecastReceiver receiver)
+        {
+            ChromecastClient client = await TestHelper.CreateConnectAndLoadAppClient(output, receiver);
+            AutoResetEvent _autoResetEvent = new AutoResetEvent(false);
+
+            var media = new Media
+            {
+                ContentUrl = ""
+            };
+
+            Exception loadFailedException = null;
+
+            MediaStatus mediaStatus;
+            try
+            {
+                mediaStatus = await client.GetChannel<IMediaChannel>().LoadAsync(media);
+            } catch (Exception ex)
+            {
+                loadFailedException = ex;
+            }
+            
+            Assert.True(loadFailedException?.Message == "Load failed");
+            
+        }
+
     }
 
 }

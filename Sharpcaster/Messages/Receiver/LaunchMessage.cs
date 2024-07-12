@@ -6,7 +6,7 @@ namespace Sharpcaster.Messages.Receiver
     /// Launch message
     /// </summary>
     [DataContract]
-    class LaunchMessage : MessageWithId
+    public class LaunchMessage : MessageWithId
     {
         /// <summary>
         /// Gets or sets the application identifier

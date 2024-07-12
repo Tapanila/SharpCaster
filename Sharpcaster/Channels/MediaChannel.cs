@@ -29,11 +29,20 @@ namespace Sharpcaster.Channels
         {
             try
             {
-                return (await SendAsync<MediaStatusMessage>(message, application.TransportId)).Status?.FirstOrDefault();
+                var response = await SendAsync<IMessageWithId>(message, application.TransportId);
+                if (response is LoadFailedMessage)
+                {
+                    throw new Exception("Load failed");
+                }
+                if (response is LoadCancelledMessage)
+                {
+                    throw new Exception("Load cancelled");
+                }
+                return (response as MediaStatusMessage).Status?.FirstOrDefault();
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Error sending message: {ex.Message}");
+                _logger?.LogError($"Error sending message: {ex.Message}");
                 Status = null;
                 throw ex;
             }

@@ -8,12 +8,7 @@ namespace Sharpcaster.Messages.Media
     /// </summary>
     [DataContract]
     [ReceptionMessage]
-    class LoadFailedMessage : MessageWithId
+    public class LoadFailedMessage : MessageWithId
     {
-        [OnDeserializing]
-        private void OnDeserializing(StreamingContext context)
-        {
-            throw new Exception("Load failed");
-        }
     }
 }

@@ -6,9 +6,6 @@
 
 [![.NET](https://github.com/Tapanila/SharpCaster/actions/workflows/dotnet.yml/badge.svg)](https://github.com/Tapanila/SharpCaster/actions/workflows/dotnet.yml)
 
-### This project is completed
-
-I won't be adding any new features to this project.
 SharpCaster is Chromecast C# SDK any platform support .net standard 2.0.
 
 ## The nuget package  [![NuGet Status](http://img.shields.io/nuget/v/SharpCaster.svg?style=flat)](https://www.nuget.org/packages/SharpCaster/)

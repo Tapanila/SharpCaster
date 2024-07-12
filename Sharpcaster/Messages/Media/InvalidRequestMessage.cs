@@ -8,7 +8,7 @@ namespace Sharpcaster.Messages.Media
     /// </summary>
     [DataContract]
     [ReceptionMessage]
-    class InvalidRequestMessage : MessageWithId
+    public class InvalidRequestMessage : MessageWithId
     {
         /// <summary>
         /// Gets or sets the reason
