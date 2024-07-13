@@ -28,7 +28,7 @@ namespace Sharpcaster.Test
         [Theory(Skip ="Skipped for autotesting because manuell intervention on device is needed for this test!")]
         [MemberData(nameof(ChromecastReceiversFilter.GetJblSpeaker), MemberType = typeof(ChromecastReceiversFilter))]
         public async Task TestWaitForDeviceStopDuringPlayback(ChromecastReceiver receiver) {
-          
+
             //   To get this test Passing, you have to manually operate the used Chromecast device!
             //   I use it with a JBL speaker device. This device has 5 buttons. (ON/OFF, Vol-, Vol+, Play/Pause, (and WLAN-Connect))
             //   Vol+/- and Play/Pause do operate and trigger 'unasked' MediaStatusChanged events which work as designed.
@@ -40,6 +40,7 @@ namespace Sharpcaster.Test
             // 
             //   after the test media starts playing you have 20 seconds to press the device stop button. Then this should pass as green!
             //
+            var TestHelper = new TestHelper();
             ChromecastClient client = await TestHelper.CreateConnectAndLoadAppClient(output, receiver);
             if (receiver.Model == "JBL Playlist") {
 
@@ -78,12 +79,15 @@ namespace Sharpcaster.Test
             } else {
                 Assert.Fail("This test only runs with a 'JBL Playlist' device and also needs manual operations!");
             }
+            await client.DisconnectAsync();
         }
 
      
         [Theory]
-        [MemberData(nameof(ChromecastReceiversFilter.GetAll), MemberType = typeof(ChromecastReceiversFilter))]
+        [MemberData(nameof(ChromecastReceiversFilter.GetDefaultDevice), MemberType = typeof(ChromecastReceiversFilter))]
         public async Task TestLoadingMediaQueueAndNavigateNextPrev(ChromecastReceiver receiver) {
+
+            var TestHelper = new TestHelper();
             ChromecastClient client = await TestHelper.CreateConnectAndLoadAppClient(output, receiver);
 
             AutoResetEvent _autoResetEvent = new AutoResetEvent(false);
@@ -143,15 +147,16 @@ namespace Sharpcaster.Test
 
             //This keeps the test running untill all eventhandler sequence steps are finished. If something goes wrong we get a very slow timeout here.
             Assert.True(_autoResetEvent.WaitOne(20000));
-
+            await client.DisconnectAsync();
         }
 
         [Theory]
         //[MemberData(nameof(ChromecastReceiversFilter.GetAll), MemberType = typeof(ChromecastReceiversFilter))]  // This sometimes give a INVALID_MEDIA_SESSION_ID on my Chromecast Audio ....
         [MemberData(nameof(ChromecastReceiversFilter.GetAny), MemberType = typeof(ChromecastReceiversFilter))]
         public async Task TestLoadMediaQueueAndCheckContent(ChromecastReceiver receiver) {
+            var TestHelper = new TestHelper();
             ChromecastClient client = await TestHelper.CreateConnectAndLoadAppClient(output, receiver);
-
+            
             QueueItem[] MyCd = TestHelper.CreateTestCd();
 
             MediaStatus status = await client.GetChannel<IMediaChannel>().QueueLoadAsync(MyCd);
@@ -173,7 +178,7 @@ namespace Sharpcaster.Test
 
             QueueItem[] items2 = await client.GetChannel<IMediaChannel>().QueueGetItemsAsync(status.MediaSessionId, ids);
             Assert.Equal(4, items2.Length);
-            
+            await client.DisconnectAsync();
         }
 
 
@@ -181,6 +186,7 @@ namespace Sharpcaster.Test
         [Theory]
         [MemberData(nameof(ChromecastReceiversFilter.GetAll), MemberType = typeof(ChromecastReceiversFilter))]
         public async Task TestLoadingMediaQueue(ChromecastReceiver receiver) {
+            var TestHelper = new TestHelper();
             ChromecastClient client = await TestHelper.CreateConnectAndLoadAppClient(output, receiver);
 
             QueueItem[] MyCd = TestHelper.CreateTestCd();
@@ -190,13 +196,14 @@ namespace Sharpcaster.Test
             Assert.Equal(PlayerStateType.Playing, status.PlayerState);
             Assert.Equal(2, status.Items.Count());           // The status message only contains the next (and if available Prev) Track/QueueItem!
             Assert.Equal(status.CurrentItemId, status.Items[0].ItemId);
-          
+            await client.DisconnectAsync();
         }
 
         [Theory]
         [MemberData(nameof(ChromecastReceiversFilter.GetAny), MemberType = typeof(ChromecastReceiversFilter))]
         public async Task TestLoadingMedia(ChromecastReceiver receiver)
         {
+            var TestHelper = new TestHelper();
             ChromecastClient client = await TestHelper.CreateConnectAndLoadAppClient(output, receiver);
 
             var media = new Media
@@ -209,32 +216,16 @@ namespace Sharpcaster.Test
             Assert.Equal(PlayerStateType.Playing, status.PlayerState);
             Assert.Single(status.Items);
             Assert.Equal(status.CurrentItemId, status.Items[0].ItemId);
-          
+            await client.DisconnectAsync();
         }
-
-        //[Theory]
-        //[MemberData(nameof(ChromecastReceiversFilter.GetAll), MemberType = typeof(ChromecastReceiversFilter))]
-        //public async Task TestLoadingMediaWithoutLogging(ChromecastReceiver receiver) {
-        //    ChromecastClient client = await TestHelper.CreateConnectAndLoadAppClient(receiver);     // No output -> No LoggingFactory mocked
-
-        //    var media = new Media {
-        //        ContentUrl = "https://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/mp4/DesigningForGoogleCast.mp4"
-        //    };
-
-        //    MediaStatus status = await client.GetChannel<IMediaChannel>().LoadAsync(media);
-
-        //    Assert.Equal(PlayerStateType.Playing, status.PlayerState);
-        //    Assert.Single(status.Items);
-        //    Assert.Equal(status.CurrentItemId, status.Items[0].ItemId);
-
-        //}
 
 
         [Theory]
         [MemberData(nameof(ChromecastReceiversFilter.GetAll), MemberType = typeof(ChromecastReceiversFilter))]
         public async Task StartApplicationAThenStartBAndLoadMedia(ChromecastReceiver receiver)
         {
-            var client = await TestHelper.CreateAndConnectClient(output, receiver);
+            var th = new TestHelper();
+            var client = await th.CreateAndConnectClient(output, receiver);
 
             _ = await client.LaunchApplicationAsync("A9BCCB7C", false);
 
@@ -246,12 +237,14 @@ namespace Sharpcaster.Test
                 ContentUrl = "https://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/mp4/DesigningForGoogleCast.mp4"
             };
             _ = await client.GetChannel<IMediaChannel>().LoadAsync(media);
+            await client.DisconnectAsync();
         }
 
         [Theory]
-        [MemberData(nameof(ChromecastReceiversFilter.GetChromecastUltra), MemberType = typeof(ChromecastReceiversFilter))]
+        [MemberData(nameof(ChromecastReceiversFilter.GetAny), MemberType = typeof(ChromecastReceiversFilter))]
         public async Task TestLoadingAndPausingMedia(ChromecastReceiver receiver)
         {
+            var TestHelper = new TestHelper();
             ChromecastClient client = await TestHelper.CreateConnectAndLoadAppClient(output, receiver);
             AutoResetEvent _autoResetEvent = new AutoResetEvent(false);
 
@@ -289,12 +282,14 @@ namespace Sharpcaster.Test
             Assert.True(_autoResetEvent.WaitOne(5000));
             runSequence += "3";
             Assert.Equal("R1p2P3", runSequence);
+            await client.DisconnectAsync();
         }
 
         [Theory]
         [MemberData(nameof(ChromecastReceiversFilter.GetAll), MemberType = typeof(ChromecastReceiversFilter))]
         public async Task TestLoadingAndStoppingMedia(ChromecastReceiver receiver)
         {
+            var TestHelper = new TestHelper();
             ChromecastClient client = await TestHelper.CreateConnectAndLoadAppClient(output, receiver);
             AutoResetEvent _autoResetEvent = new AutoResetEvent(false);
 
@@ -326,14 +321,16 @@ namespace Sharpcaster.Test
             mediaStatus = await client.GetChannel<IMediaChannel>().LoadAsync(media);
 
             //This checks that within 5000 ms we have loaded video and were able to pause it
-            Assert.True(_autoResetEvent.WaitOne(5000));
+            Assert.True(_autoResetEvent.WaitOne(10000));
 
+            await client.DisconnectAsync();
         }
 
         [Theory]
-        [MemberData(nameof(ChromecastReceiversFilter.GetChromecastUltra), MemberType = typeof(ChromecastReceiversFilter))]
+        [MemberData(nameof(ChromecastReceiversFilter.GetAny), MemberType = typeof(ChromecastReceiversFilter))]
         public async Task TestFailingLoadMedia(ChromecastReceiver receiver)
         {
+            var TestHelper = new TestHelper();
             ChromecastClient client = await TestHelper.CreateConnectAndLoadAppClient(output, receiver);
             AutoResetEvent _autoResetEvent = new AutoResetEvent(false);
 

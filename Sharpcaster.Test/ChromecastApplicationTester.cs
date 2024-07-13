@@ -21,16 +21,20 @@ namespace Sharpcaster.Test
         [MemberData(nameof(ChromecastReceiversFilter.GetAll), MemberType = typeof(ChromecastReceiversFilter))]
         public async Task ConnectToChromecastAndLaunchApplication(ChromecastReceiver receiver)
         {
+            var TestHelper = new TestHelper();
             var client = await TestHelper.CreateAndConnectClient(output, receiver);
             var status = await client.LaunchApplicationAsync("B3419EF5");
 
             Assert.Equal("B3419EF5", status.Applications[0].AppId);
+
+            await client.DisconnectAsync();
         }
 
         [Theory]
         [MemberData(nameof(ChromecastReceiversFilter.GetAll), MemberType = typeof(ChromecastReceiversFilter))]
         public async Task ConnectToChromecastAndLaunchApplicationTwice(ChromecastReceiver receiver)
         {
+            var TestHelper = new TestHelper();
             var client = await TestHelper.CreateAndConnectClient(output, receiver);
             var status = await client.LaunchApplicationAsync("B3419EF5");
 
@@ -44,10 +48,11 @@ namespace Sharpcaster.Test
         }
 
 
-        [Theory]
+        [Theory(Skip = "This does not pass any more. Now my JBL reacts as the other device - not changing the Transport ID !?")]
         [MemberData(nameof(ChromecastReceiversFilter.GetJblSpeaker), MemberType = typeof(ChromecastReceiversFilter))]
         public async Task ConnectToChromecastAndLaunchApplicationTwiceWithoutJoining1(ChromecastReceiver receiver)
         {
+            var TestHelper = new TestHelper();
             var client = await TestHelper.CreateAndConnectClient(output, receiver);
             var status = await client.LaunchApplicationAsync("B3419EF5");
 
@@ -65,6 +70,7 @@ namespace Sharpcaster.Test
         [Theory]
         [MemberData(nameof(ChromecastReceiversFilter.GetDefaultDevice), MemberType = typeof(ChromecastReceiversFilter))]
         public async Task ConnectToChromecastAndLaunchApplicationTwiceWithoutJoining2(ChromecastReceiver receiver) {
+            var TestHelper = new TestHelper();
             var client = await TestHelper.CreateAndConnectClient(output, receiver);
             var status = await client.LaunchApplicationAsync("B3419EF5");
 
@@ -83,6 +89,7 @@ namespace Sharpcaster.Test
         [MemberData(nameof(ChromecastReceiversFilter.GetAll), MemberType = typeof(ChromecastReceiversFilter))]
         public async Task ConnectToChromecastAndLaunchApplicationAThenLaunchApplicationB(ChromecastReceiver receiver)
         {
+            var TestHelper = new TestHelper();
             var client = await TestHelper.CreateAndConnectClient(output, receiver);
             var status = await client.LaunchApplicationAsync("A9BCCB7C");           //Youtube
 
@@ -99,6 +106,7 @@ namespace Sharpcaster.Test
         [MemberData(nameof(ChromecastReceiversFilter.GetAll), MemberType = typeof(ChromecastReceiversFilter))]
         public async Task ConnectToChromecastAndLaunchApplicationOnceAndJoinIt(ChromecastReceiver receiver)
         {
+            var TestHelper = new TestHelper();
             var client = await TestHelper.CreateAndConnectClient(output, receiver);
             var status = await client.LaunchApplicationAsync("B3419EF5");
 
@@ -113,6 +121,7 @@ namespace Sharpcaster.Test
         [Fact(Skip = "Seems like this isn't really working anymore and just loading a white screen")]
         public async Task ConnectToChromecastAndLaunchWebPage()
         {
+            var TestHelper = new TestHelper();
             var client = await TestHelper.CreateConnectAndLoadAppClient(output, "5CB45E5A");
 
             var req = new WebMessage

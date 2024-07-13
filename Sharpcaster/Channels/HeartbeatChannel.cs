@@ -36,28 +36,28 @@ namespace Sharpcaster.Channels
         /// <param name="message">message to process</param>
         public override async Task OnMessageReceivedAsync(IMessage message)
         {
-            _logger?.LogDebug("Received ping message on Heartbeat channel");
-            await SendAsync(new PongMessage());
-            _logger?.LogDebug("Sent pong message on Heartbeat channel");
+            
             _timer.Stop();
+            await SendAsync(new PongMessage());
             _timer.Start();
+            _logger?.LogDebug("Pong sent - Heartbeat Timer restarted.");
         }
 
         public void StartTimeoutTimer()
         {
             _timer.Start();
-            _logger?.LogDebug("Started heartbeat timeout timer");
+            _logger?.LogTrace("Started heartbeat timeout timer");
         }
 
         public void StopTimeoutTimer()
         {
             _timer.Stop();
-            _logger?.LogDebug("Stopped heartbeat timeout timer");
+            _logger?.LogTrace("Stopped heartbeat timeout timer");
         }
 
         private void TimerElapsed(object sender, ElapsedEventArgs e)
         {
-            _logger?.LogDebug("Heartbeat timeout");
+            _logger?.LogInformation("Heartbeat timeout");
             StatusChanged?.Invoke(this, e);
         }
     }
