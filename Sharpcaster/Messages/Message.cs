@@ -15,25 +15,31 @@ namespace Sharpcaster.Messages
         /// </summary>
         public Message()
         {
-            //TODO: Why is type like this
             var type = GetType().Name;
+            //Get the type name without the "Message" suffix
+            type = type.Replace("Message", "");
             var firstCharacter = true;
-            Type = string.Concat(type.Substring(0, type.LastIndexOf(nameof(Message))).Select(c =>
+            var result = "";
+            //Convert the type name to uppercase with underscores
+            //example: "ReceiverStatusMessage" -> "RECEIVER_STATUS"
+            for (int i = 0; i < type.Length; i++)
             {
+                var c = type[i];
                 if (firstCharacter)
                 {
                     firstCharacter = false;
+                    result += char.ToUpper(c).ToString();
+                }
+                else if (char.IsUpper(c))
+                {
+                    result += $"_{c}";
                 }
                 else
                 {
-                    if (char.IsUpper(c))
-                    {
-                        return $"_{c}";
-                    }
+                    result += char.ToUpper(c).ToString();
                 }
-
-                return char.ToUpper(c).ToString();
-            }));
+            }
+            Type = result;
         }
 
         /// <summary>

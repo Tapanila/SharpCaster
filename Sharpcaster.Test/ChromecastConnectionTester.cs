@@ -29,15 +29,18 @@ namespace Sharpcaster.Test
         //[MemberData(nameof(CCDevices.GetAny), MemberType = typeof(CCDevices))]
         public async Task SearchChromecastsAndConnectToIt(ChromecastReceiver receiver)
         {
+            var TestHelper = new TestHelper();
             var status = await TestHelper.CreateAndConnectClient(output, receiver);
             Assert.NotNull(status);
         }
 
         [Theory(Skip = "Test needs manuell interactions -> skipped for autotestings")]
+        //[Theory()]
         //[MemberData(nameof(CCDevices.GetAny), MemberType = typeof(CCDevices))]
-        [MemberData(nameof(ChromecastReceiversFilter.GetJblSpeaker), MemberType = typeof(ChromecastReceiversFilter))]
+        [MemberData(nameof(ChromecastReceiversFilter.GetAny), MemberType = typeof(ChromecastReceiversFilter))]
         public async Task SearchChromecastsAndConnectToItThenWaitForItToShutdown(ChromecastReceiver receiver)
         {
+            var TestHelper = new TestHelper();
             var client = await TestHelper.CreateConnectAndLoadAppClient(output, receiver);
 
             Assert.NotNull(client.GetChromecastStatus());
@@ -56,11 +59,12 @@ namespace Sharpcaster.Test
         }
 
         [Theory]
-        [MemberData(nameof(ChromecastReceiversFilter.GetChromecastUltra), MemberType = typeof(ChromecastReceiversFilter))]
-        //[MemberData(nameof(CCDevices.GetJblSpeaker), MemberType = typeof(CCDevices))]
-        //[MemberData(nameof(CCDevices.GetAny), MemberType = typeof(CCDevices))]
+        //[MemberData(nameof(ChromecastReceiversFilter.GetChromecastUltra), MemberType = typeof(ChromecastReceiversFilter))]
+        //[MemberData(nameof(ChromecastReceiversFilter.GetJblSpeaker), MemberType = typeof(ChromecastReceiversFilter))]
+        [MemberData(nameof(ChromecastReceiversFilter.GetAny), MemberType = typeof(ChromecastReceiversFilter))]
         public async Task TestingHeartBeat(ChromecastReceiver receiver)
         {
+            var TestHelper = new TestHelper();
             ChromecastClient client = await TestHelper.CreateConnectAndLoadAppClient(output, receiver);
             AutoResetEvent _autoResetEvent = new AutoResetEvent(false);
 

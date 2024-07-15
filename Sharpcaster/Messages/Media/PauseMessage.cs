@@ -6,7 +6,7 @@ namespace Sharpcaster.Messages.Media
     /// Pause message
     /// </summary>
     [DataContract]
-    class PauseMessage : MediaSessionMessage
+    public class PauseMessage : MediaSessionMessage
     {
     }
 }

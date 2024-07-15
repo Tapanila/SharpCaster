@@ -6,7 +6,7 @@ namespace Sharpcaster.Messages.Media
     /// Seek message
     /// </summary>
     [DataContract]
-    class SeekMessage : MediaSessionMessage
+    public class SeekMessage : MediaSessionMessage
     {
         /// <summary>
         /// Gets or sets the current time

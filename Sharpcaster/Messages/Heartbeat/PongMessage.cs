@@ -6,7 +6,7 @@ namespace Sharpcaster.Messages.Heartbeat
     /// Pong message
     /// </summary>
     [DataContract]
-    class PongMessage : Message
+    public class PongMessage : Message
     {
     }
 }

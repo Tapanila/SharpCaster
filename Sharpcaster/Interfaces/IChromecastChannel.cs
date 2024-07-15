@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using Microsoft.Extensions.Logging;
+using System.Threading.Tasks;
 
 namespace Sharpcaster.Interfaces
 {
@@ -16,6 +17,8 @@ namespace Sharpcaster.Interfaces
         /// Gets the full namespace
         /// </summary>
         string Namespace { get; }
+
+        ILogger _logger { get; }
 
         /// <summary>
         /// Called when a message for this channel is received
