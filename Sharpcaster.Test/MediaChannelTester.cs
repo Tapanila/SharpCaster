@@ -25,7 +25,7 @@ namespace Sharpcaster.Test
         }
 
 
-        [Theory(Skip ="Skipped for autotesting because manuell intervention on device is needed for this test!")]
+        [Theory(Skip ="Skipped for autotesting because manual intervention on device is needed for this test!")]
         [MemberData(nameof(ChromecastReceiversFilter.GetJblSpeaker), MemberType = typeof(ChromecastReceiversFilter))]
         public async Task TestWaitForDeviceStopDuringPlayback(ChromecastReceiver receiver) {
           
