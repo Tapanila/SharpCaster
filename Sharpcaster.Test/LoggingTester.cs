@@ -35,7 +35,7 @@ namespace Sharpcaster.Test
             //var loggerFactory = TestHelper.CreateMockedLoggerFactory(logLines);
 
             //var client = new ChromecastClient(loggerFactory: loggerFactory);
-            Assert.Equal("[LAUNCH_ERROR,RECEIVER_STATUS,QUEUE_CHANGE,QUEUE_ITEM_IDS,QUEUE_ITEMS,INVALID_REQUEST,LOAD_CANCELLED,LOAD_FAILED,MEDIA_STATUS,PING,CLOSE]", logLines[0]);
+            Assert.Equal("[LAUNCH_ERROR,RECEIVER_STATUS,QUEUE_CHANGE,QUEUE_ITEM_IDS,QUEUE_ITEMS,DEVICE_UPDATED,MULTIZONE_STATUS,INVALID_REQUEST,LOAD_CANCELLED,LOAD_FAILED,MEDIA_STATUS,PING,CLOSE]", logLines[0]);
         }
 
         [Theory]

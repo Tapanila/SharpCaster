@@ -31,6 +31,7 @@ namespace Sharpcaster.Test
         //[MemberData(nameof(CCDevices.GetAny), MemberType = typeof(CCDevices))]
         public async Task TestingMultiZone(ChromecastReceiver receiver)
         {
+            var TestHelper = new TestHelper();
             ChromecastClient client = await TestHelper.CreateConnectAndLoadAppClient(output, receiver);
             AutoResetEvent _autoResetEvent = new AutoResetEvent(false);
 
