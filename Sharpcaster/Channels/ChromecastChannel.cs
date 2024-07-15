@@ -10,7 +10,7 @@ namespace Sharpcaster.Channels
     public abstract class ChromecastChannel : IChromecastChannel
     {
         private const string BASE_NAMESPACE = "urn:x-cast:com.google.cast";
-        protected ILogger _logger = null;
+        public ILogger _logger { get; private set; } = null;
 
         /// <summary>
         /// Initialization
