@@ -59,7 +59,11 @@ namespace Sharpcaster.Test {
             var rec = ChromecastDevicesFixture.Receivers.Where(r => r.Model.StartsWith("Chromecast Ultra")).First();
             yield return new object[] { rec };
         }
-        
+        public static IEnumerable<object[]> GetGoogleCastGroup()
+        {
+            var rec = ChromecastDevicesFixture.Receivers.Where(r => r.Model.StartsWith("Google Cast Group")).First();
+            yield return new object[] { rec };
+        }
     }
 
 
@@ -218,6 +222,9 @@ namespace Sharpcaster.Test {
                         return CreateILoggerMock<ILogger<MediaChannel>>().Object;
                     } else if (name == "Sharpcaster.Channels.ReceiverChannel") {
                         return CreateILoggerMock<ILogger<ReceiverChannel>>().Object;
+                    } else if (name == "Sharpcaster.Channels.MultiZoneChannel")
+                    {
+                        return CreateILoggerMock<ILogger<MultiZoneChannel>>().Object;
                     } else {
                         return loggerGeneric.Object;
                     }

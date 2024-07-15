@@ -59,6 +59,7 @@ namespace Sharpcaster
             serviceCollection.AddTransient<IChromecastChannel, HeartbeatChannel>();
             serviceCollection.AddTransient<IChromecastChannel, ReceiverChannel>();
             serviceCollection.AddTransient<IChromecastChannel, MediaChannel>();
+            serviceCollection.AddTransient<IChromecastChannel, MultiZoneChannel>();
             var messageInterfaceType = typeof(IMessage);
             foreach (var type in (from t in typeof(IConnectionChannel).GetTypeInfo().Assembly.GetTypes()
                                   where t.GetTypeInfo().IsClass && !t.GetTypeInfo().IsAbstract && messageInterfaceType.IsAssignableFrom(t) && t.GetTypeInfo().GetCustomAttribute<ReceptionMessageAttribute>() != null
@@ -173,7 +174,7 @@ namespace Sharpcaster
                             }
                         } else
                         {
-                            _logger?.LogDebug("Couldn't parse the channel from payload: " + payload);
+                            _logger?.LogTrace("Couldn't parse the channel from payload: " + payload);
                         }
                     }
                 }
