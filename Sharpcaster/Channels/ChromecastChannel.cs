@@ -27,7 +27,14 @@ namespace Sharpcaster.Channels
         protected ChromecastChannel(string ns, ILogger logger, bool useBaseNamespace = true)
         {
             _logger = logger;
-            Namespace = $"{BASE_NAMESPACE}.{ns}";
+            if (useBaseNamespace)
+            {
+                Namespace = $"{BASE_NAMESPACE}.{ns}";
+            } else
+            {
+                Namespace = ns;
+            }
+            
         }
 
         /// <summary>
