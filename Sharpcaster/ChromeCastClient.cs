@@ -152,7 +152,7 @@ namespace Sharpcaster
                             {
                                 GetChannel<IHeartbeatChannel>().StopTimeoutTimer();
                             }
-                            _logger?.LogTrace($"RECEIVED: {payload}");
+                            channel?._logger?.LogTrace($"RECEIVED: {payload}");
                             
                             var message = JsonConvert.DeserializeObject<MessageWithId>(payload);
                             if (MessageTypes.TryGetValue(message.Type, out Type type))
