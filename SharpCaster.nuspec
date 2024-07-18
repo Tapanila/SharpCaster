@@ -12,12 +12,14 @@
     <tags>Chromecast SharpCaster C#</tags>
     <projectUrl>https://github.com/Tapanila/SharpCaster</projectUrl>
     <licenseUrl>https://opensource.org/licenses/MIT</licenseUrl>
+    <icon>images/logo.png</icon>
     <repository type="git" url="https://github.com/Tapanila/SharpCaster.git" />
     <readme>README.md</readme>
   </metadata>
   <files>
     <file src="Sharpcaster\bin\Release\netstandard2.0\Sharpcaster.dll" target="lib\netstandard2.0\SharpCaster.dll" />
     <file src="README.md" target="" />
+    <file src="Assets/sharpcaster-logo-64x64.png" target="image/logo.png" />
     <!-- Add other files to include in the package -->
   </files>
 </package>
