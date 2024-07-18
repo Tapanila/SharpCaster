@@ -325,6 +325,12 @@ namespace Sharpcaster
                 if (runningApplication != null)
                 {
                     await GetChannel<IConnectionChannel>().ConnectAsync(runningApplication.TransportId);
+                    //Check if the application is using the media namespace
+                    //If so go and get the media status
+                    if (runningApplication.Namespaces.Where(ns => ns.Name == "urn:x-cast:com.google.cast.media") != null)
+                    {
+                        await GetChannel<IMediaChannel>().GetMediaStatusAsync();
+                    }
                     return await GetChannel<IReceiverChannel>().GetChromecastStatusAsync();
                 } else {
                     // another AppId is running

@@ -136,5 +136,11 @@ namespace Sharpcaster.Channels
             return (await SendAsync<QueueItemIdsMessage>(new QueueGetItemIdsMessage() { MediaSessionId = mediaSessionId }, chromecastStatus.Applications[0].TransportId)).Ids;
         }
 
+        public async Task<MediaStatus> GetMediaStatusAsync()
+        {
+            var chromecastStatus = Client.GetChromecastStatus();
+            return await SendAsync(new Messages.Receiver.GetStatusMessage(), chromecastStatus.Applications[0]);
+        }
+
     }
 }

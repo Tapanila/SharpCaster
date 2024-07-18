@@ -354,6 +354,34 @@ namespace Sharpcaster.Test
             
         }
 
+        [Theory]
+        [MemberData(nameof(ChromecastReceiversFilter.GetChromecastUltra), MemberType = typeof(ChromecastReceiversFilter))]
+        public async Task TestJoiningRunningMediaSessionAndPausingMedia(ChromecastReceiver receiver)
+        {
+            var TestHelper = new TestHelper();
+            ChromecastClient client = await TestHelper.CreateConnectAndLoadAppClient(output, receiver);
+            AutoResetEvent _autoResetEvent = new AutoResetEvent(false);
+            MediaStatus mediaStatus;
+
+            var media = new Media
+            {
+                ContentUrl = "https://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/mp4/DesigningForGoogleCast.mp4"
+            };
+
+            mediaStatus = await client.GetChannel<IMediaChannel>().LoadAsync(media);
+            await client.GetChannel<IMediaChannel>().PlayAsync();
+
+            client = TestHelper.GetClientWithTestOutput(output);
+            var status = await client.ConnectChromecast(receiver);
+
+            var applicationRunning = status.Applications[0];
+
+
+
+            var chromecastStatus = await client.LaunchApplicationAsync(applicationRunning.AppId, true);
+            await client.GetChannel<IMediaChannel>().PauseAsync();
+        }
+
     }
 
 }
