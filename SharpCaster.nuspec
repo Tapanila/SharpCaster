@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<package>
+  <metadata>
+    <id>SharpCaster</id>
+    <version>0.0.0</version>
+    <title>SharpCaster</title>
+    <authors>Teemu Tapanila</authors>
+    <owners>Teemu Tapanila</owners>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>SharpCaster is a C# library to control Chromecast devices from your dotnet application.</description>
+    <copyright>Copyright 2016 Teemu Tapanila</copyright>
+    <tags>Chromecast SharpCaster C#</tags>
+    <projectUrl>https://github.com/Tapanila/SharpCaster</projectUrl>
+    <licenseUrl>https://opensource.org/licenses/MIT</licenseUrl>
+    <repository type="git" url="https://github.com/Tapanila/SharpCaster.git" />
+    <readme>README.md</readme>
+  </metadata>
+  <files>
+    <file src="bin\Release\SharpCaster.dll" target="lib\netstandard2.0\SharpCaster.dll" />
+    <file src="README.md" target="" />
+    <!-- Add other files to include in the package -->
+  </files>
+</package>
