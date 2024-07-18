@@ -30,9 +30,9 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     - name: Build
-      run: dotnet build --no-restore --configuration Release /p:Version=$VERSION Sharpcaster/Sharpcaster.csproj
+      run: dotnet build --no-restore --configuration Release /p:Version=${{ env.VERSION }} Sharpcaster/Sharpcaster.csproj
     - name: Package
-      run: dotnet pack --configuration Release /p:Version=$VERSION /p:NuspecFile=../SharpCaster.nuspec Sharpcaster/Sharpcaster.csproj
+      run: dotnet pack --configuration Release /p:Version=${{ env.VERSION }} /p:NuspecFile=../SharpCaster.nuspec Sharpcaster/Sharpcaster.csproj
     - name: Push
       if: github.event_name == 'release' && github.event.action == 'published'
       run:  dotnet nuget push "**/*.nupkg" -k $NUGET_AUTH_TOKEN -s nuget.org
