@@ -1,5 +1,6 @@
 ﻿using Google.Protobuf;
 using Newtonsoft.Json;
+using Sharpcaster;
 using System;
 using System.Linq;
 
@@ -10,8 +11,8 @@ namespace Extensions.Api.CastChannel
     {
         partial void OnConstruction()
         {
-            DestinationId = "receiver-0";
-            SourceId = "sender-0";
+            DestinationId = DefaultIdentifiers.DESTINATION_ID;
+            SourceId = DefaultIdentifiers.SENDER_ID;
         }
         public CastMessage(string destinationId, string sourceId)
         {

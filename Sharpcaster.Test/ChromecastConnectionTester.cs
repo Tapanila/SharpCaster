@@ -84,7 +84,7 @@ namespace Sharpcaster.Test
             int commandsToRun = 10;
 
             //We are setting up an event to listen to status change. Because we don't know when the video has started to play
-            client.GetChannel<IMediaChannel>().StatusChanged += async (object sender, EventArgs e) =>
+            client.GetChannel<IMediaChannel>().StatusChanged += (object sender, EventArgs e) =>
             {
                 _autoResetEvent.Set();
             };

@@ -35,6 +35,7 @@ namespace Sharpcaster
         /// Raised when the sender is disconnected
         /// </summary>
         public event EventHandler Disconnected;
+        public Guid SenderId { get; } = Guid.NewGuid();
 
         private ILogger _logger = null;
         private TcpClient _client;
@@ -233,7 +234,7 @@ namespace Sharpcaster
             return new CastMessage()
             {
                 Namespace = ns,
-                SourceId = "Sender-0",
+                SourceId = SenderId.ToString(),
                 DestinationId = destinationId
             };
         }

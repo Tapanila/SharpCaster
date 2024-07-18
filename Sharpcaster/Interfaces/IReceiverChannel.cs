@@ -1,4 +1,6 @@
 ﻿using Sharpcaster.Models.ChromecastStatus;
+using Sharpcaster.Models.Media;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Sharpcaster.Interfaces
@@ -6,7 +8,7 @@ namespace Sharpcaster.Interfaces
     /// <summary>
     /// Interface for the receiver channel
     /// </summary>
-    public interface IReceiverChannel : IChromecastChannel
+    public interface IReceiverChannel : IStatusChannel<ChromecastStatus>, IChromecastChannel
     {
         /// <summary>
         /// Launches an application
