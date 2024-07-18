@@ -11,6 +11,7 @@
     <copyright>Copyright 2016 Teemu Tapanila</copyright>
     <tags>Chromecast SharpCaster C#</tags>
     <projectUrl>https://github.com/Tapanila/SharpCaster</projectUrl>
+    <license type="expression">MIT</license>
     <icon>image/logo.png</icon>
     <repository type="git" url="https://github.com/Tapanila/SharpCaster.git" />
     <readme>README.md</readme>
