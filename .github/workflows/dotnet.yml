@@ -25,7 +25,7 @@ jobs:
     - name: tag
       id: tag
       run: |
-          version="$(gh release view -q .name --json name)"
+          version="$(gh release view -q .name --json tagName)"
           echo 'VERSION='$version >> $GITHUB_ENV
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
