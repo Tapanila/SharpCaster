@@ -5,9 +5,28 @@
     <PackageId>Sharpcaster</PackageId>
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/Tapanila/SharpCaster/</RepositoryUrl>
-    <NuspecFile>SharpCaster.nuspec</NuspecFile>
-    <NuspecProperties>version=$(PackageVersion)</NuspecProperties>
+    <PackageVersion>0.0.0</PackageVersion>
+    <Authors>Teemu Tapanila</Authors>
+    <Owners>Teemu Tapanila</Owners>
+    <Description>SharpCaster is a C# library to control Chromecast devices from your dotnet application.</Description>
+    <Copyright>Copyright 2016 Teemu Tapanila</Copyright>
+    <PackageTags>Chromecast SharpCaster C#</PackageTags>
+    <PackageProjectUrl>https://github.com/Tapanila/SharpCaster</PackageProjectUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageIcon>sharpcaster-logo-64x64.png</PackageIcon>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="../README.md">
+      <Pack>true</Pack>
+      <PackagePath />
+    </Content>
+    <Content Include="../Assets\sharpcaster-logo-64x64.png">
+      <Pack>true</Pack>
+      <PackagePath />
+    </Content>
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Google.Protobuf" Version="3.27.2" />
