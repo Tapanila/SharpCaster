@@ -5,6 +5,8 @@
     <PackageId>Sharpcaster</PackageId>
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/Tapanila/SharpCaster/</RepositoryUrl>
+    <NuspecFile>SharpCaster.nuspec</NuspecFile>
+    <NuspecProperties>version=$(PackageVersion)</NuspecProperties>
   </PropertyGroup>
 
   <ItemGroup>
