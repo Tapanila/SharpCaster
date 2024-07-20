@@ -1,4 +1,6 @@
-﻿using Sharpcaster.Models.Media;
+﻿using Newtonsoft.Json;
+using Sharpcaster.Converters;
+using Sharpcaster.Models.Media;
 using System.Runtime.Serialization;
 
 namespace Sharpcaster.Models.Queue
@@ -40,7 +42,8 @@ namespace Sharpcaster.Models.Queue
         /// The continuous playback behavior of the queue.
         /// </summary>
         [DataMember(Name = "repeatMode")]
-        public string RepeatMode { get; set; }
+        [JsonConverter(typeof(RepeatModeEnumConverter))]
+        public RepeatModeType RepeatMode { get; set; }
         /// <summary>
         /// True indicates that the queue is shuffled.
         /// </summary>

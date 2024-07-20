@@ -40,7 +40,7 @@ namespace Sharpcaster.Interfaces {
         /// <param name="seconds">time in seconds</param>
         /// <returns>media status</returns>
         Task<MediaStatus> SeekAsync(double seconds);
-        Task<MediaStatus> QueueLoadAsync(QueueItem[] items);
+        Task<MediaStatus> QueueLoadAsync(QueueItem[] items, int? currentTime = null, RepeatModeType repeatMode = RepeatModeType.OFF, int? startIndex = null);
         Task<MediaStatus> QueueNextAsync(long mediaSessionId);
         Task<MediaStatus> QueuePrevAsync(long mediaSessionId);
         Task<QueueItem[]> QueueGetItemsAsync(long mediaSessionId, int[] ids = null);

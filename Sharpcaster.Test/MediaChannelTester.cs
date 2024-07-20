@@ -1,11 +1,9 @@
-﻿using Sharpcaster.Channels;
-using Sharpcaster.Interfaces;
+﻿using Sharpcaster.Interfaces;
 using Sharpcaster.Models;
 using Sharpcaster.Models.Media;
 using Sharpcaster.Models.Queue;
 using Sharpcaster.Test.helper;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -380,6 +378,106 @@ namespace Sharpcaster.Test
 
             var chromecastStatus = await client.LaunchApplicationAsync(applicationRunning.AppId, true);
             await client.GetChannel<IMediaChannel>().PauseAsync();
+        }
+
+        [Theory]
+        [MemberData(nameof(ChromecastReceiversFilter.GetChromecastUltra), MemberType = typeof(ChromecastReceiversFilter))]
+        public async Task TestRepeatingAllQueueMedia(ChromecastReceiver receiver)
+        {
+            var TestHelper = new TestHelper();
+            ChromecastClient client = await TestHelper.CreateConnectAndLoadAppClient(output, receiver);
+
+            var media = new Media
+            {
+                ContentUrl = "https://incompetech.com/music/royalty-free/mp3-royaltyfree/Loping%20Sting.mp3"
+            };
+
+            var queueItem = new QueueItem
+            {
+                Media = media,
+
+            };
+
+
+            await client.GetChannel<IMediaChannel>().QueueLoadAsync([queueItem], null, RepeatModeType.ALL);
+            var test = await client.GetChannel<IMediaChannel>().PlayAsync();
+
+            Assert.Equal(RepeatModeType.ALL, test.RepeatMode);
+        }
+
+        [Theory]
+        [MemberData(nameof(ChromecastReceiversFilter.GetChromecastUltra), MemberType = typeof(ChromecastReceiversFilter))]
+        public async Task TestRepeatingOffQueueMedia(ChromecastReceiver receiver)
+        {
+            var TestHelper = new TestHelper();
+            ChromecastClient client = await TestHelper.CreateConnectAndLoadAppClient(output, receiver);
+
+            var media = new Media
+            {
+                ContentUrl = "https://incompetech.com/music/royalty-free/mp3-royaltyfree/Loping%20Sting.mp3"
+            };
+
+            var queueItem = new QueueItem
+            {
+                Media = media,
+
+            };
+
+
+            await client.GetChannel<IMediaChannel>().QueueLoadAsync([queueItem], null, RepeatModeType.OFF);
+            var test = await client.GetChannel<IMediaChannel>().PlayAsync();
+
+            Assert.Equal(RepeatModeType.OFF, test.RepeatMode);
+        }
+
+        [Theory]
+        [MemberData(nameof(ChromecastReceiversFilter.GetChromecastUltra), MemberType = typeof(ChromecastReceiversFilter))]
+        public async Task TestRepeatingSingleQueueMedia(ChromecastReceiver receiver)
+        {
+            var TestHelper = new TestHelper();
+            ChromecastClient client = await TestHelper.CreateConnectAndLoadAppClient(output, receiver);
+
+            var media = new Media
+            {
+                ContentUrl = "https://incompetech.com/music/royalty-free/mp3-royaltyfree/Loping%20Sting.mp3"
+            };
+
+            var queueItem = new QueueItem
+            {
+                Media = media,
+
+            };
+
+
+            await client.GetChannel<IMediaChannel>().QueueLoadAsync([queueItem], null, RepeatModeType.SINGLE);
+            var test = await client.GetChannel<IMediaChannel>().PlayAsync();
+
+            Assert.Equal(RepeatModeType.SINGLE, test.RepeatMode);
+        }
+
+        [Theory]
+        [MemberData(nameof(ChromecastReceiversFilter.GetChromecastUltra), MemberType = typeof(ChromecastReceiversFilter))]
+        public async Task TestRepeatingAllAndShuffleQueueMedia(ChromecastReceiver receiver)
+        {
+            var TestHelper = new TestHelper();
+            ChromecastClient client = await TestHelper.CreateConnectAndLoadAppClient(output, receiver);
+
+            var media = new Media
+            {
+                ContentUrl = "https://incompetech.com/music/royalty-free/mp3-royaltyfree/Loping%20Sting.mp3"
+            };
+
+            var queueItem = new QueueItem
+            {
+                Media = media,
+
+            };
+
+
+            await client.GetChannel<IMediaChannel>().QueueLoadAsync([queueItem], null, RepeatModeType.ALL_AND_SHUFFLE);
+            var test = await client.GetChannel<IMediaChannel>().PlayAsync();
+
+            Assert.Equal(RepeatModeType.ALL_AND_SHUFFLE, test.RepeatMode);
         }
 
     }

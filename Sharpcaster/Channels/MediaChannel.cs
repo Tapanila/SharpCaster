@@ -105,10 +105,10 @@ namespace Sharpcaster.Channels
             return await SendAsync(new SeekMessage() { CurrentTime = seconds });
         }
 
-        public async Task<MediaStatus> QueueLoadAsync(QueueItem[] items)
+        public async Task<MediaStatus> QueueLoadAsync(QueueItem[] items, int? currentTime = null, RepeatModeType repeatMode = RepeatModeType.OFF, int? startIndex = null)
         {
             var chromecastStatus = Client.GetChromecastStatus();
-            return (await SendAsync<MediaStatusMessage>(new QueueLoadMessage() { SessionId = chromecastStatus.Applications[0].SessionId, Items = items }, chromecastStatus.Applications[0].TransportId)).Status?.FirstOrDefault();
+            return (await SendAsync<MediaStatusMessage>(new QueueLoadMessage() { SessionId = chromecastStatus.Applications[0].SessionId, Items = items, CurrentTime = currentTime, RepeatMode = repeatMode, StartIndex = startIndex }, chromecastStatus.Applications[0].TransportId)).Status?.FirstOrDefault();
         }
 
         public async Task<MediaStatus> QueueNextAsync(long mediaSessionId)

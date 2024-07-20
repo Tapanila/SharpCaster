@@ -76,7 +76,8 @@ namespace Sharpcaster.Models.Media
         /// Gets or sets the repeat mode
         /// </summary>
         [DataMember(Name = "repeatMode")]
-        public string RepeatMode { get; set; }
+        [JsonConverter(typeof(RepeatModeEnumConverter))]
+        public RepeatModeType RepeatMode { get; set; }
 
         [DataMember(Name = "queueData")]
         public QueueData QueueData { get; set; }
