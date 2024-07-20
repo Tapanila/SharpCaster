@@ -49,7 +49,7 @@ namespace Sharpcaster.Test
                 ContentUrl = "https://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/mp4/DesigningForGoogleCast.mp4"
             };
 
-            MediaStatus status = await client.GetChannel<IMediaChannel>().LoadAsync(media);
+            MediaStatus status = await client.MediaChannel.LoadAsync(media);
 
             Assert.Equal(PlayerStateType.Playing, status.PlayerState);
             Assert.Single(status.Items);

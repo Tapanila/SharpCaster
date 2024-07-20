@@ -37,6 +37,12 @@ namespace Sharpcaster
         public event EventHandler Disconnected;
         public Guid SenderId { get; } = Guid.NewGuid();
 
+        public IMediaChannel MediaChannel => GetChannel<IMediaChannel>();
+        public IHeartbeatChannel HeartbeatChannel => GetChannel<IHeartbeatChannel>();
+        public IReceiverChannel ReceiverChannel => GetChannel<IReceiverChannel>();
+        public IConnectionChannel ConnectionChannel => GetChannel<IConnectionChannel>();
+        public MultiZoneChannel MultiZoneChannel => GetChannel<MultiZoneChannel>();
+
         private ILogger _logger = null;
         private TcpClient _client;
         private Stream _stream;
@@ -114,10 +120,10 @@ namespace Sharpcaster
 
             ReceiveTcs = new TaskCompletionSource<bool>();
             Receive();
-            GetChannel<IHeartbeatChannel>().StartTimeoutTimer();
-            GetChannel<IHeartbeatChannel>().StatusChanged += HeartBeatTimedOut;
-            await GetChannel<IConnectionChannel>().ConnectAsync();
-            return await GetChannel<IReceiverChannel>().GetChromecastStatusAsync();
+            HeartbeatChannel.StartTimeoutTimer();
+            HeartbeatChannel.StatusChanged += HeartBeatTimedOut;
+            await ConnectionChannel.ConnectAsync();
+            return await ReceiverChannel.GetChromecastStatusAsync();
         }
 
         private async void HeartBeatTimedOut(object sender, EventArgs e)
@@ -151,7 +157,7 @@ namespace Sharpcaster
                         {
                             if (channel != GetChannel<IHeartbeatChannel>())
                             {
-                                GetChannel<IHeartbeatChannel>().StopTimeoutTimer();
+                                HeartbeatChannel.StopTimeoutTimer();
                             }
                             channel?._logger?.LogTrace($"RECEIVED: {payload}");
                             
@@ -253,8 +259,8 @@ namespace Sharpcaster
             {
                 channel.GetType().GetProperty("Status").SetValue(channel, null);
             }
-            GetChannel<IHeartbeatChannel>().StopTimeoutTimer();
-            GetChannel<IHeartbeatChannel>().StatusChanged -= HeartBeatTimedOut;
+            HeartbeatChannel.StopTimeoutTimer();
+            HeartbeatChannel.StatusChanged -= HeartBeatTimedOut;
             await Dispose();
         }
 
@@ -330,7 +336,7 @@ namespace Sharpcaster
                     //If so go and get the media status
                     if (runningApplication.Namespaces.Where(ns => ns.Name == "urn:x-cast:com.google.cast.media") != null)
                     {
-                        await GetChannel<IMediaChannel>().GetMediaStatusAsync();
+                        await MediaChannel.GetMediaStatusAsync();
                     }
                     return await GetChannel<IReceiverChannel>().GetChromecastStatusAsync();
                 } else {

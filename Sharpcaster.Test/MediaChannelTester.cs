@@ -47,7 +47,7 @@ namespace Sharpcaster.Test
                 };
 
                 AutoResetEvent _disconnectReceived = new AutoResetEvent(false);
-                IMediaChannel mediaChannel = client.GetChannel<IMediaChannel>();
+                IMediaChannel mediaChannel = client.MediaChannel;
 
                 mediaChannel.StatusChanged += (object sender, EventArgs e) => {
                     try {
@@ -65,14 +65,14 @@ namespace Sharpcaster.Test
                     }
                 };
 
-                MediaStatus status = await client.GetChannel<IMediaChannel>().LoadAsync(media);
+                MediaStatus status = await client.MediaChannel.LoadAsync(media);
 
                 //This keeps the test running for 20 seconds or until the device initates the wanted stop-disconnect.
                 Assert.True(_disconnectReceived.WaitOne(20000), "Have you manually stopped the device while playback? If you did so, this is a real Error :-) !");
 
                 // To reuse the device now you have to create a new connection and reload the app ...
                 client = await TestHelper.CreateConnectAndLoadAppClient(output);
-                status = await client.GetChannel<IMediaChannel>().LoadAsync(media);
+                status = await client.MediaChannel.LoadAsync(media);
                 Assert.Equal(PlayerStateType.Playing, status.PlayerState);
             } else {
                 Assert.Fail("This test only runs with a 'JBL Playlist' device and also needs manual operations!");
@@ -89,7 +89,7 @@ namespace Sharpcaster.Test
             ChromecastClient client = await TestHelper.CreateConnectAndLoadAppClient(output, receiver);
 
             AutoResetEvent _autoResetEvent = new AutoResetEvent(false);
-            IMediaChannel mediaChannel = client.GetChannel<IMediaChannel>();
+            IMediaChannel mediaChannel = client.MediaChannel;
             QueueItem[] MyCd = TestHelper.CreateTestCd();
 
             int testSequenceCount = 0;
@@ -137,7 +137,7 @@ namespace Sharpcaster.Test
 
 
 
-            MediaStatus status = await client.GetChannel<IMediaChannel>().QueueLoadAsync(MyCd);
+            MediaStatus status = await client.MediaChannel.QueueLoadAsync(MyCd);
 
             Assert.Equal(PlayerStateType.Playing, status.PlayerState);
             Assert.Equal(2, status.Items.Count());           // The status message only contains the next (and if available Prev) Track/QueueItem!
@@ -157,7 +157,7 @@ namespace Sharpcaster.Test
             
             QueueItem[] MyCd = TestHelper.CreateTestCd();
 
-            MediaStatus status = await client.GetChannel<IMediaChannel>().QueueLoadAsync(MyCd);
+            MediaStatus status = await client.MediaChannel.QueueLoadAsync(MyCd);
 
             Assert.Equal(PlayerStateType.Playing, status.PlayerState);
             Assert.Equal(2, status.Items.Count());           // The status message only contains the next (and if available Prev) Track/QueueItem!
@@ -165,16 +165,16 @@ namespace Sharpcaster.Test
 
             await Task.Delay(2000);
 
-            int[] ids = await client.GetChannel<IMediaChannel>().QueueGetItemIdsAsync(status.MediaSessionId);
+            int[] ids = await client.MediaChannel.QueueGetItemIdsAsync(status.MediaSessionId);
 
             Assert.Equal(4, ids.Length);
 
             foreach (int id in ids) {
-                QueueItem[] items = await client.GetChannel<IMediaChannel>().QueueGetItemsAsync(status.MediaSessionId, new int[] {id});
+                QueueItem[] items = await client.MediaChannel.QueueGetItemsAsync(status.MediaSessionId, new int[] {id});
                 Assert.Single(items);
             }
 
-            QueueItem[] items2 = await client.GetChannel<IMediaChannel>().QueueGetItemsAsync(status.MediaSessionId, ids);
+            QueueItem[] items2 = await client.MediaChannel.QueueGetItemsAsync(status.MediaSessionId, ids);
             Assert.Equal(4, items2.Length);
             await client.DisconnectAsync();
         }
@@ -189,7 +189,7 @@ namespace Sharpcaster.Test
 
             QueueItem[] MyCd = TestHelper.CreateTestCd();
 
-            MediaStatus status = await client.GetChannel<IMediaChannel>().QueueLoadAsync(MyCd);
+            MediaStatus status = await client.MediaChannel.QueueLoadAsync(MyCd);
 
             Assert.Equal(PlayerStateType.Playing, status.PlayerState);
             Assert.Equal(2, status.Items.Count());           // The status message only contains the next (and if available Prev) Track/QueueItem!
@@ -209,7 +209,7 @@ namespace Sharpcaster.Test
                 ContentUrl = "https://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/mp4/DesigningForGoogleCast.mp4"
             };
 
-            MediaStatus status = await client.GetChannel<IMediaChannel>().LoadAsync(media);
+            MediaStatus status = await client.MediaChannel.LoadAsync(media);
 
             Assert.Equal(PlayerStateType.Playing, status.PlayerState);
             Assert.Single(status.Items);
@@ -234,7 +234,7 @@ namespace Sharpcaster.Test
             {
                 ContentUrl = "https://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/mp4/DesigningForGoogleCast.mp4"
             };
-            _ = await client.GetChannel<IMediaChannel>().LoadAsync(media);
+            _ = await client.MediaChannel.LoadAsync(media);
             await client.DisconnectAsync();
         }
 
@@ -256,15 +256,15 @@ namespace Sharpcaster.Test
             bool firstPlay = true;
 
             //We are setting up an event to listen to status change. Because we don't know when the video has started to play
-            client.GetChannel<IMediaChannel>().StatusChanged += async (object sender, EventArgs e) =>
+            client.MediaChannel.StatusChanged += async (object sender, EventArgs e) =>
             {
                 //runSequence += ".";
-                if (client.GetChannel<IMediaChannel>().Status.FirstOrDefault()?.PlayerState == PlayerStateType.Playing)
+                if (client.MediaChannel.Status.FirstOrDefault()?.PlayerState == PlayerStateType.Playing)
                 {
                     if (firstPlay) {
                         firstPlay = false;
                         runSequence += "p";
-                        mediaStatus = await client.GetChannel<IMediaChannel>().PauseAsync();
+                        mediaStatus = await client.MediaChannel.PauseAsync();
                         Assert.Equal(PlayerStateType.Paused, mediaStatus.PlayerState);
                         runSequence += "P";
                         _autoResetEvent.Set();
@@ -273,7 +273,7 @@ namespace Sharpcaster.Test
             };
 
             runSequence += "1";
-            mediaStatus = await client.GetChannel<IMediaChannel>().LoadAsync(media);
+            mediaStatus = await client.MediaChannel.LoadAsync(media);
             runSequence += "2";
 
             //This checks that within 5000 ms we have loaded video and were able to pause it
@@ -300,14 +300,14 @@ namespace Sharpcaster.Test
             bool firstPlay = true;
 
             //We are setting up an event to listen to status change. Because we don't know when the video has started to play
-            client.GetChannel<IMediaChannel>().StatusChanged += async (object sender, EventArgs e) =>
+            client.MediaChannel.StatusChanged += async (object sender, EventArgs e) =>
             {
                 try {
-                    if (client.GetChannel<IMediaChannel>().Status.FirstOrDefault()?.PlayerState == PlayerStateType.Playing) {
+                    if (client.MediaChannel.Status.FirstOrDefault()?.PlayerState == PlayerStateType.Playing) {
                         if (firstPlay) {
                             firstPlay = false;
                             await Task.Delay(2000); // Listen for some time
-                            mediaStatus = await client.GetChannel<IMediaChannel>().StopAsync();
+                            mediaStatus = await client.MediaChannel.StopAsync();
                             _autoResetEvent.Set();
                         }
                     }
@@ -316,7 +316,7 @@ namespace Sharpcaster.Test
                 }
             };
 
-            mediaStatus = await client.GetChannel<IMediaChannel>().LoadAsync(media);
+            mediaStatus = await client.MediaChannel.LoadAsync(media);
 
             //This checks that within 5000 ms we have loaded video and were able to pause it
             Assert.True(_autoResetEvent.WaitOne(10000));
@@ -342,7 +342,7 @@ namespace Sharpcaster.Test
             MediaStatus mediaStatus;
             try
             {
-                mediaStatus = await client.GetChannel<IMediaChannel>().LoadAsync(media);
+                mediaStatus = await client.MediaChannel.LoadAsync(media);
             } catch (Exception ex)
             {
                 loadFailedException = ex;
@@ -366,8 +366,8 @@ namespace Sharpcaster.Test
                 ContentUrl = "https://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/mp4/DesigningForGoogleCast.mp4"
             };
 
-            mediaStatus = await client.GetChannel<IMediaChannel>().LoadAsync(media);
-            await client.GetChannel<IMediaChannel>().PlayAsync();
+            mediaStatus = await client.MediaChannel.LoadAsync(media);
+            await client.MediaChannel.PlayAsync();
 
             client = TestHelper.GetClientWithTestOutput(output);
             var status = await client.ConnectChromecast(receiver);
@@ -377,7 +377,7 @@ namespace Sharpcaster.Test
 
 
             var chromecastStatus = await client.LaunchApplicationAsync(applicationRunning.AppId, true);
-            await client.GetChannel<IMediaChannel>().PauseAsync();
+            await client.MediaChannel.PauseAsync();
         }
 
         [Theory]
@@ -394,13 +394,12 @@ namespace Sharpcaster.Test
 
             var queueItem = new QueueItem
             {
-                Media = media,
-
+                Media = media
             };
 
 
-            await client.GetChannel<IMediaChannel>().QueueLoadAsync([queueItem], null, RepeatModeType.ALL);
-            var test = await client.GetChannel<IMediaChannel>().PlayAsync();
+            await client.MediaChannel.QueueLoadAsync([queueItem], null, RepeatModeType.ALL);
+            var test = await client.MediaChannel.PlayAsync();
 
             Assert.Equal(RepeatModeType.ALL, test.RepeatMode);
         }
@@ -419,13 +418,12 @@ namespace Sharpcaster.Test
 
             var queueItem = new QueueItem
             {
-                Media = media,
-
+                Media = media
             };
 
 
-            await client.GetChannel<IMediaChannel>().QueueLoadAsync([queueItem], null, RepeatModeType.OFF);
-            var test = await client.GetChannel<IMediaChannel>().PlayAsync();
+            await client.MediaChannel.QueueLoadAsync([queueItem], null, RepeatModeType.OFF);
+            var test = await client.MediaChannel.PlayAsync();
 
             Assert.Equal(RepeatModeType.OFF, test.RepeatMode);
         }
@@ -444,13 +442,12 @@ namespace Sharpcaster.Test
 
             var queueItem = new QueueItem
             {
-                Media = media,
-
+                Media = media
             };
 
 
-            await client.GetChannel<IMediaChannel>().QueueLoadAsync([queueItem], null, RepeatModeType.SINGLE);
-            var test = await client.GetChannel<IMediaChannel>().PlayAsync();
+            await client.MediaChannel.QueueLoadAsync([queueItem], null, RepeatModeType.SINGLE);
+            var test = await client.MediaChannel.PlayAsync();
 
             Assert.Equal(RepeatModeType.SINGLE, test.RepeatMode);
         }
@@ -469,13 +466,12 @@ namespace Sharpcaster.Test
 
             var queueItem = new QueueItem
             {
-                Media = media,
-
+                Media = media
             };
 
 
-            await client.GetChannel<IMediaChannel>().QueueLoadAsync([queueItem], null, RepeatModeType.ALL_AND_SHUFFLE);
-            var test = await client.GetChannel<IMediaChannel>().PlayAsync();
+            await client.MediaChannel.QueueLoadAsync([queueItem], null, RepeatModeType.ALL_AND_SHUFFLE);
+            var test = await client.MediaChannel.PlayAsync();
 
             Assert.Equal(RepeatModeType.ALL_AND_SHUFFLE, test.RepeatMode);
         }

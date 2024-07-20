@@ -33,7 +33,7 @@ namespace Sharpcaster.Test
             var client2 = await TestHelper.CreateAndConnectClient(output, receiver);
             await client2.LaunchApplicationAsync("B3419EF5", true);
 
-            client2.GetChannel<IMediaChannel>().StatusChanged += (sender, e) =>
+            client2.MediaChannel.StatusChanged += (sender, e) =>
             {
                 _autoResetEvent.Set();
             };
@@ -44,8 +44,8 @@ namespace Sharpcaster.Test
             };
 
             
-            var mediaStatus = await client1.GetChannel<IMediaChannel>().LoadAsync(media);
-            await client1.GetChannel<IMediaChannel>().PlayAsync();
+            var mediaStatus = await client1.MediaChannel.LoadAsync(media);
+            await client1.MediaChannel.PlayAsync();
 
             Assert.True(_autoResetEvent.WaitOne(3000));
         }
@@ -63,12 +63,12 @@ namespace Sharpcaster.Test
             await client2.LaunchApplicationAsync("B3419EF5", true);
             await client3.LaunchApplicationAsync("B3419EF5", true);
 
-            client2.GetChannel<IMediaChannel>().StatusChanged += (sender, e) =>
+            client2.MediaChannel.StatusChanged += (sender, e) =>
             {
                 _autoResetEvent2.Set();
             };
 
-            client3.GetChannel<IMediaChannel>().StatusChanged += (sender, e) =>
+            client3.MediaChannel.StatusChanged += (sender, e) =>
             {
                 _autoResetEvent3.Set();
             };
@@ -79,8 +79,8 @@ namespace Sharpcaster.Test
             };
 
 
-            var mediaStatus = await client1.GetChannel<IMediaChannel>().LoadAsync(media);
-            await client1.GetChannel<IMediaChannel>().PlayAsync();
+            var mediaStatus = await client1.MediaChannel.LoadAsync(media);
+            await client1.MediaChannel.PlayAsync();
 
             Assert.True(_autoResetEvent2.WaitOne(3000));
             Assert.True(_autoResetEvent3.WaitOne(100));
@@ -105,12 +105,12 @@ namespace Sharpcaster.Test
             };
 
 
-            var mediaStatus = await client1.GetChannel<IMediaChannel>().LoadAsync(media);
-            await client1.GetChannel<IMediaChannel>().PlayAsync();
+            var mediaStatus = await client1.MediaChannel.LoadAsync(media);
+            await client1.MediaChannel.PlayAsync();
 
-            await client2.GetChannel<IMediaChannel>().PauseAsync();
+            await client2.MediaChannel.PauseAsync();
 
-            await client3.GetChannel<IMediaChannel>().PlayAsync();
+            await client3.MediaChannel.PlayAsync();
 
             Assert.NotEqual(client1.SenderId, client2.SenderId);
             Assert.NotEqual(client1.SenderId, client3.SenderId);

@@ -19,9 +19,8 @@ https://nuget.org/packages/SharpCaster/
 ## Finding chromecast devices from network
 ```cs
 IChromecastLocator locator = new MdnsChromecastLocator();
-var chromecasts = await locator.FindReceiversAsync();
-//If that does not return devices on desktop then you can use this, Where 192.168.1.2 is your machines local ip
-var chromecasts = await locator.FindReceiversAsync("192.168.1.2");
+var source = new CancellationTokenSource(TimeSpan.FromMilliseconds(1500));
+var chromecasts = await locator.FindReceiversAsync(source.Token);
 ```
 ## Connecting to chromecast device, launch application and load media
 ```cs
@@ -34,7 +33,7 @@ var media = new Media
 {
 	ContentUrl = "https://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/mp4/DesigningForGoogleCast.mp4"
 };
-_ = await client.GetChannel<IMediaChannel>().LoadAsync(media);
+_ = await client.MediaChannel.LoadAsync(media);
 ```    
 
 ## SharpCaster Demo

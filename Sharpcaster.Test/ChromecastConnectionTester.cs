@@ -84,12 +84,12 @@ namespace Sharpcaster.Test
             int commandsToRun = 10;
 
             //We are setting up an event to listen to status change. Because we don't know when the video has started to play
-            client.GetChannel<IMediaChannel>().StatusChanged += (object sender, EventArgs e) =>
+            client.MediaChannel.StatusChanged += (object sender, EventArgs e) =>
             {
                 _autoResetEvent.Set();
             };
 
-            mediaStatus = await client.GetChannel<IMediaChannel>().LoadAsync(media);
+            mediaStatus = await client.MediaChannel.LoadAsync(media);
 
             _autoResetEvent.WaitOne(3000);
 
@@ -98,14 +98,14 @@ namespace Sharpcaster.Test
                 if (i % 2 == 0)
                 {
                     await Task.Delay(1000);
-                    mediaStatus = await client.GetChannel<IMediaChannel>().PauseAsync();
+                    mediaStatus = await client.MediaChannel.PauseAsync();
                     Assert.Equal(PlayerStateType.Paused, mediaStatus.PlayerState);
                     runSequence += pause;
                 }
                 else
                 {
                     await Task.Delay(1000);
-                    mediaStatus = await client.GetChannel<IMediaChannel>().PlayAsync();
+                    mediaStatus = await client.MediaChannel.PlayAsync();
                     Assert.Equal(PlayerStateType.Playing, mediaStatus.PlayerState);
                     runSequence += play;
                 }

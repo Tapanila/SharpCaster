@@ -46,30 +46,30 @@ namespace Sharpcaster.Test
             int commandsToRun = 5;
 
             //We are setting up an event listener for multi zone messages
-            client.GetChannel<MultiZoneChannel>().StatusChanged += (sender, args) =>
+            client.MultiZoneChannel.StatusChanged += (sender, args) =>
             {
                 _autoResetEvent.Set();
             };
 
             //We are setting up an event listener for multi zone messages
-            client.GetChannel<MultiZoneChannel>().DeviceUpdated += (sender, args) =>
+            client.MultiZoneChannel.DeviceUpdated += (sender, args) =>
             {
                 _autoResetEvent.Set();
             };
 
-            var mediaStatus = await client.GetChannel<IMediaChannel>().LoadAsync(media);
+            var mediaStatus = await client.MediaChannel.LoadAsync(media);
 
             for (int i = 0; i < commandsToRun; i++)
             {
                 if (i % 2 == 0)
                 {
                     await Task.Delay(1000);
-                    await client.GetChannel<ReceiverChannel>().SetVolume(0.2);
+                    await client.ReceiverChannel.SetVolume(0.2);
                 }
                 else
                 {
                     await Task.Delay(1000);
-                    await client.GetChannel<ReceiverChannel>().SetVolume(0.3);
+                    await client.ReceiverChannel.SetVolume(0.3);
                 }
             }
 
