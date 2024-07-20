@@ -17,6 +17,7 @@ namespace Sharpcaster.Channels
     /// </summary>
     public class MediaChannel : StatusChannel<MediaStatusMessage, IEnumerable<MediaStatus>>, IMediaChannel
     {
+        public MediaStatus MediaStatus { get => Status.FirstOrDefault(); }
         /// <summary>
         /// Initializes a new instance of MediaChannel class
         /// </summary>
@@ -64,7 +65,7 @@ namespace Sharpcaster.Channels
         public async Task<MediaStatus> LoadAsync(Media media, bool autoPlay = true)
         {
             var status = Client.GetChromecastStatus();
-            return await SendAsync(new LoadMessage() { SessionId = status.Applications[0].SessionId, Media = media, AutoPlay = autoPlay }, status.Applications[0]);
+            return await SendAsync(new LoadMessage() { SessionId = status.Application.SessionId, Media = media, AutoPlay = autoPlay }, status.Application);
         }
 
         /// <summary>
@@ -105,41 +106,38 @@ namespace Sharpcaster.Channels
             return await SendAsync(new SeekMessage() { CurrentTime = seconds });
         }
 
-        public async Task<MediaStatus> QueueLoadAsync(QueueItem[] items, int? currentTime = null, RepeatModeType repeatMode = RepeatModeType.OFF, int? startIndex = null)
+        public async Task<MediaStatus> QueueLoadAsync(QueueItem[] items, long? currentTime = null, RepeatModeType repeatMode = RepeatModeType.OFF, long? startIndex = null)
         {
             var chromecastStatus = Client.GetChromecastStatus();
-            return (await SendAsync<MediaStatusMessage>(new QueueLoadMessage() { SessionId = chromecastStatus.Applications[0].SessionId, Items = items, CurrentTime = currentTime, RepeatMode = repeatMode, StartIndex = startIndex }, chromecastStatus.Applications[0].TransportId)).Status?.FirstOrDefault();
+            return (await SendAsync<MediaStatusMessage>(new QueueLoadMessage() { SessionId = chromecastStatus.Application.SessionId, Items = items, CurrentTime = currentTime, RepeatMode = repeatMode, StartIndex = startIndex }, chromecastStatus.Application.TransportId)).Status?.FirstOrDefault();
         }
 
-        public async Task<MediaStatus> QueueNextAsync(long mediaSessionId)
+        public async Task<MediaStatus> QueueNextAsync()
         {
-            var chromecastStatus = Client.GetChromecastStatus();
-            return (await SendAsync<MediaStatusMessage>(new QueueNextMessage() { MediaSessionId = mediaSessionId }, chromecastStatus.Applications[0].TransportId)).Status?.FirstOrDefault();
+            return await SendAsync(new QueueNextMessage());
         }
 
-        public async Task<MediaStatus> QueuePrevAsync(long mediaSessionId)
+        public async Task<MediaStatus> QueuePrevAsync()
         {
-            var chromecastStatus = Client.GetChromecastStatus();
-            return (await SendAsync<MediaStatusMessage>(new QueuePrevMessage() { MediaSessionId = mediaSessionId }, chromecastStatus.Applications[0].TransportId)).Status?.FirstOrDefault();
+            return await SendAsync(new QueuePrevMessage());
         }
 
-
-        public async Task<QueueItem[]> QueueGetItemsAsync(long mediaSessionId, int[] ids = null)
+        public async Task<QueueItem[]> QueueGetItemsAsync(int[] ids = null)
         {
             var chromecastStatus = Client.GetChromecastStatus();
-            return (await SendAsync<QueueItemsMessage>(new QueueGetItemsMessage() { MediaSessionId = mediaSessionId, Ids = ids }, chromecastStatus.Applications[0].TransportId)).Items;
+            return (await SendAsync<QueueItemsMessage>(new QueueGetItemsMessage() { MediaSessionId = MediaStatus.MediaSessionId, Ids = ids }, chromecastStatus.Application.TransportId)).Items;
         }
 
-        public async Task<int[]> QueueGetItemIdsAsync(long mediaSessionId)
+        public async Task<int[]> QueueGetItemIdsAsync()
         {
             var chromecastStatus = Client.GetChromecastStatus();
-            return (await SendAsync<QueueItemIdsMessage>(new QueueGetItemIdsMessage() { MediaSessionId = mediaSessionId }, chromecastStatus.Applications[0].TransportId)).Ids;
+            return (await SendAsync<QueueItemIdsMessage>(new QueueGetItemIdsMessage() { MediaSessionId = MediaStatus.MediaSessionId }, chromecastStatus.Application.TransportId)).Ids;
         }
 
         public async Task<MediaStatus> GetMediaStatusAsync()
         {
             var chromecastStatus = Client.GetChromecastStatus();
-            return await SendAsync(new Messages.Receiver.GetStatusMessage(), chromecastStatus.Applications[0]);
+            return await SendAsync(new Messages.Receiver.GetStatusMessage(), chromecastStatus.Application);
         }
 
     }

@@ -51,7 +51,7 @@ namespace Sharpcaster.Test
 
                 mediaChannel.StatusChanged += (object sender, EventArgs e) => {
                     try {
-                        MediaStatus status = mediaChannel.Status.FirstOrDefault();
+                        MediaStatus status = mediaChannel.MediaStatus;
                         output.WriteLine(status?.PlayerState.ToString());
                     } catch (Exception) {
                     }
@@ -82,7 +82,7 @@ namespace Sharpcaster.Test
 
      
         [Theory]
-        [MemberData(nameof(ChromecastReceiversFilter.GetDefaultDevice), MemberType = typeof(ChromecastReceiversFilter))]
+        [MemberData(nameof(ChromecastReceiversFilter.GetChromecastUltra), MemberType = typeof(ChromecastReceiversFilter))]
         public async Task TestLoadingMediaQueueAndNavigateNextPrev(ChromecastReceiver receiver) {
 
             var TestHelper = new TestHelper();
@@ -93,11 +93,13 @@ namespace Sharpcaster.Test
             QueueItem[] MyCd = TestHelper.CreateTestCd();
 
             int testSequenceCount = 0;
+            var mediaStatusChanged = 0;
 
             //We are setting up an event to listen to status change. Because we don't know when the audio has started to play
             mediaChannel.StatusChanged += async (object sender, EventArgs e) => {
                 try {
-                    MediaStatus status = mediaChannel.Status.FirstOrDefault();
+                    mediaStatusChanged += 1;
+                    MediaStatus status = mediaChannel.MediaStatus;
                     int currentItemId = status?.CurrentItemId ?? -1;
                    
                     if (currentItemId != -1 && status.PlayerState == PlayerStateType.Playing) {
@@ -108,7 +110,7 @@ namespace Sharpcaster.Test
                                 output.WriteLine("First Test Track started playin. listen for some seconds....");
                                 await Task.Delay(6000);
                                 output.WriteLine("Lets goto next item");
-                                status = await mediaChannel.QueueNextAsync(status.MediaSessionId);
+                                status = await mediaChannel.QueueNextAsync();
                                 // Asserts
                                 // ...
                             } else {
@@ -125,8 +127,8 @@ namespace Sharpcaster.Test
                             testSequenceCount++;
                             await Task.Delay(6000);
                             output.WriteLine("Lets goto back to first one");
-                            status = await mediaChannel.QueuePrevAsync(status.MediaSessionId);
-                        }
+                            status = await mediaChannel.QueuePrevAsync();
+                        } 
 
                     }
                 } catch (Exception ex) {
@@ -144,7 +146,8 @@ namespace Sharpcaster.Test
             Assert.Equal(status.CurrentItemId, status.Items[0].ItemId);
 
             //This keeps the test running untill all eventhandler sequence steps are finished. If something goes wrong we get a very slow timeout here.
-            Assert.True(_autoResetEvent.WaitOne(20000));
+            await Task.Delay(10000);
+            Assert.True(_autoResetEvent.WaitOne(5000));
             await client.DisconnectAsync();
         }
 
@@ -165,16 +168,16 @@ namespace Sharpcaster.Test
 
             await Task.Delay(2000);
 
-            int[] ids = await client.MediaChannel.QueueGetItemIdsAsync(status.MediaSessionId);
+            int[] ids = await client.MediaChannel.QueueGetItemIdsAsync();
 
             Assert.Equal(4, ids.Length);
 
             foreach (int id in ids) {
-                QueueItem[] items = await client.MediaChannel.QueueGetItemsAsync(status.MediaSessionId, new int[] {id});
+                QueueItem[] items = await client.MediaChannel.QueueGetItemsAsync(new int[] {id});
                 Assert.Single(items);
             }
 
-            QueueItem[] items2 = await client.MediaChannel.QueueGetItemsAsync(status.MediaSessionId, ids);
+            QueueItem[] items2 = await client.MediaChannel.QueueGetItemsAsync(ids);
             Assert.Equal(4, items2.Length);
             await client.DisconnectAsync();
         }
@@ -239,7 +242,7 @@ namespace Sharpcaster.Test
         }
 
         [Theory]
-        [MemberData(nameof(ChromecastReceiversFilter.GetAny), MemberType = typeof(ChromecastReceiversFilter))]
+        [MemberData(nameof(ChromecastReceiversFilter.GetChromecastUltra), MemberType = typeof(ChromecastReceiversFilter))]
         public async Task TestLoadingAndPausingMedia(ChromecastReceiver receiver)
         {
             var TestHelper = new TestHelper();
@@ -277,14 +280,15 @@ namespace Sharpcaster.Test
             runSequence += "2";
 
             //This checks that within 5000 ms we have loaded video and were able to pause it
-            Assert.True(_autoResetEvent.WaitOne(5000));
+            await Task.Delay(3000);
+            Assert.True(_autoResetEvent.WaitOne(2000));
             runSequence += "3";
             Assert.Equal("R1p2P3", runSequence);
             await client.DisconnectAsync();
         }
 
         [Theory]
-        [MemberData(nameof(ChromecastReceiversFilter.GetAll), MemberType = typeof(ChromecastReceiversFilter))]
+        [MemberData(nameof(ChromecastReceiversFilter.GetChromecastUltra), MemberType = typeof(ChromecastReceiversFilter))]
         public async Task TestLoadingAndStoppingMedia(ChromecastReceiver receiver)
         {
             var TestHelper = new TestHelper();
@@ -303,7 +307,7 @@ namespace Sharpcaster.Test
             client.MediaChannel.StatusChanged += async (object sender, EventArgs e) =>
             {
                 try {
-                    if (client.MediaChannel.Status.FirstOrDefault()?.PlayerState == PlayerStateType.Playing) {
+                    if (client.MediaChannel.MediaStatus?.PlayerState == PlayerStateType.Playing) {
                         if (firstPlay) {
                             firstPlay = false;
                             await Task.Delay(2000); // Listen for some time
@@ -319,7 +323,8 @@ namespace Sharpcaster.Test
             mediaStatus = await client.MediaChannel.LoadAsync(media);
 
             //This checks that within 5000 ms we have loaded video and were able to pause it
-            Assert.True(_autoResetEvent.WaitOne(10000));
+            await Task.Delay(3000);
+            Assert.True(_autoResetEvent.WaitOne(2000));
 
             await client.DisconnectAsync();
         }
@@ -330,7 +335,6 @@ namespace Sharpcaster.Test
         {
             var TestHelper = new TestHelper();
             ChromecastClient client = await TestHelper.CreateConnectAndLoadAppClient(output, receiver);
-            AutoResetEvent _autoResetEvent = new AutoResetEvent(false);
 
             var media = new Media
             {
@@ -348,8 +352,7 @@ namespace Sharpcaster.Test
                 loadFailedException = ex;
             }
             
-            Assert.True(loadFailedException?.Message == "Load failed");
-            
+            Assert.Equal("Load failed", loadFailedException?.Message);
         }
 
         [Theory]
@@ -358,25 +361,20 @@ namespace Sharpcaster.Test
         {
             var TestHelper = new TestHelper();
             ChromecastClient client = await TestHelper.CreateConnectAndLoadAppClient(output, receiver);
-            AutoResetEvent _autoResetEvent = new AutoResetEvent(false);
-            MediaStatus mediaStatus;
 
             var media = new Media
             {
                 ContentUrl = "https://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/mp4/DesigningForGoogleCast.mp4"
             };
 
-            mediaStatus = await client.MediaChannel.LoadAsync(media);
+            await client.MediaChannel.LoadAsync(media);
             await client.MediaChannel.PlayAsync();
 
             client = TestHelper.GetClientWithTestOutput(output);
             var status = await client.ConnectChromecast(receiver);
 
-            var applicationRunning = status.Applications[0];
-
-
-
-            var chromecastStatus = await client.LaunchApplicationAsync(applicationRunning.AppId, true);
+            var applicationRunning = status.Application;
+            await client.LaunchApplicationAsync(applicationRunning.AppId, true);
             await client.MediaChannel.PauseAsync();
         }
 
@@ -396,7 +394,6 @@ namespace Sharpcaster.Test
             {
                 Media = media
             };
-
 
             await client.MediaChannel.QueueLoadAsync([queueItem], null, RepeatModeType.ALL);
             var test = await client.MediaChannel.PlayAsync();
@@ -421,7 +418,6 @@ namespace Sharpcaster.Test
                 Media = media
             };
 
-
             await client.MediaChannel.QueueLoadAsync([queueItem], null, RepeatModeType.OFF);
             var test = await client.MediaChannel.PlayAsync();
 
@@ -445,7 +441,6 @@ namespace Sharpcaster.Test
                 Media = media
             };
 
-
             await client.MediaChannel.QueueLoadAsync([queueItem], null, RepeatModeType.SINGLE);
             var test = await client.MediaChannel.PlayAsync();
 
@@ -468,7 +463,6 @@ namespace Sharpcaster.Test
             {
                 Media = media
             };
-
 
             await client.MediaChannel.QueueLoadAsync([queueItem], null, RepeatModeType.ALL_AND_SHUFFLE);
             var test = await client.MediaChannel.PlayAsync();

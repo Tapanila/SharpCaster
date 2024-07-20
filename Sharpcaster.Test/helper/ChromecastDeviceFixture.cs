@@ -1,23 +1,21 @@
-﻿using Sharpcaster.Interfaces;
-using Sharpcaster.Models;
+﻿using Sharpcaster.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Xunit;
 
-namespace Sharpcaster.Test.helper {
+namespace Sharpcaster.Test.helper
+{
 
     // Define a TestFixture to be used by different test classes
     public class ChromecastDevicesFixture : IDisposable {
 
         // This needs to be static to be used by the MemberData functions of the ChromecastReceiversFilter class allowing to annotate [Theories] with specific list of devices.
-        public static List<ChromecastReceiver> Receivers = new List<ChromecastReceiver>();
-        public static int NumberOfSearches = 0;
+        public static List<ChromecastReceiver> Receivers = [];
+        public static int NumberOfSearches;
 
         static ChromecastDevicesFixture() {
-            IChromecastLocator locator = new MdnsChromecastLocator();
+            MdnsChromecastLocator locator = new();
             var t = locator.FindReceiversAsync();
             t.Wait();
             Receivers = t.Result.ToList();

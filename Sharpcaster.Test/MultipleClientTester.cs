@@ -1,13 +1,10 @@
-﻿using Sharpcaster.Channels;
-using Sharpcaster.Models;
+﻿using Sharpcaster.Models;
 using Sharpcaster.Test.helper;
 using System.Threading.Tasks;
 using Xunit.Abstractions;
 using Xunit;
-using Sharpcaster.Interfaces;
 using Sharpcaster.Models.Media;
 using System.Threading;
-using System.Linq;
 
 namespace Sharpcaster.Test
 {
@@ -91,8 +88,6 @@ namespace Sharpcaster.Test
         public async Task TestCommandsFromMultipleDifferentClients(ChromecastReceiver receiver)
         {
             var TestHelper = new TestHelper();
-            AutoResetEvent _autoResetEvent2 = new AutoResetEvent(false);
-            AutoResetEvent _autoResetEvent3 = new AutoResetEvent(false);
             var client1 = await TestHelper.CreateConnectAndLoadAppClient(output, receiver);
             var client2 = await TestHelper.CreateAndConnectClient(output, receiver);
             var client3 = await TestHelper.CreateAndConnectClient(output, receiver);
@@ -104,12 +99,9 @@ namespace Sharpcaster.Test
                 ContentUrl = "https://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/mp4/DesigningForGoogleCast.mp4"
             };
 
-
-            var mediaStatus = await client1.MediaChannel.LoadAsync(media);
+            await client1.MediaChannel.LoadAsync(media);
             await client1.MediaChannel.PlayAsync();
-
             await client2.MediaChannel.PauseAsync();
-
             await client3.MediaChannel.PlayAsync();
 
             Assert.NotEqual(client1.SenderId, client2.SenderId);

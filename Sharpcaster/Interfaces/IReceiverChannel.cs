@@ -18,7 +18,7 @@ namespace Sharpcaster.Interfaces
         Task<ChromecastStatus> LaunchApplicationAsync(string applicationId);
 
         Task<ChromecastStatus> GetChromecastStatusAsync();
-        Task<ChromecastStatus> StopApplication(string sessionId);
+        Task<ChromecastStatus> StopApplication();
         Task<ChromecastStatus> SetVolume(double level);
         Task<ChromecastStatus> SetMute(bool muted);
     }

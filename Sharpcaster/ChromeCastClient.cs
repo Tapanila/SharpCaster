@@ -365,12 +365,12 @@ namespace Sharpcaster
 
         public ChromecastStatus GetChromecastStatus()
         {
-            return GetStatuses().First(x => x.Key == GetChannel<ReceiverChannel>().Namespace).Value as ChromecastStatus;
+            return ReceiverChannel.Status;
         }
 
         public MediaStatus GetMediaStatus()
         {
-            return GetStatuses().First(x => x.Key == GetChannel<MediaChannel>().Namespace).Value as MediaStatus;
+            return MediaChannel.MediaStatus;
         }
     }
 }

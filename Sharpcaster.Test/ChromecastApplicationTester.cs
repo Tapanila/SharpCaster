@@ -1,7 +1,6 @@
 ﻿using Sharpcaster.Models;
 using Sharpcaster.Test.customChannel;
 using Sharpcaster.Test.helper;
-using System;
 using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
@@ -25,7 +24,7 @@ namespace Sharpcaster.Test
             var client = await TestHelper.CreateAndConnectClient(output, receiver);
             var status = await client.LaunchApplicationAsync("B3419EF5");
 
-            Assert.Equal("B3419EF5", status.Applications[0].AppId);
+            Assert.Equal("B3419EF5", status.Application.AppId);
 
             await client.DisconnectAsync();
         }
@@ -38,13 +37,13 @@ namespace Sharpcaster.Test
             var client = await TestHelper.CreateAndConnectClient(output, receiver);
             var status = await client.LaunchApplicationAsync("B3419EF5");
 
-            var firstLaunchTransportId = status.Applications[0].TransportId;
+            var firstLaunchTransportId = status.Application.TransportId;
             await client.DisconnectAsync();
 
-            status = await client.ConnectChromecast(receiver);
+            _ = await client.ConnectChromecast(receiver);
             status = await client.LaunchApplicationAsync("B3419EF5", true);
 
-            Assert.Equal(firstLaunchTransportId, status.Applications[0].TransportId);
+            Assert.Equal(firstLaunchTransportId, status.Application.TransportId);
         }
 
 
@@ -56,15 +55,15 @@ namespace Sharpcaster.Test
             var client = await TestHelper.CreateAndConnectClient(output, receiver);
             var status = await client.LaunchApplicationAsync("B3419EF5");
 
-            var firstLaunchTransportId = status.Applications[0].TransportId;
+            var firstLaunchTransportId = status.Application.TransportId;
             await client.DisconnectAsync();
 
-            status = await client.ConnectChromecast(receiver);
+            _ = await client.ConnectChromecast(receiver);
             status = await client.LaunchApplicationAsync("B3419EF5", false);
 
 
             // My JBL Device (almost every time - but not always ) makes a new ID here!!!! (The other device - ChromecastAudio DOES NOT!?)
-            Assert.NotEqual(firstLaunchTransportId, status.Applications[0].TransportId);
+            Assert.NotEqual(firstLaunchTransportId, status.Application.TransportId);
         }
 
         [Theory]
@@ -74,14 +73,14 @@ namespace Sharpcaster.Test
             var client = await TestHelper.CreateAndConnectClient(output, receiver);
             var status = await client.LaunchApplicationAsync("B3419EF5");
 
-            var firstLaunchTransportId = status.Applications[0].TransportId;
+            var firstLaunchTransportId = status.Application.TransportId;
             await client.DisconnectAsync();
 
-            status = await client.ConnectChromecast(receiver);
+            _ = await client.ConnectChromecast(receiver);
             status = await client.LaunchApplicationAsync("B3419EF5", false);
 
             // My ChromecastAudio device keeps the same transport session here!
-            Assert.Equal(firstLaunchTransportId, status.Applications[0].TransportId);
+            Assert.Equal(firstLaunchTransportId, status.Application.TransportId);
         }
 
 
@@ -93,13 +92,13 @@ namespace Sharpcaster.Test
             var client = await TestHelper.CreateAndConnectClient(output, receiver);
             var status = await client.LaunchApplicationAsync("A9BCCB7C");           //Youtube
 
-            var firstLaunchTransportId = status.Applications[0].TransportId;
+            var firstLaunchTransportId = status.Application.TransportId;
             await client.DisconnectAsync();
 
-            status = await client.ConnectChromecast(receiver);
+            _ = await client.ConnectChromecast(receiver);
             status = await client.LaunchApplicationAsync("B3419EF5");               //My sample Application
 
-            Assert.NotEqual(firstLaunchTransportId, status.Applications[0].TransportId);
+            Assert.NotEqual(firstLaunchTransportId, status.Application.TransportId);
         }
 
         [Theory]
@@ -110,11 +109,11 @@ namespace Sharpcaster.Test
             var client = await TestHelper.CreateAndConnectClient(output, receiver);
             var status = await client.LaunchApplicationAsync("B3419EF5");
 
-            var firstLaunchTransportId = status.Applications[0].TransportId;
+            var firstLaunchTransportId = status.Application.TransportId;
 
             status = await client.LaunchApplicationAsync("B3419EF5");
             
-            Assert.Equal(firstLaunchTransportId, status.Applications[0].TransportId);
+            Assert.Equal(firstLaunchTransportId, status.Application.TransportId);
         }
 
         //Seems like this isn't really working anymore and just loading a white screen

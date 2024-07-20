@@ -21,7 +21,7 @@ namespace Sharpcaster.Messages.Queue
         /// </summary>
         [DataMember(Name = "startIndex")]
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
-        public int? StartIndex { get; set; }
+        public long? StartIndex { get; set; }
         /// <summary>
         /// Behavior of the queue when all items have been played.
         /// </summary>
@@ -39,6 +39,6 @@ namespace Sharpcaster.Messages.Queue
 
         [DataMember(Name = "currentTime")]
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
-        public int? CurrentTime { get; set; }
+        public long? CurrentTime { get; set; }
     }
 }

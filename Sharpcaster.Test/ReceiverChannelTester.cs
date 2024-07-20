@@ -1,5 +1,4 @@
-﻿using Sharpcaster.Channels;
-using Sharpcaster.Models;
+﻿using Sharpcaster.Models;
 using Sharpcaster.Test.helper;
 using System.Threading.Tasks;
 using Xunit;
@@ -61,9 +60,9 @@ namespace Sharpcaster.Test
             var TestHelper = new TestHelper();
             var client = await TestHelper.CreateAndConnectClient(output, receiver);
 
-            var status = await client.LaunchApplicationAsync("B3419EF5");
+            await client.LaunchApplicationAsync("B3419EF5");
 
-            status = await client.ReceiverChannel.StopApplication(status.Applications[0].SessionId);
+            var status = await client.ReceiverChannel.StopApplication();
             Assert.Null(status.Applications);
         }
     }

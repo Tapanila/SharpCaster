@@ -1,17 +1,10 @@
-﻿using Microsoft.VisualStudio.TestPlatform.Utilities;
-using Sharpcaster.Interfaces;
-using Sharpcaster.Models.Media;
+﻿using Sharpcaster.Models.Media;
 using Sharpcaster.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 using Sharpcaster.Test.helper;
 using Xunit.Abstractions;
-using Sharpcaster.Channels;
 
 namespace Sharpcaster.Test
 {

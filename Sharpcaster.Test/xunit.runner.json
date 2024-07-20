@@ -1,5 +1,5 @@
 ﻿{
 	"methodDisplay": "method",
-	"parallelAlgorithm": "aggressive",
-	"showLiveOutput":  true
+	"parallelizeTestCollections": false,
+	"showLiveOutput": true
 }

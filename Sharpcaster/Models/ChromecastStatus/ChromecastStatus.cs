@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Sharpcaster.Models.ChromecastStatus
 {
@@ -13,5 +14,7 @@ namespace Sharpcaster.Models.ChromecastStatus
         public bool IsStandBy { get; set; }
         [JsonProperty("volume")]
         public Volume Volume { get; set; }
+        [JsonIgnore]
+        public ChromecastApplication Application { get => Applications.FirstOrDefault(); }
     }
 }

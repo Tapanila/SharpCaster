@@ -41,9 +41,9 @@ namespace Sharpcaster.Channels
             return (await SendAsync<ReceiverStatusMessage>(new SetVolumeMessage() { Volume = new Models.Volume() { Level = level } })).Status;
         }
 
-        public async Task<ChromecastStatus> StopApplication(string sessionId)
+        public async Task<ChromecastStatus> StopApplication()
         {
-            return (await SendAsync<ReceiverStatusMessage>(new StopMessage() { SessionId = sessionId })).Status;
+            return (await SendAsync<ReceiverStatusMessage>(new StopMessage() { SessionId = Status.Application.SessionId })).Status;
         }
     }
 }

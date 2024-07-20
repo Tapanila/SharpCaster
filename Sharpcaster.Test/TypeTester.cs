@@ -1,5 +1,4 @@
 ﻿using Sharpcaster.Messages.Receiver;
-using System.Threading.Tasks;
 using Xunit;
 
 namespace Sharpcaster.Test

@@ -1,11 +1,9 @@
-﻿using Microsoft.VisualStudio.TestPlatform.Utilities;
-using Sharpcaster.Models;
+﻿using Sharpcaster.Models;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
 using Sharpcaster.Test.helper;
-using Sharpcaster.Interfaces;
 using Sharpcaster.Models.Media;
 using System;
 using System.Linq;
@@ -25,8 +23,6 @@ namespace Sharpcaster.Test
 
         [Theory]
         [MemberData(nameof(ChromecastReceiversFilter.GetAll), MemberType = typeof(ChromecastReceiversFilter))]
-        //[MemberData(nameof(CCDevices.GetJblSpeaker), MemberType = typeof(CCDevices))]
-        //[MemberData(nameof(CCDevices.GetAny), MemberType = typeof(CCDevices))]
         public async Task SearchChromecastsAndConnectToIt(ChromecastReceiver receiver)
         {
             var TestHelper = new TestHelper();
@@ -35,8 +31,6 @@ namespace Sharpcaster.Test
         }
 
         [Theory(Skip = "Test needs manuell interactions -> skipped for autotestings")]
-        //[Theory()]
-        //[MemberData(nameof(CCDevices.GetAny), MemberType = typeof(CCDevices))]
         [MemberData(nameof(ChromecastReceiversFilter.GetAny), MemberType = typeof(ChromecastReceiversFilter))]
         public async Task SearchChromecastsAndConnectToItThenWaitForItToShutdown(ChromecastReceiver receiver)
         {
@@ -59,8 +53,6 @@ namespace Sharpcaster.Test
         }
 
         [Theory]
-        //[MemberData(nameof(ChromecastReceiversFilter.GetChromecastUltra), MemberType = typeof(ChromecastReceiversFilter))]
-        //[MemberData(nameof(ChromecastReceiversFilter.GetJblSpeaker), MemberType = typeof(ChromecastReceiversFilter))]
         [MemberData(nameof(ChromecastReceiversFilter.GetAny), MemberType = typeof(ChromecastReceiversFilter))]
         public async Task TestingHeartBeat(ChromecastReceiver receiver)
         {

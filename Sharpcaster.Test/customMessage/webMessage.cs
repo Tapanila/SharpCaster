@@ -1,5 +1,4 @@
 ﻿using System.Runtime.Serialization;
-using Newtonsoft.Json;
 using Sharpcaster.Messages;
 
 namespace Sharpcaster.Test.customChannel
