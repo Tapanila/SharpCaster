@@ -344,7 +344,7 @@ namespace Sharpcaster
                 }
             }
             var newApplication = await GetChannel<IReceiverChannel>().LaunchApplicationAsync(applicationId);
-            await GetChannel<IConnectionChannel>().ConnectAsync(newApplication.Applications.First().TransportId);
+            await GetChannel<IConnectionChannel>().ConnectAsync(newApplication.Application.TransportId);
             return await GetChannel<IReceiverChannel>().GetChromecastStatusAsync();
         }
 

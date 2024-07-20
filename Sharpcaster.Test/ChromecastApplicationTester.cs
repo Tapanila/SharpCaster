@@ -116,21 +116,23 @@ namespace Sharpcaster.Test
             Assert.Equal(firstLaunchTransportId, status.Application.TransportId);
         }
 
-        //Seems like this isn't really working anymore and just loading a white screen
-        [Fact(Skip = "Seems like this isn't really working anymore and just loading a white screen")]
-        public async Task ConnectToChromecastAndLaunchWebPage()
+        [Theory]
+        [MemberData(nameof(ChromecastReceiversFilter.GetChromecastUltra), MemberType = typeof(ChromecastReceiversFilter))]
+        public async Task ConnectToChromecastAndLaunchWebPage(ChromecastReceiver receiver)
         {
             var TestHelper = new TestHelper();
-            var client = await TestHelper.CreateConnectAndLoadAppClient(output, "5CB45E5A");
+            var client = await TestHelper.CreateConnectAndLoadAppClient(output, receiver, "F7FD2183");
 
             var req = new WebMessage
             {
-                Type = "loc",
-                Url = "https://www.google.com/"
+                Url = "https://mallow.fi/",
+                Type = "load",
+                SessionId = client.GetChromecastStatus().Application.SessionId
             };
 
 
-            await client.SendAsync(null, "urn:x-cast:com.url.cast", req, "receiver-0");
+            await client.SendAsync(null, "urn:x-cast:com.boombatower.chromecast-dashboard", req, client.GetChromecastStatus().Application.SessionId);
+            await Task.Delay(5000);
         }
     }
 }
