@@ -6,6 +6,12 @@ using Sharpcaster.Channels;
 using Sharpcaster.Extensions;
 using Sharpcaster.Interfaces;
 using Sharpcaster.Messages;
+using Sharpcaster.Messages.Connection;
+using Sharpcaster.Messages.Heartbeat;
+using Sharpcaster.Messages.Media;
+using Sharpcaster.Messages.Multizone;
+using Sharpcaster.Messages.Queue;
+using Sharpcaster.Messages.Receiver;
 using Sharpcaster.Models;
 using Sharpcaster.Models.ChromecastStatus;
 using Sharpcaster.Models.Media;
@@ -13,6 +19,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Net.Security;
@@ -49,7 +56,7 @@ namespace Sharpcaster
         private TaskCompletionSource<bool> ReceiveTcs { get; set; }
         private SemaphoreSlim SendSemaphoreSlim { get; } = new SemaphoreSlim(1, 1);
 
-        private IDictionary<string, Type> MessageTypes { get; set; }
+        private Dictionary<string, Type> MessageTypes { get; set; }
         private IEnumerable<IChromecastChannel> Channels { get; set; }
         private ConcurrentDictionary<int, object> WaitingTasks { get; } = new ConcurrentDictionary<int, object>();
 
@@ -68,12 +75,20 @@ namespace Sharpcaster
             serviceCollection.AddTransient<IChromecastChannel, MediaChannel>();
             serviceCollection.AddTransient<IChromecastChannel, MultiZoneChannel>();
             var messageInterfaceType = typeof(IMessage);
-            foreach (var type in (from t in typeof(IConnectionChannel).GetTypeInfo().Assembly.GetTypes()
-                                  where t.GetTypeInfo().IsClass && !t.GetTypeInfo().IsAbstract && messageInterfaceType.IsAssignableFrom(t) && t.GetTypeInfo().GetCustomAttribute<ReceptionMessageAttribute>() != null
-                                  select t))
-            {
-                serviceCollection.AddTransient(messageInterfaceType, type);
-            }
+            serviceCollection.AddTransient(messageInterfaceType, typeof(CloseMessage));
+            serviceCollection.AddTransient(messageInterfaceType, typeof(PingMessage));
+            serviceCollection.AddTransient(messageInterfaceType, typeof(ReceiverStatusMessage));
+            serviceCollection.AddTransient(messageInterfaceType, typeof(LoadFailedMessage));
+            serviceCollection.AddTransient(messageInterfaceType, typeof(LoadCancelledMessage));
+            serviceCollection.AddTransient(messageInterfaceType, typeof(MediaStatusMessage));
+            serviceCollection.AddTransient(messageInterfaceType, typeof(MultizoneStatusMessage));
+            serviceCollection.AddTransient(messageInterfaceType, typeof(DeviceUpdatedMessage));
+            serviceCollection.AddTransient(messageInterfaceType, typeof(QueueChangeMessage));
+            serviceCollection.AddTransient(messageInterfaceType, typeof(QueueItemsMessage));
+            serviceCollection.AddTransient(messageInterfaceType, typeof(QueueItemIdsMessage));
+            serviceCollection.AddTransient(messageInterfaceType, typeof(LaunchErrorMessage));
+            serviceCollection.AddTransient(messageInterfaceType, typeof(InvalidRequestMessage));
+
             Init(serviceCollection);
         }
 
@@ -96,8 +111,8 @@ namespace Sharpcaster
             Channels = channels;
 
             _logger = serviceProvider.GetService<ILogger<ChromecastClient>>();
-            _logger?.LogDebug(MessageTypes.Keys.ToString(","));
-            _logger?.LogDebug(Channels.ToString(","));
+            _logger?.LogDebug("MessageTypes: {MessageTypes}", MessageTypes.Keys.ToString(","));
+            _logger?.LogDebug("Channels: {Channels}", Channels.ToString(","));
 
             foreach (var channel in Channels)
             {
@@ -159,7 +174,7 @@ namespace Sharpcaster
                             {
                                 HeartbeatChannel.StopTimeoutTimer();
                             }
-                            channel?._logger?.LogTrace($"RECEIVED: {payload}");
+                            channel?._logger?.LogTrace("RECEIVED: {Payload}", payload);
                             
                             var message = JsonConvert.DeserializeObject<MessageWithId>(payload);
                             if (MessageTypes.TryGetValue(message.Type, out Type type))
@@ -173,8 +188,8 @@ namespace Sharpcaster
                                 }
                                 catch (Exception ex)
                                 {
-                                    _logger?.LogError($"Exception processing the Response: {ex.Message}");
-                                    TaskCompletionSourceInvoke(ref tcs, message, "SetException", ex, new Type[] { typeof(Exception) });
+                                    _logger?.LogError("Exception processing the Response: {Message}", ex.Message);
+                                    TaskCompletionSourceInvoke(ref tcs, message, "SetException", ex, [typeof(Exception)]);
                                 }
                             }
                             else
@@ -185,13 +200,13 @@ namespace Sharpcaster
                             }
                         } else
                         {
-                            _logger?.LogError($"Couldn't parse the channel from: {castMessage.Namespace}  :  {payload}");
+                            _logger?.LogError("Couldn't parse the channel from: {NameSpace} : {Payload}", castMessage.Namespace, payload);
                         }
                     }
                 }
                 catch (Exception exception)
                 {
-                    _logger?.LogError($"Error in receive loop: {exception.Message}");
+                    _logger?.LogError("Error in receive loop: {Message}", exception.Message);
                     //await Dispose(false);
                     ReceiveTcs.SetResult(true);
                 }
@@ -207,7 +222,7 @@ namespace Sharpcaster
             }
             if (tcs != null) {
                 var tcsType = tcs.GetType();
-                (types == null ? tcsType.GetMethod(method) : tcsType.GetMethod(method, types)).Invoke(tcs, new object[] { parameter });
+                (types == null ? tcsType.GetMethod(method) : tcsType.GetMethod(method, types)).Invoke(tcs, [parameter]);
             }
         }
 
@@ -223,10 +238,10 @@ namespace Sharpcaster
             await SendSemaphoreSlim.WaitAsync();
             try
             {
-                ((channelLogger!=null)?channelLogger:_logger)?.LogTrace($"SENT    : {castMessage.DestinationId}: {castMessage.PayloadUtf8}");
+                (channelLogger ?? _logger)?.LogTrace("SENT: {Destination}: {PayLoad}", castMessage.DestinationId, castMessage.PayloadUtf8);
                 byte[] message = castMessage.ToProto();
                 var networkStream = _stream;
-                await networkStream.WriteAsync(message, 0, message.Length);
+                await networkStream.WriteAsync(message);
                 await networkStream.FlushAsync();
             }
             finally
@@ -295,7 +310,7 @@ namespace Sharpcaster
                 }
                 catch (Exception ex)
                 {
-                    _logger?.LogError($"Error on disposing. {ex.Message}");
+                    _logger?.LogError("Error on disposing. {Message}", ex.Message);
                 }
                 finally
                 {

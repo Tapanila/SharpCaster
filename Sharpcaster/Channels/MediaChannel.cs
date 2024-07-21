@@ -43,16 +43,16 @@ namespace Sharpcaster.Channels
             }
             catch (Exception ex)
             {
-                _logger?.LogError($"Error sending message: {ex.Message}");
+                _logger?.LogError("Error sending message: {Message}", ex.Message);
                 Status = null;
-                throw ex;
+                throw;
             }
         }
 
         private async Task<MediaStatus> SendAsync(MediaSessionMessage message)
         {
             var chromecastStatus = Client.GetChromecastStatus();
-            message.MediaSessionId = Status?.First().MediaSessionId ?? throw new ArgumentNullException("MediaSessionId");
+            message.MediaSessionId = Status?.First().MediaSessionId ?? throw new ArgumentNullException(nameof(message), "MediaSessionID");
             return await SendAsync(message, chromecastStatus.Applications[0]);
         }
 
