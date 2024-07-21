@@ -155,7 +155,7 @@ namespace Sharpcaster
                         var channel = Channels.FirstOrDefault(c => c.Namespace == castMessage.Namespace);
                         if (channel != null)
                         {
-                            if (channel != GetChannel<IHeartbeatChannel>())
+                            if (channel != HeartbeatChannel)
                             {
                                 HeartbeatChannel.StopTimeoutTimer();
                             }
@@ -331,21 +331,21 @@ namespace Sharpcaster
                 var runningApplication = status?.Applications?.FirstOrDefault(x => x.AppId == applicationId);
                 if (runningApplication != null)
                 {
-                    await GetChannel<IConnectionChannel>().ConnectAsync(runningApplication.TransportId);
+                    await ConnectionChannel.ConnectAsync(runningApplication.TransportId);
                     //Check if the application is using the media namespace
                     //If so go and get the media status
                     if (runningApplication.Namespaces.Where(ns => ns.Name == "urn:x-cast:com.google.cast.media") != null)
                     {
                         await MediaChannel.GetMediaStatusAsync();
                     }
-                    return await GetChannel<IReceiverChannel>().GetChromecastStatusAsync();
+                    return await ReceiverChannel.GetChromecastStatusAsync();
                 } else {
                     // another AppId is running
                 }
             }
-            var newApplication = await GetChannel<IReceiverChannel>().LaunchApplicationAsync(applicationId);
-            await GetChannel<IConnectionChannel>().ConnectAsync(newApplication.Application.TransportId);
-            return await GetChannel<IReceiverChannel>().GetChromecastStatusAsync();
+            var newApplication = await ReceiverChannel.LaunchApplicationAsync(applicationId);
+            await ConnectionChannel.ConnectAsync(newApplication.Application.TransportId);
+            return await ReceiverChannel.GetChromecastStatusAsync();
         }
 
         private IEnumerable<IChromecastChannel> GetStatusChannels()
