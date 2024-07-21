@@ -90,7 +90,7 @@ namespace Sharpcaster.Test
 
             AutoResetEvent _autoResetEvent = new AutoResetEvent(false);
             IMediaChannel mediaChannel = client.MediaChannel;
-            QueueItem[] MyCd = TestHelper.CreateTestCd();
+            QueueItem[] MyCd = Test.TestHelper.CreateTestCd();
 
             int testSequenceCount = 0;
             var mediaStatusChanged = 0;
@@ -158,7 +158,7 @@ namespace Sharpcaster.Test
             var TestHelper = new TestHelper();
             ChromecastClient client = await TestHelper.CreateConnectAndLoadAppClient(output, receiver);
             
-            QueueItem[] MyCd = TestHelper.CreateTestCd();
+            QueueItem[] MyCd = Test.TestHelper.CreateTestCd();
 
             MediaStatus status = await client.MediaChannel.QueueLoadAsync(MyCd);
 
@@ -190,7 +190,7 @@ namespace Sharpcaster.Test
             var TestHelper = new TestHelper();
             ChromecastClient client = await TestHelper.CreateConnectAndLoadAppClient(output, receiver);
 
-            QueueItem[] MyCd = TestHelper.CreateTestCd();
+            QueueItem[] MyCd = Test.TestHelper.CreateTestCd();
 
             MediaStatus status = await client.MediaChannel.QueueLoadAsync(MyCd);
 

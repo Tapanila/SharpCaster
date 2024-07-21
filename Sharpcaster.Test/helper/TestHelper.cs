@@ -170,7 +170,7 @@ namespace Sharpcaster.Test
         {
             TestOutput = null;
             var chromecast = FindChromecast();
-            ChromecastClient cc = new ChromecastClient();
+            ChromecastClient cc = new();
             await cc.ConnectChromecast(chromecast);
             await cc.LaunchApplicationAsync(appId, false);
             return cc;
@@ -205,7 +205,7 @@ namespace Sharpcaster.Test
                     var formatter = invocation.Arguments[4];
 
                     var invokeMethod = formatter.GetType().GetMethod("Invoke");
-                    var logMessage = (string)invokeMethod?.Invoke(formatter, new[] { state, exception });
+                    var logMessage = (string)invokeMethod?.Invoke(formatter, [state, exception]);
 
                     var testingName = typeof(T).GetGenericArguments().FirstOrDefault()?.Name;
 
@@ -241,7 +241,7 @@ namespace Sharpcaster.Test
                     var formatter = invocation.Arguments[4];
 
                     var invokeMethod = formatter.GetType().GetMethod("Invoke");
-                    var logMessage = (string)invokeMethod?.Invoke(formatter, new[] { state, exception });
+                    var logMessage = (string)invokeMethod?.Invoke(formatter, [state, exception]);
 
                     try
                     {
@@ -297,7 +297,7 @@ namespace Sharpcaster.Test
         }
 
 
-        public QueueItem[] CreateTestCd()
+        public static QueueItem[] CreateTestCd()
         {
             QueueItem[] MyCd =
             [
