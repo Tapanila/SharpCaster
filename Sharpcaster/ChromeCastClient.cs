@@ -36,6 +36,7 @@ namespace Sharpcaster
         /// </summary>
         public event EventHandler Disconnected;
         public Guid SenderId { get; } = Guid.NewGuid();
+        public string FriendlyName { get; set; }
 
         public IMediaChannel MediaChannel => GetChannel<IMediaChannel>();
         public IHeartbeatChannel HeartbeatChannel => GetChannel<IHeartbeatChannel>();
@@ -108,7 +109,8 @@ namespace Sharpcaster
         public async Task<ChromecastStatus> ConnectChromecast(ChromecastReceiver chromecastReceiver)
         {
             await Dispose();
-
+            FriendlyName = chromecastReceiver.Name;
+            
             _client = new TcpClient();
             await _client.ConnectAsync(chromecastReceiver.DeviceUri.Host, chromecastReceiver.Port);
             
