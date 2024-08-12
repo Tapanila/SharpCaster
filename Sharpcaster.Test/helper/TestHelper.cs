@@ -325,5 +325,30 @@ namespace Sharpcaster.Test
             return MyCd;
         }
 
+        public QueueItem[] CreateFailingQueu()
+        {
+            QueueItem[] queueItems =
+            [
+            
+                new QueueItem() {
+                    Media = new Media {
+                        ContentUrl = "https://audionautix.com/Music/AwayInAManger.mp3"
+                    }
+                },
+                new QueueItem() {
+                    Media = new Media {
+                        ContentUrl = "https://audionautix.com/Music/CarolOfTheBells.mp3"
+                    }
+                },
+                new QueueItem() {
+                    Media = new Media {
+                        ContentUrl = "https://audionautix.com/Music/JoyToTheWorld.mp3"
+                    }
+                }
+            
+            ];
+            return queueItems;
+        }
+
     }
 }

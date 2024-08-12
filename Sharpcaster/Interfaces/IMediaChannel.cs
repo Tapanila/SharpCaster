@@ -1,5 +1,7 @@
-﻿using Sharpcaster.Models.Media;
+﻿using Sharpcaster.Messages.Media;
+using Sharpcaster.Models.Media;
 using Sharpcaster.Models.Queue;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -8,6 +10,7 @@ namespace Sharpcaster.Interfaces {
     /// Interface for the media channel
     /// </summary>
     public interface IMediaChannel : IStatusChannel<IEnumerable<MediaStatus>>, IChromecastChannel {
+        event EventHandler<ErrorMessage> ErrorHappened;
         /// <summary>
         /// Loads a media
         /// </summary>
