@@ -6,10 +6,13 @@ using System.Text;
 namespace Sharpcaster.Messages.Spotify
 {
     [DataContract]
-    public class GetInfoMessage: MessageWithId
+    public class GetInfoMessage: Message
     {
-        public string remoteName { get; set; }
-        public string deviceId { get; set; }
-        public bool deviceAPI_isGroup { get; set; }
+        [DataMember(Name = "payload")]
+        public GetInfoMessagePayload Payload { get; set; }
+        public GetInfoMessage()
+        {
+            Type = "getInfo";
+        }
     }
 }

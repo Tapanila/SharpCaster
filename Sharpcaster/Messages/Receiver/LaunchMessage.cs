@@ -13,5 +13,8 @@ namespace Sharpcaster.Messages.Receiver
         /// </summary>
         [DataMember(Name = "appId")]
         public string ApplicationId { get; set; }
+
+        [DataMember(Name = "language")]
+        public string Language { get; set; } = "en-US";
     }
 }

@@ -39,3 +39,15 @@ _ = await client.MediaChannel.LoadAsync(media);
 ## SharpCaster Demo
 
 ![SharpCaster Simple demo](https://raw.githubusercontent.com/tapanila/SharpCaster/master/Assets/SharpCaster.Simple.Demo.gif)
+
+## Adding support for custom chromecast channels
+
+ * In Chrome, go to `chrome://net-export/`
+ * Select 'Include raw bytes (will include cookies and credentials)'
+ * Click 'Start Logging to Disk'
+ * Open a new tab, browse to your favorite application on the web that has Chromecast support and start casting.
+ * Go back to the tab that is capturing events and click on stop.
+ * Open https://netlog-viewer.appspot.com/ and select your event log file.
+ * Browse to https://netlog-viewer.appspot.com/#events&q=type:SOCKET, and find the socket that has familiar JSON data.
+ * Go through the results and collect the JSON that is exchanged.
+ * Now you can create a new class that inherits from ChromecastChannel and implement the logic to send and receive messages.

@@ -55,9 +55,13 @@ namespace Sharpcaster.Channels
         {
             await SendAsync(new GetInfoMessage
             {
-                deviceId = Client.FriendlyName,
-                remoteName = SpotifyDeviceId,
-                deviceAPI_isGroup = false
+                Payload = new GetInfoMessagePayload
+                {
+                    DeviceId = SpotifyDeviceId,
+                    RemoteName = Client.FriendlyName,
+                    DeviceAPI_isGroup = false
+                }
+
             });
         }
 

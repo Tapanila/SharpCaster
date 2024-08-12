@@ -26,12 +26,15 @@ namespace Sharpcaster.Test
         [Theory]
         //[MemberData(nameof(ChromecastReceiversFilter.GetGoogleCastGroup), MemberType = typeof(ChromecastReceiversFilter))]
         //[MemberData(nameof(CCDevices.GetJblSpeaker), MemberType = typeof(CCDevices))]
-        [MemberData(nameof(ChromecastReceiversFilter.GetAny), MemberType = typeof(ChromecastReceiversFilter))]
+        [MemberData(nameof(ChromecastReceiversFilter.GetChromecastUltra), MemberType = typeof(ChromecastReceiversFilter))]
         public async Task TestChromecastGetInfo(ChromecastReceiver receiver)
         {
             var TestHelper = new TestHelper();
             ChromecastClient client = await TestHelper.CreateConnectAndLoadAppClient(output, receiver, "CC32E753");
+            await Task.Delay(3000);
             await client.GetChannel<SpotifyChannel>().GetSpotifyInfo();
+            await Task.Delay(25000);
+            await client.ReceiverChannel.StopApplication();
         }
     }
 }
