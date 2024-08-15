@@ -6,7 +6,7 @@ using System.Text;
 namespace Sharpcaster.Messages.Spotify
 {
     [DataContract]
-    public class GetInfoMessage: Message
+    public class GetInfoMessage: MessageWithId
     {
         [DataMember(Name = "payload")]
         public GetInfoMessagePayload Payload { get; set; }

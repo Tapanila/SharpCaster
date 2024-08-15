@@ -30,11 +30,18 @@ namespace Sharpcaster.Test
         public async Task TestChromecastGetInfo(ChromecastReceiver receiver)
         {
             var TestHelper = new TestHelper();
+            var SpotifyStatusUpdated = false;
             ChromecastClient client = await TestHelper.CreateConnectAndLoadAppClient(output, receiver, "CC32E753");
-            await Task.Delay(3000);
+            client.GetChannel<SpotifyChannel>().SpotifyStatusUpdated += (sender, status) =>
+            {
+                output.WriteLine("ClientId: " + status.ClientID);
+                SpotifyStatusUpdated = true;
+            };
+
             await client.GetChannel<SpotifyChannel>().GetSpotifyInfo();
-            await Task.Delay(25000);
+            await Task.Delay(300);
             await client.ReceiverChannel.StopApplication();
+            Assert.True(SpotifyStatusUpdated);
         }
     }
 }

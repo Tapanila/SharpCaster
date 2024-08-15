@@ -1,8 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using Sharpcaster.Interfaces;
-using Sharpcaster.Messages.Multizone;
 using Sharpcaster.Messages.Spotify;
-using Sharpcaster.Models.MultiZone;
 using Sharpcaster.Models.Spotify;
 using System;
 using System.Security.Cryptography;
@@ -34,8 +32,8 @@ namespace Sharpcaster.Channels
             switch (message)
             {
                 case GetInfoResponseMessage getInfoResponseMessage:
-                    SpotifyStatus = getInfoResponseMessage.Status;
-                    SpotifyStatusUpdated?.Invoke(this, getInfoResponseMessage.Status);
+                    SpotifyStatus = getInfoResponseMessage.Payload;
+                    SpotifyStatusUpdated?.Invoke(this, getInfoResponseMessage.Payload);
                     break;
                 default:
                     break;
@@ -61,8 +59,7 @@ namespace Sharpcaster.Channels
                     RemoteName = Client.FriendlyName,
                     DeviceAPI_isGroup = false
                 }
-
-            });
+            }, Client.GetChromecastStatus().Application.TransportId);
         }
 
         public string SpotifyDeviceId { get
