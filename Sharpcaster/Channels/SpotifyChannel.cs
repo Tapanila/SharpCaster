@@ -11,12 +11,9 @@ namespace Sharpcaster.Channels
 {
     public class SpotifyChannel : ChromecastChannel
     { 
-        /// <summary>
-        /// Raised when device has been updated
-        /// </summary>
         public event EventHandler<SpotifyStatus> SpotifyStatusUpdated;
-
         public SpotifyStatus SpotifyStatus{ get; set; }
+        public event EventHandler<AddUserResponseMessagePayload> AddUserResponseReceived;
 
         public SpotifyChannel(ILogger<SpotifyChannel> logger = null) : base("urn:x-cast:com.spotify.chromecast.secure.v1", logger, false)
         {
@@ -34,6 +31,9 @@ namespace Sharpcaster.Channels
                 case GetInfoResponseMessage getInfoResponseMessage:
                     SpotifyStatus = getInfoResponseMessage.Payload;
                     SpotifyStatusUpdated?.Invoke(this, getInfoResponseMessage.Payload);
+                    break;
+                case AddUserResponseMessage addUserResponseMessage:
+                    AddUserResponseReceived?.Invoke(this, addUserResponseMessage.Payload);
                     break;
                 default:
                     break;
@@ -58,6 +58,18 @@ namespace Sharpcaster.Channels
                     DeviceId = SpotifyDeviceId,
                     RemoteName = Client.FriendlyName,
                     DeviceAPI_isGroup = false
+                }
+            }, Client.GetChromecastStatus().Application.TransportId);
+        }
+
+        public async Task AddUser(string accessToken)
+        {
+            await SendAsync(new AddUserMessage
+            {
+                Payload = new AddUserMessagePayload
+                {
+                    Blob = accessToken,
+                    TokenType = "accesstoken"
                 }
             }, Client.GetChromecastStatus().Application.TransportId);
         }

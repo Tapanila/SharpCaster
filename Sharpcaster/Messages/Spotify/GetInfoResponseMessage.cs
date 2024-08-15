@@ -16,7 +16,6 @@ namespace Sharpcaster.Messages.Spotify
         public GetInfoResponseMessage()
         {
             Type = "getInfoResponse";
-            var i = 0;
         }
 
         [DataMember(Name = "payload")]
