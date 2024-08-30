@@ -36,6 +36,7 @@ namespace Sharpcaster
         /// </summary>
         public event EventHandler Disconnected;
         public Guid SenderId { get; } = Guid.NewGuid();
+        public string FriendlyName { get; set; }
 
         public IMediaChannel MediaChannel => GetChannel<IMediaChannel>();
         public IHeartbeatChannel HeartbeatChannel => GetChannel<IHeartbeatChannel>();
@@ -67,6 +68,7 @@ namespace Sharpcaster
             serviceCollection.AddTransient<IChromecastChannel, ReceiverChannel>();
             serviceCollection.AddTransient<IChromecastChannel, MediaChannel>();
             serviceCollection.AddTransient<IChromecastChannel, MultiZoneChannel>();
+            serviceCollection.AddTransient<IChromecastChannel, SpotifyChannel>();
             var messageInterfaceType = typeof(IMessage);
             foreach (var type in (from t in typeof(IConnectionChannel).GetTypeInfo().Assembly.GetTypes()
                                   where t.GetTypeInfo().IsClass && !t.GetTypeInfo().IsAbstract && messageInterfaceType.IsAssignableFrom(t) && t.GetTypeInfo().GetCustomAttribute<ReceptionMessageAttribute>() != null
@@ -108,7 +110,8 @@ namespace Sharpcaster
         public async Task<ChromecastStatus> ConnectChromecast(ChromecastReceiver chromecastReceiver)
         {
             await Dispose();
-
+            FriendlyName = chromecastReceiver.Name;
+            
             _client = new TcpClient();
             await _client.ConnectAsync(chromecastReceiver.DeviceUri.Host, chromecastReceiver.Port);
             
@@ -223,7 +226,7 @@ namespace Sharpcaster
             await SendSemaphoreSlim.WaitAsync();
             try
             {
-                ((channelLogger!=null)?channelLogger:_logger)?.LogTrace($"SENT    : {castMessage.DestinationId}: {castMessage.PayloadUtf8}");
+                (channelLogger ?? _logger)?.LogTrace($"SENT    : {castMessage.DestinationId}: {castMessage.PayloadUtf8}");
                 byte[] message = castMessage.ToProto();
                 var networkStream = _stream;
                 await networkStream.WriteAsync(message, 0, message.Length);
@@ -339,8 +342,6 @@ namespace Sharpcaster
                         await MediaChannel.GetMediaStatusAsync();
                     }
                     return await ReceiverChannel.GetChromecastStatusAsync();
-                } else {
-                    // another AppId is running
                 }
             }
             var newApplication = await ReceiverChannel.LaunchApplicationAsync(applicationId);

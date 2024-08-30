@@ -286,6 +286,10 @@ namespace Sharpcaster.Test
                     {
                         return CreateILoggerMock<ILogger<MultiZoneChannel>>().Object;
                     }
+                    else if (name == "Sharpcaster.Channels.SpotifyChannel")
+                    {
+                        return CreateILoggerMock<ILogger<SpotifyChannel>>().Object;
+                    }
                     else
                     {
                         return loggerGeneric.Object;
