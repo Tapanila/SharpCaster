@@ -22,7 +22,7 @@ namespace Sharpcaster.Test
 {
     public class SpotifyTester : IClassFixture<ChromecastDevicesFixture>
     {
-        private ITestOutputHelper output;
+        private readonly ITestOutputHelper output;
 
         public SpotifyTester(ITestOutputHelper outputHelper, ChromecastDevicesFixture fixture)
         {
@@ -120,7 +120,6 @@ namespace Sharpcaster.Test
                     clientId,
                     deviceId
                 });
-
 
                 var result = await client.PostAsync("/device-auth/v1/refresh", jsonContent);
                 result.EnsureSuccessStatusCode();

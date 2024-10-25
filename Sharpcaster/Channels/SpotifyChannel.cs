@@ -17,7 +17,6 @@ namespace Sharpcaster.Channels
 
         public SpotifyChannel(ILogger<SpotifyChannel> logger = null) : base("urn:x-cast:com.spotify.chromecast.secure.v1", logger, false)
         {
-
         }
 
         /// <summary>

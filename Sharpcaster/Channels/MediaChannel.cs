@@ -30,7 +30,6 @@ namespace Sharpcaster.Channels
         {
         }
 
-
         private async Task<MediaStatus> SendAsync(IMessageWithId message, ChromecastApplication application)
         {
             try
@@ -48,9 +47,9 @@ namespace Sharpcaster.Channels
             }
             catch (Exception ex)
             {
-                _logger?.LogError($"Error sending message: {ex.Message}");
+                Logger?.LogError($"Error sending message: {ex.Message}");
                 Status = null;
-                throw ex;
+                throw;
             }
         }
 
@@ -99,7 +98,6 @@ namespace Sharpcaster.Channels
         /// <returns>media status</returns>
         public async Task<MediaStatus> PauseAsync()
         {
-
             return await SendAsync(new PauseMessage());
         }
 
@@ -166,6 +164,5 @@ namespace Sharpcaster.Channels
             var chromecastStatus = Client.GetChromecastStatus();
             return await SendAsync(new Messages.Receiver.GetStatusMessage(), chromecastStatus.Application);
         }
-
     }
 }

@@ -9,7 +9,6 @@ namespace Sharpcaster.Messages.Receiver
     [ReceptionMessage]
     class LaunchErrorMessage : MessageWithId
     {
-
         [DataMember(Name = "reason")]
         public string Reason { get; set; }
     }

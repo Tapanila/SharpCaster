@@ -37,11 +37,10 @@ namespace Sharpcaster.Test
         public async Task SearchChromecastsWithTooShortTimeout()
         {
             IChromecastLocator locator = new MdnsChromecastLocator();
-            CancellationTokenSource cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromMilliseconds(0));
+            CancellationTokenSource cancellationTokenSource = new(TimeSpan.FromMilliseconds(0));
             var chromecasts = await locator.FindReceiversAsync(cancellationTokenSource.Token);
             Assert.Empty(chromecasts);
         }
-
 
         [Fact]
         public async Task SearchChromecastsCancellationToken()

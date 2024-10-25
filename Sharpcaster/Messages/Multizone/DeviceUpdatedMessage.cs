@@ -1,5 +1,4 @@
-﻿using Sharpcaster.Messages.Chromecast;
-using Sharpcaster.Models.MultiZone;
+﻿using Sharpcaster.Models.MultiZone;
 using System.Runtime.Serialization;
 
 namespace Sharpcaster.Messages.Multizone

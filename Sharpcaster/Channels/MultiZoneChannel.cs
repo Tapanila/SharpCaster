@@ -23,7 +23,6 @@ namespace Sharpcaster.Channels
 
         public MultiZoneChannel(ILogger<MultiZoneChannel> logger = null) : base("multizone", logger)
         {
-
         }
 
         /// <summary>
@@ -53,7 +52,6 @@ namespace Sharpcaster.Channels
         /// </summary>
         protected virtual void OnStatusChanged()
         {
-
         }
     }
 }

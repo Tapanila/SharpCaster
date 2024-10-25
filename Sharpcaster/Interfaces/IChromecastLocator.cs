@@ -14,7 +14,7 @@ namespace Sharpcaster.Interfaces
         /// <summary>
         /// Find the available chromecast receivers
         /// </summary>
-        /// <typeparam name="cancellationToken">Enable to change the operation default timeout which is 2000 ms</typeparam>
+        /// <param name="cancellationToken">Enable to change the operation default timeout which is 2000 ms</typeparam>
         /// <returns>a collection of chromecast receivers</returns>
         Task<IEnumerable<ChromecastReceiver>> FindReceiversAsync(CancellationToken cancellationToken);
         /// <summary>
@@ -26,7 +26,6 @@ namespace Sharpcaster.Interfaces
         /// Fires when chromecastreceiver is found. You can use this with the combination of FindReceiverAsync in special cases.
         /// </summary>
         /// <returns>single chromecast receiver</returns>
-
         event EventHandler<ChromecastReceiver> ChromecastReceivedFound;
     }
 }

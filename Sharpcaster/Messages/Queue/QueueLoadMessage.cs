@@ -25,7 +25,6 @@ namespace Sharpcaster.Messages.Queue
         /// <summary>
         /// Behavior of the queue when all items have been played.
         /// </summary>
-
         [DataMember(Name = "repeatMode")]
         [JsonConverter(typeof(RepeatModeEnumConverter))]
         public RepeatModeType RepeatMode { get; set; }
@@ -36,7 +35,6 @@ namespace Sharpcaster.Messages.Queue
         /// This is to cover the common case where the user casts the item that was playing locally so the currentTime does not apply to the item permanently like the QueueItem startTime does.
         /// It avoids having to reset the startTime dynamically (that may not be possible if the phone has gone to sleep).
         /// </summary>
-
         [DataMember(Name = "currentTime")]
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public long? CurrentTime { get; set; }

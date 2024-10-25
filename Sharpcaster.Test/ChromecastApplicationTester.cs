@@ -10,7 +10,6 @@ namespace Sharpcaster.Test
     [Collection("SingleCollection")]
     public class ChromecastApplicationTester : IClassFixture<ChromecastDevicesFixture>
     {
-
         private ITestOutputHelper output;
         public ChromecastApplicationTester(ITestOutputHelper outputHelper, ChromecastDevicesFixture fixture)
         {
@@ -48,7 +47,6 @@ namespace Sharpcaster.Test
             Assert.Equal(firstLaunchTransportId, status.Application.TransportId);
         }
 
-
         [Theory(Skip = "This does not pass any more. Now my JBL reacts as the other device - not changing the Transport ID !?")]
         [MemberData(nameof(ChromecastReceiversFilter.GetJblSpeaker), MemberType = typeof(ChromecastReceiversFilter))]
         public async Task ConnectToChromecastAndLaunchApplicationTwiceWithoutJoining1(ChromecastReceiver receiver)
@@ -62,7 +60,6 @@ namespace Sharpcaster.Test
 
             _ = await client.ConnectChromecast(receiver);
             status = await client.LaunchApplicationAsync("B3419EF5", false);
-
 
             // My JBL Device (almost every time - but not always ) makes a new ID here!!!! (The other device - ChromecastAudio DOES NOT!?)
             Assert.NotEqual(firstLaunchTransportId, status.Application.TransportId);
@@ -85,7 +82,6 @@ namespace Sharpcaster.Test
             // My ChromecastAudio device keeps the same transport session here!
             Assert.Equal(firstLaunchTransportId, status.Application.TransportId);
         }
-
 
         [Theory]
         [MemberData(nameof(ChromecastReceiversFilter.GetAll), MemberType = typeof(ChromecastReceiversFilter))]
@@ -132,7 +128,6 @@ namespace Sharpcaster.Test
                 Type = "load",
                 SessionId = client.GetChromecastStatus().Application.SessionId
             };
-
 
             await client.SendAsync(null, "urn:x-cast:com.boombatower.chromecast-dashboard", req, client.GetChromecastStatus().Application.SessionId);
             await Task.Delay(5000);

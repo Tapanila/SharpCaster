@@ -1,5 +1,6 @@
 ﻿using Sharpcaster.Models;
 using Sharpcaster.Models.Media;
+using Sharpcaster.Test.helper;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Xunit;
@@ -8,13 +9,9 @@ using Xunit.Abstractions;
 namespace Sharpcaster.Test
 {
     [Collection("SingleCollection")]
-    public class LoggingTester
+    public class LoggingTester(ITestOutputHelper outputHelper)
     {
-        ITestOutputHelper output;
-        public LoggingTester(ITestOutputHelper outputHelper)
-        {
-            output = outputHelper;
-        }
+        readonly ITestOutputHelper output = outputHelper;
 
         [Fact]
         public void TestLogging()
@@ -30,7 +27,7 @@ namespace Sharpcaster.Test
         [MemberData(nameof(ChromecastReceiversFilter.GetAll), MemberType = typeof(ChromecastReceiversFilter))]
         public async Task TestPlayMediaWorksWithoutLogging(ChromecastReceiver receiver)
         {
-            ChromecastClient client = new ChromecastClient();
+            ChromecastClient client = new();
             await client.ConnectChromecast(receiver);
             await client.LaunchApplicationAsync("B3419EF5", false);
 
@@ -44,9 +41,6 @@ namespace Sharpcaster.Test
             Assert.Equal(PlayerStateType.Playing, status.PlayerState);
             Assert.Single(status.Items);
             Assert.Equal(status.CurrentItemId, status.Items[0].ItemId);
-
         }
-
-
     }
 }

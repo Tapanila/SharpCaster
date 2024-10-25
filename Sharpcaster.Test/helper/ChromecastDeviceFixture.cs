@@ -6,11 +6,9 @@ using Xunit;
 
 namespace Sharpcaster.Test.helper
 {
-
     // Define a TestFixture to be used by different test classes
     public class ChromecastDevicesFixture : IDisposable
     {
-
         // This needs to be static to be used by the MemberData functions of the ChromecastReceiversFilter class allowing to annotate [Theories] with specific list of devices.
         public static List<ChromecastReceiver> Receivers = [];
         public static int NumberOfSearches;
@@ -33,9 +31,7 @@ namespace Sharpcaster.Test.helper
         {
             //Receivers.Clear();
         }
-
     }
-
 
     // Lets use out fixture as 'Collection Fixture' -> its only initilized once for all tests in this collection.
     [CollectionDefinition("SingleCollection")]
@@ -45,5 +41,4 @@ namespace Sharpcaster.Test.helper
         // to be the place to apply [CollectionDefinition] and all the
         // ICollectionFixture<> interfaces.
     }
-
 }

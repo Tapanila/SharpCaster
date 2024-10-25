@@ -10,7 +10,7 @@ namespace Sharpcaster.Channels
     public abstract class ChromecastChannel : IChromecastChannel
     {
         private const string BASE_NAMESPACE = "urn:x-cast:com.google.cast";
-        public ILogger _logger { get; private set; } = null;
+        public ILogger Logger { get; }
 
         /// <summary>
         /// Initialization
@@ -26,7 +26,7 @@ namespace Sharpcaster.Channels
         /// <param name="useBaseNamespace">When true add urn:x-cast:com.google.cast to beginning of namespace</param>
         protected ChromecastChannel(string ns, ILogger logger, bool useBaseNamespace = true)
         {
-            _logger = logger;
+            Logger = logger;
             if (useBaseNamespace)
             {
                 Namespace = $"{BASE_NAMESPACE}.{ns}";
@@ -35,7 +35,6 @@ namespace Sharpcaster.Channels
             {
                 Namespace = ns;
             }
-
         }
 
         /// <summary>
@@ -55,7 +54,7 @@ namespace Sharpcaster.Channels
         /// <param name="destinationId">destination identifier</param>
         protected async Task SendAsync(IMessage message, string destinationId = DefaultIdentifiers.DESTINATION_ID)
         {
-            await Client.SendAsync(_logger, Namespace, message, destinationId);
+            await Client.SendAsync(Logger, Namespace, message, destinationId);
         }
 
         /// <summary>
@@ -67,7 +66,7 @@ namespace Sharpcaster.Channels
         /// <returns>the result</returns>
         protected async Task<TResponse> SendAsync<TResponse>(IMessageWithId message, string destinationId = DefaultIdentifiers.DESTINATION_ID) where TResponse : IMessageWithId
         {
-            return await Client.SendAsync<TResponse>(_logger, Namespace, message, destinationId);
+            return await Client.SendAsync<TResponse>(Logger, Namespace, message, destinationId);
         }
 
         /// <summary>

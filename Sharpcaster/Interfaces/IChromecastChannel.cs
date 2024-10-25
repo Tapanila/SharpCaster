@@ -18,7 +18,7 @@ namespace Sharpcaster.Interfaces
         /// </summary>
         string Namespace { get; }
 
-        ILogger _logger { get; }
+        ILogger Logger { get; }
 
         /// <summary>
         /// Called when a message for this channel is received

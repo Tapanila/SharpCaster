@@ -1,9 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using Sharpcaster.Interfaces;
 using Sharpcaster.Messages.Heartbeat;
-using Sharpcaster.Models;
 using System;
-using System.Diagnostics;
 using System.Threading.Tasks;
 using System.Timers;
 
@@ -15,7 +13,7 @@ namespace Sharpcaster.Channels
     public class HeartbeatChannel : ChromecastChannel, IHeartbeatChannel
     {
         //private ILogger _logger = null;
-        private Timer _timer;
+        private readonly Timer _timer;
 
         /// <summary>
         /// Initializes a new instance of HeartbeatChannel class
@@ -36,28 +34,27 @@ namespace Sharpcaster.Channels
         /// <param name="message">message to process</param>
         public override async Task OnMessageReceivedAsync(IMessage message)
         {
-
             _timer.Stop();
             await SendAsync(new PongMessage());
             _timer.Start();
-            _logger?.LogDebug("Pong sent - Heartbeat Timer restarted.");
+            Logger?.LogDebug("Pong sent - Heartbeat Timer restarted.");
         }
 
         public void StartTimeoutTimer()
         {
             _timer.Start();
-            _logger?.LogTrace("Started heartbeat timeout timer");
+            Logger?.LogTrace("Started heartbeat timeout timer");
         }
 
         public void StopTimeoutTimer()
         {
             _timer.Stop();
-            _logger?.LogTrace("Stopped heartbeat timeout timer");
+            Logger?.LogTrace("Stopped heartbeat timeout timer");
         }
 
         private void TimerElapsed(object sender, ElapsedEventArgs e)
         {
-            _logger?.LogInformation("Heartbeat timeout");
+            Logger?.LogInformation("Heartbeat timeout");
             StatusChanged?.Invoke(this, e);
         }
     }

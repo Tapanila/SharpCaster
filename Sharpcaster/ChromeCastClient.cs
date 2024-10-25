@@ -25,10 +25,8 @@ using static Extensions.Api.CastChannel.CastMessage.Types;
 
 namespace Sharpcaster
 {
-
     public class ChromecastClient : IChromecastClient
     {
-
         private const int RECEIVE_TIMEOUT = 30000;
 
         /// <summary>
@@ -117,10 +115,9 @@ namespace Sharpcaster
             await _client.ConnectAsync(chromecastReceiver.DeviceUri.Host, chromecastReceiver.Port);
 
             //Open SSL stream to Chromecast and bypass all SSL validation
-            var secureStream = new SslStream(_client.GetStream(), true, (sender, certificate, chain, sslPolicyErrors) => true);
+            var secureStream = new SslStream(_client.GetStream(), true, (_, __, ___, ____) => true);
             await secureStream.AuthenticateAsClientAsync(chromecastReceiver.DeviceUri.Host);
             _stream = secureStream;
-
 
             ReceiveTcs = new TaskCompletionSource<bool>();
             Receive();
@@ -163,7 +160,7 @@ namespace Sharpcaster
                             {
                                 HeartbeatChannel.StopTimeoutTimer();
                             }
-                            channel?._logger?.LogTrace($"RECEIVED: {payload}");
+                            channel?.Logger?.LogTrace($"RECEIVED: {payload}");
 
                             var message = JsonConvert.DeserializeObject<MessageWithId>(payload);
                             if (MessageTypes.TryGetValue(message.Type, out Type type))
@@ -272,7 +269,6 @@ namespace Sharpcaster
             await Dispose();
         }
 
-
         private async Task Dispose()
         {
             await Dispose(true);
@@ -332,7 +328,6 @@ namespace Sharpcaster
 
         public async Task<ChromecastStatus> LaunchApplicationAsync(string applicationId, bool joinExistingApplicationSession = true)
         {
-
             if (joinExistingApplicationSession)
             {
                 var status = GetChromecastStatus();

@@ -2,7 +2,6 @@
 
 namespace Sharpcaster.Messages.Media
 {
-
     [DataContract]
     public class StopMessage : MediaSessionMessage
     {

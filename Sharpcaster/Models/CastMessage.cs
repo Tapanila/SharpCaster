@@ -4,7 +4,6 @@ using Sharpcaster;
 using System;
 using System.Linq;
 
-
 namespace Extensions.Api.CastChannel
 {
     public sealed partial class CastMessage

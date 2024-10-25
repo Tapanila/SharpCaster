@@ -17,7 +17,6 @@ namespace Sharpcaster.Test
             output.WriteLine("Fixture has found " + ChromecastDevicesFixture.Receivers?.Count + " receivers with " + fixture.GetSearchesCnt() + " searche(s).");
         }
 
-
         [Theory]
         [MemberData(nameof(ChromecastReceiversFilter.GetAll), MemberType = typeof(ChromecastReceiversFilter))]
         public async Task TestMute(ChromecastReceiver receiver)

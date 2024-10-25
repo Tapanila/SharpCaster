@@ -2,7 +2,6 @@
 
 namespace Sharpcaster.Messages.Receiver
 {
-
     [DataContract]
     public class StopMessage : MessageWithSession
     {

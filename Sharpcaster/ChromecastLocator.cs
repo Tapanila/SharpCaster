@@ -15,8 +15,8 @@ namespace Sharpcaster
     public class MdnsChromecastLocator : IChromecastLocator
     {
         public event EventHandler<ChromecastReceiver> ChromecastReceivedFound;
-        private IList<ChromecastReceiver> DiscoveredDevices { get; set; }
-        private ServiceBrowser _serviceBrowser;
+        private IList<ChromecastReceiver> DiscoveredDevices { get; }
+        private readonly ServiceBrowser _serviceBrowser;
         private SemaphoreSlim ServiceAddedSemaphoreSlim { get; } = new SemaphoreSlim(1, 1);
         public MdnsChromecastLocator()
         {
@@ -24,7 +24,6 @@ namespace Sharpcaster
             _serviceBrowser = new ServiceBrowser();
             _serviceBrowser.ServiceAdded += OnServiceAdded;
         }
-
 
         private void OnServiceAdded(object sender, ServiceAnnouncementEventArgs e)
         {
@@ -80,8 +79,7 @@ namespace Sharpcaster
         /// <summary>
         /// Find the available chromecast receivers
         /// </summary>
-        /// <typeparam name="cancellationToken">Enable to cancel the operation before timeout</typeparam>
-        /// <typeparam name="timeOut">Define custom timeout when required, default is 2000 ms</typeparam>
+        /// <param name="cancellationToken">Enable to cancel the operation</param>
         /// <returns>a collection of chromecast receivers</returns>
         public async Task<IEnumerable<ChromecastReceiver>> FindReceiversAsync(CancellationToken cancellationToken)
         {
