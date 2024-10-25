@@ -115,11 +115,12 @@ namespace Sharpcaster.Test
                     "authority", "spclient.wg.spotify.com");
                 client.DefaultRequestHeaders.Add(
                     "authorization", "Bearer " + originalAccessToken);
-                var jsonContent = JsonContent.Create(new {
+                var jsonContent = JsonContent.Create(new
+                {
                     clientId,
                     deviceId
                 });
-                
+
 
                 var result = await client.PostAsync("/device-auth/v1/refresh", jsonContent);
                 result.EnsureSuccessStatusCode();

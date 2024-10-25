@@ -33,7 +33,7 @@ namespace Sharpcaster.Test
         }
 
         [Fact(Skip = "This fails if Chromecast is quick to answer")]
-        
+
         public async Task SearchChromecastsWithTooShortTimeout()
         {
             IChromecastLocator locator = new MdnsChromecastLocator();

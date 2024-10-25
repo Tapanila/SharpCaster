@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Sharpcaster.Interfaces {
-    public interface IConsoleWrapper {
+namespace Sharpcaster.Interfaces
+{
+    public interface IConsoleWrapper
+    {
         void WriteLine(string line);
         void WriteLine(string line, Exception ex, object p);
     }

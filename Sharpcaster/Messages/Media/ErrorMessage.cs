@@ -7,7 +7,7 @@ namespace Sharpcaster.Messages.Media
 {
     [DataContract]
     [ReceptionMessage]
-    public class ErrorMessage: Message
+    public class ErrorMessage : Message
     {
         [DataMember(Name = "detailedErrorCode")]
         public int DetailedErrorCode { get; set; }

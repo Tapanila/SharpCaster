@@ -57,11 +57,12 @@ namespace Sharpcaster
         public ChromecastClient(ILoggerFactory loggerFactory = null)
         {
             var serviceCollection = new ServiceCollection();
-            
-            if (loggerFactory != null) {
+
+            if (loggerFactory != null)
+            {
                 serviceCollection.AddSingleton<ILoggerFactory>(loggerFactory);
                 serviceCollection.AddSingleton(typeof(ILogger<>), typeof(Logger<>));  // see https://stackoverflow.com/questions/31751437/how-is-iloggert-resolved-via-di 
-            }                                                                                            
+            }
 
             serviceCollection.AddTransient<IChromecastChannel, ConnectionChannel>();
             serviceCollection.AddTransient<IChromecastChannel, HeartbeatChannel>();
@@ -111,15 +112,15 @@ namespace Sharpcaster
         {
             await Dispose();
             FriendlyName = chromecastReceiver.Name;
-            
+
             _client = new TcpClient();
             await _client.ConnectAsync(chromecastReceiver.DeviceUri.Host, chromecastReceiver.Port);
-            
+
             //Open SSL stream to Chromecast and bypass all SSL validation
             var secureStream = new SslStream(_client.GetStream(), true, (sender, certificate, chain, sslPolicyErrors) => true);
             await secureStream.AuthenticateAsClientAsync(chromecastReceiver.DeviceUri.Host);
             _stream = secureStream;
-            
+
 
             ReceiveTcs = new TaskCompletionSource<bool>();
             Receive();
@@ -163,7 +164,7 @@ namespace Sharpcaster
                                 HeartbeatChannel.StopTimeoutTimer();
                             }
                             channel?._logger?.LogTrace($"RECEIVED: {payload}");
-                            
+
                             var message = JsonConvert.DeserializeObject<MessageWithId>(payload);
                             if (MessageTypes.TryGetValue(message.Type, out Type type))
                             {
@@ -186,7 +187,8 @@ namespace Sharpcaster
                                    " An implementing IMessage class is missing!", message.Type);
                                 Debugger.Break();
                             }
-                        } else
+                        }
+                        else
                         {
                             _logger?.LogError($"Couldn't parse the channel from: {castMessage.Namespace}  :  {payload}");
                         }
@@ -203,12 +205,15 @@ namespace Sharpcaster
 
         private void TaskCompletionSourceInvoke(ref object tcs, MessageWithId message, string method, object parameter, Type[] types = null)
         {
-            if (tcs == null) {
-                if (message.HasRequestId && WaitingTasks.TryRemove(message.RequestId, out object newtcs)) {
+            if (tcs == null)
+            {
+                if (message.HasRequestId && WaitingTasks.TryRemove(message.RequestId, out object newtcs))
+                {
                     tcs = newtcs;
                 }
             }
-            if (tcs != null) {
+            if (tcs != null)
+            {
                 var tcsType = tcs.GetType();
                 (types == null ? tcsType.GetMethod(method) : tcsType.GetMethod(method, types)).Invoke(tcs, new object[] { parameter });
             }

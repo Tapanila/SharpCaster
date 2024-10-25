@@ -30,11 +30,12 @@ namespace Sharpcaster.Channels
             if (useBaseNamespace)
             {
                 Namespace = $"{BASE_NAMESPACE}.{ns}";
-            } else
+            }
+            else
             {
                 Namespace = ns;
             }
-            
+
         }
 
         /// <summary>

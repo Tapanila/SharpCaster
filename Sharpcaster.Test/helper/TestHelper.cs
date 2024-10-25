@@ -305,23 +305,31 @@ namespace Sharpcaster.Test
         {
             QueueItem[] MyCd =
             [
-                new QueueItem() {
-                    Media = new Media {
+                new QueueItem()
+                {
+                    Media = new Media
+                    {
                         ContentUrl = "http://www.openmusicarchive.org/audio/Frankie%20by%20Mississippi%20John%20Hurt.mp3"
                     }
                 },
-                new QueueItem() {
-                    Media = new Media {
+                new QueueItem()
+                {
+                    Media = new Media
+                    {
                         ContentUrl = "http://www.openmusicarchive.org/audio/Mississippi%20Boweavil%20Blues%20by%20The%20Masked%20Marvel.mp3"
                     }
                 },
-                new QueueItem() {
-                    Media = new Media {
+                new QueueItem()
+                {
+                    Media = new Media
+                    {
                         ContentUrl = "http://www.openmusicarchive.org/audio/The%20Wild%20Wagoner%20by%20Jilson%20Setters.mp3"
                     }
                 },
-                new QueueItem() {
-                    Media = new Media {
+                new QueueItem()
+                {
+                    Media = new Media
+                    {
                         ContentUrl = "http://www.openmusicarchive.org/audio/Drunkards%20Special%20by%20Coley%20Jones.mp3"
                     }
                 },
@@ -333,23 +341,29 @@ namespace Sharpcaster.Test
         {
             QueueItem[] queueItems =
             [
-            
-                new QueueItem() {
-                    Media = new Media {
+
+                new QueueItem()
+                {
+                    Media = new Media
+                    {
                         ContentUrl = "https://audionautix.com/Music/AwayInAManger.mp3"
                     }
                 },
-                new QueueItem() {
-                    Media = new Media {
+                new QueueItem()
+                {
+                    Media = new Media
+                    {
                         ContentUrl = "https://audionautix.com/Music/CarolOfTheBells.mp3"
                     }
                 },
-                new QueueItem() {
-                    Media = new Media {
+                new QueueItem()
+                {
+                    Media = new Media
+                    {
                         ContentUrl = "https://audionautix.com/Music/JoyToTheWorld.mp3"
                     }
                 }
-            
+
             ];
             return queueItems;
         }

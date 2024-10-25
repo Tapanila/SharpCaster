@@ -7,11 +7,11 @@ namespace Sharpcaster.Messages.Spotify
 {
     [DataContract]
     [ReceptionMessage]
-    public class AddUserResponseMessage: Message
+    public class AddUserResponseMessage : Message
     {
         public AddUserResponseMessage()
         {
-            Type= "addUserResponse";
+            Type = "addUserResponse";
         }
 
         [DataMember(Name = "payload")]

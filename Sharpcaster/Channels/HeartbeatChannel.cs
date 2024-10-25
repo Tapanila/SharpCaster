@@ -36,7 +36,7 @@ namespace Sharpcaster.Channels
         /// <param name="message">message to process</param>
         public override async Task OnMessageReceivedAsync(IMessage message)
         {
-            
+
             _timer.Stop();
             await SendAsync(new PongMessage());
             _timer.Start();

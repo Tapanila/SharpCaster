@@ -8,7 +8,7 @@ using Xunit.Abstractions;
 
 namespace Sharpcaster.Test
 {
-    public class MultiZoneChannelTester: IClassFixture<ChromecastDevicesFixture>
+    public class MultiZoneChannelTester : IClassFixture<ChromecastDevicesFixture>
     {
         private ITestOutputHelper output;
 

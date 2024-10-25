@@ -10,9 +10,9 @@ using System.Threading.Tasks;
 namespace Sharpcaster.Channels
 {
     public class SpotifyChannel : ChromecastChannel
-    { 
+    {
         public event EventHandler<SpotifyStatus> SpotifyStatusUpdated;
-        public SpotifyStatus SpotifyStatus{ get; set; }
+        public SpotifyStatus SpotifyStatus { get; set; }
         public event EventHandler<AddUserResponseMessagePayload> AddUserResponseReceived;
 
         public SpotifyChannel(ILogger<SpotifyChannel> logger = null) : base("urn:x-cast:com.spotify.chromecast.secure.v1", logger, false)
@@ -74,7 +74,9 @@ namespace Sharpcaster.Channels
             }, Client.GetChromecastStatus().Application.TransportId);
         }
 
-        public string SpotifyDeviceId { get
+        public string SpotifyDeviceId
+        {
+            get
             {
                 var friendlyName = Client.FriendlyName;
                 return ComputeMd5Hash(friendlyName);

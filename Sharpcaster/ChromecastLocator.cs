@@ -38,7 +38,8 @@ namespace Sharpcaster
                 }
 
                 var txtValues = e.Announcement.Txt
-                    .Select(i => {
+                    .Select(i =>
+                    {
                         if (!string.IsNullOrEmpty(i))
                         {
                             return i.Split('=');

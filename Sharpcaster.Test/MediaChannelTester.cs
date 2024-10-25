@@ -527,7 +527,8 @@ namespace Sharpcaster.Test
             try
             {
                 var result = await client.MediaChannel.QueueLoadAsync(MyCd);
-            } catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 output.WriteLine("Exception happened: " + ex.Message);
             }

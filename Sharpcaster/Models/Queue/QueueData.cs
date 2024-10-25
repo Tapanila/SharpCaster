@@ -21,22 +21,22 @@ namespace Sharpcaster.Models.Queue
         /// <summary>
         /// The ID of the queue.
         /// </summary>
-        [DataMember(Name ="id")]
+        [DataMember(Name = "id")]
         public string Id { get; set; }
         /// <summary>
         /// An Array of queue items, sorted in playback order.
         /// </summary>
-        [DataMember(Name ="items")]
+        [DataMember(Name = "items")]
         public QueueItem[] Items { get; set; }
         /// <summary>
         /// The name of the queue.
         /// </summary>
-        [DataMember(Name ="name")]
+        [DataMember(Name = "name")]
         public string Name { get; set; }
         /// <summary>
         /// A queue type, such as album, playlist, radio station, or tv series.
         /// </summary>
-        [DataMember(Name= "queueType")]
+        [DataMember(Name = "queueType")]
         public string QueueType { get; set; }
         /// <summary>
         /// The continuous playback behavior of the queue.

@@ -40,7 +40,7 @@ namespace Sharpcaster.Test
                 ContentUrl = "https://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/mp4/DesigningForGoogleCast.mp4"
             };
 
-            
+
             var mediaStatus = await client1.MediaChannel.LoadAsync(media);
             await client1.MediaChannel.PlayAsync();
 
