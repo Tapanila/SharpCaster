@@ -21,7 +21,7 @@ namespace Sharpcaster.Channels
         /// Initialization
         /// </summary>
         /// <param name="ns">namespace</param>
-        public StatusChannel(string ns, ILogger logger) : base(ns, logger)
+        protected StatusChannel(string ns, ILogger logger) : base(ns, logger)
         {
         }
 

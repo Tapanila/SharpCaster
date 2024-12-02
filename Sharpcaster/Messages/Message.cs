@@ -1,5 +1,4 @@
 ﻿using Sharpcaster.Interfaces;
-using System.Linq;
 using System.Runtime.Serialization;
 
 namespace Sharpcaster.Messages
@@ -13,7 +12,7 @@ namespace Sharpcaster.Messages
         /// <summary>
         /// Initialization
         /// </summary>
-        public Message()
+        protected Message()
         {
             var type = GetType().Name;
             //Get the type name without the "Message" suffix

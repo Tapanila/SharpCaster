@@ -13,7 +13,7 @@ namespace Sharpcaster.Channels
         /// Raised when the status has changed
         /// </summary>
         public event EventHandler<MultiZoneStatus> StatusChanged;
-        
+
         /// <summary>
         /// Raised when device has been updated
         /// </summary>
@@ -23,7 +23,6 @@ namespace Sharpcaster.Channels
 
         public MultiZoneChannel(ILogger<MultiZoneChannel> logger = null) : base("multizone", logger)
         {
-
         }
 
         /// <summary>
@@ -53,7 +52,6 @@ namespace Sharpcaster.Channels
         /// </summary>
         protected virtual void OnStatusChanged()
         {
-            
         }
     }
 }

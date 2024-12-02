@@ -5,7 +5,6 @@ namespace Sharpcaster.Models.MultiZone
     [DataContract]
     public class MultiZoneStatus
     {
-
         [DataMember(Name = "devices")]
         public Device[] Devices { get; set; }
         [DataMember(Name = "isMultichannel")]

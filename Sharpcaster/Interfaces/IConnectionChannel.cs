@@ -8,10 +8,13 @@ namespace Sharpcaster.Interfaces
     public interface IConnectionChannel : IChromecastChannel
     {
         /// <summary>
-        /// Connects 
+        /// Connects
         /// </summary>
-        /// <param name="destinationId">destination identifier</param>
         Task ConnectAsync();
+        /// <summary>
+        /// Connects
+        /// </summary>
+        /// <param name="transportId">destination identifier</param>
         Task ConnectAsync(string transportId);
     }
 }

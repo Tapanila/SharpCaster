@@ -8,6 +8,5 @@ namespace Sharpcaster.Messages.Receiver
     {
         [DataMember(Name = "volume")]
         public Volume Volume { get; set; }
-
     }
 }

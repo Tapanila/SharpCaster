@@ -19,13 +19,12 @@ namespace Sharpcaster.Test
             output.WriteLine("Fixture has found " + ChromecastDevicesFixture.Receivers?.Count + " receivers with " + fixture.GetSearchesCnt() + " searche(s).");
         }
 
-
         [Theory]
         [MemberData(nameof(ChromecastReceiversFilter.GetChromecastUltra), MemberType = typeof(ChromecastReceiversFilter))]
         public async Task TestTwoClients(ChromecastReceiver receiver)
         {
             var TestHelper = new TestHelper();
-            AutoResetEvent _autoResetEvent = new AutoResetEvent(false);
+            AutoResetEvent _autoResetEvent = new(false);
             var client1 = await TestHelper.CreateConnectAndLoadAppClient(output, receiver);
             var client2 = await TestHelper.CreateAndConnectClient(output, receiver);
             await client2.LaunchApplicationAsync("B3419EF5", true);
@@ -40,7 +39,6 @@ namespace Sharpcaster.Test
                 ContentUrl = "https://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/mp4/DesigningForGoogleCast.mp4"
             };
 
-            
             var mediaStatus = await client1.MediaChannel.LoadAsync(media);
             await client1.MediaChannel.PlayAsync();
 
@@ -52,8 +50,8 @@ namespace Sharpcaster.Test
         public async Task TestThreeClients(ChromecastReceiver receiver)
         {
             var TestHelper = new TestHelper();
-            AutoResetEvent _autoResetEvent2 = new AutoResetEvent(false);
-            AutoResetEvent _autoResetEvent3 = new AutoResetEvent(false);
+            AutoResetEvent _autoResetEvent2 = new(false);
+            AutoResetEvent _autoResetEvent3 = new(false);
             var client1 = await TestHelper.CreateConnectAndLoadAppClient(output, receiver);
             var client2 = await TestHelper.CreateAndConnectClient(output, receiver);
             var client3 = await TestHelper.CreateAndConnectClient(output, receiver);
@@ -74,7 +72,6 @@ namespace Sharpcaster.Test
             {
                 ContentUrl = "https://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/mp4/DesigningForGoogleCast.mp4"
             };
-
 
             var mediaStatus = await client1.MediaChannel.LoadAsync(media);
             await client1.MediaChannel.PlayAsync();

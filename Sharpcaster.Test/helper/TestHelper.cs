@@ -9,13 +9,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Xunit.Abstractions;
-using Sharpcaster.Test.helper;
 
-namespace Sharpcaster.Test
+namespace Sharpcaster.Test.helper
 {
     public class ChromecastReceiversFilter
     {
-
         public static IEnumerable<object[]> GetAll()
         {
             if (ChromecastDevicesFixture.Receivers.Count > 0)
@@ -89,29 +87,24 @@ namespace Sharpcaster.Test
         }
     }
 
-
     public class TestContext
     {
         public List<string> AssertableTestLog = null;
         public ITestOutputHelper TestOutput = null;
     }
 
-
     public class TestHelper
     {
 
-
-
         public List<string> AssertableTestLog = null;
         private ITestOutputHelper TestOutput = null;
-
 
         public ChromecastReceiver FindChromecast(string receiverName = null)
         {
             ChromecastReceiver receiver = null;
 
             var chromecasts = ChromecastDevicesFixture.Receivers;
-            if ((receiverName == null) || (receiverName == "*"))
+            if (receiverName == null || receiverName == "*")
             {
                 receiver = chromecasts.First();
             }
@@ -143,12 +136,11 @@ namespace Sharpcaster.Test
         public async Task<ChromecastClient> CreateAndConnectClient(ITestOutputHelper output, ChromecastReceiver receiver)
         {
             TestOutput = output;
-            TestOutput?.WriteLine("Using Receiver '" + (receiver.Model) + "' at " + receiver.DeviceUri);
+            TestOutput?.WriteLine("Using Receiver '" + receiver.Model + "' at " + receiver.DeviceUri);
             ChromecastClient cc = GetClientWithTestOutput(output);
             await cc.ConnectChromecast(receiver);
             return cc;
         }
-
 
         public async Task<ChromecastClient> CreateConnectAndLoadAppClient(ITestOutputHelper output, string appId = "B3419EF5")
         {
@@ -176,20 +168,17 @@ namespace Sharpcaster.Test
             return cc;
         }
 
-
         public ChromecastClient GetClientWithTestOutput(ITestOutputHelper output, List<string> assertableLog = null)
         {
-
             TestOutput = output;
             ILoggerFactory lFactory = CreateMockedLoggerFactory(assertableLog);
 
             return new ChromecastClient(loggerFactory: lFactory);
         }
 
-
         private Mock<ILogger<T>> CreateILoggerMock<T>()
         {
-            Mock<ILogger<T>> retVal = new Mock<ILogger<T>>();
+            Mock<ILogger<T>> retVal = new();
             retVal.Setup(x => x.Log(
                 It.IsAny<LogLevel>(),
                 It.IsAny<EventId>(),
@@ -220,7 +209,6 @@ namespace Sharpcaster.Test
             return retVal;
         }
 
-
         public ILoggerFactory CreateMockedLoggerFactory(List<string> assertableLog = null)
         {
             AssertableTestLog = assertableLog;
@@ -250,7 +238,6 @@ namespace Sharpcaster.Test
                     catch { }
                     AssertableTestLog?.Add(logMessage);
                 }));
-
 
             var loggerFactory = new Mock<ILoggerFactory>();
 
@@ -286,6 +273,10 @@ namespace Sharpcaster.Test
                     {
                         return CreateILoggerMock<ILogger<MultiZoneChannel>>().Object;
                     }
+                    else if (name == "Sharpcaster.Channels.SpotifyChannel")
+                    {
+                        return CreateILoggerMock<ILogger<SpotifyChannel>>().Object;
+                    }
                     else
                     {
                         return loggerGeneric.Object;
@@ -296,34 +287,77 @@ namespace Sharpcaster.Test
             return loggerFactory.Object;
         }
 
-
-        public static QueueItem[] CreateTestCd()
+        public static QueueItem[] CreateTestCd
         {
-            QueueItem[] MyCd =
-            [
-                new QueueItem() {
-                    Media = new Media {
+            get
+            {
+                QueueItem[] MyCd =
+                [
+                    new QueueItem()
+                {
+                    Media = new Media
+                    {
                         ContentUrl = "http://www.openmusicarchive.org/audio/Frankie%20by%20Mississippi%20John%20Hurt.mp3"
                     }
                 },
-                new QueueItem() {
-                    Media = new Media {
+                new QueueItem()
+                {
+                    Media = new Media
+                    {
                         ContentUrl = "http://www.openmusicarchive.org/audio/Mississippi%20Boweavil%20Blues%20by%20The%20Masked%20Marvel.mp3"
                     }
                 },
-                new QueueItem() {
-                    Media = new Media {
+                new QueueItem()
+                {
+                    Media = new Media
+                    {
                         ContentUrl = "http://www.openmusicarchive.org/audio/The%20Wild%20Wagoner%20by%20Jilson%20Setters.mp3"
                     }
                 },
-                new QueueItem() {
-                    Media = new Media {
+                new QueueItem()
+                {
+                    Media = new Media
+                    {
                         ContentUrl = "http://www.openmusicarchive.org/audio/Drunkards%20Special%20by%20Coley%20Jones.mp3"
                     }
                 },
             ];
-            return MyCd;
+                return MyCd;
+            }
         }
 
+        public static QueueItem[] CreateFailingQueu
+        {
+            get
+            {
+                QueueItem[] queueItems =
+                [
+
+                    new QueueItem()
+                {
+                    Media = new Media
+                    {
+                        ContentUrl = "https://audionautix.com/Music/AwayInAManger.mp3"
+                    }
+                },
+                new QueueItem()
+                {
+                    Media = new Media
+                    {
+                        ContentUrl = "https://audionautix.com/Music/CarolOfTheBells.mp3"
+                    }
+                },
+                new QueueItem()
+                {
+                    Media = new Media
+                    {
+                        ContentUrl = "https://audionautix.com/Music/JoyToTheWorld.mp3"
+                    }
+                }
+
+                ];
+                return queueItems;
+            }
+        }
     }
 }

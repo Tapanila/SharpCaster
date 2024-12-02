@@ -2,7 +2,6 @@
 
 namespace Sharpcaster.Messages.Queue
 {
-
     //TODO: not tested yet. Either implement Queue manipulation Requests or test with 2nd external client!?
 
     [DataContract]
@@ -15,6 +14,4 @@ namespace Sharpcaster.Messages.Queue
         [DataMember(Name = "itemIds")]
         public int[] ChangedIds { get; set; }
     }
-
-
 }

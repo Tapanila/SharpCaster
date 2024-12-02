@@ -1,6 +1,4 @@
 ﻿using Sharpcaster.Models.ChromecastStatus;
-using Sharpcaster.Models.Media;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Sharpcaster.Interfaces

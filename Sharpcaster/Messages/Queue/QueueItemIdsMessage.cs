@@ -7,7 +7,6 @@ namespace Sharpcaster.Messages.Queue
     [ReceptionMessage]
     public class QueueItemIdsMessage : MediaSessionMessage
     {
-
         [DataMember(Name = "itemIds")]
         public int[] Ids { get; set; }
     }

@@ -38,7 +38,7 @@ namespace Sharpcaster.Test
             var client = await TestHelper.CreateConnectAndLoadAppClient(output, receiver);
 
             Assert.NotNull(client.GetChromecastStatus());
-            AutoResetEvent _autoResetEvent = new AutoResetEvent(false);
+            AutoResetEvent _autoResetEvent = new(false);
 
             client.Disconnected += (sender, args) =>
             {
@@ -58,7 +58,7 @@ namespace Sharpcaster.Test
         {
             var TestHelper = new TestHelper();
             ChromecastClient client = await TestHelper.CreateConnectAndLoadAppClient(output, receiver);
-            AutoResetEvent _autoResetEvent = new AutoResetEvent(false);
+            AutoResetEvent _autoResetEvent = new(false);
 
             //We are going to load video & start playing it
             //Then we are going to pause and play it quite many times
@@ -107,6 +107,5 @@ namespace Sharpcaster.Test
 
             Assert.Equal(expectedSequence, runSequence);
         }
-
     }
 }

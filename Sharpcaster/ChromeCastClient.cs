@@ -32,10 +32,8 @@ using static Extensions.Api.CastChannel.CastMessage.Types;
 
 namespace Sharpcaster
 {
-
     public class ChromecastClient : IChromecastClient
     {
-
         private const int RECEIVE_TIMEOUT = 30000;
 
         /// <summary>
@@ -43,6 +41,7 @@ namespace Sharpcaster
         /// </summary>
         public event EventHandler Disconnected;
         public Guid SenderId { get; } = Guid.NewGuid();
+        public string FriendlyName { get; set; }
 
         public IMediaChannel MediaChannel => GetChannel<IMediaChannel>();
         public IHeartbeatChannel HeartbeatChannel => GetChannel<IHeartbeatChannel>();
@@ -63,17 +62,19 @@ namespace Sharpcaster
         public ChromecastClient(ILoggerFactory loggerFactory = null)
         {
             var serviceCollection = new ServiceCollection();
-            
-            if (loggerFactory != null) {
+
+            if (loggerFactory != null)
+            {
                 serviceCollection.AddSingleton<ILoggerFactory>(loggerFactory);
                 serviceCollection.AddSingleton(typeof(ILogger<>), typeof(Logger<>));  // see https://stackoverflow.com/questions/31751437/how-is-iloggert-resolved-via-di 
-            }                                                                                            
+            }
 
             serviceCollection.AddTransient<IChromecastChannel, ConnectionChannel>();
             serviceCollection.AddTransient<IChromecastChannel, HeartbeatChannel>();
             serviceCollection.AddTransient<IChromecastChannel, ReceiverChannel>();
             serviceCollection.AddTransient<IChromecastChannel, MediaChannel>();
             serviceCollection.AddTransient<IChromecastChannel, MultiZoneChannel>();
+            serviceCollection.AddTransient<IChromecastChannel, SpotifyChannel>();
             var messageInterfaceType = typeof(IMessage);
             serviceCollection.AddTransient(messageInterfaceType, typeof(CloseMessage));
             serviceCollection.AddTransient(messageInterfaceType, typeof(PingMessage));
@@ -123,15 +124,15 @@ namespace Sharpcaster
         public async Task<ChromecastStatus> ConnectChromecast(ChromecastReceiver chromecastReceiver)
         {
             await Dispose();
+            FriendlyName = chromecastReceiver.Name;
 
             _client = new TcpClient();
             await _client.ConnectAsync(chromecastReceiver.DeviceUri.Host, chromecastReceiver.Port);
-            
+
             //Open SSL stream to Chromecast and bypass all SSL validation
-            var secureStream = new SslStream(_client.GetStream(), true, (sender, certificate, chain, sslPolicyErrors) => true);
+            var secureStream = new SslStream(_client.GetStream(), true, (_, __, ___, ____) => true);
             await secureStream.AuthenticateAsClientAsync(chromecastReceiver.DeviceUri.Host);
             _stream = secureStream;
-            
 
             ReceiveTcs = new TaskCompletionSource<bool>();
             Receive();
@@ -174,8 +175,8 @@ namespace Sharpcaster
                             {
                                 HeartbeatChannel.StopTimeoutTimer();
                             }
-                            channel?._logger?.LogTrace("RECEIVED: {Payload}", payload);
-                            
+                            channel?.Logger?.LogTrace($"RECEIVED: {payload}");
+
                             var message = JsonConvert.DeserializeObject<MessageWithId>(payload);
                             if (MessageTypes.TryGetValue(message.Type, out Type type))
                             {
@@ -198,7 +199,8 @@ namespace Sharpcaster
                                    " An implementing IMessage class is missing!", message.Type);
                                 Debugger.Break();
                             }
-                        } else
+                        }
+                        else
                         {
                             _logger?.LogError("Couldn't parse the channel from: {NameSpace} : {Payload}", castMessage.Namespace, payload);
                         }
@@ -215,12 +217,15 @@ namespace Sharpcaster
 
         private void TaskCompletionSourceInvoke(ref object tcs, MessageWithId message, string method, object parameter, Type[] types = null)
         {
-            if (tcs == null) {
-                if (message.HasRequestId && WaitingTasks.TryRemove(message.RequestId, out object newtcs)) {
+            if (tcs == null)
+            {
+                if (message.HasRequestId && WaitingTasks.TryRemove(message.RequestId, out object newtcs))
+                {
                     tcs = newtcs;
                 }
             }
-            if (tcs != null) {
+            if (tcs != null)
+            {
                 var tcsType = tcs.GetType();
                 (types == null ? tcsType.GetMethod(method) : tcsType.GetMethod(method, types)).Invoke(tcs, [parameter]);
             }
@@ -238,7 +243,7 @@ namespace Sharpcaster
             await SendSemaphoreSlim.WaitAsync();
             try
             {
-                (channelLogger ?? _logger)?.LogTrace("SENT: {Destination}: {PayLoad}", castMessage.DestinationId, castMessage.PayloadUtf8);
+                (channelLogger ?? _logger)?.LogTrace($"SENT    : {castMessage.DestinationId}: {castMessage.PayloadUtf8}");
                 byte[] message = castMessage.ToProto();
                 var networkStream = _stream;
                 await networkStream.WriteAsync(message);
@@ -278,7 +283,6 @@ namespace Sharpcaster
             HeartbeatChannel.StatusChanged -= HeartBeatTimedOut;
             await Dispose();
         }
-
 
         private async Task Dispose()
         {
@@ -339,7 +343,6 @@ namespace Sharpcaster
 
         public async Task<ChromecastStatus> LaunchApplicationAsync(string applicationId, bool joinExistingApplicationSession = true)
         {
-
             if (joinExistingApplicationSession)
             {
                 var status = GetChromecastStatus();
@@ -354,8 +357,6 @@ namespace Sharpcaster
                         await MediaChannel.GetMediaStatusAsync();
                     }
                     return await ReceiverChannel.GetChromecastStatusAsync();
-                } else {
-                    // another AppId is running
                 }
             }
             var newApplication = await ReceiverChannel.LaunchApplicationAsync(applicationId);

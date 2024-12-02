@@ -1,11 +1,10 @@
-﻿using System.Runtime.Serialization;
-using Sharpcaster.Messages.Media;
+﻿using Sharpcaster.Messages.Media;
+using System.Runtime.Serialization;
 
 namespace Sharpcaster.Messages.Queue
 {
     [DataContract]
     public class QueueNextMessage : MediaSessionMessage
     {
-
     }
 }

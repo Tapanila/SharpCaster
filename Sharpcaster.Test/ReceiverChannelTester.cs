@@ -7,18 +7,20 @@ using Xunit.Abstractions;
 namespace Sharpcaster.Test
 {
     [Collection("SingleCollection")]
-    public class ReceiverChannelTester : IClassFixture<ChromecastDevicesFixture> {
+    public class ReceiverChannelTester : IClassFixture<ChromecastDevicesFixture>
+    {
         private ITestOutputHelper output;
 
-        public ReceiverChannelTester(ITestOutputHelper outputHelper, ChromecastDevicesFixture fixture) {
+        public ReceiverChannelTester(ITestOutputHelper outputHelper, ChromecastDevicesFixture fixture)
+        {
             output = outputHelper;
             output.WriteLine("Fixture has found " + ChromecastDevicesFixture.Receivers?.Count + " receivers with " + fixture.GetSearchesCnt() + " searche(s).");
         }
 
-
         [Theory]
         [MemberData(nameof(ChromecastReceiversFilter.GetAll), MemberType = typeof(ChromecastReceiversFilter))]
-        public async Task TestMute(ChromecastReceiver receiver) {
+        public async Task TestMute(ChromecastReceiver receiver)
+        {
             var TestHelper = new TestHelper();
             var client = await TestHelper.CreateAndConnectClient(output, receiver);
 
@@ -29,7 +31,8 @@ namespace Sharpcaster.Test
 
         [Theory]
         [MemberData(nameof(ChromecastReceiversFilter.GetAll), MemberType = typeof(ChromecastReceiversFilter))]
-        public async Task TestUnMute(ChromecastReceiver receiver) {
+        public async Task TestUnMute(ChromecastReceiver receiver)
+        {
             var TestHelper = new TestHelper();
             var client = await TestHelper.CreateAndConnectClient(output, receiver);
 
@@ -39,10 +42,11 @@ namespace Sharpcaster.Test
 
         [Theory]
         [MemberData(nameof(ChromecastReceiversFilter.GetAll), MemberType = typeof(ChromecastReceiversFilter))]
-        public async Task TestVolume(ChromecastReceiver receiver) {
+        public async Task TestVolume(ChromecastReceiver receiver)
+        {
             var TestHelper = new TestHelper();
             var client = await TestHelper.CreateAndConnectClient(output, receiver);
-           
+
             var status = await client.ReceiverChannel.SetVolume(0.1);
             Assert.Equal(0.1, status.Volume.Level.Value, precision: 1);
 
@@ -56,7 +60,8 @@ namespace Sharpcaster.Test
 
         [Theory]
         [MemberData(nameof(ChromecastReceiversFilter.GetAll), MemberType = typeof(ChromecastReceiversFilter))]
-        public async Task TestStoppingApplication(ChromecastReceiver receiver) {
+        public async Task TestStoppingApplication(ChromecastReceiver receiver)
+        {
             var TestHelper = new TestHelper();
             var client = await TestHelper.CreateAndConnectClient(output, receiver);
 

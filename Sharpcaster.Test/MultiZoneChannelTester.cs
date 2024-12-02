@@ -8,7 +8,7 @@ using Xunit.Abstractions;
 
 namespace Sharpcaster.Test
 {
-    public class MultiZoneChannelTester: IClassFixture<ChromecastDevicesFixture>
+    public class MultiZoneChannelTester : IClassFixture<ChromecastDevicesFixture>
     {
         private ITestOutputHelper output;
 
@@ -26,7 +26,7 @@ namespace Sharpcaster.Test
         {
             var TestHelper = new TestHelper();
             ChromecastClient client = await TestHelper.CreateConnectAndLoadAppClient(output, receiver);
-            AutoResetEvent _autoResetEvent = new AutoResetEvent(false);
+            AutoResetEvent _autoResetEvent = new(false);
 
             //We are going to load video & start playing it
             //Then we are going to change the volume few times
@@ -68,6 +68,5 @@ namespace Sharpcaster.Test
 
             Assert.True(_autoResetEvent.WaitOne(1000));
         }
-
     }
 }

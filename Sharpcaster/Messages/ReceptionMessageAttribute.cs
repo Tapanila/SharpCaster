@@ -2,6 +2,7 @@
 
 namespace Sharpcaster.Messages
 {
+    [AttributeUsage(AttributeTargets.All, AllowMultiple = false)]
     /// <summary>
     /// Attribute for received messages
     /// </summary>

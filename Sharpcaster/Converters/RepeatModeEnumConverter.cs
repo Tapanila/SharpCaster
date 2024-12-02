@@ -1,8 +1,6 @@
 ﻿using Newtonsoft.Json;
 using Sharpcaster.Models.Media;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Sharpcaster.Converters
 {

@@ -1,7 +1,4 @@
-﻿using System.Net.NetworkInformation;
-using System;
-using System.Threading.Tasks;
-using System.Timers;
+﻿using System;
 
 namespace Sharpcaster.Interfaces
 {

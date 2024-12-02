@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using Sharpcaster.Interfaces;
+using Sharpcaster.Messages;
 using Sharpcaster.Messages.Media;
 using Sharpcaster.Messages.Queue;
 using Sharpcaster.Models.ChromecastStatus;
@@ -17,6 +18,10 @@ namespace Sharpcaster.Channels
     /// </summary>
     public class MediaChannel : StatusChannel<MediaStatusMessage, IEnumerable<MediaStatus>>, IMediaChannel
     {
+        /// <summary>
+        /// Raised when error is received
+        /// </summary>
+        public event EventHandler<ErrorMessage> ErrorHappened;
         public MediaStatus MediaStatus { get => Status.FirstOrDefault(); }
         /// <summary>
         /// Initializes a new instance of MediaChannel class
@@ -24,7 +29,6 @@ namespace Sharpcaster.Channels
         public MediaChannel(ILogger<MediaChannel> logger = null) : base("media", logger)
         {
         }
-
 
         private async Task<MediaStatus> SendAsync(IMessageWithId message, ChromecastApplication application)
         {
@@ -43,7 +47,7 @@ namespace Sharpcaster.Channels
             }
             catch (Exception ex)
             {
-                _logger?.LogError("Error sending message: {Message}", ex.Message);
+                Logger?.LogError($"Error sending message: {ex.Message}");
                 Status = null;
                 throw;
             }
@@ -68,6 +72,17 @@ namespace Sharpcaster.Channels
             return await SendAsync(new LoadMessage() { SessionId = status.Application.SessionId, Media = media, AutoPlay = autoPlay }, status.Application);
         }
 
+        public override Task OnMessageReceivedAsync(IMessage message)
+        {
+            switch (message)
+            {
+                case ErrorMessage errorMessage:
+                    ErrorHappened?.Invoke(this, errorMessage);
+                    throw new Exception("Errored: " + errorMessage.DetailedErrorCode);
+            }
+            return base.OnMessageReceivedAsync(message);
+        }
+
         /// <summary>
         /// Plays the media
         /// </summary>
@@ -83,7 +98,6 @@ namespace Sharpcaster.Channels
         /// <returns>media status</returns>
         public async Task<MediaStatus> PauseAsync()
         {
-
             return await SendAsync(new PauseMessage());
         }
 
@@ -109,7 +123,18 @@ namespace Sharpcaster.Channels
         public async Task<MediaStatus> QueueLoadAsync(QueueItem[] items, long? currentTime = null, RepeatModeType repeatMode = RepeatModeType.OFF, long? startIndex = null)
         {
             var chromecastStatus = Client.GetChromecastStatus();
-            return (await SendAsync<MediaStatusMessage>(new QueueLoadMessage() { SessionId = chromecastStatus.Application.SessionId, Items = items, CurrentTime = currentTime, RepeatMode = repeatMode, StartIndex = startIndex }, chromecastStatus.Application.TransportId)).Status?.FirstOrDefault();
+            var response = await SendAsync<MessageWithId>(new QueueLoadMessage() { SessionId = chromecastStatus.Application.SessionId, Items = items, CurrentTime = currentTime, RepeatMode = repeatMode, StartIndex = startIndex }, chromecastStatus.Application.TransportId);
+
+            switch (response)
+            {
+                case MediaStatusMessage mediaStatusMessage:
+                    return mediaStatusMessage.Status?.FirstOrDefault();
+                case LoadFailedMessage _:
+                    throw new Exception("Load failed");
+                case LoadCancelledMessage _:
+                    throw new Exception("Load cancelled");
+            }
+            throw new Exception("Unknown response");
         }
 
         public async Task<MediaStatus> QueueNextAsync()
@@ -139,6 +164,5 @@ namespace Sharpcaster.Channels
             var chromecastStatus = Client.GetChromecastStatus();
             return await SendAsync(new Messages.Receiver.GetStatusMessage(), chromecastStatus.Application);
         }
-
     }
 }

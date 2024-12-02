@@ -12,5 +12,6 @@ namespace Sharpcaster.Interfaces
         Task<TResponse> SendAsync<TResponse>(ILogger logger, string ns, IMessageWithId message, string destinationId) where TResponse : IMessageWithId;
         Task DisconnectAsync();
         ChromecastStatus GetChromecastStatus();
+        string FriendlyName { get; set; }
     }
 }
