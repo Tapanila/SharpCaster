@@ -43,7 +43,7 @@ namespace Sharpcaster
                         {
                             return i.Split('=');
                         }
-                        return ["", ""];
+                        return new string[] { "", "" };
                     })
                     .ToDictionary(y => y[0], y => y[1]);
                 if (!txtValues.ContainsKey("fn")) return;

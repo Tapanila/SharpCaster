@@ -17,5 +17,10 @@ namespace Sharpcaster.Interfaces
         /// Gets the status
         /// </summary>
         TStatus Status { get; }
+
+        /// <summary>
+        /// Clears the status
+        /// </summary>
+        void ClearStatus();
     }
 }

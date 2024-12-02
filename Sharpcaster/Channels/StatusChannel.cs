@@ -54,5 +54,10 @@ namespace Sharpcaster.Channels
         {
             StatusChanged?.Invoke(this, EventArgs.Empty);
         }
+
+        public void ClearStatus()
+        {
+            Status = default;
+        }
     }
 }

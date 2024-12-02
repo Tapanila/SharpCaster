@@ -1,5 +1,6 @@
 ﻿using Google.Protobuf;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Sharpcaster;
 using System;
 using System.Linq;
@@ -43,9 +44,9 @@ namespace Extensions.Api.CastChannel
                 return string.Empty;
             }
 
-            dynamic stuff = JsonConvert.DeserializeObject(PayloadUtf8);
+            var stuff = JObject.Parse(PayloadUtf8);
 
-            return stuff.type;
+            return stuff["type"]?.ToString() ?? string.Empty;
         }
     }
 }

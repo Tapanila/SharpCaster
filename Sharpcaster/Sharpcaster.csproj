@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-	<TargetFramework>net9.0</TargetFramework>
+	<TargetFrameworks>net9.0;netstandard2.0</TargetFrameworks>
     <PackageId>Sharpcaster</PackageId>
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/Tapanila/SharpCaster/</RepositoryUrl>
@@ -15,7 +15,7 @@
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageIcon>sharpcaster-logo-64x64.png</PackageIcon>
     <PackageReadmeFile>README.md</PackageReadmeFile>
-	<IsAotCompatible>true</IsAotCompatible>
+	<IsAotCompatible Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net9.0'))">true</IsAotCompatible>
   </PropertyGroup>
 
   <ItemGroup>

@@ -190,7 +190,7 @@ namespace Sharpcaster
                                 catch (Exception ex)
                                 {
                                     _logger?.LogError("Exception processing the Response: {Message}", ex.Message);
-                                    TaskCompletionSourceInvoke(ref tcs, message, "SetException", ex, [typeof(Exception)]);
+                                    TaskCompletionSourceInvoke(ref tcs, message, "SetException", ex, new Type[] { typeof(Exception) });
                                 }
                             }
                             else
@@ -227,7 +227,7 @@ namespace Sharpcaster
             if (tcs != null)
             {
                 var tcsType = tcs.GetType();
-                (types == null ? tcsType.GetMethod(method) : tcsType.GetMethod(method, types)).Invoke(tcs, [parameter]);
+                (types == null ? tcsType.GetMethod(method) : tcsType.GetMethod(method, types)).Invoke(tcs, new object[] { parameter });
             }
         }
 
@@ -246,7 +246,7 @@ namespace Sharpcaster
                 (channelLogger ?? _logger)?.LogTrace($"SENT    : {castMessage.DestinationId}: {castMessage.PayloadUtf8}");
                 byte[] message = castMessage.ToProto();
                 var networkStream = _stream;
-                await networkStream.WriteAsync(message);
+                await networkStream.WriteAsync(message, 0, message.Length);
                 await networkStream.FlushAsync();
             }
             finally
@@ -277,7 +277,7 @@ namespace Sharpcaster
         {
             foreach (var channel in GetStatusChannels())
             {
-                channel.GetType().GetProperty("Status").SetValue(channel, null);
+                channel.ClearStatus();
             }
             HeartbeatChannel.StopTimeoutTimer();
             HeartbeatChannel.StatusChanged -= HeartBeatTimedOut;
@@ -364,10 +364,9 @@ namespace Sharpcaster
             return await ReceiverChannel.GetChromecastStatusAsync();
         }
 
-        private IEnumerable<IChromecastChannel> GetStatusChannels()
+        private IEnumerable<IStatusChannel<object>> GetStatusChannels()
         {
-            var statusChannelType = typeof(IStatusChannel<>);
-            return Channels.Where(c => c.GetType().GetInterfaces().Any(i => i.GetTypeInfo().IsGenericType && i.GetGenericTypeDefinition() == statusChannelType));
+            return Channels.OfType<IStatusChannel<object>>();
         }
 
         /// <summary>
@@ -376,7 +375,7 @@ namespace Sharpcaster
         /// <returns>a dictionnary of namespace/status</returns>
         public IDictionary<string, object> GetStatuses()
         {
-            return GetStatusChannels().ToDictionary(c => c.Namespace, c => c.GetType().GetProperty("Status").GetValue(c));
+            return GetStatusChannels().ToDictionary(c => c.Namespace, c => c.Status);
         }
 
         public ChromecastStatus GetChromecastStatus()
