@@ -11,7 +11,7 @@ namespace Sharpcaster.Interfaces
         /// <summary>
         /// Raised when the status has changed
         /// </summary>
-        event EventHandler StatusChanged;
+        event EventHandler<TStatus> StatusChanged;
 
         /// <summary>
         /// Gets the status

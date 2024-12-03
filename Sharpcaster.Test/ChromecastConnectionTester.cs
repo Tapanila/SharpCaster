@@ -7,6 +7,7 @@ using Sharpcaster.Test.helper;
 using Sharpcaster.Models.Media;
 using System;
 using System.Linq;
+using System.Collections.Generic;
 
 namespace Sharpcaster.Test
 {
@@ -76,7 +77,7 @@ namespace Sharpcaster.Test
             int commandsToRun = 10;
 
             //We are setting up an event to listen to status change. Because we don't know when the video has started to play
-            client.MediaChannel.StatusChanged += (object sender, EventArgs e) =>
+            client.MediaChannel.StatusChanged += (object sender, IEnumerable<MediaStatus> e) =>
             {
                 _autoResetEvent.Set();
             };

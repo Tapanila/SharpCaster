@@ -15,7 +15,7 @@ namespace Sharpcaster.Channels
         /// <summary>
         /// Raised when the status has changed
         /// </summary>
-        public event EventHandler StatusChanged;
+        public event EventHandler<TStatus> StatusChanged;
 
         /// <summary>
         /// Initialization
@@ -40,7 +40,7 @@ namespace Sharpcaster.Channels
             {
                 case TStatusMessage statusMessage:
                     Status = statusMessage.Status;
-                    OnStatusChanged();
+                    OnStatusChanged(statusMessage.Status);
                     break;
             }
 
@@ -50,9 +50,9 @@ namespace Sharpcaster.Channels
         /// <summary>
         /// Raises the StatusChanged event
         /// </summary>
-        protected virtual void OnStatusChanged()
+        protected virtual void OnStatusChanged(TStatus status)
         {
-            StatusChanged?.Invoke(this, EventArgs.Empty);
+            StatusChanged?.Invoke(this, status);
         }
 
         public void ClearStatus()

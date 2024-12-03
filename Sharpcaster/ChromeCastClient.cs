@@ -53,6 +53,7 @@ namespace Sharpcaster
         private ILogger _logger = null;
         private TcpClient _client;
         private SslStream _stream;
+        private CancellationTokenSource _cancellationTokenSource;
         private TaskCompletionSource<bool> ReceiveTcs { get; set; }
         private SemaphoreSlim SendSemaphoreSlim { get; } = new SemaphoreSlim(1, 1);
 
@@ -94,7 +95,6 @@ namespace Sharpcaster
             serviceCollection.AddTransient(messageInterfaceType, typeof(PingMessage));
             serviceCollection.AddTransient(messageInterfaceType, typeof(CloseMessage));
             serviceCollection.AddTransient(messageInterfaceType, typeof(LaunchStatusMessage));
-
 
             Init(serviceCollection);
         }
@@ -144,8 +144,9 @@ namespace Sharpcaster
             await secureStream.AuthenticateAsClientAsync(chromecastReceiver.DeviceUri.Host);
             _stream = secureStream;
 
+            _cancellationTokenSource = new CancellationTokenSource();
             ReceiveTcs = new TaskCompletionSource<bool>();
-            Receive();
+            Receive(_cancellationTokenSource.Token);
             HeartbeatChannel.StartTimeoutTimer();
             HeartbeatChannel.StatusChanged += HeartBeatTimedOut;
             await ConnectionChannel.ConnectAsync();
@@ -158,7 +159,7 @@ namespace Sharpcaster
             await DisconnectAsync();
         }
 
-        private void Receive()
+        private void Receive(CancellationToken cancellationToken)
         {
             Task.Run(async () =>
             {
@@ -167,13 +168,13 @@ namespace Sharpcaster
                     while (true)
                     {
                         //First 4 bytes contains the length of the message
-                        var buffer = await _stream.ReadAsync(4);
+                        var buffer = await _stream.ReadAsync(4, cancellationToken);
                         if (BitConverter.IsLittleEndian)
                         {
                             Array.Reverse(buffer);
                         }
                         var length = BitConverter.ToInt32(buffer, 0);
-                        var castMessage = CastMessage.Parser.ParseFrom(await _stream.ReadAsync(length));
+                        var castMessage = CastMessage.Parser.ParseFrom(await _stream.ReadAsync(length, cancellationToken));
                         //Payload can either be Binary or UTF8 json
                         var payload = (castMessage.PayloadType == PayloadType.Binary ?
                             Encoding.UTF8.GetString(castMessage.PayloadBinary.ToByteArray()) : castMessage.PayloadUtf8);
@@ -231,7 +232,7 @@ namespace Sharpcaster
                     //await Dispose(false);
                     ReceiveTcs.SetResult(true);
                 }
-            });
+            }, cancellationToken);
         }
 
         public async Task SendAsync(ILogger channelLogger, string ns, IMessage message, string destinationId)
@@ -291,6 +292,8 @@ namespace Sharpcaster
             }
             HeartbeatChannel.StopTimeoutTimer();
             HeartbeatChannel.StatusChanged -= HeartBeatTimedOut;
+            _cancellationTokenSource.Cancel(true);
+            await Task.Delay(100);
             await Dispose();
         }
 

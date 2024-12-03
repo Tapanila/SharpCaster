@@ -24,7 +24,7 @@ namespace Sharpcaster.Converters
                     writer.WriteValue("PLAYING");
                     break;
                 default:
-                    throw new ArgumentOutOfRangeException();
+                    throw new ArgumentOutOfRangeException(nameof(value));
             }
         }
 

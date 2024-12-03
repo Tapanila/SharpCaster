@@ -5,6 +5,7 @@ using Sharpcaster.Models.Media;
 using Sharpcaster.Models.Queue;
 using Sharpcaster.Test.helper;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -50,16 +51,9 @@ namespace Sharpcaster.Test
                 AutoResetEvent _disconnectReceived = new(false);
                 IMediaChannel mediaChannel = client.MediaChannel;
 
-                mediaChannel.StatusChanged += (object sender, EventArgs e) =>
+                mediaChannel.StatusChanged += (object sender, IEnumerable<MediaStatus> e) =>
                 {
-                    try
-                    {
-                        MediaStatus status = mediaChannel.MediaStatus;
-                        output.WriteLine(status?.PlayerState.ToString());
-                    }
-                    catch (Exception)
-                    {
-                    }
+                        output.WriteLine(e.FirstOrDefault()?.PlayerState.ToString());
                 };
 
                 client.Disconnected += (object sender, EventArgs e) =>
@@ -106,12 +100,12 @@ namespace Sharpcaster.Test
             var mediaStatusChanged = 0;
 
             //We are setting up an event to listen to status change. Because we don't know when the audio has started to play
-            mediaChannel.StatusChanged += async (object sender, EventArgs e) =>
+            mediaChannel.StatusChanged += async (object sender, IEnumerable<MediaStatus> e) =>
             {
                 try
                 {
                     mediaStatusChanged += 1;
-                    MediaStatus status = mediaChannel.MediaStatus;
+                    MediaStatus status = e.FirstOrDefault();
                     int currentItemId = status?.CurrentItemId ?? -1;
 
                     if (currentItemId != -1 && status.PlayerState == PlayerStateType.Playing)
@@ -158,7 +152,7 @@ namespace Sharpcaster.Test
             MediaStatus status = await client.MediaChannel.QueueLoadAsync(MyCd);
 
             Assert.Equal(PlayerStateType.Playing, status.PlayerState);
-            Assert.Equal(2, status.Items.Count());           // The status message only contains the next (and if available Prev) Track/QueueItem!
+            Assert.Equal(2, status.Items.Length);           // The status message only contains the next (and if available Prev) Track/QueueItem!
             Assert.Equal(status.CurrentItemId, status.Items[0].ItemId);
 
             //This keeps the test running untill all eventhandler sequence steps are finished. If something goes wrong we get a very slow timeout here.
@@ -275,10 +269,10 @@ namespace Sharpcaster.Test
             bool firstPlay = true;
 
             //We are setting up an event to listen to status change. Because we don't know when the video has started to play
-            client.MediaChannel.StatusChanged += async (object sender, EventArgs e) =>
+            client.MediaChannel.StatusChanged += async (object sender, IEnumerable<MediaStatus> e) =>
             {
                 //runSequence += ".";
-                if (client.MediaChannel.Status.FirstOrDefault()?.PlayerState == PlayerStateType.Playing)
+                if (e.FirstOrDefault().PlayerState == PlayerStateType.Playing)
                 {
                     if (firstPlay)
                     {
@@ -321,11 +315,11 @@ namespace Sharpcaster.Test
             bool firstPlay = true;
 
             //We are setting up an event to listen to status change. Because we don't know when the video has started to play
-            client.MediaChannel.StatusChanged += async (object sender, EventArgs e) =>
+            client.MediaChannel.StatusChanged += async (object sender, IEnumerable<MediaStatus> e) =>
             {
                 try
                 {
-                    if (client.MediaChannel.MediaStatus?.PlayerState == PlayerStateType.Playing)
+                    if (e.FirstOrDefault().PlayerState == PlayerStateType.Playing)
                     {
                         if (firstPlay)
                         {
