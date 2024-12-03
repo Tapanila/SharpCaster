@@ -47,7 +47,7 @@ namespace Sharpcaster.Channels
             }
             catch (Exception ex)
             {
-                Logger?.LogError($"Error sending message: {ex.Message}");
+                Logger?.LogError("Error sending message: {exceptionMessage}", ex.Message);
                 Status = null;
                 throw;
             }

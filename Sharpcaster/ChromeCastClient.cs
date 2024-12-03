@@ -51,13 +51,13 @@ namespace Sharpcaster
 
         private ILogger _logger = null;
         private TcpClient _client;
-        private Stream _stream;
+        private SslStream _stream;
         private TaskCompletionSource<bool> ReceiveTcs { get; set; }
         private SemaphoreSlim SendSemaphoreSlim { get; } = new SemaphoreSlim(1, 1);
 
         private Dictionary<string, Type> MessageTypes { get; set; }
         private IEnumerable<IChromecastChannel> Channels { get; set; }
-        private ConcurrentDictionary<int, object> WaitingTasks { get; } = new ConcurrentDictionary<int, object>();
+        private ConcurrentDictionary<int, SharpCasterTaskCompletionSource> WaitingTasks { get; } = new ConcurrentDictionary<int, SharpCasterTaskCompletionSource>();
 
         public ChromecastClient(ILoggerFactory loggerFactory = null)
         {
@@ -175,22 +175,29 @@ namespace Sharpcaster
                             {
                                 HeartbeatChannel.StopTimeoutTimer();
                             }
-                            channel?.Logger?.LogTrace($"RECEIVED: {payload}");
+                            channel?.Logger?.LogTrace("RECEIVED: {payload}", payload);
 
                             var message = JsonConvert.DeserializeObject<MessageWithId>(payload);
                             if (MessageTypes.TryGetValue(message.Type, out Type type))
                             {
-                                object tcs = null;
                                 try
                                 {
                                     var response = (IMessage)JsonConvert.DeserializeObject(payload, type);
                                     await channel.OnMessageReceivedAsync(response);
-                                    TaskCompletionSourceInvoke(ref tcs, message, "SetResult", response);
+                                    if (message.HasRequestId)
+                                    {
+                                        WaitingTasks.TryRemove(message.RequestId, out SharpCasterTaskCompletionSource tcs);
+                                        tcs.SetResult(response as IMessageWithId);
+                                    }
                                 }
                                 catch (Exception ex)
                                 {
                                     _logger?.LogError("Exception processing the Response: {Message}", ex.Message);
-                                    TaskCompletionSourceInvoke(ref tcs, message, "SetException", ex, new Type[] { typeof(Exception) });
+                                    if (message.HasRequestId)
+                                    {
+                                        WaitingTasks.TryRemove(message.RequestId, out SharpCasterTaskCompletionSource tcs);
+                                        tcs.SetException(ex);
+                                    }
                                 }
                             }
                             else
@@ -215,22 +222,6 @@ namespace Sharpcaster
             });
         }
 
-        private void TaskCompletionSourceInvoke(ref object tcs, MessageWithId message, string method, object parameter, Type[] types = null)
-        {
-            if (tcs == null)
-            {
-                if (message.HasRequestId && WaitingTasks.TryRemove(message.RequestId, out object newtcs))
-                {
-                    tcs = newtcs;
-                }
-            }
-            if (tcs != null)
-            {
-                var tcsType = tcs.GetType();
-                (types == null ? tcsType.GetMethod(method) : tcsType.GetMethod(method, types)).Invoke(tcs, new object[] { parameter });
-            }
-        }
-
         public async Task SendAsync(ILogger channelLogger, string ns, IMessage message, string destinationId)
         {
             var castMessage = CreateCastMessage(ns, destinationId);
@@ -243,11 +234,18 @@ namespace Sharpcaster
             await SendSemaphoreSlim.WaitAsync();
             try
             {
-                (channelLogger ?? _logger)?.LogTrace($"SENT    : {castMessage.DestinationId}: {castMessage.PayloadUtf8}");
+                (channelLogger ?? _logger)?.LogTrace("SENT: {DestinationId}: {PayloadUtf8}", castMessage.DestinationId, castMessage.PayloadUtf8);
+#if NETSTANDARD2_0
                 byte[] message = castMessage.ToProto();
-                var networkStream = _stream;
-                await networkStream.WriteAsync(message, 0, message.Length);
-                await networkStream.FlushAsync();
+#else
+                ReadOnlyMemory<byte> message = castMessage.ToProto();
+#endif
+#if NETSTANDARD2_0
+                await _stream.WriteAsync(message, 0, message.Length);
+#else
+                await _stream.WriteAsync(message);
+#endif
+                await _stream.FlushAsync();
             }
             finally
             {
@@ -267,10 +265,10 @@ namespace Sharpcaster
 
         public async Task<TResponse> SendAsync<TResponse>(ILogger channelLogger, string ns, IMessageWithId message, string destinationId) where TResponse : IMessageWithId
         {
-            var taskCompletionSource = new TaskCompletionSource<TResponse>();
+            var taskCompletionSource = new SharpCasterTaskCompletionSource();
             WaitingTasks[message.RequestId] = taskCompletionSource;
             await SendAsync(channelLogger, ns, message, destinationId);
-            return await taskCompletionSource.Task.TimeoutAfter(RECEIVE_TIMEOUT);
+            return (TResponse)await taskCompletionSource.Task.TimeoutAfter(RECEIVE_TIMEOUT);
         }
 
         public async Task DisconnectAsync()
