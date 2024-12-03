@@ -12,6 +12,7 @@ using Sharpcaster.Messages.Media;
 using Sharpcaster.Messages.Multizone;
 using Sharpcaster.Messages.Queue;
 using Sharpcaster.Messages.Receiver;
+using Sharpcaster.Messages.Spotify;
 using Sharpcaster.Models;
 using Sharpcaster.Models.ChromecastStatus;
 using Sharpcaster.Models.Media;
@@ -76,19 +77,24 @@ namespace Sharpcaster
             serviceCollection.AddTransient<IChromecastChannel, MultiZoneChannel>();
             serviceCollection.AddTransient<IChromecastChannel, SpotifyChannel>();
             var messageInterfaceType = typeof(IMessage);
-            serviceCollection.AddTransient(messageInterfaceType, typeof(CloseMessage));
-            serviceCollection.AddTransient(messageInterfaceType, typeof(PingMessage));
-            serviceCollection.AddTransient(messageInterfaceType, typeof(ReceiverStatusMessage));
-            serviceCollection.AddTransient(messageInterfaceType, typeof(LoadFailedMessage));
-            serviceCollection.AddTransient(messageInterfaceType, typeof(LoadCancelledMessage));
-            serviceCollection.AddTransient(messageInterfaceType, typeof(MediaStatusMessage));
-            serviceCollection.AddTransient(messageInterfaceType, typeof(MultizoneStatusMessage));
-            serviceCollection.AddTransient(messageInterfaceType, typeof(DeviceUpdatedMessage));
-            serviceCollection.AddTransient(messageInterfaceType, typeof(QueueChangeMessage));
-            serviceCollection.AddTransient(messageInterfaceType, typeof(QueueItemsMessage));
-            serviceCollection.AddTransient(messageInterfaceType, typeof(QueueItemIdsMessage));
+            serviceCollection.AddTransient(messageInterfaceType, typeof(AddUserResponseMessage));
+            serviceCollection.AddTransient(messageInterfaceType, typeof(GetInfoResponseMessage));
             serviceCollection.AddTransient(messageInterfaceType, typeof(LaunchErrorMessage));
+            serviceCollection.AddTransient(messageInterfaceType, typeof(ReceiverStatusMessage));
+            serviceCollection.AddTransient(messageInterfaceType, typeof(QueueChangeMessage));
+            serviceCollection.AddTransient(messageInterfaceType, typeof(QueueItemIdsMessage));
+            serviceCollection.AddTransient(messageInterfaceType, typeof(QueueItemsMessage));
+            serviceCollection.AddTransient(messageInterfaceType, typeof(DeviceUpdatedMessage));
+            serviceCollection.AddTransient(messageInterfaceType, typeof(MultizoneStatusMessage));
+            serviceCollection.AddTransient(messageInterfaceType, typeof(ErrorMessage));
             serviceCollection.AddTransient(messageInterfaceType, typeof(InvalidRequestMessage));
+            serviceCollection.AddTransient(messageInterfaceType, typeof(LoadCancelledMessage));
+            serviceCollection.AddTransient(messageInterfaceType, typeof(LoadFailedMessage));
+            serviceCollection.AddTransient(messageInterfaceType, typeof(MediaStatusMessage));
+            serviceCollection.AddTransient(messageInterfaceType, typeof(PingMessage));
+            serviceCollection.AddTransient(messageInterfaceType, typeof(CloseMessage));
+            serviceCollection.AddTransient(messageInterfaceType, typeof(LaunchStatusMessage));
+
 
             Init(serviceCollection);
         }
@@ -123,6 +129,10 @@ namespace Sharpcaster
 
         public async Task<ChromecastStatus> ConnectChromecast(ChromecastReceiver chromecastReceiver)
         {
+            if (chromecastReceiver.DeviceUri == null)
+            {
+                throw new ArgumentNullException(nameof(chromecastReceiver.DeviceUri));
+            }
             await Dispose();
             FriendlyName = chromecastReceiver.Name;
 
@@ -187,7 +197,9 @@ namespace Sharpcaster
                                     if (message.HasRequestId)
                                     {
                                         WaitingTasks.TryRemove(message.RequestId, out SharpCasterTaskCompletionSource tcs);
-                                        tcs.SetResult(response as IMessageWithId);
+                                        tcs?.SetResult(response as IMessageWithId);
+                                        if (tcs == null)
+                                            _logger.LogTrace("No TaskCompletionSource found for RequestId: {RequestId}", message.RequestId);
                                     }
                                 }
                                 catch (Exception ex)
@@ -196,7 +208,7 @@ namespace Sharpcaster
                                     if (message.HasRequestId)
                                     {
                                         WaitingTasks.TryRemove(message.RequestId, out SharpCasterTaskCompletionSource tcs);
-                                        tcs.SetException(ex);
+                                        tcs?.SetException(ex);
                                     }
                                 }
                             }

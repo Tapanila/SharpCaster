@@ -2,6 +2,7 @@
 using Sharpcaster.Models;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -51,7 +52,11 @@ namespace Sharpcaster
                     .ToDictionary(y => y[0], y => y[1]);
                 if (!txtValues.TryGetValue("fn", out string value)) return;
                 var ip = e.Announcement.Addresses[0];
-                Uri.TryCreate("https://" + ip, UriKind.Absolute, out Uri myUri);
+                var uriBuilder = new UriBuilder("https", ip.ToString());
+                Uri myUri = uriBuilder.Uri;
+
+                if (myUri == null)
+                    Debugger.Break();
                 var chromecast = new ChromecastReceiver
                 {
                     DeviceUri = myUri,
@@ -93,7 +98,7 @@ namespace Sharpcaster
             _serviceBrowser.StartBrowse("_googlecast._tcp");
             while (!cancellationToken.IsCancellationRequested)
             {
-                await Task.Delay(100, cancellationToken);
+                await Task.Delay(100, CancellationToken.None);
             }
             _serviceBrowser.StopBrowse();
             return DiscoveredDevices;

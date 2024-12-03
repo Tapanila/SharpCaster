@@ -1,4 +1,6 @@
-﻿using Sharpcaster.Models.ChromecastStatus;
+﻿using Sharpcaster.Messages.Receiver;
+using Sharpcaster.Models.ChromecastStatus;
+using System;
 using System.Threading.Tasks;
 
 namespace Sharpcaster.Interfaces
@@ -14,10 +16,11 @@ namespace Sharpcaster.Interfaces
         /// <param name="applicationId">application identifier</param>
         /// <returns>receiver status</returns>
         Task<ChromecastStatus> LaunchApplicationAsync(string applicationId);
-
         Task<ChromecastStatus> GetChromecastStatusAsync();
         Task<ChromecastStatus> StopApplication();
         Task<ChromecastStatus> SetVolume(double level);
         Task<ChromecastStatus> SetMute(bool muted);
+
+        event EventHandler<LaunchStatusMessage> LaunchStatusChanged;
     }
 }

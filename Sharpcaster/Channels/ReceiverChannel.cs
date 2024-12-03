@@ -16,6 +16,8 @@ namespace Sharpcaster.Channels
         {
         }
 
+        public event EventHandler<LaunchStatusMessage> LaunchStatusChanged;
+
         public async Task<ChromecastStatus> GetChromecastStatusAsync()
         {
             return (await SendAsync<ReceiverStatusMessage>(new GetStatusMessage())).Status;
@@ -44,6 +46,18 @@ namespace Sharpcaster.Channels
         public async Task<ChromecastStatus> StopApplication()
         {
             return (await SendAsync<ReceiverStatusMessage>(new StopMessage() { SessionId = Status.Application.SessionId })).Status;
+        }
+
+        public override Task OnMessageReceivedAsync(IMessage message)
+        {
+            switch (message)
+            {
+                case LaunchStatusMessage launchStatusMessage:
+                    LaunchStatusChanged?.Invoke(this, launchStatusMessage);
+                    break;
+
+            }
+            return base.OnMessageReceivedAsync(message);
         }
     }
 }
