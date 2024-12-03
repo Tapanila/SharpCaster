@@ -55,8 +55,6 @@ namespace Sharpcaster
                 var uriBuilder = new UriBuilder("https", ip.ToString());
                 Uri myUri = uriBuilder.Uri;
 
-                if (myUri == null)
-                    Debugger.Break();
                 var chromecast = new ChromecastReceiver
                 {
                     DeviceUri = myUri,
