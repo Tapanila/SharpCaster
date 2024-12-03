@@ -48,7 +48,9 @@ namespace Sharpcaster
                     .ToDictionary(y => y[0], y => y[1]);
                 if (!txtValues.ContainsKey("fn")) return;
                 var ip = e.Announcement.Addresses[0];
-                Uri.TryCreate("https://" + ip, UriKind.Absolute, out Uri myUri);
+                var uriBuilder = new UriBuilder("https", ip.ToString());
+                Uri myUri = uriBuilder.Uri;
+
                 var chromecast = new ChromecastReceiver
                 {
                     DeviceUri = myUri,
