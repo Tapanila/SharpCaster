@@ -20,7 +20,7 @@ namespace Sharpcaster.Test
         }
 
         [Theory]
-        [MemberData(nameof(ChromecastReceiversFilter.GetChromecastUltra), MemberType = typeof(ChromecastReceiversFilter))]
+        [MemberData(nameof(ChromecastReceiversFilter.GetAny), MemberType = typeof(ChromecastReceiversFilter))]
         public async Task TestTwoClients(ChromecastReceiver receiver)
         {
             var TestHelper = new TestHelper();
@@ -46,7 +46,7 @@ namespace Sharpcaster.Test
         }
 
         [Theory]
-        [MemberData(nameof(ChromecastReceiversFilter.GetChromecastUltra), MemberType = typeof(ChromecastReceiversFilter))]
+        [MemberData(nameof(ChromecastReceiversFilter.GetAny), MemberType = typeof(ChromecastReceiversFilter))]
         public async Task TestThreeClients(ChromecastReceiver receiver)
         {
             var TestHelper = new TestHelper();
@@ -81,7 +81,7 @@ namespace Sharpcaster.Test
         }
 
         [Theory]
-        [MemberData(nameof(ChromecastReceiversFilter.GetChromecastUltra), MemberType = typeof(ChromecastReceiversFilter))]
+        [MemberData(nameof(ChromecastReceiversFilter.GetAny), MemberType = typeof(ChromecastReceiversFilter))]
         public async Task TestCommandsFromMultipleDifferentClients(ChromecastReceiver receiver)
         {
             var TestHelper = new TestHelper();

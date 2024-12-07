@@ -8,6 +8,7 @@ using Sharpcaster.Models.Media;
 using Sharpcaster.Models.Queue;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -22,6 +23,9 @@ namespace Sharpcaster.Channels
         /// Raised when error is received
         /// </summary>
         public event EventHandler<ErrorMessage> ErrorHappened;
+        public event EventHandler<LoadCancelledMessage> LoadCancelled;
+        public event EventHandler<LoadFailedMessage> LoadFailed;    
+        public event EventHandler<InvalidRequestMessage> InvalidRequest;
         public MediaStatus MediaStatus { get => Status.FirstOrDefault(); }
         /// <summary>
         /// Initializes a new instance of MediaChannel class
@@ -30,24 +34,18 @@ namespace Sharpcaster.Channels
         {
         }
 
-        private async Task<MediaStatus> SendAsync(IMessageWithId message, ChromecastApplication application)
+        private async Task<MediaStatus> SendAsync(IMessageWithId message, ChromecastApplication application, bool DoNotReturnOnLoading = true)
         {
             try
             {
                 var response = await SendAsync<IMessageWithId>(message, application.TransportId);
-                if (response is LoadFailedMessage)
-                {
-                    throw new Exception("Load failed");
-                }
-                if (response is LoadCancelledMessage)
-                {
-                    throw new Exception("Load cancelled");
-                }
+                if (DoNotReturnOnLoading && (response as MediaStatusMessage).Status.FirstOrDefault().ExtendedStatus?.PlayerState == PlayerStateType.Loading)
+                    response = await Client.WaitResponseAsync<IMessageWithId>(message);
                 return (response as MediaStatusMessage).Status?.FirstOrDefault();
             }
             catch (Exception ex)
             {
-                Logger?.LogError($"Error sending message: {ex.Message}");
+                Logger?.LogError("Error sending message: {exceptionMessage}", ex.Message);
                 Status = null;
                 throw;
             }
@@ -56,7 +54,7 @@ namespace Sharpcaster.Channels
         private async Task<MediaStatus> SendAsync(MediaSessionMessage message)
         {
             var chromecastStatus = Client.GetChromecastStatus();
-            message.MediaSessionId = Status?.First().MediaSessionId ?? throw new ArgumentNullException("MediaSessionId");
+            message.MediaSessionId = Status?.First().MediaSessionId ?? throw new ArgumentNullException(nameof(message), "MediaSessionID");
             return await SendAsync(message, chromecastStatus.Applications[0]);
         }
 
@@ -76,9 +74,18 @@ namespace Sharpcaster.Channels
         {
             switch (message)
             {
+                case LoadFailedMessage loadFailedMessage:
+                    LoadFailed?.Invoke(this, loadFailedMessage);
+                    return Task.CompletedTask;
+                case LoadCancelledMessage loadCancelledMessage:
+                    LoadCancelled?.Invoke(this, loadCancelledMessage);
+                    return Task.CompletedTask;
+                case InvalidRequestMessage invalidRequestMessage:
+                    InvalidRequest?.Invoke(this, invalidRequestMessage);
+                    return Task.CompletedTask;
                 case ErrorMessage errorMessage:
                     ErrorHappened?.Invoke(this, errorMessage);
-                    throw new Exception("Errored: " + errorMessage.DetailedErrorCode);
+                    return Task.CompletedTask;
             }
             return base.OnMessageReceivedAsync(message);
         }
@@ -129,12 +136,8 @@ namespace Sharpcaster.Channels
             {
                 case MediaStatusMessage mediaStatusMessage:
                     return mediaStatusMessage.Status?.FirstOrDefault();
-                case LoadFailedMessage _:
-                    throw new Exception("Load failed");
-                case LoadCancelledMessage _:
-                    throw new Exception("Load cancelled");
             }
-            throw new Exception("Unknown response");
+            return null;
         }
 
         public async Task<MediaStatus> QueueNextAsync()

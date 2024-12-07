@@ -1,12 +1,11 @@
-﻿using Sharpcaster.Interfaces;
-using System.Runtime.Serialization;
+﻿using System.Text.Json.Serialization;
+using Sharpcaster.Interfaces;
 
 namespace Sharpcaster.Messages
 {
     /// <summary>
     /// Message base class
     /// </summary>
-    [DataContract]
     public abstract class Message : IMessage
     {
         /// <summary>
@@ -15,12 +14,12 @@ namespace Sharpcaster.Messages
         protected Message()
         {
             var type = GetType().Name;
-            //Get the type name without the "Message" suffix
+            // Get the type name without the "Message" suffix
             type = type.Replace("Message", "");
             var firstCharacter = true;
             var result = "";
-            //Convert the type name to uppercase with underscores
-            //example: "ReceiverStatusMessage" -> "RECEIVER_STATUS"
+            // Convert the type name to uppercase with underscores
+            // example: "ReceiverStatusMessage" -> "RECEIVER_STATUS"
             for (int i = 0; i < type.Length; i++)
             {
                 var c = type[i];
@@ -44,7 +43,7 @@ namespace Sharpcaster.Messages
         /// <summary>
         /// Gets or sets the message type
         /// </summary>
-        [DataMember(Name = "type")]
+        [JsonPropertyName("type")]
         public string Type { get; set; }
     }
 }

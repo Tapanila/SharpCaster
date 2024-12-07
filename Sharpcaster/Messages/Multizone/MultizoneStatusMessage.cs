@@ -7,7 +7,6 @@ namespace Sharpcaster.Messages.Multizone
     /// <summary>
     /// Media status message
     /// </summary>
-    [DataContract]
     [ReceptionMessage]
     public class MultizoneStatusMessage : StatusMessage<MultiZoneStatus>
     {

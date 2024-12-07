@@ -13,6 +13,9 @@ namespace Sharpcaster.Interfaces
     public interface IMediaChannel : IStatusChannel<IEnumerable<MediaStatus>>, IChromecastChannel
     {
         event EventHandler<ErrorMessage> ErrorHappened;
+        event EventHandler<LoadFailedMessage> LoadFailed;
+        event EventHandler<LoadCancelledMessage> LoadCancelled;
+        event EventHandler<InvalidRequestMessage> InvalidRequest;
         /// <summary>
         /// Loads a media
         /// </summary>

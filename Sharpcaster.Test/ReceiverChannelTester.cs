@@ -70,5 +70,31 @@ namespace Sharpcaster.Test
             var status = await client.ReceiverChannel.StopApplication();
             Assert.Null(status.Applications);
         }
+
+        [Theory]
+        [MemberData(nameof(ChromecastReceiversFilter.GetAny), MemberType = typeof(ChromecastReceiversFilter))]
+        public async Task TestApplicationLaunchStatusMessage(ChromecastReceiver receiver)
+        {
+            var TestHelper = new TestHelper(); 
+            var client = await TestHelper.CreateAndConnectClient(output, receiver);
+
+            string launchStatus = "";
+
+            client.ReceiverChannel.LaunchStatusChanged += (sender, e) =>
+            {
+                launchStatus = e.Status;
+            };
+
+            await client.LaunchApplicationAsync("B3419EF5");
+
+            var status = await client.ReceiverChannel.StopApplication();
+            Assert.Null(status.Applications);
+            Assert.Equal("USER_ALLOWED", launchStatus);
+        }
+
+        private void ReceiverChannel_LaunchStatusChanged(object sender, Messages.Receiver.LaunchStatusMessage e)
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }

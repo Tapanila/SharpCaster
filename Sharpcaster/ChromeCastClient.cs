@@ -1,11 +1,17 @@
 using Extensions.Api.CastChannel;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
 using Sharpcaster.Channels;
 using Sharpcaster.Extensions;
 using Sharpcaster.Interfaces;
 using Sharpcaster.Messages;
+using Sharpcaster.Messages.Connection;
+using Sharpcaster.Messages.Heartbeat;
+using Sharpcaster.Messages.Media;
+using Sharpcaster.Messages.Multizone;
+using Sharpcaster.Messages.Queue;
+using Sharpcaster.Messages.Receiver;
+using Sharpcaster.Messages.Spotify;
 using Sharpcaster.Models;
 using Sharpcaster.Models.ChromecastStatus;
 using Sharpcaster.Models.Media;
@@ -13,12 +19,14 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Net.Security;
 using System.Net.Sockets;
 using System.Reflection;
 using System.Text;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using static Extensions.Api.CastChannel.CastMessage.Types;
@@ -44,13 +52,14 @@ namespace Sharpcaster
 
         private ILogger _logger = null;
         private TcpClient _client;
-        private Stream _stream;
+        private SslStream _stream;
+        private CancellationTokenSource _cancellationTokenSource;
         private TaskCompletionSource<bool> ReceiveTcs { get; set; }
         private SemaphoreSlim SendSemaphoreSlim { get; } = new SemaphoreSlim(1, 1);
-
-        private IDictionary<string, Type> MessageTypes { get; set; }
+        private JsonSerializerOptions _jsonSerializerOptions;
+        private Dictionary<string, Type> MessageTypes { get; set; }
         private IEnumerable<IChromecastChannel> Channels { get; set; }
-        private ConcurrentDictionary<int, object> WaitingTasks { get; } = new ConcurrentDictionary<int, object>();
+        private ConcurrentDictionary<int, SharpCasterTaskCompletionSource> WaitingTasks { get; } = new ConcurrentDictionary<int, SharpCasterTaskCompletionSource>();
 
         public ChromecastClient(ILoggerFactory loggerFactory = null)
         {
@@ -69,12 +78,24 @@ namespace Sharpcaster
             serviceCollection.AddTransient<IChromecastChannel, MultiZoneChannel>();
             serviceCollection.AddTransient<IChromecastChannel, SpotifyChannel>();
             var messageInterfaceType = typeof(IMessage);
-            foreach (var type in (from t in typeof(IConnectionChannel).GetTypeInfo().Assembly.GetTypes()
-                                  where t.GetTypeInfo().IsClass && !t.GetTypeInfo().IsAbstract && messageInterfaceType.IsAssignableFrom(t) && t.GetTypeInfo().GetCustomAttribute<ReceptionMessageAttribute>() != null
-                                  select t))
-            {
-                serviceCollection.AddTransient(messageInterfaceType, type);
-            }
+            serviceCollection.AddTransient(messageInterfaceType, typeof(AddUserResponseMessage));
+            serviceCollection.AddTransient(messageInterfaceType, typeof(GetInfoResponseMessage));
+            serviceCollection.AddTransient(messageInterfaceType, typeof(LaunchErrorMessage));
+            serviceCollection.AddTransient(messageInterfaceType, typeof(ReceiverStatusMessage));
+            serviceCollection.AddTransient(messageInterfaceType, typeof(QueueChangeMessage));
+            serviceCollection.AddTransient(messageInterfaceType, typeof(QueueItemIdsMessage));
+            serviceCollection.AddTransient(messageInterfaceType, typeof(QueueItemsMessage));
+            serviceCollection.AddTransient(messageInterfaceType, typeof(DeviceUpdatedMessage));
+            serviceCollection.AddTransient(messageInterfaceType, typeof(MultizoneStatusMessage));
+            serviceCollection.AddTransient(messageInterfaceType, typeof(ErrorMessage));
+            serviceCollection.AddTransient(messageInterfaceType, typeof(InvalidRequestMessage));
+            serviceCollection.AddTransient(messageInterfaceType, typeof(LoadCancelledMessage));
+            serviceCollection.AddTransient(messageInterfaceType, typeof(LoadFailedMessage));
+            serviceCollection.AddTransient(messageInterfaceType, typeof(MediaStatusMessage));
+            serviceCollection.AddTransient(messageInterfaceType, typeof(PingMessage));
+            serviceCollection.AddTransient(messageInterfaceType, typeof(CloseMessage));
+            serviceCollection.AddTransient(messageInterfaceType, typeof(LaunchStatusMessage));
+
             Init(serviceCollection);
         }
 
@@ -97,17 +118,28 @@ namespace Sharpcaster
             Channels = channels;
 
             _logger = serviceProvider.GetService<ILogger<ChromecastClient>>();
-            _logger?.LogDebug(MessageTypes.Keys.ToString(","));
-            _logger?.LogDebug(Channels.ToString(","));
+            _logger?.LogDebug("MessageTypes: {MessageTypes}", MessageTypes.Keys.ToString(","));
+            _logger?.LogDebug("Channels: {Channels}", Channels.ToString(","));
 
             foreach (var channel in Channels)
             {
                 channel.Client = this;
             }
+
+            _jsonSerializerOptions = new JsonSerializerOptions
+            {
+                Converters = {
+                    new IMessageJsonConverter()
+                }
+            };
         }
 
         public async Task<ChromecastStatus> ConnectChromecast(ChromecastReceiver chromecastReceiver)
         {
+            if (chromecastReceiver.DeviceUri == null)
+            {
+                throw new ArgumentNullException(nameof(chromecastReceiver.DeviceUri));
+            }
             await Dispose();
             FriendlyName = chromecastReceiver.Name;
 
@@ -119,8 +151,9 @@ namespace Sharpcaster
             await secureStream.AuthenticateAsClientAsync(chromecastReceiver.DeviceUri.Host);
             _stream = secureStream;
 
+            _cancellationTokenSource = new CancellationTokenSource();
             ReceiveTcs = new TaskCompletionSource<bool>();
-            Receive();
+            Receive(_cancellationTokenSource.Token);
             HeartbeatChannel.StartTimeoutTimer();
             HeartbeatChannel.StatusChanged += HeartBeatTimedOut;
             await ConnectionChannel.ConnectAsync();
@@ -133,7 +166,7 @@ namespace Sharpcaster
             await DisconnectAsync();
         }
 
-        private void Receive()
+        private void Receive(CancellationToken cancellationToken)
         {
             Task.Run(async () =>
             {
@@ -142,13 +175,13 @@ namespace Sharpcaster
                     while (true)
                     {
                         //First 4 bytes contains the length of the message
-                        var buffer = await _stream.ReadAsync(4);
+                        var buffer = await _stream.ReadAsync(4, cancellationToken);
                         if (BitConverter.IsLittleEndian)
                         {
                             Array.Reverse(buffer);
                         }
                         var length = BitConverter.ToInt32(buffer, 0);
-                        var castMessage = CastMessage.Parser.ParseFrom(await _stream.ReadAsync(length));
+                        var castMessage = CastMessage.Parser.ParseFrom(await _stream.ReadAsync(length, cancellationToken));
                         //Payload can either be Binary or UTF8 json
                         var payload = (castMessage.PayloadType == PayloadType.Binary ?
                             Encoding.UTF8.GetString(castMessage.PayloadBinary.ToByteArray()) : castMessage.PayloadUtf8);
@@ -160,22 +193,31 @@ namespace Sharpcaster
                             {
                                 HeartbeatChannel.StopTimeoutTimer();
                             }
-                            channel?.Logger?.LogTrace($"RECEIVED: {payload}");
+                            channel?.Logger?.LogTrace("RECEIVED: {payload}", payload);
 
-                            var message = JsonConvert.DeserializeObject<MessageWithId>(payload);
+                            var message = JsonSerializer.Deserialize<MessageWithId>(payload, _jsonSerializerOptions);
                             if (MessageTypes.TryGetValue(message.Type, out Type type))
                             {
-                                object tcs = null;
                                 try
                                 {
-                                    var response = (IMessage)JsonConvert.DeserializeObject(payload, type);
+                                    var response = (IMessage)JsonSerializer.Deserialize(payload, type, _jsonSerializerOptions);
                                     await channel.OnMessageReceivedAsync(response);
-                                    TaskCompletionSourceInvoke(ref tcs, message, "SetResult", response);
+                                    if (message.HasRequestId)
+                                    {
+                                        WaitingTasks.TryRemove(message.RequestId, out SharpCasterTaskCompletionSource tcs);
+                                        tcs?.SetResult(response as IMessageWithId);
+                                        if (tcs == null)
+                                            _logger.LogTrace("No TaskCompletionSource found for RequestId: {RequestId}, CompletionSourceCount: {CompletionSourceCount} ", message.RequestId, WaitingTasks.Count);
+                                    }
                                 }
                                 catch (Exception ex)
                                 {
-                                    _logger?.LogError($"Exception processing the Response: {ex.Message}");
-                                    TaskCompletionSourceInvoke(ref tcs, message, "SetException", ex, new Type[] { typeof(Exception) });
+                                    _logger?.LogError("Exception processing the Response: {Message}", ex.Message);
+                                    if (message.HasRequestId)
+                                    {
+                                        WaitingTasks.TryRemove(message.RequestId, out SharpCasterTaskCompletionSource tcs);
+                                        tcs?.SetException(ex);
+                                    }
                                 }
                             }
                             else
@@ -187,39 +229,23 @@ namespace Sharpcaster
                         }
                         else
                         {
-                            _logger?.LogError($"Couldn't parse the channel from: {castMessage.Namespace}  :  {payload}");
+                            _logger?.LogError("Couldn't parse the channel from: {NameSpace} : {Payload}", castMessage.Namespace, payload);
                         }
                     }
                 }
                 catch (Exception exception)
                 {
-                    _logger?.LogError($"Error in receive loop: {exception.Message}");
+                    _logger?.LogError("Error in receive loop: {Message}", exception.Message);
                     //await Dispose(false);
                     ReceiveTcs.SetResult(true);
                 }
-            });
-        }
-
-        private void TaskCompletionSourceInvoke(ref object tcs, MessageWithId message, string method, object parameter, Type[] types = null)
-        {
-            if (tcs == null)
-            {
-                if (message.HasRequestId && WaitingTasks.TryRemove(message.RequestId, out object newtcs))
-                {
-                    tcs = newtcs;
-                }
-            }
-            if (tcs != null)
-            {
-                var tcsType = tcs.GetType();
-                (types == null ? tcsType.GetMethod(method) : tcsType.GetMethod(method, types)).Invoke(tcs, new object[] { parameter });
-            }
+            }, cancellationToken);
         }
 
         public async Task SendAsync(ILogger channelLogger, string ns, IMessage message, string destinationId)
         {
             var castMessage = CreateCastMessage(ns, destinationId);
-            castMessage.PayloadUtf8 = JsonConvert.SerializeObject(message);
+            castMessage.PayloadUtf8 = JsonSerializer.Serialize(message, _jsonSerializerOptions);
             await SendAsync(channelLogger, castMessage);
         }
 
@@ -228,11 +254,18 @@ namespace Sharpcaster
             await SendSemaphoreSlim.WaitAsync();
             try
             {
-                (channelLogger ?? _logger)?.LogTrace($"SENT    : {castMessage.DestinationId}: {castMessage.PayloadUtf8}");
+                (channelLogger ?? _logger)?.LogTrace("SENT: {NameSpace} - {DestinationId}: {PayloadUtf8}", castMessage.Namespace, castMessage.DestinationId, castMessage.PayloadUtf8);
+#if NETSTANDARD2_0
                 byte[] message = castMessage.ToProto();
-                var networkStream = _stream;
-                await networkStream.WriteAsync(message, 0, message.Length);
-                await networkStream.FlushAsync();
+#else
+                ReadOnlyMemory<byte> message = castMessage.ToProto();
+#endif
+#if NETSTANDARD2_0
+                await _stream.WriteAsync(message, 0, message.Length);
+#else
+                await _stream.WriteAsync(message);
+#endif
+                await _stream.FlushAsync();
             }
             finally
             {
@@ -252,20 +285,29 @@ namespace Sharpcaster
 
         public async Task<TResponse> SendAsync<TResponse>(ILogger channelLogger, string ns, IMessageWithId message, string destinationId) where TResponse : IMessageWithId
         {
-            var taskCompletionSource = new TaskCompletionSource<TResponse>();
+            var taskCompletionSource = new SharpCasterTaskCompletionSource();
             WaitingTasks[message.RequestId] = taskCompletionSource;
             await SendAsync(channelLogger, ns, message, destinationId);
-            return await taskCompletionSource.Task.TimeoutAfter(RECEIVE_TIMEOUT);
+            return (TResponse)await taskCompletionSource.Task.TimeoutAfter(RECEIVE_TIMEOUT);
+        }
+
+        public async Task<TResponse> WaitResponseAsync<TResponse>(IMessageWithId message) where TResponse : IMessageWithId
+        {
+            var taskCompletionSource = new SharpCasterTaskCompletionSource();
+            WaitingTasks[message.RequestId] = taskCompletionSource;
+            return (TResponse)await taskCompletionSource.Task.TimeoutAfter(RECEIVE_TIMEOUT);
         }
 
         public async Task DisconnectAsync()
         {
             foreach (var channel in GetStatusChannels())
             {
-                channel.GetType().GetProperty("Status").SetValue(channel, null);
+                channel.ClearStatus();
             }
             HeartbeatChannel.StopTimeoutTimer();
             HeartbeatChannel.StatusChanged -= HeartBeatTimedOut;
+            _cancellationTokenSource.Cancel(true);
+            await Task.Delay(100);
             await Dispose();
         }
 
@@ -299,7 +341,7 @@ namespace Sharpcaster
                 }
                 catch (Exception ex)
                 {
-                    _logger?.LogError($"Error on disposing. {ex.Message}");
+                    _logger?.LogError("Error on disposing. {Message}", ex.Message);
                 }
                 finally
                 {
@@ -349,10 +391,9 @@ namespace Sharpcaster
             return await ReceiverChannel.GetChromecastStatusAsync();
         }
 
-        private IEnumerable<IChromecastChannel> GetStatusChannels()
+        private IEnumerable<IStatusChannel<object>> GetStatusChannels()
         {
-            var statusChannelType = typeof(IStatusChannel<>);
-            return Channels.Where(c => c.GetType().GetInterfaces().Any(i => i.GetTypeInfo().IsGenericType && i.GetGenericTypeDefinition() == statusChannelType));
+            return Channels.OfType<IStatusChannel<object>>();
         }
 
         /// <summary>
@@ -361,7 +402,7 @@ namespace Sharpcaster
         /// <returns>a dictionnary of namespace/status</returns>
         public IDictionary<string, object> GetStatuses()
         {
-            return GetStatusChannels().ToDictionary(c => c.Namespace, c => c.GetType().GetProperty("Status").GetValue(c));
+            return GetStatusChannels().ToDictionary(c => c.Namespace, c => c.Status);
         }
 
         public ChromecastStatus GetChromecastStatus()

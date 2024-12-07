@@ -1,21 +1,26 @@
-﻿using Newtonsoft.Json;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace Sharpcaster.Models.ChromecastStatus
 {
     public class ChromecastApplication
     {
-        [JsonProperty("appId")]
+        [JsonPropertyName("appId")]
         public string AppId { get; set; }
-        [JsonProperty("displayName")]
+
+        [JsonPropertyName("displayName")]
         public string DisplayName { get; set; }
-        [JsonProperty("namespaces")]
+
+        [JsonPropertyName("namespaces")]
         public List<Namespace> Namespaces { get; set; }
-        [JsonProperty("sessionId")]
+
+        [JsonPropertyName("sessionId")]
         public string SessionId { get; set; }
-        [JsonProperty("statusText")]
+
+        [JsonPropertyName("statusText")]
         public string StatusText { get; set; }
-        [JsonProperty("transportId")]
+
+        [JsonPropertyName("transportId")]
         public string TransportId { get; set; }
     }
 }

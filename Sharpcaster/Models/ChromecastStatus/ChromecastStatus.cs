@@ -1,20 +1,24 @@
-﻿using Newtonsoft.Json;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json.Serialization;
 
 namespace Sharpcaster.Models.ChromecastStatus
 {
     public class ChromecastStatus
     {
-        [JsonProperty("applications")]
+        [JsonPropertyName("applications")]
         public List<ChromecastApplication> Applications { get; set; }
-        [JsonProperty("isActiveInput")]
+
+        [JsonPropertyName("isActiveInput")]
         public bool IsActiveInput { get; set; }
-        [JsonProperty("isStandBy")]
+
+        [JsonPropertyName("isStandBy")]
         public bool IsStandBy { get; set; }
-        [JsonProperty("volume")]
+
+        [JsonPropertyName("volume")]
         public Volume Volume { get; set; }
+
         [JsonIgnore]
-        public ChromecastApplication Application { get => Applications.FirstOrDefault(); }
+        public ChromecastApplication Application => Applications?.FirstOrDefault();
     }
 }

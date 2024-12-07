@@ -31,9 +31,7 @@ namespace Sharpcaster.Test
         }
 
         [Theory]
-        //[MemberData(nameof(ChromecastReceiversFilter.GetGoogleCastGroup), MemberType = typeof(ChromecastReceiversFilter))]
-        //[MemberData(nameof(CCDevices.GetJblSpeaker), MemberType = typeof(CCDevices))]
-        [MemberData(nameof(ChromecastReceiversFilter.GetChromecastUltra), MemberType = typeof(ChromecastReceiversFilter))]
+        [MemberData(nameof(ChromecastReceiversFilter.GetAny), MemberType = typeof(ChromecastReceiversFilter))]
         public async Task TestChromecastGetInfo(ChromecastReceiver receiver)
         {
             var TestHelper = new TestHelper();

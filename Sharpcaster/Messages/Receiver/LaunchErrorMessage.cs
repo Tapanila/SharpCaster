@@ -1,15 +1,15 @@
 ﻿using System.Runtime.Serialization;
+using System.Text.Json.Serialization;
 
 namespace Sharpcaster.Messages.Receiver
 {
     /// <summary>
     /// Launch Error message
     /// </summary>
-    [DataContract]
     [ReceptionMessage]
     class LaunchErrorMessage : MessageWithId
     {
-        [DataMember(Name = "reason")]
+        [JsonPropertyName("reason")]
         public string Reason { get; set; }
     }
 }

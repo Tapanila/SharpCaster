@@ -326,7 +326,7 @@ namespace Sharpcaster.Test.helper
             }
         }
 
-        public static QueueItem[] CreateFailingQueu
+        public static QueueItem[] CreateFailingQueue
         {
             get
             {

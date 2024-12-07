@@ -1,11 +1,11 @@
 ﻿using System.Runtime.Serialization;
+using System.Text.Json.Serialization;
 
 namespace Sharpcaster.Messages.Spotify
 {
-    [DataContract]
     public class GetInfoMessage : MessageWithId
     {
-        [DataMember(Name = "payload")]
+        [JsonPropertyName("payload")]
         public GetInfoMessagePayload Payload { get; set; }
         public GetInfoMessage()
         {
@@ -13,15 +13,14 @@ namespace Sharpcaster.Messages.Spotify
         }
     }
 
-    [DataContract]
     public class GetInfoMessagePayload
     {
-        [DataMember(Name = "deviceAPI_isGroup")]
+        [JsonPropertyName("deviceAPI_isGroup")]
         public bool DeviceAPI_isGroup { get; set; }
 
-        [DataMember(Name = "deviceID")]
+        [JsonPropertyName("deviceID")]
         public string DeviceId { get; set; }
-        [DataMember(Name = "remoteName")]
+        [JsonPropertyName("remoteName")]
         public string RemoteName { get; set; }
     }
 }

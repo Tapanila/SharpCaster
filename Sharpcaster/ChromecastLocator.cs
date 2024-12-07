@@ -2,6 +2,7 @@
 using Sharpcaster.Models;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -15,9 +16,12 @@ namespace Sharpcaster
     public class MdnsChromecastLocator : IChromecastLocator
     {
         public event EventHandler<ChromecastReceiver> ChromecastReceivedFound;
-        private IList<ChromecastReceiver> DiscoveredDevices { get; }
+        private List<ChromecastReceiver> DiscoveredDevices { get; }
         private readonly ServiceBrowser _serviceBrowser;
         private SemaphoreSlim ServiceAddedSemaphoreSlim { get; } = new SemaphoreSlim(1, 1);
+
+        private static readonly string[] stringArray = new string[] { "", "" };
+
         public MdnsChromecastLocator()
         {
             DiscoveredDevices = new List<ChromecastReceiver>();
@@ -43,10 +47,10 @@ namespace Sharpcaster
                         {
                             return i.Split('=');
                         }
-                        return new string[] { "", "" };
+                        return stringArray;
                     })
                     .ToDictionary(y => y[0], y => y[1]);
-                if (!txtValues.ContainsKey("fn")) return;
+                if (!txtValues.TryGetValue("fn", out string value)) return;
                 var ip = e.Announcement.Addresses[0];
                 var uriBuilder = new UriBuilder("https", ip.ToString());
                 Uri myUri = uriBuilder.Uri;
@@ -54,7 +58,7 @@ namespace Sharpcaster
                 var chromecast = new ChromecastReceiver
                 {
                     DeviceUri = myUri,
-                    Name = txtValues["fn"],
+                    Name = value,
                     Model = txtValues["md"],
                     Version = txtValues["ve"],
                     ExtraInformation = txtValues,
@@ -92,7 +96,7 @@ namespace Sharpcaster
             _serviceBrowser.StartBrowse("_googlecast._tcp");
             while (!cancellationToken.IsCancellationRequested)
             {
-                await Task.Delay(100);
+                await Task.Delay(100, CancellationToken.None);
             }
             _serviceBrowser.StopBrowse();
             return DiscoveredDevices;

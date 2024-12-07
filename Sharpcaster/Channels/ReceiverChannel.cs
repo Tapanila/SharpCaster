@@ -16,6 +16,8 @@ namespace Sharpcaster.Channels
         {
         }
 
+        public event EventHandler<LaunchStatusMessage> LaunchStatusChanged;
+
         public async Task<ChromecastStatus> GetChromecastStatusAsync()
         {
             return (await SendAsync<ReceiverStatusMessage>(new GetStatusMessage())).Status;
@@ -35,7 +37,7 @@ namespace Sharpcaster.Channels
         {
             if (level < 0 || level > 1.0)
             {
-                Logger?.LogError($"level must be between 0.0 and 1.0 - is {level}");
+                Logger?.LogError("level must be between 0.0 and 1.0 - is {level}", level);
                 throw new ArgumentException("level must be between 0.0 and 1.0", nameof(level));
             }
             return (await SendAsync<ReceiverStatusMessage>(new SetVolumeMessage() { Volume = new Models.Volume() { Level = level } })).Status;
@@ -44,6 +46,18 @@ namespace Sharpcaster.Channels
         public async Task<ChromecastStatus> StopApplication()
         {
             return (await SendAsync<ReceiverStatusMessage>(new StopMessage() { SessionId = Status.Application.SessionId })).Status;
+        }
+
+        public override Task OnMessageReceivedAsync(IMessage message)
+        {
+            switch (message)
+            {
+                case LaunchStatusMessage launchStatusMessage:
+                    LaunchStatusChanged?.Invoke(this, launchStatusMessage);
+                    break;
+
+            }
+            return base.OnMessageReceivedAsync(message);
         }
     }
 }

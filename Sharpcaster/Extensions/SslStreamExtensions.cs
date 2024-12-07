@@ -1,24 +1,36 @@
 ﻿using System;
 using System.IO;
+using System.Net.Security;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Sharpcaster.Extensions
 {
     public static class StreamExtensions
     {
-        public static async Task<byte[]> ReadAsync(this Stream stream, int bufferLength)
+        public static async Task<byte[]> ReadAsync(this SslStream stream, int bufferLength, CancellationToken cancellationToken = default)
         {
             var buffer = new byte[bufferLength];
-            int nb, length = 0;
-            while (length < bufferLength)
+
+            #if NETSTANDARD2_0
+            int bytesRead, totalBytesRead = 0;
+            while (totalBytesRead < bufferLength)
             {
-                nb = await stream.ReadAsync(buffer, length, bufferLength - length);
-                if (nb == 0)
+                if (stream == null)
                 {
-                    throw new InvalidOperationException();
+                    throw new ObjectDisposedException(nameof(stream));
                 }
-                length += nb;
+                bytesRead = await stream.ReadAsync(buffer, totalBytesRead, bufferLength - totalBytesRead, cancellationToken);
+                if (bytesRead == 0)
+                {
+                    throw new EndOfStreamException();
+                }
+                totalBytesRead += bytesRead;
             }
+            #else
+            ObjectDisposedException.ThrowIf(stream == null, stream);
+            await stream.ReadExactlyAsync(buffer.AsMemory(0, bufferLength), cancellationToken);
+            #endif
             return buffer;
         }
     }

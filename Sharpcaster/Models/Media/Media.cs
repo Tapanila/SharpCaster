@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Runtime.Serialization;
+using System.Text.Json.Serialization;
 
 namespace Sharpcaster.Models.Media
 {
@@ -12,37 +13,37 @@ namespace Sharpcaster.Models.Media
         /// <summary>
         /// Gets or sets the content identifier
         /// </summary>
-        [DataMember(Name = "contentId")]
+        [JsonPropertyName("contentId")]
         public string ContentUrl { get; set; }
 
         /// <summary>
         /// Gets or sets the stream type
         /// </summary>
-        [DataMember(Name = "streamType")]
+        [JsonPropertyName("streamType")]
         public StreamType StreamType { get; set; } = StreamType.Buffered;
 
         /// <summary>
         /// Gets or sets the content type
         /// </summary>
-        [DataMember(Name = "contentType")]
+        [JsonPropertyName("contentType")]
         public string ContentType { get; set; }
 
         /// <summary>
         /// Gets or sets the metadata
         /// </summary>
-        [DataMember(Name = "metadata")]
+        [JsonPropertyName("metadata")]
         public MediaMetadata Metadata { get; set; }
 
         /// <summary>
         /// Gets or sets the duration of the media
         /// </summary>
-        [DataMember(Name = "duration")]
+        [JsonPropertyName("duration")]
         public double? Duration { get; set; }
 
         /// <summary>
         /// Gets or sets the custom data
         /// </summary>
-        [DataMember(Name = "customData")]
+        [JsonPropertyName("customData")]
         public IDictionary<string, string> CustomData { get; set; }
     }
 }

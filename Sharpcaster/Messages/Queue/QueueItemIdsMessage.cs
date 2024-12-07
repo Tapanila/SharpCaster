@@ -1,13 +1,13 @@
 ﻿using Sharpcaster.Messages.Media;
 using System.Runtime.Serialization;
+using System.Text.Json.Serialization;
 
 namespace Sharpcaster.Messages.Queue
 {
-    [DataContract]
     [ReceptionMessage]
     public class QueueItemIdsMessage : MediaSessionMessage
     {
-        [DataMember(Name = "itemIds")]
+        [JsonPropertyName("itemIds")]
         public int[] Ids { get; set; }
     }
 }

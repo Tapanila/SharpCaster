@@ -1,8 +1,8 @@
 ﻿using Google.Protobuf;
-using Newtonsoft.Json;
 using Sharpcaster;
 using System;
 using System.Linq;
+using System.Text.Json;
 
 namespace Extensions.Api.CastChannel
 {
@@ -43,9 +43,15 @@ namespace Extensions.Api.CastChannel
                 return string.Empty;
             }
 
-            dynamic stuff = JsonConvert.DeserializeObject(PayloadUtf8);
+            using (var document = JsonDocument.Parse(PayloadUtf8))
+            {
+                if (document.RootElement.TryGetProperty("type", out JsonElement typeElement))
+                {
+                    return typeElement.GetString() ?? string.Empty;
+                }
+            }
 
-            return stuff.type;
+            return string.Empty;
         }
     }
 }
