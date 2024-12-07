@@ -8,7 +8,6 @@ namespace Sharpcaster.Messages.Media
     /// <summary>
     /// Media status message
     /// </summary>
-    [DataContract]
     [ReceptionMessage]
     public class MediaStatusMessage : StatusMessage<IEnumerable<MediaStatus>>
     {

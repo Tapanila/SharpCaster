@@ -1,17 +1,15 @@
 ﻿using System.Runtime.Serialization;
+using System.Text.Json.Serialization;
 
 namespace Sharpcaster.Messages.Queue
 {
-    //TODO: not tested yet. Either implement Queue manipulation Requests or test with 2nd external client!?
-
-    [DataContract]
     [ReceptionMessage]
     public class QueueChangeMessage : MessageWithSession
     {
-        [DataMember(Name = "changeType")]
+        [JsonPropertyName("changeType")]
         public string ChangeType { get; set; }
 
-        [DataMember(Name = "itemIds")]
+        [JsonPropertyName("itemIds")]
         public int[] ChangedIds { get; set; }
     }
 }

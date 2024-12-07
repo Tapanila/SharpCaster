@@ -1,59 +1,52 @@
-﻿using Newtonsoft.Json;
+﻿using System;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using Sharpcaster.Models.Media;
-using System;
 
 namespace Sharpcaster.Converters
 {
-    public class RepeatModeEnumConverter : JsonConverter
+    public class RepeatModeEnumConverter : JsonConverter<RepeatModeType>
     {
-        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+        public override RepeatModeType Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
-            var repeatModeType = (RepeatModeType)value;
-            switch (repeatModeType)
-            {
-                case RepeatModeType.OFF:
-                    writer.WriteValue("REPEAT_OFF");
-                    break;
-                case RepeatModeType.ALL:
-                    writer.WriteValue("REPEAT_ALL");
-                    break;
-                case RepeatModeType.SINGLE:
-                    writer.WriteValue("REPEAT_SINGLE");
-                    break;
-                case RepeatModeType.ALL_AND_SHUFFLE:
-                    writer.WriteValue("REPEAT_ALL_AND_SHUFFLE");
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
-        }
-
-        public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
-        {
-            var enumString = (string)reader.Value;
-            RepeatModeType? repeatModeType = null;
-
+            string enumString = reader.GetString();
             switch (enumString)
             {
                 case "REPEAT_OFF":
-                    repeatModeType = RepeatModeType.OFF;
-                    break;
+                    return RepeatModeType.OFF;
                 case "REPEAT_ALL":
-                    repeatModeType = RepeatModeType.ALL;
-                    break;
+                    return RepeatModeType.ALL;
                 case "REPEAT_SINGLE":
-                    repeatModeType = RepeatModeType.SINGLE;
-                    break;
+                    return RepeatModeType.SINGLE;
                 case "REPEAT_ALL_AND_SHUFFLE":
-                    repeatModeType = RepeatModeType.ALL_AND_SHUFFLE;
-                    break;
+                    return RepeatModeType.ALL_AND_SHUFFLE;
+                default:
+                    throw new JsonException($"Invalid value '{enumString}' for {nameof(RepeatModeType)}");
             }
-            return repeatModeType;
         }
 
-        public override bool CanConvert(Type objectType)
+        public override void Write(Utf8JsonWriter writer, RepeatModeType value, JsonSerializerOptions options)
         {
-            return objectType == typeof(string);
+            string stringValue;
+            switch (value)
+            {
+                case RepeatModeType.OFF:
+                    stringValue = "REPEAT_OFF";
+                    break;
+                case RepeatModeType.ALL:
+                    stringValue = "REPEAT_ALL";
+                    break;
+                case RepeatModeType.SINGLE:
+                    stringValue = "REPEAT_SINGLE";
+                    break;
+                case RepeatModeType.ALL_AND_SHUFFLE:
+                    stringValue = "REPEAT_ALL_AND_SHUFFLE";
+                    break;
+                default:
+                    throw new JsonException($"Unsupported {nameof(RepeatModeType)} value: {value}");
+            }
+
+            writer.WriteStringValue(stringValue);
         }
     }
 }

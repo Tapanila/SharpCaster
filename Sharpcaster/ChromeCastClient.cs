@@ -1,7 +1,6 @@
 using Extensions.Api.CastChannel;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
 using Sharpcaster.Channels;
 using Sharpcaster.Extensions;
 using Sharpcaster.Interfaces;
@@ -27,6 +26,7 @@ using System.Net.Security;
 using System.Net.Sockets;
 using System.Reflection;
 using System.Text;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using static Extensions.Api.CastChannel.CastMessage.Types;
@@ -56,7 +56,7 @@ namespace Sharpcaster
         private CancellationTokenSource _cancellationTokenSource;
         private TaskCompletionSource<bool> ReceiveTcs { get; set; }
         private SemaphoreSlim SendSemaphoreSlim { get; } = new SemaphoreSlim(1, 1);
-
+        private JsonSerializerOptions _jsonSerializerOptions;
         private Dictionary<string, Type> MessageTypes { get; set; }
         private IEnumerable<IChromecastChannel> Channels { get; set; }
         private ConcurrentDictionary<int, SharpCasterTaskCompletionSource> WaitingTasks { get; } = new ConcurrentDictionary<int, SharpCasterTaskCompletionSource>();
@@ -125,6 +125,13 @@ namespace Sharpcaster
             {
                 channel.Client = this;
             }
+
+            _jsonSerializerOptions = new JsonSerializerOptions
+            {
+                Converters = {
+                    new IMessageJsonConverter()
+                }
+            };
         }
 
         public async Task<ChromecastStatus> ConnectChromecast(ChromecastReceiver chromecastReceiver)
@@ -188,19 +195,19 @@ namespace Sharpcaster
                             }
                             channel?.Logger?.LogTrace("RECEIVED: {payload}", payload);
 
-                            var message = JsonConvert.DeserializeObject<MessageWithId>(payload);
+                            var message = JsonSerializer.Deserialize<MessageWithId>(payload, _jsonSerializerOptions);
                             if (MessageTypes.TryGetValue(message.Type, out Type type))
                             {
                                 try
                                 {
-                                    var response = (IMessage)JsonConvert.DeserializeObject(payload, type);
+                                    var response = (IMessage)JsonSerializer.Deserialize(payload, type, _jsonSerializerOptions);
                                     await channel.OnMessageReceivedAsync(response);
                                     if (message.HasRequestId)
                                     {
                                         WaitingTasks.TryRemove(message.RequestId, out SharpCasterTaskCompletionSource tcs);
                                         tcs?.SetResult(response as IMessageWithId);
                                         if (tcs == null)
-                                            _logger.LogTrace("No TaskCompletionSource found for RequestId: {RequestId}", message.RequestId);
+                                            _logger.LogTrace("No TaskCompletionSource found for RequestId: {RequestId}, CompletionSourceCount: {CompletionSourceCount} ", message.RequestId, WaitingTasks.Count);
                                     }
                                 }
                                 catch (Exception ex)
@@ -238,7 +245,7 @@ namespace Sharpcaster
         public async Task SendAsync(ILogger channelLogger, string ns, IMessage message, string destinationId)
         {
             var castMessage = CreateCastMessage(ns, destinationId);
-            castMessage.PayloadUtf8 = JsonConvert.SerializeObject(message);
+            castMessage.PayloadUtf8 = JsonSerializer.Serialize(message, _jsonSerializerOptions);
             await SendAsync(channelLogger, castMessage);
         }
 
@@ -247,7 +254,7 @@ namespace Sharpcaster
             await SendSemaphoreSlim.WaitAsync();
             try
             {
-                (channelLogger ?? _logger)?.LogTrace("SENT: {DestinationId}: {PayloadUtf8}", castMessage.DestinationId, castMessage.PayloadUtf8);
+                (channelLogger ?? _logger)?.LogTrace("SENT: {NameSpace} - {DestinationId}: {PayloadUtf8}", castMessage.Namespace, castMessage.DestinationId, castMessage.PayloadUtf8);
 #if NETSTANDARD2_0
                 byte[] message = castMessage.ToProto();
 #else
@@ -281,6 +288,13 @@ namespace Sharpcaster
             var taskCompletionSource = new SharpCasterTaskCompletionSource();
             WaitingTasks[message.RequestId] = taskCompletionSource;
             await SendAsync(channelLogger, ns, message, destinationId);
+            return (TResponse)await taskCompletionSource.Task.TimeoutAfter(RECEIVE_TIMEOUT);
+        }
+
+        public async Task<TResponse> WaitResponseAsync<TResponse>(IMessageWithId message) where TResponse : IMessageWithId
+        {
+            var taskCompletionSource = new SharpCasterTaskCompletionSource();
+            WaitingTasks[message.RequestId] = taskCompletionSource;
             return (TResponse)await taskCompletionSource.Task.TimeoutAfter(RECEIVE_TIMEOUT);
         }
 

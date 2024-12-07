@@ -172,7 +172,6 @@ namespace Sharpcaster.Test
             QueueItem[] MyCd = helper.TestHelper.CreateTestCd;
 
             MediaStatus status = await client.MediaChannel.QueueLoadAsync(MyCd);
-
             Assert.Equal(PlayerStateType.Playing, status.PlayerState);
             Assert.Equal(2, status.Items.Count());           // The status message only contains the next (and if available Prev) Track/QueueItem!
             Assert.Equal(status.CurrentItemId, status.Items[0].ItemId);
@@ -357,19 +356,23 @@ namespace Sharpcaster.Test
                 ContentUrl = ""
             };
 
-            Exception loadFailedException = null;
+            LoadFailedMessage loadFailedMessage = null;
+
+            client.MediaChannel.LoadFailed += (object sender, LoadFailedMessage e) =>
+            {
+                loadFailedMessage = e;
+            };
+
+            
 
             MediaStatus mediaStatus;
-            try
-            {
-                mediaStatus = await client.MediaChannel.LoadAsync(media);
-            }
-            catch (Exception ex)
-            {
-                loadFailedException = ex;
-            }
+ 
+            mediaStatus = await client.MediaChannel.LoadAsync(media);
 
-            Assert.Equal("Load failed", loadFailedException?.Message);
+            await Task.Delay(500);
+            
+
+            Assert.NotNull(loadFailedMessage);
         }
 
         [Theory]
@@ -385,7 +388,10 @@ namespace Sharpcaster.Test
             };
 
             await client.MediaChannel.LoadAsync(media);
+
             await client.MediaChannel.PlayAsync();
+
+            await Task.Delay(500);
 
             client = TestHelper.GetClientWithTestOutput(output);
             var status = await client.ConnectChromecast(receiver);
@@ -394,6 +400,7 @@ namespace Sharpcaster.Test
             await client.LaunchApplicationAsync(applicationRunning.AppId, true);
             await client.MediaChannel.PauseAsync();
         }
+
 
         [Theory]
         [MemberData(nameof(ChromecastReceiversFilter.GetAny), MemberType = typeof(ChromecastReceiversFilter))]
@@ -495,21 +502,17 @@ namespace Sharpcaster.Test
             ChromecastClient client = await TestHelper.CreateConnectAndLoadAppClient(output, receiver);
             bool errorHappened = false;
 
-            QueueItem[] MyCd = helper.TestHelper.CreateFailingQueu;
+            QueueItem[] MyCd = helper.TestHelper.CreateFailingQueue;
 
-            client.MediaChannel.ErrorHappened += (object sender, ErrorMessage e) =>
+
+            client.MediaChannel.InvalidRequest += (object sender, InvalidRequestMessage e) =>
             {
-                output.WriteLine("Error happened: " + e.DetailedErrorCode);
+                output.WriteLine("Error happened: " + e.Reason);
                 errorHappened = true;
             };
-            try
-            {
-                var result = await client.MediaChannel.QueueLoadAsync(MyCd);
-            }
-            catch (Exception ex)
-            {
-                output.WriteLine("Exception happened: " + ex.Message);
-            }
+
+            var result = await client.MediaChannel.QueueLoadAsync(MyCd);
+
 
             await Task.Delay(200);
             Assert.True(errorHappened);

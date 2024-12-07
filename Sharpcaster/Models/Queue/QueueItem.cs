@@ -1,4 +1,5 @@
 ﻿using System.Runtime.Serialization;
+using System.Text.Json.Serialization;
 
 namespace Sharpcaster.Models.Queue
 {
@@ -8,29 +9,34 @@ namespace Sharpcaster.Models.Queue
         /// <summary>
         /// Gets or sets the item identifier
         /// </summary>
-        [DataMember(Name = "itemId", EmitDefaultValue = false)]
+        [JsonPropertyName("itemId")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public long? ItemId { get; set; }
         /// <summary>
         /// Gets or sets the media
         /// </summary>
-        [DataMember(Name = "media")]
+        [JsonPropertyName("media")]
         public Media.Media Media { get; set; }
         /// <summary>
         /// Gets or sets a value indicating whether autoplay is enabled or not
         /// </summary>
-        [DataMember(Name = "autoPlay")]
+        [JsonPropertyName("autoPlay")]
         public bool? IsAutoPlay { get; set; }
 
-        [DataMember(Name = "orderId", EmitDefaultValue = false)]
+        [JsonPropertyName("orderId")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public long? OrderId { get; set; }
 
-        [DataMember(Name = "startTime", EmitDefaultValue = false)]
+        [JsonPropertyName("startTime")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public long? StartTime { get; set; }
 
-        [DataMember(Name = "preloadTime", EmitDefaultValue = false)]
+        [JsonPropertyName("preloadTime")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public long? PreloadTime { get; set; }
 
-        [DataMember(Name = "activeTrackIds", EmitDefaultValue = false)]
+        [JsonPropertyName("activeTrackIds")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public long[] ActiveTrackIds { get; set; }
     }
 }

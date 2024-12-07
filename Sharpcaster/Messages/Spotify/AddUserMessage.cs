@@ -1,11 +1,11 @@
 ﻿using System.Runtime.Serialization;
+using System.Text.Json.Serialization;
 
 namespace Sharpcaster.Messages.Spotify
 {
-    [DataContract]
     public class AddUserMessage : MessageWithId
     {
-        [DataMember(Name = "payload")]
+        [JsonPropertyName("payload")]
         public AddUserMessagePayload Payload { get; set; }
         public AddUserMessage()
         {
@@ -13,12 +13,11 @@ namespace Sharpcaster.Messages.Spotify
         }
     }
 
-    [DataContract]
     public class AddUserMessagePayload
     {
-        [DataMember(Name = "blob")]
+        [JsonPropertyName("blob")]
         public string Blob { get; set; }
-        [DataMember(Name = "tokenType")]
+        [JsonPropertyName("tokenType")]
         public string TokenType { get; set; }
     }
 }
