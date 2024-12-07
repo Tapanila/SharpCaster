@@ -20,7 +20,7 @@ namespace Sharpcaster.Test
             List<string> logLines = [];
             _ = TestHelper.GetClientWithTestOutput(output, assertableLog: logLines);
 
-            Assert.Equal("MessageTypes: [addUserResponse,getInfoResponse,LAUNCH_ERROR,RECEIVER_STATUS,QUEUE_CHANGE,QUEUE_ITEM_IDS,QUEUE_ITEMS,DEVICE_UPDATED,MULTIZONE_STATUS,ERROR,INVALID_REQUEST,LOAD_CANCELLED,LOAD_FAILED,MEDIA_STATUS,PING,CLOSE]", logLines[0]);
+            Assert.Equal("MessageTypes: [addUserResponse,getInfoResponse,LAUNCH_ERROR,RECEIVER_STATUS,QUEUE_CHANGE,QUEUE_ITEM_IDS,QUEUE_ITEMS,DEVICE_UPDATED,MULTIZONE_STATUS,ERROR,INVALID_REQUEST,LOAD_CANCELLED,LOAD_FAILED,MEDIA_STATUS,PING,CLOSE,LAUNCH_STATUS]", logLines[0]);
         }
 
         [Theory]
