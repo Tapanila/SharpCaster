@@ -6,10 +6,10 @@ namespace Sharpcaster.Interfaces
 {
     public interface IChromecastClient
     {
-        Task SendAsync(ILogger logger, string ns, IMessage message, string destinationId);
         Task<ChromecastStatus> LaunchApplicationAsync(string applicationId, bool joinExistingApplicationSession = true);
-        Task<TResponse> SendAsync<TResponse>(ILogger logger, string ns, IMessageWithId message, string destinationId) where TResponse : IMessageWithId;
-        Task<TResponse> WaitResponseAsync<TResponse>(IMessageWithId message) where TResponse : IMessageWithId;
+        Task<string> SendAsync(ILogger logger, string ns, int messageRequestId, string messagePayload, string destinationId);
+        Task SendAsync(ILogger logger, string ns, string messagePayload, string destinationId);
+        Task<string> WaitResponseAsync(int messageRequestId);
         Task DisconnectAsync();
         ChromecastStatus GetChromecastStatus();
         string FriendlyName { get; set; }

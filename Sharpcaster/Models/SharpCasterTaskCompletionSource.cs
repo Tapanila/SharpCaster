@@ -9,16 +9,16 @@ namespace Sharpcaster.Models
 {
     public class SharpCasterTaskCompletionSource
     {
-        private readonly TaskCompletionSource<IMessageWithId> _tcs;
+        private readonly TaskCompletionSource<string> _tcs;
 
-        public Task<IMessageWithId> Task { get => _tcs.Task; }
+        public Task<string> Task { get => _tcs.Task; }
 
         public SharpCasterTaskCompletionSource()
         {
-            _tcs = new TaskCompletionSource<IMessageWithId>();
+            _tcs = new TaskCompletionSource<string>();
         }
 
-        public void SetResult(IMessageWithId parameter)
+        public void SetResult(string parameter)
         {
             _tcs.SetResult(parameter);
         }

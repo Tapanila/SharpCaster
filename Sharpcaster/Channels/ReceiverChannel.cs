@@ -1,8 +1,10 @@
 ﻿using Microsoft.Extensions.Logging;
+using Sharpcaster.Extensions;
 using Sharpcaster.Interfaces;
 using Sharpcaster.Messages.Receiver;
 using Sharpcaster.Models.ChromecastStatus;
 using System;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace Sharpcaster.Channels
@@ -20,17 +22,26 @@ namespace Sharpcaster.Channels
 
         public async Task<ChromecastStatus> GetChromecastStatusAsync()
         {
-            return (await SendAsync<ReceiverStatusMessage>(new GetStatusMessage())).Status;
+            var getStatusMessage = new GetStatusMessage();
+            var response = await SendAsync(getStatusMessage.RequestId, JsonSerializer.Serialize(getStatusMessage, SharpcasteSerializationContext.Default.GetStatusMessage));
+            var status = JsonSerializer.Deserialize(response, SharpcasteSerializationContext.Default.ReceiverStatusMessage);
+            return status.Status;
         }
 
         public async Task<ChromecastStatus> LaunchApplicationAsync(string applicationId)
         {
-            return (await SendAsync<ReceiverStatusMessage>(new LaunchMessage() { ApplicationId = applicationId })).Status;
+            var launchMessage = new LaunchMessage() { ApplicationId = applicationId };
+            var response = await SendAsync(launchMessage.RequestId, JsonSerializer.Serialize(launchMessage, SharpcasteSerializationContext.Default.LaunchMessage));
+            var status = JsonSerializer.Deserialize(response, SharpcasteSerializationContext.Default.ReceiverStatusMessage);
+            return status.Status;
         }
 
         public async Task<ChromecastStatus> SetMute(bool muted)
         {
-            return (await SendAsync<ReceiverStatusMessage>(new SetVolumeMessage() { Volume = new Models.Volume() { Muted = muted } })).Status;
+            var setVolumeMessage = new SetVolumeMessage() { Volume = new Models.Volume() { Muted = muted } };
+            var response = await SendAsync(setVolumeMessage.RequestId, JsonSerializer.Serialize(setVolumeMessage, SharpcasteSerializationContext.Default.SetVolumeMessage));
+            var status = JsonSerializer.Deserialize(response, SharpcasteSerializationContext.Default.ReceiverStatusMessage);
+            return status.Status;
         }
 
         public async Task<ChromecastStatus> SetVolume(double level)
@@ -40,24 +51,36 @@ namespace Sharpcaster.Channels
                 Logger?.LogError("level must be between 0.0 and 1.0 - is {level}", level);
                 throw new ArgumentException("level must be between 0.0 and 1.0", nameof(level));
             }
-            return (await SendAsync<ReceiverStatusMessage>(new SetVolumeMessage() { Volume = new Models.Volume() { Level = level } })).Status;
+            var setVolumeMessage = new SetVolumeMessage() { Volume = new Models.Volume() { Level = level } };
+            var response = await SendAsync(setVolumeMessage.RequestId, JsonSerializer.Serialize(setVolumeMessage, SharpcasteSerializationContext.Default.SetVolumeMessage));
+            var status = JsonSerializer.Deserialize(response, SharpcasteSerializationContext.Default.ReceiverStatusMessage);
+            return status.Status;
         }
 
         public async Task<ChromecastStatus> StopApplication()
         {
-            return (await SendAsync<ReceiverStatusMessage>(new StopMessage() { SessionId = Status.Application.SessionId })).Status;
+            var stopMessage = new StopMessage() { SessionId = Status.Application.SessionId };
+            var response = await SendAsync(stopMessage.RequestId, JsonSerializer.Serialize(stopMessage, SharpcasteSerializationContext.Default.StopMessage));
+            var status = JsonSerializer.Deserialize(response, SharpcasteSerializationContext.Default.ReceiverStatusMessage);
+            return status.Status;
         }
 
-        public override Task OnMessageReceivedAsync(IMessage message)
+        public override Task OnMessageReceivedAsync(string messagePayload, string type)
         {
-            switch (message)
+            switch (type)
             {
-                case LaunchStatusMessage launchStatusMessage:
+                case "LAUNCH_STATUS":
+                    var launchStatusMessage = JsonSerializer.Deserialize(messagePayload, SharpcasteSerializationContext.Default.LaunchStatusMessage);
                     LaunchStatusChanged?.Invoke(this, launchStatusMessage);
+                    break;
+                case "RECEIVER_STATUS":
+                    var receiverStatusMessage = JsonSerializer.Deserialize(messagePayload, SharpcasteSerializationContext.Default.ReceiverStatusMessage);
+                    Status = receiverStatusMessage.Status;
+                    OnStatusChanged(receiverStatusMessage.Status);
                     break;
 
             }
-            return base.OnMessageReceivedAsync(message);
+            return base.OnMessageReceivedAsync(messagePayload, type);
         }
     }
 }

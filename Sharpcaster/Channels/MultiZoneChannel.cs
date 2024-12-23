@@ -1,8 +1,10 @@
 ﻿using Microsoft.Extensions.Logging;
+using Sharpcaster.Extensions;
 using Sharpcaster.Interfaces;
 using Sharpcaster.Messages.Multizone;
 using Sharpcaster.Models.MultiZone;
 using System;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace Sharpcaster.Channels
@@ -29,22 +31,24 @@ namespace Sharpcaster.Channels
         /// Called when a message for this channel is received
         /// </summary>
         /// <param name="message">message to process</param>
-        public override Task OnMessageReceivedAsync(IMessage message)
+        public override Task OnMessageReceivedAsync(string messagePayload, string type)
         {
-            switch (message)
+            switch (type)
             {
-                case MultizoneStatusMessage multizoneStatusMessage:
+                case "MULTIZONE_STATUS":
+                    var multizoneStatusMessage = JsonSerializer.Deserialize(messagePayload, SharpcasteSerializationContext.Default.MultizoneStatusMessage);
                     Status = multizoneStatusMessage.Status;
                     StatusChanged?.Invoke(this, multizoneStatusMessage.Status);
                     break;
-                case DeviceUpdatedMessage deviceUpdatedMessage:
+                case "DEVICE_UPDATED":
+                    var deviceUpdatedMessage = JsonSerializer.Deserialize(messagePayload, SharpcasteSerializationContext.Default.DeviceUpdatedMessage);
                     DeviceUpdated?.Invoke(this, deviceUpdatedMessage.Device);
                     break;
                 default:
                     break;
             }
 
-            return base.OnMessageReceivedAsync(message);
+            return base.OnMessageReceivedAsync(messagePayload, type);
         }
 
         /// <summary>

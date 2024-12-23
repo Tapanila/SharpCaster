@@ -128,9 +128,7 @@ namespace Sharpcaster
 
             _jsonSerializerOptions = new JsonSerializerOptions
             {
-                Converters = {
-                    new IMessageJsonConverter()
-                }
+                TypeInfoResolver = SharpcasteSerializationContext.Default
             };
         }
 
@@ -195,19 +193,18 @@ namespace Sharpcaster
                             }
                             channel?.Logger?.LogTrace("RECEIVED: {payload}", payload);
 
-                            var message = JsonSerializer.Deserialize<MessageWithId>(payload, _jsonSerializerOptions);
+                            var message = JsonSerializer.Deserialize(payload, SharpcasteSerializationContext.Default.MessageWithId);
                             if (MessageTypes.TryGetValue(message.Type, out Type type))
                             {
                                 try
                                 {
-                                    var response = (IMessage)JsonSerializer.Deserialize(payload, type, _jsonSerializerOptions);
-                                    await channel.OnMessageReceivedAsync(response);
+                                    await channel.OnMessageReceivedAsync(payload, message.Type);
                                     if (message.HasRequestId)
                                     {
                                         WaitingTasks.TryRemove(message.RequestId, out SharpCasterTaskCompletionSource tcs);
-                                        tcs?.SetResult(response as IMessageWithId);
+                                        tcs?.SetResult(payload);
                                         if (tcs == null)
-                                            _logger.LogTrace("No TaskCompletionSource found for RequestId: {RequestId}, CompletionSourceCount: {CompletionSourceCount} ", message.RequestId, WaitingTasks.Count);
+                                            _logger.LogTrace("No TaskCompletionSource found for RequestId: {RequestId}, CompletionSourceCount: {CompletionSourceCount}, Type: {Type} ", message.RequestId, WaitingTasks.Count, message.Type);
                                     }
                                 }
                                 catch (Exception ex)
@@ -242,10 +239,10 @@ namespace Sharpcaster
             }, cancellationToken);
         }
 
-        public async Task SendAsync(ILogger channelLogger, string ns, IMessage message, string destinationId)
+        public async Task SendAsync(ILogger channelLogger, string ns, string messagePayload, string destinationId)
         {
             var castMessage = CreateCastMessage(ns, destinationId);
-            castMessage.PayloadUtf8 = JsonSerializer.Serialize(message, _jsonSerializerOptions);
+            castMessage.PayloadUtf8 = messagePayload;
             await SendAsync(channelLogger, castMessage);
         }
 
@@ -283,19 +280,19 @@ namespace Sharpcaster
             };
         }
 
-        public async Task<TResponse> SendAsync<TResponse>(ILogger channelLogger, string ns, IMessageWithId message, string destinationId) where TResponse : IMessageWithId
+        public async Task<string> SendAsync(ILogger channelLogger, string ns, int messageRequestId, string messagePayload, string destinationId)
         {
             var taskCompletionSource = new SharpCasterTaskCompletionSource();
-            WaitingTasks[message.RequestId] = taskCompletionSource;
-            await SendAsync(channelLogger, ns, message, destinationId);
-            return (TResponse)await taskCompletionSource.Task.TimeoutAfter(RECEIVE_TIMEOUT);
+            WaitingTasks[messageRequestId] = taskCompletionSource;
+            await SendAsync(channelLogger, ns, messagePayload, destinationId);
+            return await taskCompletionSource.Task.TimeoutAfter(RECEIVE_TIMEOUT);
         }
 
-        public async Task<TResponse> WaitResponseAsync<TResponse>(IMessageWithId message) where TResponse : IMessageWithId
+        public async Task<string> WaitResponseAsync(int messageRequestId)
         {
             var taskCompletionSource = new SharpCasterTaskCompletionSource();
-            WaitingTasks[message.RequestId] = taskCompletionSource;
-            return (TResponse)await taskCompletionSource.Task.TimeoutAfter(RECEIVE_TIMEOUT);
+            WaitingTasks[messageRequestId] = taskCompletionSource;
+            return await taskCompletionSource.Task.TimeoutAfter(RECEIVE_TIMEOUT);
         }
 
         public async Task DisconnectAsync()

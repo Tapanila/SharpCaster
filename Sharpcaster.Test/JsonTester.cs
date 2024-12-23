@@ -2,6 +2,7 @@
 using Microsoft.VisualBasic;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.DataCollection;
 using Microsoft.VisualStudio.TestPlatform.Utilities;
+using Sharpcaster.Extensions;
 using Sharpcaster.Interfaces;
 using Sharpcaster.Messages.Connection;
 using Sharpcaster.Models;
@@ -26,9 +27,7 @@ namespace Sharpcaster.Test
 
             var options = new JsonSerializerOptions
             {
-                Converters = {
-                    new IMessageJsonConverter()
-                }
+                TypeInfoResolver = SharpcasteSerializationContext.Default
             };
 
 

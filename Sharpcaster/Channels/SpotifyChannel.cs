@@ -1,10 +1,12 @@
 ﻿using Microsoft.Extensions.Logging;
+using Sharpcaster.Extensions;
 using Sharpcaster.Interfaces;
 using Sharpcaster.Messages.Spotify;
 using Sharpcaster.Models.Spotify;
 using System;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace Sharpcaster.Channels
@@ -23,22 +25,22 @@ namespace Sharpcaster.Channels
         /// Called when a message for this channel is received
         /// </summary>
         /// <param name="message">message to process</param>
-        public override Task OnMessageReceivedAsync(IMessage message)
+        public override Task OnMessageReceivedAsync(string messagePayload, string type)
         {
-            switch (message)
+            switch (messagePayload)
             {
-                case GetInfoResponseMessage getInfoResponseMessage:
+                case "getInfoResponse":
+                    var getInfoResponseMessage = JsonSerializer.Deserialize(messagePayload, SharpcasteSerializationContext.Default.GetInfoResponseMessage);
                     SpotifyStatus = getInfoResponseMessage.Payload;
                     SpotifyStatusUpdated?.Invoke(this, getInfoResponseMessage.Payload);
                     break;
-                case AddUserResponseMessage addUserResponseMessage:
+                case "addUserResponse":
+                    var addUserResponseMessage = JsonSerializer.Deserialize(messagePayload, SharpcasteSerializationContext.Default.AddUserResponseMessage);
                     AddUserResponseReceived?.Invoke(this, addUserResponseMessage.Payload);
-                    break;
-                default:
                     break;
             }
 
-            return base.OnMessageReceivedAsync(message);
+            return base.OnMessageReceivedAsync(messagePayload, type);
         }
 
         /// <summary>
@@ -50,7 +52,7 @@ namespace Sharpcaster.Channels
 
         public async Task GetSpotifyInfo()
         {
-            await SendAsync(new GetInfoMessage
+            var spotifyInfoMessage = new GetInfoMessage
             {
                 Payload = new GetInfoMessagePayload
                 {
@@ -58,19 +60,21 @@ namespace Sharpcaster.Channels
                     RemoteName = Client.FriendlyName,
                     DeviceAPI_isGroup = false
                 }
-            }, Client.GetChromecastStatus().Application.TransportId);
+            };
+            await SendAsync(spotifyInfoMessage.RequestId, JsonSerializer.Serialize(spotifyInfoMessage, SharpcasteSerializationContext.Default.GetInfoMessage), Client.GetChromecastStatus().Application.TransportId);
         }
 
         public async Task AddUser(string accessToken)
         {
-            await SendAsync(new AddUserMessage
+            var addUserMessage = new AddUserMessage
             {
                 Payload = new AddUserMessagePayload
                 {
                     Blob = accessToken,
                     TokenType = "accesstoken"
                 }
-            }, Client.GetChromecastStatus().Application.TransportId);
+            };
+            await SendAsync(addUserMessage.RequestId, JsonSerializer.Serialize(addUserMessage, SharpcasteSerializationContext.Default.AddUserMessage), Client.GetChromecastStatus().Application.TransportId);
         }
 
         public string SpotifyDeviceId

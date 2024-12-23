@@ -4,7 +4,7 @@ using Sharpcaster.Messages;
 namespace Sharpcaster.Test.customChannel
 {
     [DataContract]
-    internal class WebMessage : MessageWithSession
+    public class WebMessage : MessageWithSession
     {
         [DataMember(Name = "url")]
         public string Url { get; set; }

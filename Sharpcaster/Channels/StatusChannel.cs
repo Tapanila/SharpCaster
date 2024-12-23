@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using Sharpcaster.Interfaces;
 using System;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace Sharpcaster.Channels
@@ -34,9 +35,9 @@ namespace Sharpcaster.Channels
         /// Called when a message for this channel is received
         /// </summary>
         /// <param name="message">message to process</param>
-        public override Task OnMessageReceivedAsync(IMessage message)
+        public override Task OnMessageReceivedAsync(string messagePayload, string type)
         {
-            switch (message)
+            switch (type)
             {
                 case TStatusMessage statusMessage:
                     Status = statusMessage.Status;
@@ -44,7 +45,7 @@ namespace Sharpcaster.Channels
                     break;
             }
 
-            return base.OnMessageReceivedAsync(message);
+            return base.OnMessageReceivedAsync(messagePayload, type);
         }
 
         /// <summary>

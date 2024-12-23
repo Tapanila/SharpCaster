@@ -7,7 +7,7 @@ namespace Sharpcaster.Messages.Receiver
     /// Launch Error message
     /// </summary>
     [ReceptionMessage]
-    class LaunchErrorMessage : MessageWithId
+    public class LaunchErrorMessage : MessageWithId
     {
         [JsonPropertyName("reason")]
         public string Reason { get; set; }
