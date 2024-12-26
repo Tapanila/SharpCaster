@@ -1,7 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using Sharpcaster.Extensions;
 using Sharpcaster.Interfaces;
-using Sharpcaster.Messages;
 using Sharpcaster.Messages.Media;
 using Sharpcaster.Messages.Queue;
 using Sharpcaster.Models.ChromecastStatus;
@@ -9,7 +8,6 @@ using Sharpcaster.Models.Media;
 using Sharpcaster.Models.Queue;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;

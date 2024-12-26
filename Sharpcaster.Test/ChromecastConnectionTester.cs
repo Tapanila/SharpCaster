@@ -5,7 +5,6 @@ using Xunit;
 using Xunit.Abstractions;
 using Sharpcaster.Test.helper;
 using Sharpcaster.Models.Media;
-using System;
 using System.Linq;
 using System.Collections.Generic;
 

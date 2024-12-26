@@ -1,22 +1,14 @@
 ﻿using Sharpcaster.Test.helper;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Xunit.Abstractions;
 using Xunit;
-using Sharpcaster.Models.Media;
 using Sharpcaster.Models;
-using System.Threading;
 using Sharpcaster.Channels;
 using System.Net.Http;
 using System.Net;
 using System.Text.Json.Nodes;
 using System.Net.Http.Json;
-using System.ComponentModel.DataAnnotations;
-using Sharpcaster.Messages.Spotify;
-using Newtonsoft.Json;
 
 namespace Sharpcaster.Test
 {

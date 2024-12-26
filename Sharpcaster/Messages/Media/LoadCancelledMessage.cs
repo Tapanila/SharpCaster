@@ -1,7 +1,4 @@
-﻿using System;
-using System.Runtime.Serialization;
-
-namespace Sharpcaster.Messages.Media
+﻿namespace Sharpcaster.Messages.Media
 {
     /// <summary>
     /// Load cancelled message

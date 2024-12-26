@@ -85,7 +85,7 @@ namespace Sharpcaster.Test
         }
 
         [Theory]
-        [MemberData(nameof(ChromecastReceiversFilter.GetAll), MemberType = typeof(ChromecastReceiversFilter))]
+        [MemberData(nameof(ChromecastReceiversFilter.GetAny), MemberType = typeof(ChromecastReceiversFilter))]
         public async Task ConnectToChromecastAndLaunchApplicationOnceAndJoinIt(ChromecastReceiver receiver)
         {
             var TestHelper = new TestHelper();
@@ -100,7 +100,7 @@ namespace Sharpcaster.Test
         }
 
         [Theory]
-        [MemberData(nameof(ChromecastReceiversFilter.GetAny), MemberType = typeof(ChromecastReceiversFilter))]
+        [MemberData(nameof(ChromecastReceiversFilter.GetChromecastUltra), MemberType = typeof(ChromecastReceiversFilter))]
         public async Task ConnectToChromecastAndLaunchWebPage(ChromecastReceiver receiver)
         {
             var TestHelper = new TestHelper();

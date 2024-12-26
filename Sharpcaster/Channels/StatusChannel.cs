@@ -1,7 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using Sharpcaster.Interfaces;
 using System;
-using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace Sharpcaster.Channels

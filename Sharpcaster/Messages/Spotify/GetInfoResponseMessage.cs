@@ -1,6 +1,5 @@
 ﻿using Sharpcaster.Messages.Chromecast;
 using Sharpcaster.Models.Spotify;
-using System.Runtime.Serialization;
 using System.Text.Json.Serialization;
 
 namespace Sharpcaster.Messages.Spotify

@@ -1,10 +1,8 @@
 ﻿using Sharpcaster.Extensions;
 using Sharpcaster.Interfaces;
-using Sharpcaster.Messages;
 using Sharpcaster.Messages.Connection;
 using Sharpcaster.Messages.Heartbeat;
 using System.Text.Json;
-using System.Text.Json.Serialization.Metadata;
 
 namespace Sharpcaster.Test.Aot
 {
@@ -36,7 +34,7 @@ namespace Sharpcaster.Test.Aot
             const string input = "{\"type\":\"PING\"}";
             var message = JsonSerializer.Deserialize(input, SharpcasteSerializationContext.Default.PingMessage);
 
-            Assert.AreEqual(message?.Type, "PING");
+            Assert.AreEqual("PING", message?.Type);
         }
     }
 }

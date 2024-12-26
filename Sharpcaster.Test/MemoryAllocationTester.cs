@@ -1,9 +1,6 @@
-﻿using Microsoft.VisualStudio.TestPlatform.Utilities;
-using Sharpcaster.Test.helper;
+﻿using Sharpcaster.Test.helper;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Xunit;
 

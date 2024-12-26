@@ -1,6 +1,4 @@
-﻿using System.Runtime.Serialization;
-
-namespace Sharpcaster.Messages.Receiver
+﻿namespace Sharpcaster.Messages.Receiver
 {
     public class StopMessage : MessageWithSession
     {

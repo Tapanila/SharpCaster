@@ -1,6 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
 using Sharpcaster.Extensions;
-using Sharpcaster.Interfaces;
 using Sharpcaster.Messages.Spotify;
 using Sharpcaster.Models.Spotify;
 using System;

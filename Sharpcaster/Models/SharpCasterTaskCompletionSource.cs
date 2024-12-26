@@ -1,8 +1,4 @@
-﻿using Sharpcaster.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System;
 using System.Threading.Tasks;
 
 namespace Sharpcaster.Models

@@ -1,7 +1,6 @@
 ﻿using Sharpcaster.Messages.Chromecast;
 using Sharpcaster.Models.Media;
 using System.Collections.Generic;
-using System.Runtime.Serialization;
 
 namespace Sharpcaster.Messages.Media
 {
