@@ -16,13 +16,7 @@ namespace Sharpcaster.Test
             IMessage connectMessage = new ConnectMessage();
             var requestId = (connectMessage as IMessageWithId).RequestId;
 
-            var options = new JsonSerializerOptions
-            {
-                TypeInfoResolver = SharpcasteSerializationContext.Default
-            };
-
-
-            var output = JsonSerializer.Serialize(connectMessage, options);
+            var output = JsonSerializer.Serialize(connectMessage, SharpcasteSerializationContext.Default.ConnectMessage);
             Assert.Equal("{\"requestId\":" + requestId +  ",\"type\":\"CONNECT\"}", output);
         }
 

@@ -19,9 +19,9 @@ namespace Sharpcaster.Test
             var client = new ChromecastClient();
             Assert.NotEmpty(receivers);
             await client.ConnectChromecast(receivers.First());
-            //var status = await client.LaunchApplicationAsync("B3419EF5");
+            var status = await client.LaunchApplicationAsync("B3419EF5");
 
-            //Assert.Equal("B3419EF5", status.Application.AppId);
+            Assert.Equal("B3419EF5", status.Application.AppId);
 
             await client.DisconnectAsync();
 

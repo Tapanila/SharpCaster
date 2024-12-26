@@ -3,11 +3,12 @@ using Sharpcaster.Extensions;
 using Sharpcaster.Interfaces;
 using Sharpcaster.Messages.Media;
 using Sharpcaster.Messages.Queue;
+using Sharpcaster.Messages.Receiver;
 using Sharpcaster.Models.ChromecastStatus;
 using Sharpcaster.Models.Media;
 using Sharpcaster.Models.Queue;
 using System;
-using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -17,7 +18,7 @@ namespace Sharpcaster.Channels
     /// <summary>
     /// Media channel
     /// </summary>
-    public class MediaChannel : StatusChannel<MediaStatusMessage, IEnumerable<MediaStatus>>, IMediaChannel
+    public class MediaChannel : ChromecastChannel, IMediaChannel
     {
         /// <summary>
         /// Raised when error is received
@@ -26,7 +27,10 @@ namespace Sharpcaster.Channels
         public event EventHandler<LoadCancelledMessage> LoadCancelled;
         public event EventHandler<LoadFailedMessage> LoadFailed;    
         public event EventHandler<InvalidRequestMessage> InvalidRequest;
-        public MediaStatus MediaStatus { get => Status.FirstOrDefault(); }
+        public event EventHandler<MediaStatus> StatusChanged;
+
+        public MediaStatus MediaStatus { get => mediaStatus; }
+        private MediaStatus mediaStatus;
         /// <summary>
         /// Initializes a new instance of MediaChannel class
         /// </summary>
@@ -40,7 +44,7 @@ namespace Sharpcaster.Channels
             {
                 var response = await SendAsync(messageRequestId, messagePayload, application.TransportId);
                 var mediaStatusMessage = JsonSerializer.Deserialize(response, SharpcasteSerializationContext.Default.MediaStatusMessage);
-                if (DoNotReturnOnLoading && mediaStatusMessage.Status.FirstOrDefault()?.ExtendedStatus?.PlayerState == PlayerStateType.Loading)
+                if (DoNotReturnOnLoading && mediaStatusMessage.Status?.FirstOrDefault()?.ExtendedStatus?.PlayerState == PlayerStateType.Loading)
                 {
                     response = await Client.WaitResponseAsync(messageRequestId);
                     mediaStatusMessage = JsonSerializer.Deserialize(response, SharpcasteSerializationContext.Default.MediaStatusMessage);
@@ -50,7 +54,7 @@ namespace Sharpcaster.Channels
             catch (Exception ex)
             {
                 Logger?.LogError("Error sending message: {exceptionMessage}", ex.Message);
-                Status = null;
+                mediaStatus = null;
                 throw;
             }
         }
@@ -58,7 +62,7 @@ namespace Sharpcaster.Channels
         private async Task<MediaStatus> SendAsync(MediaSessionMessage message)
         {
             var chromecastStatus = Client.GetChromecastStatus();
-            message.MediaSessionId = Status?.First().MediaSessionId ?? throw new ArgumentNullException(nameof(message), "MediaSessionID");
+            message.MediaSessionId = MediaStatus?.MediaSessionId ?? throw new ArgumentNullException(nameof(message), "MediaSessionID");
             var messagePayload = JsonSerializer.Serialize(message, SharpcasteSerializationContext.Default.MediaSessionMessage);
             return await SendAsync(message.RequestId, messagePayload, chromecastStatus.Applications[0]);
         }
@@ -96,8 +100,14 @@ namespace Sharpcaster.Channels
                     var errorMessage = JsonSerializer.Deserialize(messagePayload, SharpcasteSerializationContext.Default.ErrorMessage);
                     ErrorHappened?.Invoke(this, errorMessage);
                     return Task.CompletedTask;
+                case "MEDIA_STATUS":
+                    var mediaStatusMessage = JsonSerializer.Deserialize(messagePayload, SharpcasteSerializationContext.Default.MediaStatusMessage);
+                    mediaStatus = mediaStatusMessage.Status.FirstOrDefault();
+                    StatusChanged?.Invoke(this, MediaStatus);
+                    return Task.CompletedTask;
             }
-            return base.OnMessageReceivedAsync(messagePayload, type);
+            Debugger.Break();
+            return Task.CompletedTask;
         }
 
         /// <summary>
@@ -124,7 +134,7 @@ namespace Sharpcaster.Channels
         /// <returns>media status</returns>
         public async Task<MediaStatus> StopAsync()
         {
-            return await SendAsync(new StopMessage());
+            return await SendAsync(new StopMediaMessage());
         }
 
         /// <summary>
@@ -181,8 +191,8 @@ namespace Sharpcaster.Channels
         public async Task<MediaStatus> GetMediaStatusAsync()
         {
             var chromecastStatus = Client.GetChromecastStatus();
-            var mediaStatusMessage = new MediaStatusMessage();
-            var response = await SendAsync(mediaStatusMessage.RequestId, JsonSerializer.Serialize(mediaStatusMessage, SharpcasteSerializationContext.Default.MediaStatusMessage), chromecastStatus.Application.TransportId);
+            var mediaStatusMessage = new GetStatusMessage();
+            var response = await SendAsync(mediaStatusMessage.RequestId, JsonSerializer.Serialize(mediaStatusMessage, SharpcasteSerializationContext.Default.GetStatusMessage), chromecastStatus.Application.TransportId);
             var mediaStatus = JsonSerializer.Deserialize(response, SharpcasteSerializationContext.Default.MediaStatusMessage);
             return mediaStatus.Status.FirstOrDefault();
         }

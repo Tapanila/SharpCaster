@@ -12,13 +12,16 @@ namespace Sharpcaster.Channels
     /// <summary>
     /// ReceiverChannel, Receives ChromecastStatus, volume, starting and stopping application
     /// </summary>
-    public class ReceiverChannel : StatusChannel<ReceiverStatusMessage, ChromecastStatus>, IReceiverChannel
+    public class ReceiverChannel : ChromecastChannel, IReceiverChannel
     {
+        public ChromecastStatus ReceiverStatus { get => receiverStatus; }
+        private ChromecastStatus receiverStatus;
+
         public ReceiverChannel(ILogger<ReceiverChannel> logger = null) : base("receiver", logger)
         {
         }
-
         public event EventHandler<LaunchStatusMessage> LaunchStatusChanged;
+        public event EventHandler<ChromecastStatus> ReceiverStatusChanged;
 
         public async Task<ChromecastStatus> GetChromecastStatusAsync()
         {
@@ -59,7 +62,7 @@ namespace Sharpcaster.Channels
 
         public async Task<ChromecastStatus> StopApplication()
         {
-            var stopMessage = new StopMessage() { SessionId = Status.Application.SessionId };
+            var stopMessage = new StopMessage() { SessionId = ReceiverStatus.Application.SessionId };
             var response = await SendAsync(stopMessage.RequestId, JsonSerializer.Serialize(stopMessage, SharpcasteSerializationContext.Default.StopMessage));
             var status = JsonSerializer.Deserialize(response, SharpcasteSerializationContext.Default.ReceiverStatusMessage);
             return status.Status;
@@ -75,8 +78,8 @@ namespace Sharpcaster.Channels
                     break;
                 case "RECEIVER_STATUS":
                     var receiverStatusMessage = JsonSerializer.Deserialize(messagePayload, SharpcasteSerializationContext.Default.ReceiverStatusMessage);
-                    Status = receiverStatusMessage.Status;
-                    OnStatusChanged(receiverStatusMessage.Status);
+                    receiverStatus = receiverStatusMessage.Status;
+                    ReceiverStatusChanged?.Invoke(this, ReceiverStatus);
                     break;
 
             }

@@ -400,7 +400,7 @@ namespace Sharpcaster
 
         public ChromecastStatus GetChromecastStatus()
         {
-            return ReceiverChannel.Status;
+            return ReceiverChannel.ReceiverStatus;
         }
 
         public MediaStatus GetMediaStatus()

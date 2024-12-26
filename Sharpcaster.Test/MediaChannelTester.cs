@@ -51,9 +51,9 @@ namespace Sharpcaster.Test
                 AutoResetEvent _disconnectReceived = new(false);
                 IMediaChannel mediaChannel = client.MediaChannel;
 
-                mediaChannel.StatusChanged += (object sender, IEnumerable<MediaStatus> e) =>
+                mediaChannel.StatusChanged += (object sender, MediaStatus e) =>
                 {
-                        output.WriteLine(e.FirstOrDefault()?.PlayerState.ToString());
+                        output.WriteLine(e.PlayerState.ToString());
                 };
 
                 client.Disconnected += (object sender, EventArgs e) =>
@@ -100,12 +100,12 @@ namespace Sharpcaster.Test
             var mediaStatusChanged = 0;
 
             //We are setting up an event to listen to status change. Because we don't know when the audio has started to play
-            mediaChannel.StatusChanged += async (object sender, IEnumerable<MediaStatus> e) =>
+            mediaChannel.StatusChanged += async (object sender, MediaStatus e) =>
             {
                 try
                 {
                     mediaStatusChanged += 1;
-                    MediaStatus status = e.FirstOrDefault();
+                    MediaStatus status = e;
                     int currentItemId = status?.CurrentItemId ?? -1;
 
                     if (currentItemId != -1 && status.PlayerState == PlayerStateType.Playing)
@@ -194,7 +194,7 @@ namespace Sharpcaster.Test
         }
 
         [Theory]
-        [MemberData(nameof(ChromecastReceiversFilter.GetAll), MemberType = typeof(ChromecastReceiversFilter))]
+        [MemberData(nameof(ChromecastReceiversFilter.GetAny), MemberType = typeof(ChromecastReceiversFilter))]
         public async Task TestLoadingMediaQueue(ChromecastReceiver receiver)
         {
             var TestHelper = new TestHelper();
@@ -231,7 +231,7 @@ namespace Sharpcaster.Test
         }
 
         [Theory]
-        [MemberData(nameof(ChromecastReceiversFilter.GetAll), MemberType = typeof(ChromecastReceiversFilter))]
+        [MemberData(nameof(ChromecastReceiversFilter.GetAny), MemberType = typeof(ChromecastReceiversFilter))]
         public async Task StartApplicationAThenStartBAndLoadMedia(ChromecastReceiver receiver)
         {
             var th = new TestHelper();
@@ -268,10 +268,10 @@ namespace Sharpcaster.Test
             bool firstPlay = true;
 
             //We are setting up an event to listen to status change. Because we don't know when the video has started to play
-            client.MediaChannel.StatusChanged += async (object sender, IEnumerable<MediaStatus> e) =>
+            client.MediaChannel.StatusChanged += async (object sender, MediaStatus e) =>
             {
                 //runSequence += ".";
-                if (e.FirstOrDefault().PlayerState == PlayerStateType.Playing)
+                if (e.PlayerState == PlayerStateType.Playing)
                 {
                     if (firstPlay)
                     {
@@ -314,11 +314,11 @@ namespace Sharpcaster.Test
             bool firstPlay = true;
 
             //We are setting up an event to listen to status change. Because we don't know when the video has started to play
-            client.MediaChannel.StatusChanged += async (object sender, IEnumerable<MediaStatus> e) =>
+            client.MediaChannel.StatusChanged += async (object sender, MediaStatus e) =>
             {
                 try
                 {
-                    if (e.FirstOrDefault().PlayerState == PlayerStateType.Playing)
+                    if (e.PlayerState == PlayerStateType.Playing)
                     {
                         if (firstPlay)
                         {
@@ -507,14 +507,20 @@ namespace Sharpcaster.Test
 
             client.MediaChannel.InvalidRequest += (object sender, InvalidRequestMessage e) =>
             {
-                output.WriteLine("Error happened: " + e.Reason);
+                output.WriteLine("Invalid Request Error happened: " + e.Reason);
+                errorHappened = true;
+            };
+
+            client.MediaChannel.LoadFailed += (object sender, LoadFailedMessage e) =>
+            {
+                output.WriteLine("Load Failed Error happened and failing media was  " + e.ItemId);
                 errorHappened = true;
             };
 
             var result = await client.MediaChannel.QueueLoadAsync(MyCd);
 
 
-            await Task.Delay(200);
+            await Task.Delay(2000);
             Assert.True(errorHappened);
         }
     }

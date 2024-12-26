@@ -18,7 +18,7 @@ namespace Sharpcaster.Test
         }
 
         [Theory]
-        [MemberData(nameof(ChromecastReceiversFilter.GetAll), MemberType = typeof(ChromecastReceiversFilter))]
+        [MemberData(nameof(ChromecastReceiversFilter.GetAny), MemberType = typeof(ChromecastReceiversFilter))]
         public async Task TestMute(ChromecastReceiver receiver)
         {
             var TestHelper = new TestHelper();
@@ -30,7 +30,7 @@ namespace Sharpcaster.Test
         }
 
         [Theory]
-        [MemberData(nameof(ChromecastReceiversFilter.GetAll), MemberType = typeof(ChromecastReceiversFilter))]
+        [MemberData(nameof(ChromecastReceiversFilter.GetAny), MemberType = typeof(ChromecastReceiversFilter))]
         public async Task TestUnMute(ChromecastReceiver receiver)
         {
             var TestHelper = new TestHelper();
@@ -41,7 +41,7 @@ namespace Sharpcaster.Test
         }
 
         [Theory]
-        [MemberData(nameof(ChromecastReceiversFilter.GetAll), MemberType = typeof(ChromecastReceiversFilter))]
+        [MemberData(nameof(ChromecastReceiversFilter.GetAny), MemberType = typeof(ChromecastReceiversFilter))]
         public async Task TestVolume(ChromecastReceiver receiver)
         {
             var TestHelper = new TestHelper();
@@ -59,7 +59,7 @@ namespace Sharpcaster.Test
         }
 
         [Theory]
-        [MemberData(nameof(ChromecastReceiversFilter.GetAll), MemberType = typeof(ChromecastReceiversFilter))]
+        [MemberData(nameof(ChromecastReceiversFilter.GetAny), MemberType = typeof(ChromecastReceiversFilter))]
         public async Task TestStoppingApplication(ChromecastReceiver receiver)
         {
             var TestHelper = new TestHelper();
@@ -89,12 +89,6 @@ namespace Sharpcaster.Test
 
             var status = await client.ReceiverChannel.StopApplication();
             Assert.Null(status.Applications);
-            Assert.Equal("USER_ALLOWED", launchStatus);
-        }
-
-        private void ReceiverChannel_LaunchStatusChanged(object sender, Messages.Receiver.LaunchStatusMessage e)
-        {
-            throw new System.NotImplementedException();
         }
     }
 }

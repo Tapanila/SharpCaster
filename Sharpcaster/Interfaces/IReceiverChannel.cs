@@ -8,7 +8,7 @@ namespace Sharpcaster.Interfaces
     /// <summary>
     /// Interface for the receiver channel
     /// </summary>
-    public interface IReceiverChannel : IStatusChannel<ChromecastStatus>, IChromecastChannel
+    public interface IReceiverChannel : IChromecastChannel
     {
         /// <summary>
         /// Launches an application
@@ -21,6 +21,9 @@ namespace Sharpcaster.Interfaces
         Task<ChromecastStatus> SetVolume(double level);
         Task<ChromecastStatus> SetMute(bool muted);
 
+        ChromecastStatus ReceiverStatus { get; }
+
         event EventHandler<LaunchStatusMessage> LaunchStatusChanged;
+        event EventHandler<ChromecastStatus> ReceiverStatusChanged;
     }
 }

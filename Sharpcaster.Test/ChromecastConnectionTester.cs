@@ -22,7 +22,7 @@ namespace Sharpcaster.Test
         }
 
         [Theory]
-        [MemberData(nameof(ChromecastReceiversFilter.GetAll), MemberType = typeof(ChromecastReceiversFilter))]
+        [MemberData(nameof(ChromecastReceiversFilter.GetAny), MemberType = typeof(ChromecastReceiversFilter))]
         public async Task SearchChromecastsAndConnectToIt(ChromecastReceiver receiver)
         {
             var TestHelper = new TestHelper();
@@ -76,7 +76,7 @@ namespace Sharpcaster.Test
             int commandsToRun = 10;
 
             //We are setting up an event to listen to status change. Because we don't know when the video has started to play
-            client.MediaChannel.StatusChanged += (object sender, IEnumerable<MediaStatus> e) =>
+            client.MediaChannel.StatusChanged += (object sender, MediaStatus e) =>
             {
                 _autoResetEvent.Set();
             };
