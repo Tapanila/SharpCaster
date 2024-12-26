@@ -1,12 +1,12 @@
 ﻿using System.Runtime.Serialization;
+using System.Text.Json.Serialization;
 using Sharpcaster.Messages;
 
 namespace Sharpcaster.Test.customChannel
 {
-    [DataContract]
     public class WebMessage : MessageWithSession
     {
-        [DataMember(Name = "url")]
+        [JsonPropertyName("url")]
         public string Url { get; set; }
     }
 }
