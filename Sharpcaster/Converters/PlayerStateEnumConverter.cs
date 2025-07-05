@@ -23,6 +23,9 @@ namespace Sharpcaster.Converters
                 case PlayerStateType.Playing:
                     writer.WriteValue("PLAYING");
                     break;
+                case PlayerStateType.Loading:
+                    writer.WriteValue("LOADING");
+                    break;
                 default:
                     throw new ArgumentOutOfRangeException();
             }
@@ -46,6 +49,9 @@ namespace Sharpcaster.Converters
                     break;
                 case "PLAYING":
                     playerState = PlayerStateType.Playing;
+                    break;
+                case "LOADING":
+                    playerState = PlayerStateType.Loading;
                     break;
             }
             return playerState;
