@@ -24,21 +24,17 @@ SharpCaster is a cross-platform C# SDK for communicating with Google Chromecast 
 
 ---
 
-## Installation
-Install the NuGet package:
-PM> Install-Package SharpCaster
-Or via .NET CLI:
-dotnet add package SharpCaster
-[NuGet Gallery](https://nuget.org/packages/SharpCaster/)
-
----
-
 ## Getting Started
 
-### 1. Discover Chromecast DevicesIChromecastLocator locator = new MdnsChromecastLocator();
+### 1. Discover Chromecasts
+ ```csharp
+DevicesIChromecastLocator locator = new MdnsChromecastLocator();
 var source = new CancellationTokenSource(TimeSpan.FromMilliseconds(1500));
 var chromecasts = await locator.FindReceiversAsync(source.Token);
-### 2. Connect, Launch App, and Load Mediavar chromecast = chromecasts.First();
+ ```
+### 2. Connect, Launch App, and Load Media
+ ```csharp
+var chromecast = chromecasts.First();
 var client = new ChromecastClient();
 await client.ConnectChromecast(chromecast);
 await client.LaunchApplicationAsync("B3419EF5"); // Replace with your app ID
@@ -48,6 +44,7 @@ var media = new Media
     ContentUrl = "https://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/mp4/DesigningForGoogleCast.mp4"
 };
 await client.MediaChannel.LoadAsync(media);
+```
 ---
 
 ## Demo
