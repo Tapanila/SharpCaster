@@ -1,53 +1,80 @@
-![Icon](https://raw.githubusercontent.com/Tapanila/SharpCaster/master/Assets/sharpcaster-logo-64x64.png)
+![SharpCaster Logo](https://raw.githubusercontent.com/Tapanila/SharpCaster/master/Assets/sharpcaster-logo-64x64.png)
+
 # SharpCaster
 
-### Currently Supported Platforms
-* [.NET Standard 2.0](https://docs.microsoft.com/en-us/dotnet/standard/net-standard?tabs=net-standard-2-0)
+[![.NET Build Status](https://github.com/Tapanila/SharpCaster/actions/workflows/dotnet.yml/badge.svg)](https://github.com/Tapanila/SharpCaster/actions/workflows/dotnet.yml)
+[![NuGet Status](http://img.shields.io/nuget/v/SharpCaster.svg?style=flat)](https://www.nuget.org/packages/SharpCaster/)
 
-[![.NET](https://github.com/Tapanila/SharpCaster/actions/workflows/dotnet.yml/badge.svg)](https://github.com/Tapanila/SharpCaster/actions/workflows/dotnet.yml)
+SharpCaster is a cross-platform C# SDK for communicating with Google Chromecast devices. It enables .NET applications to discover, connect, launch apps, and control media playback on Chromecast devices.
 
-SharpCaster is Chromecast C# SDK any platform support .net standard 2.0.
+---
 
-## The nuget package  [![NuGet Status](http://img.shields.io/nuget/v/SharpCaster.svg?style=flat)](https://www.nuget.org/packages/SharpCaster/)
+## Features
+- Discover Chromecast devices on your local network
+- Connect and launch applications on Chromecast
+- Load and control media playback (play, pause, stop, etc.)
+- Support for custom Chromecast channels
+- Compatible with .NET Standard 2.0 and .NET 9
 
-https://nuget.org/packages/SharpCaster/
+---
 
-    PM> Install-Package SharpCaster
+## Supported Platforms
+- [.NET Standard 2.0](https://docs.microsoft.com/en-us/dotnet/standard/net-standard?tabs=net-standard-2-0)
+- [.NET 9](https://dotnet.microsoft.com/en-us/download/dotnet/9.0)
 
-# Getting started
+---
 
-## Finding chromecast devices from network
-```cs
-IChromecastLocator locator = new MdnsChromecastLocator();
+## Installation
+Install the NuGet package:
+PM> Install-Package SharpCaster
+Or via .NET CLI:
+dotnet add package SharpCaster
+[NuGet Gallery](https://nuget.org/packages/SharpCaster/)
+
+---
+
+## Getting Started
+
+### 1. Discover Chromecast DevicesIChromecastLocator locator = new MdnsChromecastLocator();
 var source = new CancellationTokenSource(TimeSpan.FromMilliseconds(1500));
 var chromecasts = await locator.FindReceiversAsync(source.Token);
-```
-## Connecting to chromecast device, launch application and load media
-```cs
-var chromecast = chromecasts.First();
+### 2. Connect, Launch App, and Load Mediavar chromecast = chromecasts.First();
 var client = new ChromecastClient();
 await client.ConnectChromecast(chromecast);
-_ = await client.LaunchApplicationAsync("B3419EF5");
+await client.LaunchApplicationAsync("B3419EF5"); // Replace with your app ID
 
 var media = new Media
 {
-	ContentUrl = "https://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/mp4/DesigningForGoogleCast.mp4"
+    ContentUrl = "https://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/mp4/DesigningForGoogleCast.mp4"
 };
-_ = await client.MediaChannel.LoadAsync(media);
-```    
+await client.MediaChannel.LoadAsync(media);
+---
 
-## SharpCaster Demo
+## Demo
 
 ![SharpCaster Simple demo](https://raw.githubusercontent.com/tapanila/SharpCaster/master/Assets/SharpCaster.Simple.Demo.gif)
 
-## Adding support for custom chromecast channels
+---
 
- * In Chrome, go to `chrome://net-export/`
- * Select 'Include raw bytes (will include cookies and credentials)'
- * Click 'Start Logging to Disk'
- * Open a new tab, browse to your favorite application on the web that has Chromecast support and start casting.
- * Go back to the tab that is capturing events and click on stop.
- * Open https://netlog-viewer.appspot.com/ and select your event log file.
- * Browse to https://netlog-viewer.appspot.com/#events&q=type:SOCKET, and find the socket that has familiar JSON data.
- * Go through the results and collect the JSON that is exchanged.
- * Now you can create a new class that inherits from ChromecastChannel and implement the logic to send and receive messages.
+## Custom Chromecast Channels
+
+You can add support for custom Chromecast channels by reverse engineering the communication:
+
+1. In Chrome, go to `chrome://net-export/`
+2. Select 'Include raw bytes (will include cookies and credentials)'
+3. Click 'Start Logging to Disk'
+4. Cast from your favorite web app
+5. Stop logging and open the log in [netlog-viewer](https://netlog-viewer.appspot.com/)
+6. Search for `type:SOCKET` and find familiar JSON data
+7. Collect the exchanged JSON
+8. Create a new class inheriting from `ChromecastChannel` and implement your logic
+
+---
+
+## Contributing
+Contributions, issues, and feature requests are welcome! Feel free to open an issue or submit a pull request.
+
+---
+
+## License
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.

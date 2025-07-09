@@ -1,4 +1,4 @@
-<Project Sdk="MSTest.Sdk/3.6.1">
+﻿<Project Sdk="MSTest.Sdk/3.6.1">
 
   <PropertyGroup>
     <TargetFramework>net9.0-windows</TargetFramework>
@@ -18,23 +18,23 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Update="Microsoft.CodeCoverage.MSBuild" Version="17.13.1" />
+    <PackageReference Update="Microsoft.CodeCoverage.MSBuild" Version="17.14.2" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Update="Microsoft.Testing.Extensions.CodeCoverage" Version="17.13.1" />
+    <PackageReference Update="Microsoft.Testing.Extensions.CodeCoverage" Version="17.14.2" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Update="Microsoft.Testing.Extensions.TrxReport" Version="1.5.0" />
+    <PackageReference Update="Microsoft.Testing.Extensions.TrxReport" Version="1.7.3" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Update="Microsoft.Testing.Platform.MSBuild" Version="1.5.0" />
+    <PackageReference Update="Microsoft.Testing.Platform.MSBuild" Version="1.7.3" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Update="MSTest.TestFramework" Version="3.7.0" />
+    <PackageReference Update="MSTest.TestFramework" Version="3.9.3" />
   </ItemGroup>
 
 </Project>
