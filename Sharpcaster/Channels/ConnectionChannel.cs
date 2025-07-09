@@ -1,6 +1,8 @@
 ﻿using Microsoft.Extensions.Logging;
+using Sharpcaster.Extensions;
 using Sharpcaster.Interfaces;
 using Sharpcaster.Messages.Connection;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace Sharpcaster.Channels
@@ -22,7 +24,7 @@ namespace Sharpcaster.Channels
         /// </summary>
         public async Task ConnectAsync()
         {
-            await SendAsync(new ConnectMessage());
+            await ConnectAsync("receiver-0");
         }
 
         /// <summary>
@@ -30,21 +32,22 @@ namespace Sharpcaster.Channels
         /// </summary>
         public async Task ConnectAsync(string transportId)
         {
-            await SendAsync(new ConnectMessage(), transportId);
+            var connectMessage = new ConnectMessage();
+            await SendAsync(JsonSerializer.Serialize(connectMessage, SharpcasteSerializationContext.Default.ConnectMessage), transportId);
         }
 
         /// <summary>
         /// Called when a message for this channel is received
         /// </summary>
         /// <param name="message">message to process</param>
-        public async override Task OnMessageReceivedAsync(IMessage message)
+        public async override Task OnMessageReceivedAsync(string messagePayload, string type)
         {
-            if (message is CloseMessage)
+            if (type == "CLOSE")
             {
                 // In order to avoid usage deadlocks we need to spawn a new Task here!?
                 _ = Task.Run(async () => await Client.DisconnectAsync());
             }
-            await base.OnMessageReceivedAsync(message);
+            await base.OnMessageReceivedAsync(messagePayload, type);
         }
     }
 }

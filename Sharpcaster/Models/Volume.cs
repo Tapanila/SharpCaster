@@ -1,14 +1,13 @@
-﻿using System.Runtime.Serialization;
+﻿using System.Text.Json.Serialization;
 
 namespace Sharpcaster.Models
 {
-    [DataContract]
     public class Volume
     {
-        [DataMember(Name = "level")]
+        [JsonPropertyName("level")]
         public double? Level { get; set; }
 
-        [DataMember(Name = "muted")]
+        [JsonPropertyName("muted")]
         public bool? Muted { get; set; }
     }
 }

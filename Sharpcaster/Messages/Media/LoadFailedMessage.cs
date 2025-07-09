@@ -1,13 +1,14 @@
-﻿using System.Runtime.Serialization;
+﻿using System.Text.Json.Serialization;
 
 namespace Sharpcaster.Messages.Media
 {
     /// <summary>
     /// Load failed message
     /// </summary>
-    [DataContract]
     [ReceptionMessage]
     public class LoadFailedMessage : MessageWithId
     {
+        [JsonPropertyName("itemId")]
+        public int ItemId { get; set; }
     }
 }

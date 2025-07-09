@@ -5,7 +5,7 @@
         Buffering,
         Idle,
         Paused,
-        Playing,
-        Loading
+        Loading,
+        Playing
     }
 }

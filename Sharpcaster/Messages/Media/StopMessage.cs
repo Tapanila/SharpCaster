@@ -1,9 +1,10 @@
-﻿using System.Runtime.Serialization;
-
-namespace Sharpcaster.Messages.Media
+﻿namespace Sharpcaster.Messages.Media
 {
-    [DataContract]
-    public class StopMessage : MediaSessionMessage
+    public class StopMediaMessage : MediaSessionMessage
     {
+        public StopMediaMessage()
+        {
+            Type = "STOP_MESSAGE";
+        }
     }
 }

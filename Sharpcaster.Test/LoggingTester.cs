@@ -20,11 +20,11 @@ namespace Sharpcaster.Test
             List<string> logLines = [];
             _ = TestHelper.GetClientWithTestOutput(output, assertableLog: logLines);
 
-            Assert.Equal("[addUserResponse,getInfoResponse,LAUNCH_ERROR,RECEIVER_STATUS,QUEUE_CHANGE,QUEUE_ITEM_IDS,QUEUE_ITEMS,DEVICE_UPDATED,MULTIZONE_STATUS,ERROR,INVALID_REQUEST,LOAD_CANCELLED,LOAD_FAILED,MEDIA_STATUS,PING,CLOSE]", logLines[0]);
+            Assert.Equal("MessageTypes: [addUserResponse,getInfoResponse,LAUNCH_ERROR,RECEIVER_STATUS,QUEUE_CHANGE,QUEUE_ITEM_IDS,QUEUE_ITEMS,DEVICE_UPDATED,MULTIZONE_STATUS,ERROR,INVALID_REQUEST,LOAD_CANCELLED,LOAD_FAILED,MEDIA_STATUS,PING,CLOSE,LAUNCH_STATUS]", logLines[0]);
         }
 
         [Theory]
-        [MemberData(nameof(ChromecastReceiversFilter.GetAll), MemberType = typeof(ChromecastReceiversFilter))]
+        [MemberData(nameof(ChromecastReceiversFilter.GetAny), MemberType = typeof(ChromecastReceiversFilter))]
         public async Task TestPlayMediaWorksWithoutLogging(ChromecastReceiver receiver)
         {
             ChromecastClient client = new();

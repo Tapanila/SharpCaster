@@ -52,28 +52,26 @@ namespace Sharpcaster.Channels
         /// </summary>
         /// <param name="message">message to send</param>
         /// <param name="destinationId">destination identifier</param>
-        protected async Task SendAsync(IMessage message, string destinationId = DefaultIdentifiers.DESTINATION_ID)
+        protected async Task<string> SendAsync(int messageRequestId, string messagePayload, string destinationId = DefaultIdentifiers.DESTINATION_ID)
         {
-            await Client.SendAsync(Logger, Namespace, message, destinationId);
+            return await Client.SendAsync(Logger, Namespace, messageRequestId, messagePayload, destinationId);
         }
 
         /// <summary>
-        /// Sends a message and waits the result
+        /// Sends a message
         /// </summary>
-        /// <typeparam name="TResponse">response type</typeparam>
         /// <param name="message">message to send</param>
         /// <param name="destinationId">destination identifier</param>
-        /// <returns>the result</returns>
-        protected async Task<TResponse> SendAsync<TResponse>(IMessageWithId message, string destinationId = DefaultIdentifiers.DESTINATION_ID) where TResponse : IMessageWithId
+        protected async Task SendAsync(string messagePayload, string destinationId = DefaultIdentifiers.DESTINATION_ID)
         {
-            return await Client.SendAsync<TResponse>(Logger, Namespace, message, destinationId);
+            await Client.SendAsync(Logger, Namespace, messagePayload, destinationId);
         }
 
         /// <summary>
         /// Called when a message for this channel is received
         /// </summary>
         /// <param name="message">message to process</param>
-        public virtual Task OnMessageReceivedAsync(IMessage message)
+        public virtual Task OnMessageReceivedAsync(string messagePayload, string type)
         {
             return Task.CompletedTask;
         }

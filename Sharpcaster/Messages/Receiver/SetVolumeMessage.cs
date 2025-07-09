@@ -1,12 +1,11 @@
 ﻿using Sharpcaster.Models;
-using System.Runtime.Serialization;
+using System.Text.Json.Serialization;
 
 namespace Sharpcaster.Messages.Receiver
 {
-    [DataContract]
     public class SetVolumeMessage : MessageWithId
     {
-        [DataMember(Name = "volume")]
+        [JsonPropertyName("volume")]
         public Volume Volume { get; set; }
     }
 }

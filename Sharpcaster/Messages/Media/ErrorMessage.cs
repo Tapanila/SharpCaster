@@ -1,14 +1,13 @@
-﻿using System.Runtime.Serialization;
+﻿using System.Text.Json.Serialization;
 
 namespace Sharpcaster.Messages.Media
 {
-    [DataContract]
     [ReceptionMessage]
     public class ErrorMessage : Message
     {
-        [DataMember(Name = "detailedErrorCode")]
+        [JsonPropertyName("detailedErrorCode")]
         public int DetailedErrorCode { get; set; }
-        [DataMember(Name = "itemId")]
+        [JsonPropertyName("itemId")]
         public int ItemId { get; set; }
     }
 }

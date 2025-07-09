@@ -1,7 +1,9 @@
 ﻿using Microsoft.Extensions.Logging;
+using Sharpcaster.Extensions;
 using Sharpcaster.Interfaces;
 using Sharpcaster.Messages.Heartbeat;
 using System;
+using System.Text.Json;
 using System.Threading.Tasks;
 using System.Timers;
 
@@ -32,10 +34,11 @@ namespace Sharpcaster.Channels
         /// Called when a message for this channel is received
         /// </summary>
         /// <param name="message">message to process</param>
-        public override async Task OnMessageReceivedAsync(IMessage message)
+        public override async Task OnMessageReceivedAsync(string messagePayload, string type)
         {
             _timer.Stop();
-            await SendAsync(new PongMessage());
+            var pongMessage = new PongMessage();
+            await SendAsync(JsonSerializer.Serialize(pongMessage, SharpcasteSerializationContext.Default.PongMessage));
             _timer.Start();
             Logger?.LogDebug("Pong sent - Heartbeat Timer restarted.");
         }

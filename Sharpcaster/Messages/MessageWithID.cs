@@ -1,6 +1,6 @@
 ﻿using Sharpcaster.Interfaces;
 using System;
-using System.Runtime.Serialization;
+using System.Text.Json.Serialization;
 using System.Threading;
 
 namespace Sharpcaster.Messages
@@ -8,7 +8,6 @@ namespace Sharpcaster.Messages
     /// <summary>
     /// Message with request identifier
     /// </summary>
-    [DataContract]
     public class MessageWithId : Message, IMessageWithId
     {
         private static int _id = new Random().Next();
@@ -16,16 +15,17 @@ namespace Sharpcaster.Messages
         /// <summary>
         /// Gets a value indicating whether the message has a request identifier
         /// </summary>
+        [JsonIgnore]
         public bool HasRequestId
         {
-            get { return _requestId != null; }
+            get { return _requestId != 0; }
         }
 
         private int? _requestId;
         /// <summary>
         /// Gets or sets the request identifier
         /// </summary>
-        [DataMember(Name = "requestId")]
+        [JsonPropertyName("requestId")]
         public int RequestId
         {
             get { return (int)(_requestId ?? (_requestId = Interlocked.Increment(ref _id))); }

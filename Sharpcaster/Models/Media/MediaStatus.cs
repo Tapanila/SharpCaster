@@ -1,88 +1,92 @@
-﻿using Newtonsoft.Json;
+﻿using System.Text.Json.Serialization;
 using Sharpcaster.Converters;
 using Sharpcaster.Models.Queue;
-using System.Runtime.Serialization;
 
 namespace Sharpcaster.Models.Media
 {
     /// <summary>
     /// Media status
     /// </summary>
-    [DataContract]
     public class MediaStatus
     {
         /// <summary>
         /// Gets or sets the media session identifier
         /// </summary>
-        [DataMember(Name = "mediaSessionId")]
+        [JsonPropertyName("mediaSessionId")]
         public long MediaSessionId { get; set; }
 
         /// <summary>
         /// Gets or sets the playback rate
         /// </summary>
-        [DataMember(Name = "playbackRate")]
+        [JsonPropertyName("playbackRate")]
         public int PlaybackRate { get; set; }
 
         /// <summary>
         /// Gets or sets the player state
         /// </summary>
-        [DataMember(Name = "playerState")]
+        [JsonPropertyName("playerState")]
         [JsonConverter(typeof(PlayerStateEnumConverter))]
         public PlayerStateType PlayerState { get; set; }
 
         /// <summary>
         /// Gets or sets the current time
         /// </summary>
-        [DataMember(Name = "currentTime")]
+        [JsonPropertyName("currentTime")]
         public double CurrentTime { get; set; }
 
         /// <summary>
         /// Gets or sets the supported media commands
         /// </summary>
-        [DataMember(Name = "supportedMediaCommands")]
+        [JsonPropertyName("supportedMediaCommands")]
         public int SupportedMediaCommands { get; set; }
 
         /// <summary>
         /// Gets or sets the volume
         /// </summary>
-        [DataMember(Name = "volume")]
+        [JsonPropertyName("volume")]
         public Volume Volume { get; set; }
 
         /// <summary>
         /// Gets or sets the idle reason
         /// </summary>
-        [DataMember(Name = "idleReason")]
+        [JsonPropertyName("idleReason")]
         public string IdleReason { get; set; }
 
         /// <summary>
         /// Gets or sets the media
         /// </summary>
-        [DataMember(Name = "media")]
+        [JsonPropertyName("media")]
         public Media Media { get; set; }
 
         /// <summary>
         /// Gets or sets the current item identifier
         /// </summary>
-        [DataMember(Name = "currentItemId")]
+        [JsonPropertyName("currentItemId")]
         public int CurrentItemId { get; set; } = -1;
 
         /// <summary>
         /// Gets or sets the extended status
         /// </summary>
-        [DataMember(Name = "extendedStatus")]
+        [JsonPropertyName("extendedStatus")]
         public MediaStatus ExtendedStatus { get; set; }
 
         /// <summary>
         /// Gets or sets the repeat mode
         /// </summary>
-        [DataMember(Name = "repeatMode")]
+        [JsonPropertyName("repeatMode")]
         [JsonConverter(typeof(RepeatModeEnumConverter))]
         public RepeatModeType RepeatMode { get; set; }
 
-        [DataMember(Name = "queueData")]
+        /// <summary>
+        /// Gets or sets the queue data
+        /// </summary>
+        [JsonPropertyName("queueData")]
         public QueueData QueueData { get; set; }
 
-        [DataMember(Name = "items")]
+        /// <summary>
+        /// Gets or sets the queue items
+        /// </summary>
+        [JsonPropertyName("items")]
         public QueueItem[] Items { get; set; }
     }
 }

@@ -1,15 +1,13 @@
-﻿using Newtonsoft.Json;
-using Sharpcaster.Converters;
+﻿using Sharpcaster.Converters;
 using Sharpcaster.Models.Media;
 using Sharpcaster.Models.Queue;
-using System.Runtime.Serialization;
+using System.Text.Json.Serialization;
 
 namespace Sharpcaster.Messages.Queue
 {
-    [DataContract]
     public class QueueLoadMessage : MessageWithSession
     {
-        [DataMember(Name = "items")]
+        [JsonPropertyName("items")]
         public QueueItem[] Items { get; set; }
 
         /// <summary>
@@ -19,13 +17,13 @@ namespace Sharpcaster.Messages.Queue
         /// This may be useful for continuation scenarios where the user was already using the sender app and in the middle decides to cast.
         /// In this way the sender app does not need to map between the local and remote queue positions or saves one extra QUEUE_UPDATE request.
         /// </summary>
-        [DataMember(Name = "startIndex")]
-        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        [JsonPropertyName("startIndex")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public long? StartIndex { get; set; }
         /// <summary>
         /// Behavior of the queue when all items have been played.
         /// </summary>
-        [DataMember(Name = "repeatMode")]
+        [JsonPropertyName("repeatMode")]
         [JsonConverter(typeof(RepeatModeEnumConverter))]
         public RepeatModeType RepeatMode { get; set; }
 
@@ -35,8 +33,8 @@ namespace Sharpcaster.Messages.Queue
         /// This is to cover the common case where the user casts the item that was playing locally so the currentTime does not apply to the item permanently like the QueueItem startTime does.
         /// It avoids having to reset the startTime dynamically (that may not be possible if the phone has gone to sleep).
         /// </summary>
-        [DataMember(Name = "currentTime")]
-        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        [JsonPropertyName("currentTime")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public long? CurrentTime { get; set; }
     }
 }

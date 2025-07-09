@@ -1,14 +1,13 @@
-﻿using System.Runtime.Serialization;
+﻿using System.Text.Json.Serialization;
 
 namespace Sharpcaster.Messages
 {
     /// <summary>
     /// Message with request identifier and session identifier
     /// </summary>
-    [DataContract]
     public class MessageWithSession : MessageWithId
     {
-        [DataMember(Name = "sessionId")]
+        [JsonPropertyName("sessionId")]
         public string SessionId { get; set; }
     }
 }

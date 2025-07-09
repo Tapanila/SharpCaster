@@ -3,6 +3,7 @@ using Sharpcaster.Models.Media;
 using Sharpcaster.Models.Queue;
 using System;
 using System.Collections.Generic;
+using System.Net.NetworkInformation;
 using System.Threading.Tasks;
 
 namespace Sharpcaster.Interfaces
@@ -10,9 +11,13 @@ namespace Sharpcaster.Interfaces
     /// <summary>
     /// Interface for the media channel
     /// </summary>
-    public interface IMediaChannel : IStatusChannel<IEnumerable<MediaStatus>>, IChromecastChannel
+    public interface IMediaChannel : IChromecastChannel
     {
         event EventHandler<ErrorMessage> ErrorHappened;
+        event EventHandler<LoadFailedMessage> LoadFailed;
+        event EventHandler<LoadCancelledMessage> LoadCancelled;
+        event EventHandler<InvalidRequestMessage> InvalidRequest;
+        event EventHandler<MediaStatus> StatusChanged;
         /// <summary>
         /// Loads a media
         /// </summary>

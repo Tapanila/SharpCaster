@@ -1,16 +1,15 @@
 ﻿using Sharpcaster.Models.MultiZone;
-using System.Runtime.Serialization;
+using System.Text.Json.Serialization;
 
 namespace Sharpcaster.Messages.Multizone
 {
     /// <summary>
     /// Media status message
     /// </summary>
-    [DataContract]
     [ReceptionMessage]
     public class DeviceUpdatedMessage : MessageWithId
     {
-        [DataMember(Name = "device")]
+        [JsonPropertyName("device")]
         public Device Device { get; set; }
     }
 }

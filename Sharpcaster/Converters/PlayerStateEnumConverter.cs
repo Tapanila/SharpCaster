@@ -1,65 +1,55 @@
-﻿using Newtonsoft.Json;
+﻿using System;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using Sharpcaster.Models.Media;
-using System;
 
 namespace Sharpcaster.Converters
 {
-    public class PlayerStateEnumConverter : JsonConverter
+    public class PlayerStateEnumConverter : JsonConverter<PlayerStateType>
     {
-        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+        public override PlayerStateType Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
-            var playerState = (PlayerStateType)value;
-            switch (playerState)
-            {
-                case PlayerStateType.Buffering:
-                    writer.WriteValue("BUFFERING");
-                    break;
-                case PlayerStateType.Idle:
-                    writer.WriteValue("IDLE");
-                    break;
-                case PlayerStateType.Paused:
-                    writer.WriteValue("PAUSED");
-                    break;
-                case PlayerStateType.Playing:
-                    writer.WriteValue("PLAYING");
-                    break;
-                case PlayerStateType.Loading:
-                    writer.WriteValue("LOADING");
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
-        }
-
-        public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
-        {
-            var enumString = (string)reader.Value;
-            PlayerStateType? playerState = null;
-
+            string enumString = reader.GetString();
             switch (enumString)
             {
                 case "BUFFERING":
-                    playerState = PlayerStateType.Buffering;
-                    break;
+                    return PlayerStateType.Buffering;
                 case "IDLE":
-                    playerState = PlayerStateType.Idle;
-                    break;
+                    return PlayerStateType.Idle;
                 case "PAUSED":
-                    playerState = PlayerStateType.Paused;
-                    break;
+                    return PlayerStateType.Paused;
                 case "PLAYING":
-                    playerState = PlayerStateType.Playing;
-                    break;
+                    return PlayerStateType.Playing;
                 case "LOADING":
-                    playerState = PlayerStateType.Loading;
-                    break;
+                    return PlayerStateType.Loading;
+
+                default:
+                    throw new JsonException($"Invalid value '{enumString}' for {nameof(PlayerStateType)}");
             }
-            return playerState;
         }
 
-        public override bool CanConvert(Type objectType)
+        public override void Write(Utf8JsonWriter writer, PlayerStateType value, JsonSerializerOptions options)
         {
-            return objectType == typeof(string);
+            switch (value)
+            {
+                case PlayerStateType.Buffering:
+                    writer.WriteStringValue("BUFFERING");
+                    break;
+                case PlayerStateType.Idle:
+                    writer.WriteStringValue("IDLE");
+                    break;
+                case PlayerStateType.Paused:
+                    writer.WriteStringValue("PAUSED");
+                    break;
+                case PlayerStateType.Playing:
+                    writer.WriteStringValue("PLAYING");
+                    break;
+                case PlayerStateType.Loading:
+                    writer.WriteStringValue("LOADING");
+                    break;
+                default:
+                    throw new JsonException($"Unsupported {nameof(PlayerStateType)} value: {value}");
+            }
         }
     }
 }

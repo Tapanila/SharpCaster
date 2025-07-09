@@ -1,8 +1,7 @@
-﻿using System.Runtime.Serialization;
+﻿using System.Text.Json.Serialization;
 
 namespace Sharpcaster.Messages.Spotify
 {
-    [DataContract]
     [ReceptionMessage]
     public class AddUserResponseMessage : Message
     {
@@ -11,27 +10,25 @@ namespace Sharpcaster.Messages.Spotify
             Type = "addUserResponse";
         }
 
-        [DataMember(Name = "payload")]
+        [JsonPropertyName("payload")]
         public AddUserResponseMessagePayload Payload { get; set; }
     }
-    [DataContract]
     public class AddUserResponseMessagePayload
     {
-        [DataMember(Name = "status")]
+        [JsonPropertyName("status")]
         public int Status { get; set; }
-        [DataMember(Name = "statusString")]
+        [JsonPropertyName("statusString")]
         public string StatusString { get; set; }
-        [DataMember(Name = "spotifyError")]
+        [JsonPropertyName("spotifyError")]
         public int SpotifyError { get; set; }
-        [DataMember(Name = "user")]
+        [JsonPropertyName("user")]
         public AddUserResponseMessagePayloadUser User { get; set; }
-        [DataMember(Name = "deviceId")]
+        [JsonPropertyName("deviceId")]
         public string DeviceId { get; set; }
     }
-    [DataContract]
     public class AddUserResponseMessagePayloadUser
     {
-        [DataMember(Name = "id")]
+        [JsonPropertyName("id")]
         public string Id { get; set; }
     }
 }

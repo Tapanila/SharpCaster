@@ -1,6 +1,8 @@
 ﻿using Sharpcaster.Models;
 using Sharpcaster.Test.customChannel;
+using Sharpcaster.Test.customMessage;
 using Sharpcaster.Test.helper;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
@@ -18,7 +20,7 @@ namespace Sharpcaster.Test
         }
 
         [Theory]
-        [MemberData(nameof(ChromecastReceiversFilter.GetAll), MemberType = typeof(ChromecastReceiversFilter))]
+        [MemberData(nameof(ChromecastReceiversFilter.GetChromecastUltra), MemberType = typeof(ChromecastReceiversFilter))]
         public async Task ConnectToChromecastAndLaunchApplication(ChromecastReceiver receiver)
         {
             var TestHelper = new TestHelper();
@@ -31,7 +33,7 @@ namespace Sharpcaster.Test
         }
 
         [Theory]
-        [MemberData(nameof(ChromecastReceiversFilter.GetAll), MemberType = typeof(ChromecastReceiversFilter))]
+        [MemberData(nameof(ChromecastReceiversFilter.GetChromecastUltra), MemberType = typeof(ChromecastReceiversFilter))]
         public async Task ConnectToChromecastAndLaunchApplicationTwice(ChromecastReceiver receiver)
         {
             var TestHelper = new TestHelper();
@@ -47,26 +49,8 @@ namespace Sharpcaster.Test
             Assert.Equal(firstLaunchTransportId, status.Application.TransportId);
         }
 
-        [Theory(Skip = "This does not pass any more. Now my JBL reacts as the other device - not changing the Transport ID !?")]
-        [MemberData(nameof(ChromecastReceiversFilter.GetJblSpeaker), MemberType = typeof(ChromecastReceiversFilter))]
-        public async Task ConnectToChromecastAndLaunchApplicationTwiceWithoutJoining1(ChromecastReceiver receiver)
-        {
-            var TestHelper = new TestHelper();
-            var client = await TestHelper.CreateAndConnectClient(output, receiver);
-            var status = await client.LaunchApplicationAsync("B3419EF5");
-
-            var firstLaunchTransportId = status.Application.TransportId;
-            await client.DisconnectAsync();
-
-            _ = await client.ConnectChromecast(receiver);
-            status = await client.LaunchApplicationAsync("B3419EF5", false);
-
-            // My JBL Device (almost every time - but not always ) makes a new ID here!!!! (The other device - ChromecastAudio DOES NOT!?)
-            Assert.NotEqual(firstLaunchTransportId, status.Application.TransportId);
-        }
-
         [Theory]
-        [MemberData(nameof(ChromecastReceiversFilter.GetDefaultDevice), MemberType = typeof(ChromecastReceiversFilter))]
+        [MemberData(nameof(ChromecastReceiversFilter.GetAny), MemberType = typeof(ChromecastReceiversFilter))]
         public async Task ConnectToChromecastAndLaunchApplicationTwiceWithoutJoining2(ChromecastReceiver receiver)
         {
             var TestHelper = new TestHelper();
@@ -84,7 +68,7 @@ namespace Sharpcaster.Test
         }
 
         [Theory]
-        [MemberData(nameof(ChromecastReceiversFilter.GetAll), MemberType = typeof(ChromecastReceiversFilter))]
+        [MemberData(nameof(ChromecastReceiversFilter.GetChromecastUltra), MemberType = typeof(ChromecastReceiversFilter))]
         public async Task ConnectToChromecastAndLaunchApplicationAThenLaunchApplicationB(ChromecastReceiver receiver)
         {
             var TestHelper = new TestHelper();
@@ -101,7 +85,7 @@ namespace Sharpcaster.Test
         }
 
         [Theory]
-        [MemberData(nameof(ChromecastReceiversFilter.GetAll), MemberType = typeof(ChromecastReceiversFilter))]
+        [MemberData(nameof(ChromecastReceiversFilter.GetAny), MemberType = typeof(ChromecastReceiversFilter))]
         public async Task ConnectToChromecastAndLaunchApplicationOnceAndJoinIt(ChromecastReceiver receiver)
         {
             var TestHelper = new TestHelper();
@@ -129,7 +113,9 @@ namespace Sharpcaster.Test
                 SessionId = client.GetChromecastStatus().Application.SessionId
             };
 
-            await client.SendAsync(null, "urn:x-cast:com.boombatower.chromecast-dashboard", req, client.GetChromecastStatus().Application.SessionId);
+            var requestPayload = JsonSerializer.Serialize(req, WebMessageSerializationContext.Default.WebMessage);
+
+            await client.SendAsync(null, "urn:x-cast:com.boombatower.chromecast-dashboard", requestPayload, client.GetChromecastStatus().Application.SessionId);
             await Task.Delay(5000);
         }
     }

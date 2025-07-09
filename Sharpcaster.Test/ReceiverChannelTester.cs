@@ -18,7 +18,7 @@ namespace Sharpcaster.Test
         }
 
         [Theory]
-        [MemberData(nameof(ChromecastReceiversFilter.GetAll), MemberType = typeof(ChromecastReceiversFilter))]
+        [MemberData(nameof(ChromecastReceiversFilter.GetAny), MemberType = typeof(ChromecastReceiversFilter))]
         public async Task TestMute(ChromecastReceiver receiver)
         {
             var TestHelper = new TestHelper();
@@ -30,7 +30,7 @@ namespace Sharpcaster.Test
         }
 
         [Theory]
-        [MemberData(nameof(ChromecastReceiversFilter.GetAll), MemberType = typeof(ChromecastReceiversFilter))]
+        [MemberData(nameof(ChromecastReceiversFilter.GetAny), MemberType = typeof(ChromecastReceiversFilter))]
         public async Task TestUnMute(ChromecastReceiver receiver)
         {
             var TestHelper = new TestHelper();
@@ -41,7 +41,7 @@ namespace Sharpcaster.Test
         }
 
         [Theory]
-        [MemberData(nameof(ChromecastReceiversFilter.GetAll), MemberType = typeof(ChromecastReceiversFilter))]
+        [MemberData(nameof(ChromecastReceiversFilter.GetAny), MemberType = typeof(ChromecastReceiversFilter))]
         public async Task TestVolume(ChromecastReceiver receiver)
         {
             var TestHelper = new TestHelper();
@@ -59,11 +59,31 @@ namespace Sharpcaster.Test
         }
 
         [Theory]
-        [MemberData(nameof(ChromecastReceiversFilter.GetAll), MemberType = typeof(ChromecastReceiversFilter))]
+        [MemberData(nameof(ChromecastReceiversFilter.GetAny), MemberType = typeof(ChromecastReceiversFilter))]
         public async Task TestStoppingApplication(ChromecastReceiver receiver)
         {
             var TestHelper = new TestHelper();
             var client = await TestHelper.CreateAndConnectClient(output, receiver);
+
+            await client.LaunchApplicationAsync("B3419EF5");
+
+            var status = await client.ReceiverChannel.StopApplication();
+            Assert.Null(status.Applications);
+        }
+
+        [Theory]
+        [MemberData(nameof(ChromecastReceiversFilter.GetAny), MemberType = typeof(ChromecastReceiversFilter))]
+        public async Task TestApplicationLaunchStatusMessage(ChromecastReceiver receiver)
+        {
+            var TestHelper = new TestHelper(); 
+            var client = await TestHelper.CreateAndConnectClient(output, receiver);
+
+            string launchStatus = "";
+
+            client.ReceiverChannel.LaunchStatusChanged += (sender, e) =>
+            {
+                launchStatus = e.Status;
+            };
 
             await client.LaunchApplicationAsync("B3419EF5");
 

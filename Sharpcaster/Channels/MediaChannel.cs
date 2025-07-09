@@ -1,14 +1,16 @@
 ﻿using Microsoft.Extensions.Logging;
+using Sharpcaster.Extensions;
 using Sharpcaster.Interfaces;
-using Sharpcaster.Messages;
 using Sharpcaster.Messages.Media;
 using Sharpcaster.Messages.Queue;
+using Sharpcaster.Messages.Receiver;
 using Sharpcaster.Models.ChromecastStatus;
 using Sharpcaster.Models.Media;
 using Sharpcaster.Models.Queue;
 using System;
-using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace Sharpcaster.Channels
@@ -16,13 +18,19 @@ namespace Sharpcaster.Channels
     /// <summary>
     /// Media channel
     /// </summary>
-    public class MediaChannel : StatusChannel<MediaStatusMessage, IEnumerable<MediaStatus>>, IMediaChannel
+    public class MediaChannel : ChromecastChannel, IMediaChannel
     {
         /// <summary>
         /// Raised when error is received
         /// </summary>
         public event EventHandler<ErrorMessage> ErrorHappened;
-        public MediaStatus MediaStatus { get => Status.FirstOrDefault(); }
+        public event EventHandler<LoadCancelledMessage> LoadCancelled;
+        public event EventHandler<LoadFailedMessage> LoadFailed;    
+        public event EventHandler<InvalidRequestMessage> InvalidRequest;
+        public event EventHandler<MediaStatus> StatusChanged;
+
+        public MediaStatus MediaStatus { get => mediaStatus; }
+        private MediaStatus mediaStatus;
         /// <summary>
         /// Initializes a new instance of MediaChannel class
         /// </summary>
@@ -30,25 +38,23 @@ namespace Sharpcaster.Channels
         {
         }
 
-        private async Task<MediaStatus> SendAsync(IMessageWithId message, ChromecastApplication application)
+        private async Task<MediaStatus> SendAsync(int messageRequestId, string messagePayload, ChromecastApplication application, bool DoNotReturnOnLoading = true)
         {
             try
             {
-                var response = await SendAsync<IMessageWithId>(message, application.TransportId);
-                if (response is LoadFailedMessage)
+                var response = await SendAsync(messageRequestId, messagePayload, application.TransportId);
+                var mediaStatusMessage = JsonSerializer.Deserialize(response, SharpcasteSerializationContext.Default.MediaStatusMessage);
+                if (DoNotReturnOnLoading && mediaStatusMessage.Status?.FirstOrDefault()?.ExtendedStatus?.PlayerState == PlayerStateType.Loading)
                 {
-                    throw new Exception("Load failed");
+                    response = await Client.WaitResponseAsync(messageRequestId);
+                    mediaStatusMessage = JsonSerializer.Deserialize(response, SharpcasteSerializationContext.Default.MediaStatusMessage);
                 }
-                if (response is LoadCancelledMessage)
-                {
-                    throw new Exception("Load cancelled");
-                }
-                return (response as MediaStatusMessage).Status?.FirstOrDefault();
+                return mediaStatusMessage.Status?.FirstOrDefault();
             }
             catch (Exception ex)
             {
-                Logger?.LogError($"Error sending message: {ex.Message}");
-                Status = null;
+                Logger?.LogError("Error sending message: {exceptionMessage}", ex.Message);
+                mediaStatus = null;
                 throw;
             }
         }
@@ -56,8 +62,9 @@ namespace Sharpcaster.Channels
         private async Task<MediaStatus> SendAsync(MediaSessionMessage message)
         {
             var chromecastStatus = Client.GetChromecastStatus();
-            message.MediaSessionId = Status?.First().MediaSessionId ?? throw new ArgumentNullException("MediaSessionId");
-            return await SendAsync(message, chromecastStatus.Applications[0]);
+            message.MediaSessionId = MediaStatus?.MediaSessionId ?? throw new ArgumentNullException(nameof(message), "MediaSessionID");
+            var messagePayload = JsonSerializer.Serialize(message, SharpcasteSerializationContext.Default.MediaSessionMessage);
+            return await SendAsync(message.RequestId, messagePayload, chromecastStatus.Applications[0]);
         }
 
         /// <summary>
@@ -69,18 +76,38 @@ namespace Sharpcaster.Channels
         public async Task<MediaStatus> LoadAsync(Media media, bool autoPlay = true)
         {
             var status = Client.GetChromecastStatus();
-            return await SendAsync(new LoadMessage() { SessionId = status.Application.SessionId, Media = media, AutoPlay = autoPlay }, status.Application);
+            var loadMessage = new LoadMessage() { SessionId = status.Application.SessionId, Media = media, AutoPlay = autoPlay };
+            return await SendAsync(loadMessage.RequestId, JsonSerializer.Serialize(loadMessage, SharpcasteSerializationContext.Default.LoadMessage), status.Application);
         }
 
-        public override Task OnMessageReceivedAsync(IMessage message)
+        public override Task OnMessageReceivedAsync(string messagePayload, string type)
         {
-            switch (message)
+            switch (type)
             {
-                case ErrorMessage errorMessage:
+                case "LOAD_FAILED":
+                    var loadFailedMessage = JsonSerializer.Deserialize(messagePayload, SharpcasteSerializationContext.Default.LoadFailedMessage);
+                    LoadFailed?.Invoke(this, loadFailedMessage);
+                    return Task.CompletedTask;
+                case "LOAD_CANCELLED":
+                    var loadCancelledMessage = JsonSerializer.Deserialize(messagePayload, SharpcasteSerializationContext.Default.LoadCancelledMessage);
+                    LoadCancelled?.Invoke(this, loadCancelledMessage);
+                    return Task.CompletedTask;
+                case "INVALID_REQUEST":
+                    var invalidRequestMessage = JsonSerializer.Deserialize(messagePayload, SharpcasteSerializationContext.Default.InvalidRequestMessage);
+                    InvalidRequest?.Invoke(this, invalidRequestMessage);
+                    return Task.CompletedTask;
+                case "ERROR":
+                    var errorMessage = JsonSerializer.Deserialize(messagePayload, SharpcasteSerializationContext.Default.ErrorMessage);
                     ErrorHappened?.Invoke(this, errorMessage);
-                    throw new Exception("Errored: " + errorMessage.DetailedErrorCode);
+                    return Task.CompletedTask;
+                case "MEDIA_STATUS":
+                    var mediaStatusMessage = JsonSerializer.Deserialize(messagePayload, SharpcasteSerializationContext.Default.MediaStatusMessage);
+                    mediaStatus = mediaStatusMessage.Status.FirstOrDefault();
+                    StatusChanged?.Invoke(this, MediaStatus);
+                    return Task.CompletedTask;
             }
-            return base.OnMessageReceivedAsync(message);
+            Debugger.Break();
+            return Task.CompletedTask;
         }
 
         /// <summary>
@@ -107,7 +134,7 @@ namespace Sharpcaster.Channels
         /// <returns>media status</returns>
         public async Task<MediaStatus> StopAsync()
         {
-            return await SendAsync(new StopMessage());
+            return await SendAsync(new StopMediaMessage());
         }
 
         /// <summary>
@@ -123,18 +150,14 @@ namespace Sharpcaster.Channels
         public async Task<MediaStatus> QueueLoadAsync(QueueItem[] items, long? currentTime = null, RepeatModeType repeatMode = RepeatModeType.OFF, long? startIndex = null)
         {
             var chromecastStatus = Client.GetChromecastStatus();
-            var response = await SendAsync<MessageWithId>(new QueueLoadMessage() { SessionId = chromecastStatus.Application.SessionId, Items = items, CurrentTime = currentTime, RepeatMode = repeatMode, StartIndex = startIndex }, chromecastStatus.Application.TransportId);
-
-            switch (response)
+            var queueLoadMessage = new QueueLoadMessage() { SessionId = chromecastStatus.Application.SessionId, Items = items, CurrentTime = currentTime, RepeatMode = repeatMode, StartIndex = startIndex };
+            var response = await SendAsync(queueLoadMessage.RequestId, JsonSerializer.Serialize(queueLoadMessage, SharpcasteSerializationContext.Default.QueueLoadMessage), chromecastStatus.Application.TransportId);
+            var mediaStatusMessage = JsonSerializer.Deserialize(response, SharpcasteSerializationContext.Default.MediaStatusMessage);
+            if (mediaStatusMessage != null)
             {
-                case MediaStatusMessage mediaStatusMessage:
-                    return mediaStatusMessage.Status?.FirstOrDefault();
-                case LoadFailedMessage _:
-                    throw new Exception("Load failed");
-                case LoadCancelledMessage _:
-                    throw new Exception("Load cancelled");
+                return mediaStatusMessage.Status.FirstOrDefault();
             }
-            throw new Exception("Unknown response");
+            return null;
         }
 
         public async Task<MediaStatus> QueueNextAsync()
@@ -150,19 +173,28 @@ namespace Sharpcaster.Channels
         public async Task<QueueItem[]> QueueGetItemsAsync(int[] ids = null)
         {
             var chromecastStatus = Client.GetChromecastStatus();
-            return (await SendAsync<QueueItemsMessage>(new QueueGetItemsMessage() { MediaSessionId = MediaStatus.MediaSessionId, Ids = ids }, chromecastStatus.Application.TransportId)).Items;
+            var queueGetItemsMessage = new QueueGetItemsMessage() { MediaSessionId = MediaStatus.MediaSessionId, Ids = ids };
+            var response = await SendAsync(queueGetItemsMessage.RequestId, JsonSerializer.Serialize(queueGetItemsMessage, SharpcasteSerializationContext.Default.QueueGetItemsMessage), chromecastStatus.Application.TransportId);
+            var queueItemsResponse = JsonSerializer.Deserialize(response, SharpcasteSerializationContext.Default.QueueItemsMessage);
+            return queueItemsResponse.Items;
         }
 
         public async Task<int[]> QueueGetItemIdsAsync()
         {
             var chromecastStatus = Client.GetChromecastStatus();
-            return (await SendAsync<QueueItemIdsMessage>(new QueueGetItemIdsMessage() { MediaSessionId = MediaStatus.MediaSessionId }, chromecastStatus.Application.TransportId)).Ids;
+            var queueGetItemIdsMessage = new QueueGetItemIdsMessage() { MediaSessionId = MediaStatus.MediaSessionId };
+            var response = await SendAsync(queueGetItemIdsMessage.RequestId, JsonSerializer.Serialize(queueGetItemIdsMessage, SharpcasteSerializationContext.Default.QueueGetItemIdsMessage), chromecastStatus.Application.TransportId);
+            var queueItemIdsResponse = JsonSerializer.Deserialize(response, SharpcasteSerializationContext.Default.QueueItemIdsMessage);
+            return queueItemIdsResponse.Ids;
         }
 
         public async Task<MediaStatus> GetMediaStatusAsync()
         {
             var chromecastStatus = Client.GetChromecastStatus();
-            return await SendAsync(new Messages.Receiver.GetStatusMessage(), chromecastStatus.Application);
+            var mediaStatusMessage = new GetStatusMessage();
+            var response = await SendAsync(mediaStatusMessage.RequestId, JsonSerializer.Serialize(mediaStatusMessage, SharpcasteSerializationContext.Default.GetStatusMessage), chromecastStatus.Application.TransportId);
+            var mediaStatus = JsonSerializer.Deserialize(response, SharpcasteSerializationContext.Default.MediaStatusMessage);
+            return mediaStatus.Status.FirstOrDefault();
         }
     }
 }

@@ -1,5 +1,5 @@
 ﻿using Sharpcaster.Interfaces;
-using System.Runtime.Serialization;
+using System.Text.Json.Serialization;
 
 namespace Sharpcaster.Messages.Chromecast
 {
@@ -7,14 +7,13 @@ namespace Sharpcaster.Messages.Chromecast
     /// Status message base class
     /// </summary>
     /// <typeparam name="TStatus">status type</typeparam>
-    [DataContract]
     [ReceptionMessage]
     public abstract class StatusMessage<TStatus> : MessageWithId, IStatusMessage<TStatus>
     {
         /// <summary>
         /// Gets or sets the status
         /// </summary>
-        [DataMember(Name = "status")]
+        [JsonPropertyName("status")]
         public TStatus Status { get; set; }
     }
 }

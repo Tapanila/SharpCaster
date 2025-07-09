@@ -326,7 +326,7 @@ namespace Sharpcaster.Test.helper
             }
         }
 
-        public static QueueItem[] CreateFailingQueu
+        public static QueueItem[] CreateFailingQueue
         {
             get
             {
@@ -337,21 +337,36 @@ namespace Sharpcaster.Test.helper
                 {
                     Media = new Media
                     {
-                        ContentUrl = "https://audionautix.com/Music/AwayInAManger.mp3"
+                        ContentUrl = "https://audionautix.com/Music/AwayInAManger.mp33",
+                        Metadata = new MediaMetadata
+                        {
+                            Title = "Away In A Manger",
+                            SubTitle = "Christmas Songs"
+                        }
                     }
                 },
                 new QueueItem()
                 {
                     Media = new Media
                     {
-                        ContentUrl = "https://audionautix.com/Music/CarolOfTheBells.mp3"
+                        ContentUrl = "https://audionautix.com/Music/CarolOfTheBells.mp33",
+                        Metadata = new MediaMetadata
+                        {
+                            Title = "Carol Of The Bells",
+                            SubTitle = "Christmas Songs"
+                        }
                     }
                 },
                 new QueueItem()
                 {
                     Media = new Media
                     {
-                        ContentUrl = "https://audionautix.com/Music/JoyToTheWorld.mp3"
+                        ContentUrl = "https://audionautix.com/Music/JoyToTheWorld.mp33",
+                        Metadata = new MediaMetadata
+                        {
+                            Title = "Joy To The World",
+                            SubTitle = "Christmas Songs"
+                        }
                     }
                 }
 
