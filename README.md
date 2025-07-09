@@ -74,4 +74,4 @@ Contributions, issues, and feature requests are welcome! Feel free to open an is
 ---
 
 ## License
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License. See the [LICENSE](LICENSE.txt) file for details.
