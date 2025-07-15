@@ -1,23 +1,22 @@
-﻿using System.Runtime.Serialization;
+﻿using System.Text.Json.Serialization;
 
 namespace Sharpcaster.Models.MultiZone
 {
-    [DataContract]
     public class Device
     {
-        [DataMember(Name = "capabilities")]
+        [JsonPropertyName("capabilities")]
         public string Capabilities { get; set; }
 
-        [DataMember(Name = "deviceId")]
+        [JsonPropertyName("deviceId")]
         public string DeviceId { get; set; }
 
-        [DataMember(Name = "name")]
+        [JsonPropertyName("name")]
         public string Name { get; set; }
 
         /// <summary>
         /// Gets or sets the volume
         /// </summary>
-        [DataMember(Name = "volume")]
+        [JsonPropertyName("volume")]
         public Volume Volume { get; set; }
     }
 }
