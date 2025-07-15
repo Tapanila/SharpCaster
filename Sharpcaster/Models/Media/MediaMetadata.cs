@@ -6,6 +6,10 @@ namespace Sharpcaster.Models.Media
     /// Media metadata
     /// </summary>
     [JsonDerivedType(typeof(MovieMetadata))]
+    [JsonDerivedType(typeof(TVShowMetadata))]
+    [JsonDerivedType(typeof(MusicTrackMetadata))]
+    [JsonDerivedType(typeof(PhotoMetadata))]
+    [JsonDerivedType(typeof(AudiobookChapterMetadata))]
     public class MediaMetadata
     {
         /// <summary>

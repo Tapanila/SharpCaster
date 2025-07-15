@@ -53,6 +53,10 @@ namespace Sharpcaster.Interfaces
         Task<MediaStatus> QueueLoadAsync(QueueItem[] items, long? currentTime = null, RepeatModeType repeatMode = RepeatModeType.OFF, long? startIndex = null);
         Task<MediaStatus> QueueNextAsync();
         Task<MediaStatus> QueuePrevAsync();
+        Task<MediaStatus> QueueInsertAsync(QueueItem[] items, long? insertBefore = null);
+        Task<MediaStatus> QueueRemoveAsync(long[] itemIds);
+        Task<MediaStatus> QueueReorderAsync(long[] itemIds, long? insertBefore = null);
+        Task<MediaStatus> QueueUpdateAsync(QueueItem[] items);
         Task<QueueItem[]> QueueGetItemsAsync(int[] ids = null);
         Task<int[]> QueueGetItemIdsAsync();
         Task<MediaStatus> GetMediaStatusAsync();

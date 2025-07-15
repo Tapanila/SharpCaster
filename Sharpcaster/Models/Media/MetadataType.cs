@@ -13,7 +13,12 @@
         /// <summary>
         /// Movie
         /// </summary>
-        Movie = 2,
+        Movie = 1,
+
+        /// <summary>
+        /// TV show
+        /// </summary>
+        TVShow = 2,
 
         /// <summary>
         /// Music
@@ -23,6 +28,11 @@
         /// <summary>
         /// Photo
         /// </summary>
-        Photo = 4
+        Photo = 4,
+
+        /// <summary>
+        /// Audiobook chapter
+        /// </summary>
+        AudiobookChapter = 5
     }
 }

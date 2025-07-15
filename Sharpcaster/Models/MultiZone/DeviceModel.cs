@@ -5,7 +5,7 @@ namespace Sharpcaster.Models.MultiZone
     public class Device
     {
         [JsonPropertyName("capabilities")]
-        public string Capabilities { get; set; }
+        public int Capabilities { get; set; }
 
         [JsonPropertyName("deviceId")]
         public string DeviceId { get; set; }
