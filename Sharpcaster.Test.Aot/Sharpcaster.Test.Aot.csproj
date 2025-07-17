@@ -34,6 +34,10 @@
   </ItemGroup>
 
   <ItemGroup>
+
+    <PackageReference Include="MSTest.Engine" Version="1.0.0-alpha.25317.1" />
+
+    <PackageReference Include="MSTest.SourceGeneration" Version="1.0.0-alpha.25317.1" />
     <PackageReference Update="MSTest.TestFramework" Version="3.9.3" />
   </ItemGroup>
 
