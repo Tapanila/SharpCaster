@@ -1,6 +1,6 @@
 ﻿using Sharpcaster.Messages.Media;
 using Sharpcaster.Models.Queue;
-using System.Runtime.Serialization;
+using System.Text.Json.Serialization;
 
 namespace Sharpcaster.Messages.Queue
 {
@@ -14,7 +14,7 @@ namespace Sharpcaster.Messages.Queue
         /// including the media information. The items not provided in this list will remain unchanged.
         /// The tracks information can not change once the item is loaded (if the item is the currentItem). If any of the items does not exist it will be ignored.
         /// </summary>
-        [DataMember(Name = "items")]
+        [JsonPropertyName("items")]
         public QueueItem[] Items { get; set; }
 
     }

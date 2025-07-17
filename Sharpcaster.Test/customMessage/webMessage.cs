@@ -1,5 +1,4 @@
-﻿using System.Runtime.Serialization;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 using Sharpcaster.Messages;
 
 namespace Sharpcaster.Test.customChannel
