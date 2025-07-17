@@ -237,7 +237,7 @@ namespace Sharpcaster.Test
             var th = new TestHelper();
             var client = await th.CreateAndConnectClient(output, receiver);
 
-            _ = await client.LaunchApplicationAsync("A9BCCB7C", false);
+            _ = await client.LaunchApplicationAsync("233637DE", false);
 
             await client.DisconnectAsync();
             await client.ConnectChromecast(receiver);
@@ -514,6 +514,12 @@ namespace Sharpcaster.Test
             client.MediaChannel.LoadFailed += (object sender, LoadFailedMessage e) =>
             {
                 output.WriteLine("Load Failed Error happened and failing media was  " + e.ItemId);
+                errorHappened = true;
+            };
+
+            client.MediaChannel.ErrorHappened += (object sender, ErrorMessage e) =>
+            {
+                output.WriteLine("Error happened: " + e.ToString());
                 errorHappened = true;
             };
 
