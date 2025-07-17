@@ -1,45 +1,61 @@
-﻿using System.Runtime.Serialization;
+﻿using System.Text.Json.Serialization;
 
 namespace Sharpcaster.Models.Spotify
 {
-    [DataContract]
     public class SpotifyStatus
     {
-        [DataMember(Name = "version")]
+        [JsonPropertyName("version")]
         public string Version { get; set; }
-        [DataMember(Name = "publicKey")]
+
+        [JsonPropertyName("publicKey")]
         public string PublicKey { get; set; }
-        [DataMember(Name = "remoteName")]
+
+        [JsonPropertyName("remoteName")]
         public string RemoteName { get; set; }
-        [DataMember(Name = "deviceType")]
+
+        [JsonPropertyName("deviceType")]
         public string DeviceType { get; set; }
-        [DataMember(Name = "brandDisplayName")]
+
+        [JsonPropertyName("brandDisplayName")]
         public string BrandDisplayName { get; set; }
-        [DataMember(Name = "modelDisplayName")]
+
+        [JsonPropertyName("modelDisplayName")]
         public string ModelDisplayName { get; set; }
-        [DataMember(Name = "libraryVersion")]
+
+        [JsonPropertyName("libraryVersion")]
         public string LibraryVersion { get; set; }
-        [DataMember(Name = "resolverVersion")]
+
+        [JsonPropertyName("resolverVersion")]
         public string ResolverVersion { get; set; }
-        [DataMember(Name = "groupStatus")]
+
+        [JsonPropertyName("groupStatus")]
         public string GroupStatus { get; set; }
-        [DataMember(Name = "deviceAPI_isGroup")]
+
+        [JsonPropertyName("deviceAPI_isGroup")]
         public bool DeviceAPI_isGroup { get; set; }
-        [DataMember(Name = "tokenType")]
+
+        [JsonPropertyName("tokenType")]
         public string TokenType { get; set; }
-        [DataMember(Name = "clientID")]
+
+        [JsonPropertyName("clientID")]
         public string ClientID { get; set; }
-        [DataMember(Name = "productID")]
+
+        [JsonPropertyName("productID")]
         public int ProductID { get; set; }
-        [DataMember(Name = "scope")]
+
+        [JsonPropertyName("scope")]
         public string Scope { get; set; }
-        [DataMember(Name = "availability")]
+
+        [JsonPropertyName("availability")]
         public string Availability { get; set; }
-        [DataMember(Name = "spotifyError")]
+
+        [JsonPropertyName("spotifyError")]
         public int SpotifyError { get; set; }
-        [DataMember(Name = "status")]
+
+        [JsonPropertyName("status")]
         public int Status { get; set; }
-        [DataMember(Name = "statusString")]
+
+        [JsonPropertyName("statusString")]
         public string StatusString { get; set; }
     }
 }

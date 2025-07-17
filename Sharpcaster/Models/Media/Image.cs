@@ -1,29 +1,28 @@
-﻿using System.Runtime.Serialization;
+﻿using System.Text.Json.Serialization;
 
 namespace Sharpcaster.Models.Media
 {
     /// <summary>
     /// Image
     /// </summary>
-    [DataContract]
     public class Image
     {
         /// <summary>
         /// Gets or sets the image url
         /// </summary>
-        [DataMember(Name = "url")]
+        [JsonPropertyName("url")]
         public string Url { get; set; }
 
         /// <summary>
         /// Gets or sets the image height
         /// </summary>
-        [DataMember(Name = "height")]
+        [JsonPropertyName("height")]
         public int? Height { get; set; }
 
         /// <summary>
         /// Gets or sets the image width
         /// </summary>
-        [DataMember(Name = "width")]
+        [JsonPropertyName("width")]
         public int? Width { get; set; }
     }
 }

@@ -1,15 +1,16 @@
-﻿using System.Runtime.Serialization;
+﻿using System.Text.Json.Serialization;
 
 namespace Sharpcaster.Models.MultiZone
 {
-    [DataContract]
     public class PlaybackSessionModel
     {
-        [DataMember(Name = "appAllowsGrouping")]
+        [JsonPropertyName("appAllowsGrouping")]
         public bool? AppAllowsGrouping { get; set; }
-        [DataMember(Name = "isVideoContent")]
+
+        [JsonPropertyName("isVideoContent")]
         public bool? IsVideoContent { get; set; }
-        [DataMember(Name = "streamTransferSupported")]
+
+        [JsonPropertyName("streamTransferSupported")]
         public bool? StreamTransferSupported { get; set; }
     }
 }

@@ -18,7 +18,7 @@ namespace Sharpcaster.Messages
         [JsonIgnore]
         public bool HasRequestId
         {
-            get { return _requestId != 0; }
+            get { return _requestId != null && _requestId != 0; }
         }
 
         private int? _requestId;
