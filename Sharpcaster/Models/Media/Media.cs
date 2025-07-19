@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Runtime.Serialization;
 using System.Text.Json.Serialization;
 
 namespace Sharpcaster.Models.Media
@@ -7,7 +6,6 @@ namespace Sharpcaster.Models.Media
     /// <summary>
     /// Get or sets the media
     /// </summary>
-    [DataContract]
     public class Media
     {
         /// <summary>

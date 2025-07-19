@@ -1,9 +1,7 @@
-﻿using System.Runtime.Serialization;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 
 namespace Sharpcaster.Models.Queue
 {
-    [DataContract]
     public class QueueItem
     {
         /// <summary>

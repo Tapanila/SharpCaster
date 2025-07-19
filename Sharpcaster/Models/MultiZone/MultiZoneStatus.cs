@@ -1,15 +1,16 @@
-﻿using System.Runtime.Serialization;
+﻿using System.Text.Json.Serialization;
 
 namespace Sharpcaster.Models.MultiZone
 {
-    [DataContract]
     public class MultiZoneStatus
     {
-        [DataMember(Name = "devices")]
+        [JsonPropertyName("devices")]
         public Device[] Devices { get; set; }
-        [DataMember(Name = "isMultichannel")]
+
+        [JsonPropertyName("isMultichannel")]
         public bool? IsMultichannel { get; set; }
-        [DataMember(Name = "playbackSession")]
+
+        [JsonPropertyName("playbackSession")]
         public PlaybackSessionModel PlaybackSession { get; set; }
     }
 }

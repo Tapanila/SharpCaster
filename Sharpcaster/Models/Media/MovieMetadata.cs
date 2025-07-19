@@ -1,11 +1,10 @@
-﻿using System.Runtime.Serialization;
+﻿using System.Text.Json.Serialization;
 
 namespace Sharpcaster.Models.Media
 {
     /// <summary>
     /// Movie metadata
     /// </summary>
-    [DataContract]
     public class MovieMetadata : MediaMetadata
     {
         /// <summary>
@@ -19,7 +18,7 @@ namespace Sharpcaster.Models.Media
         /// <summary>
         /// Gets or sets the studio
         /// </summary>
-        [DataMember(Name = "studio")]
+        [JsonPropertyName("studio")]
         public string Studio { get; set; }
     }
 }

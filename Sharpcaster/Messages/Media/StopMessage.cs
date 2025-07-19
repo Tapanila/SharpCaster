@@ -4,7 +4,7 @@
     {
         public StopMediaMessage()
         {
-            Type = "STOP_MESSAGE";
+            Type = "STOP";
         }
     }
 }
