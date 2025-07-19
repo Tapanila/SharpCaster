@@ -199,9 +199,8 @@ namespace Sharpcaster.Channels
 
         public async Task<MediaStatus> QueueUpdateAsync(QueueItem[] items)
         {
-            return null;
-            //return await SendAsync(new QueueUpdateMessage() { Items = items },
-            //    SharpcasteSerializationContext.Default.QueueUpdateMessage);
+            return await SendAsync(new QueueUpdateMessage() { Items = items },
+                SharpcasteSerializationContext.Default.QueueUpdateMessage);
         }
 
         public async Task<QueueItem[]> QueueGetItemsAsync(int[] ids = null)
