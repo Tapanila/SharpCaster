@@ -297,28 +297,32 @@ namespace Sharpcaster.Test.helper
                 {
                     Media = new Media
                     {
-                        ContentUrl = "http://www.openmusicarchive.org/audio/Frankie%20by%20Mississippi%20John%20Hurt.mp3"
+                        ContentUrl = "https://incompetech.com/music/royalty-free/mp3-royaltyfree/Loping%20Sting.mp3",
+                        ContentType = "audio/mpeg"
                     }
                 },
                 new QueueItem()
                 {
                     Media = new Media
                     {
-                        ContentUrl = "http://www.openmusicarchive.org/audio/Mississippi%20Boweavil%20Blues%20by%20The%20Masked%20Marvel.mp3"
+                        ContentUrl = "https://incompetech.com/music/royalty-free/mp3-royaltyfree/Bass%20Vibes.mp3",
+                        ContentType = "audio/mpeg"
                     }
                 },
                 new QueueItem()
                 {
                     Media = new Media
                     {
-                        ContentUrl = "http://www.openmusicarchive.org/audio/The%20Wild%20Wagoner%20by%20Jilson%20Setters.mp3"
+                        ContentUrl = "https://incompetech.com/music/royalty-free/mp3-royaltyfree/Cool%20Vibes.mp3",
+                        ContentType = "audio/mpeg"
                     }
                 },
                 new QueueItem()
                 {
                     Media = new Media
                     {
-                        ContentUrl = "http://www.openmusicarchive.org/audio/Drunkards%20Special%20by%20Coley%20Jones.mp3"
+                        ContentUrl = "https://incompetech.com/music/royalty-free/mp3-royaltyfree/Funky%20Chunk.mp3",
+                        ContentType = "audio/mpeg"
                     }
                 },
             ];
