@@ -293,11 +293,31 @@ namespace Sharpcaster.Test.helper
             {
                 QueueItem[] MyCd =
                 [
+
+                new QueueItem()
+                {
+                    Media = new Media
+                    {
+                        ContentId = "Aquarium",
+                        ContentUrl = "https://incompetech.com/music/royalty-free/mp3-royaltyfree/Aquarium.mp3",
+                        ContentType = "audio/mpeg"
+                    }
+                },
+                new QueueItem()
+                {
+                    Media = new Media
+                    {
+                        ContentId = "Arcane",
+                        ContentUrl = "https://incompetech.com/music/royalty-free/mp3-royaltyfree/Arcane.mp3",
+                        ContentType = "audio/mpeg"
+                    }
+                },
                     new QueueItem()
                 {
                     Media = new Media
                     {
-                        ContentUrl = "https://incompetech.com/music/royalty-free/mp3-royaltyfree/Loping%20Sting.mp3",
+                        ContentId = "A Mission",
+                        ContentUrl = "https://incompetech.com/music/royalty-free/mp3-royaltyfree/A%20Mission.mp3",
                         ContentType = "audio/mpeg"
                     }
                 },
@@ -305,23 +325,55 @@ namespace Sharpcaster.Test.helper
                 {
                     Media = new Media
                     {
-                        ContentUrl = "https://incompetech.com/music/royalty-free/mp3-royaltyfree/Bass%20Vibes.mp3",
+                        ContentId = "All This",
+                        ContentUrl = "https://incompetech.com/music/royalty-free/mp3-royaltyfree/All%20This.mp3",
+                        ContentType = "audio/mpeg"
+                    }
+                },
+            ];
+                return MyCd;
+            }
+        }
+
+        public static QueueItem[] CreateTestCdWithItemIds
+        {
+            get
+            {
+                QueueItem[] MyCd =
+                [
+                    new QueueItem()
+                {
+                    ItemId = 0,
+                    Media = new Media
+                    {
+                        ContentUrl = "https://incompetech.com/music/royalty-free/mp3-royaltyfree/A%20Mission.mp3",
                         ContentType = "audio/mpeg"
                     }
                 },
                 new QueueItem()
                 {
+                    ItemId = 1,
                     Media = new Media
                     {
-                        ContentUrl = "https://incompetech.com/music/royalty-free/mp3-royaltyfree/Cool%20Vibes.mp3",
+                        ContentUrl = "https://incompetech.com/music/royalty-free/mp3-royaltyfree/All%20This.mp3",
                         ContentType = "audio/mpeg"
                     }
                 },
                 new QueueItem()
                 {
+                    ItemId = 2,
                     Media = new Media
                     {
-                        ContentUrl = "https://incompetech.com/music/royalty-free/mp3-royaltyfree/Funky%20Chunk.mp3",
+                        ContentUrl = "https://incompetech.com/music/royalty-free/mp3-royaltyfree/Aquarium.mp3",
+                        ContentType = "audio/mpeg"
+                    }
+                },
+                new QueueItem()
+                {
+                    ItemId = 3,
+                    Media = new Media
+                    {
+                        ContentUrl = "https://incompetech.com/music/royalty-free/mp3-royaltyfree/Arcane.mp3",
                         ContentType = "audio/mpeg"
                     }
                 },

@@ -85,81 +85,6 @@ namespace Sharpcaster.Test
             await client.DisconnectAsync();
         }
 
-        [Theory]
-        [MemberData(nameof(ChromecastReceiversFilter.GetAny), MemberType = typeof(ChromecastReceiversFilter))]
-        public async Task TestLoadingMediaQueueAndNavigateNextPrev(ChromecastReceiver receiver)
-        {
-            var TestHelper = new TestHelper();
-            ChromecastClient client = await TestHelper.CreateConnectAndLoadAppClient(output, receiver);
-
-            AutoResetEvent _autoResetEvent = new(false);
-            IMediaChannel mediaChannel = client.MediaChannel;
-            QueueItem[] MyCd = helper.TestHelper.CreateTestCd;
-
-            int testSequenceCount = 0;
-            var mediaStatusChanged = 0;
-
-            //We are setting up an event to listen to status change. Because we don't know when the audio has started to play
-            mediaChannel.StatusChanged += async (object sender, MediaStatus e) =>
-            {
-                try
-                {
-                    mediaStatusChanged += 1;
-                    MediaStatus status = e;
-                    int currentItemId = status?.CurrentItemId ?? -1;
-
-                    if (currentItemId != -1 && status.PlayerState == PlayerStateType.Playing)
-                    {
-                        if (status?.Items?.ToList()?.Where(i => i.ItemId == currentItemId).FirstOrDefault()?.Media?.ContentUrl?.Equals(MyCd[0].Media.ContentUrl) ?? false)
-                        {
-                            if (testSequenceCount == 0)
-                            {
-                                testSequenceCount++;
-                                output.WriteLine("First Test Track started playin. listen for some seconds....");
-                                await Task.Delay(6000);
-                                output.WriteLine("Lets goto next item");
-                                status = await mediaChannel.QueueNextAsync();
-                                // Asserts
-                                // ...
-                            }
-                            else
-                            {
-                                testSequenceCount++;
-                                output.WriteLine("First Test Track started for the 2nd time. Stop and end the test");
-                                await Task.Delay(1000);
-                                status = await mediaChannel.StopAsync();
-                                output.WriteLine("test Sequence finished");
-                                _autoResetEvent.Set();
-                            }
-                        }
-                        else if (status?.Items?.ToList()?.Where(i => i.ItemId == currentItemId).FirstOrDefault()?.Media?.ContentUrl?.Equals(MyCd[1].Media.ContentUrl) ?? false)
-                        {
-                            output.WriteLine("2nd Test Track started playin. listen for some seconds....");
-                            testSequenceCount++;
-                            await Task.Delay(6000);
-                            output.WriteLine("Lets goto back to first one");
-                            status = await mediaChannel.QueuePrevAsync();
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    output?.WriteLine(ex.ToString());
-                    Assert.Fail(ex.ToString());
-                }
-            };
-
-            MediaStatus status = await client.MediaChannel.QueueLoadAsync(MyCd);
-
-            Assert.Equal(PlayerStateType.Playing, status.PlayerState);
-            Assert.Equal(2, status.Items.Length);           // The status message only contains the next (and if available Prev) Track/QueueItem!
-            Assert.Equal(status.CurrentItemId, status.Items[0].ItemId);
-
-            //This keeps the test running untill all eventhandler sequence steps are finished. If something goes wrong we get a very slow timeout here.
-            await Task.Delay(10000);
-            Assert.True(_autoResetEvent.WaitOne(5000));
-            await client.DisconnectAsync();
-        }
 
         [Theory]
         //[MemberData(nameof(ChromecastReceiversFilter.GetAll), MemberType = typeof(ChromecastReceiversFilter))]  // This sometimes give a INVALID_MEDIA_SESSION_ID on my Chromecast Audio ....
@@ -207,6 +132,34 @@ namespace Sharpcaster.Test
             Assert.Equal(PlayerStateType.Playing, status.PlayerState);
             Assert.Equal(2, status.Items.Count());           // The status message only contains the next (and if available Prev) Track/QueueItem!
             Assert.Equal(status.CurrentItemId, status.Items[0].ItemId);
+            await client.DisconnectAsync();
+        }
+
+        [Theory]
+        [MemberData(nameof(ChromecastReceiversFilter.GetAny), MemberType = typeof(ChromecastReceiversFilter))]
+        public async Task TestLoadingMediaQueueWithItemIds(ChromecastReceiver receiver)
+        {
+            var TestHelper = new TestHelper();
+            ChromecastClient client = await TestHelper.CreateConnectAndLoadAppClient(output, receiver);
+            AutoResetEvent _autoResetEvent = new(false);
+
+            QueueItem[] MyCd = helper.TestHelper.CreateTestCdWithItemIds;
+            // ItemId is Unique identifier of the item in the queue.
+            // when doing QueueLoad or QueueInsert it must be null
+            // (as it will be assigned by the receiver when an item is first created/inserted).
+            // For other operations it is mandatory.
+            // That's why this should fail
+
+            client.MediaChannel.InvalidRequest += (object sender, InvalidRequestMessage e) =>
+            {
+                output.WriteLine("Invalid Request Error happened: " + e.Reason);
+                _autoResetEvent.Set();
+            };
+
+            MediaStatus status = await client.MediaChannel.QueueLoadAsync(MyCd);
+
+            Assert.True(_autoResetEvent.WaitOne(1000));
+
             await client.DisconnectAsync();
         }
 

@@ -73,7 +73,7 @@ namespace Sharpcaster.Test
         {
             var TestHelper = new TestHelper();
             var client = await TestHelper.CreateAndConnectClient(output, receiver);
-            var status = await client.LaunchApplicationAsync("A9BCCB7C");           //Youtube
+            var status = await client.LaunchApplicationAsync("233637DE");           //Something else
 
             var firstLaunchTransportId = status.Application.TransportId;
             await client.DisconnectAsync();

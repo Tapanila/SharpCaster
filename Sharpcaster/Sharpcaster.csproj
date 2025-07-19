@@ -16,6 +16,7 @@
     <PackageIcon>sharpcaster-logo-64x64.png</PackageIcon>
     <PackageReadmeFile>README.md</PackageReadmeFile>
 	<IsAotCompatible Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net9.0'))">true</IsAotCompatible>
+	<Nullable>enable</Nullable>
   </PropertyGroup>
 
     <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">

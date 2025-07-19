@@ -26,7 +26,7 @@ namespace Sharpcaster.Channels
         /// <param name="message">message to process</param>
         public override Task OnMessageReceivedAsync(string messagePayload, string type)
         {
-            switch (messagePayload)
+            switch (type)
             {
                 case "getInfoResponse":
                     var getInfoResponseMessage = JsonSerializer.Deserialize(messagePayload, SharpcasteSerializationContext.Default.GetInfoResponseMessage);
@@ -60,7 +60,7 @@ namespace Sharpcaster.Channels
                     DeviceAPI_isGroup = false
                 }
             };
-            await SendAsync(spotifyInfoMessage.RequestId, JsonSerializer.Serialize(spotifyInfoMessage, SharpcasteSerializationContext.Default.GetInfoMessage), Client.GetChromecastStatus().Application.TransportId);
+            await SendAsync(JsonSerializer.Serialize(spotifyInfoMessage, SharpcasteSerializationContext.Default.GetInfoMessage), Client.GetChromecastStatus().Application.TransportId);
         }
 
         public async Task AddUser(string accessToken)

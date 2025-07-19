@@ -197,10 +197,10 @@ namespace Sharpcaster
                                     await channel.OnMessageReceivedAsync(payload, message.Type);
                                     if (message.HasRequestId)
                                     {
-                                        WaitingTasks.TryRemove(message.RequestId, out SharpCasterTaskCompletionSource tcs);
+                                        WaitingTasks.TryRemove(message.RequestId, out SharpCasterTaskCompletionSource? tcs);
                                         tcs?.SetResult(payload);
                                         if (tcs == null)
-                                            _logger.LogTrace("No TaskCompletionSource found for RequestId: {RequestId}, CompletionSourceCount: {CompletionSourceCount}, Type: {Type} ", message.RequestId, WaitingTasks.Count, message.Type);
+                                            _logger?.LogTrace("No TaskCompletionSource found for RequestId: {RequestId}, CompletionSourceCount: {CompletionSourceCount}, Type: {Type} ", message.RequestId, WaitingTasks.Count, message.Type);
                                     }
                                 }
                                 catch (Exception ex)
@@ -208,7 +208,7 @@ namespace Sharpcaster
                                     _logger?.LogError("Exception processing the Response: {Message}", ex.Message);
                                     if (message.HasRequestId)
                                     {
-                                        WaitingTasks.TryRemove(message.RequestId, out SharpCasterTaskCompletionSource tcs);
+                                        WaitingTasks.TryRemove(message.RequestId, out SharpCasterTaskCompletionSource? tcs);
                                         tcs?.SetException(ex);
                                     }
                                 }

@@ -60,12 +60,12 @@ namespace Sharpcaster.Channels
             }
         }
 
-        private async Task<MediaStatus> SendAsync<T>(T message, JsonTypeInfo<T> serializationContext) where T : MediaSessionMessage
+        private async Task<MediaStatus> SendAsync<T>(T message, JsonTypeInfo<T> serializationContext, bool DoNotReturnOnLoading = true) where T : MediaSessionMessage
         {
             var chromecastStatus = Client.GetChromecastStatus();
             message.MediaSessionId = MediaStatus?.MediaSessionId ?? throw new ArgumentNullException(nameof(message), "MediaSessionID");
             var messagePayload = JsonSerializer.Serialize(message, serializationContext);
-            return await SendAsync(message.RequestId, messagePayload, chromecastStatus.Applications[0]);
+            return await SendAsync(message.RequestId, messagePayload, chromecastStatus.Applications[0], DoNotReturnOnLoading);
         }
 
         /// <summary>
@@ -152,13 +152,13 @@ namespace Sharpcaster.Channels
             return await SendAsync(new SeekMessage() { CurrentTime = seconds }, SharpcasteSerializationContext.Default.SeekMessage);
         }
 
-        public async Task<MediaStatus> QueueLoadAsync(QueueItem[] items, long? currentTime = null, RepeatModeType repeatMode = RepeatModeType.OFF, long? startIndex = null)
+        public async Task<MediaStatus?> QueueLoadAsync(QueueItem[] items, long? currentTime = null, RepeatModeType repeatMode = RepeatModeType.OFF, long? startIndex = null)
         {
             var chromecastStatus = Client.GetChromecastStatus();
             var queueLoadMessage = new QueueLoadMessage() { SessionId = chromecastStatus.Application.SessionId, Items = items, CurrentTime = currentTime, RepeatMode = repeatMode, StartIndex = startIndex };
             var response = await SendAsync(queueLoadMessage.RequestId, JsonSerializer.Serialize(queueLoadMessage, SharpcasteSerializationContext.Default.QueueLoadMessage), chromecastStatus.Application.TransportId);
             var mediaStatusMessage = JsonSerializer.Deserialize(response, SharpcasteSerializationContext.Default.MediaStatusMessage);
-            if (mediaStatusMessage != null)
+            if (mediaStatusMessage != null && mediaStatusMessage.Status != null)
             {
                 return mediaStatusMessage.Status.FirstOrDefault();
             }
@@ -167,12 +167,16 @@ namespace Sharpcaster.Channels
 
         public async Task<MediaStatus> QueueNextAsync()
         {
-            return await SendAsync(new QueueNextMessage(), SharpcasteSerializationContext.Default.QueueNextMessage);
+            //For some reason the request id is only returned with the first message that might be buffering, idle or playing and rest of the messages are without it
+            await SendAsync(new QueueUpdateMessage { Jump = 1 }, SharpcasteSerializationContext.Default.QueueUpdateMessage, false);
+            return await GetMediaStatusAsync();
         }
 
         public async Task<MediaStatus> QueuePrevAsync()
         {
-            return await SendAsync(new QueuePrevMessage(), SharpcasteSerializationContext.Default.QueuePrevMessage);
+            //For some reason the request id is only returned with the first message that might be buffering, idle or playing and rest of the messages are without it
+            await SendAsync(new QueueUpdateMessage { Jump = -1}, SharpcasteSerializationContext.Default.QueueUpdateMessage, false);
+            return await GetMediaStatusAsync();
         }
 
         public async Task<MediaStatus> QueueInsertAsync(QueueItem[] items, long? insertBefore = null)
@@ -195,8 +199,9 @@ namespace Sharpcaster.Channels
 
         public async Task<MediaStatus> QueueUpdateAsync(QueueItem[] items)
         {
-            return await SendAsync(new QueueUpdateMessage() { Items = items },
-                SharpcasteSerializationContext.Default.QueueUpdateMessage);
+            return null;
+            //return await SendAsync(new QueueUpdateMessage() { Items = items },
+            //    SharpcasteSerializationContext.Default.QueueUpdateMessage);
         }
 
         public async Task<QueueItem[]> QueueGetItemsAsync(int[] ids = null)
