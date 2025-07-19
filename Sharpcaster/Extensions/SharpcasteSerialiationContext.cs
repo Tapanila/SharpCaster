@@ -34,8 +34,6 @@ namespace Sharpcaster.Extensions
     [JsonSerializable(typeof(MultizoneStatusMessage))]
     [JsonSerializable(typeof(CloseMessage))]
     [JsonSerializable(typeof(LoadMessage))]
-    [JsonSerializable(typeof(QueueNextMessage))]
-    [JsonSerializable(typeof(QueuePrevMessage))]
     [JsonSerializable(typeof(QueueInsertMessage))]
     [JsonSerializable(typeof(QueueRemoveMessage))]
     [JsonSerializable(typeof(QueueReorderMessage))]
