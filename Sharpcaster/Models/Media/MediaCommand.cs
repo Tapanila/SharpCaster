@@ -144,11 +144,12 @@ namespace Sharpcaster.Models.Media
         /// </summary>
         /// <param name="combinedCommands">The combined MediaCommand flags value</param>
         /// <returns>A list of command names</returns>
-        public static List<string> GetCommandNames(this MediaCommand combinedCommands)
+        public static IReadOnlyCollection<string> GetCommandNames(this MediaCommand combinedCommands)
         {
             return GetIndividualCommands(combinedCommands)
                 .Select(cmd => cmd.ToString())
-                .ToList();
+                .ToList()
+                .AsReadOnly();
         }
     }
 }

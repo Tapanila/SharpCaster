@@ -29,7 +29,7 @@ namespace Sharpcaster.Extensions
             }
             #else
             ObjectDisposedException.ThrowIf(stream == null, stream);
-            await stream.ReadExactlyAsync(buffer.AsMemory(0, bufferLength), cancellationToken);
+            await stream.ReadExactlyAsync(buffer.AsMemory(0, bufferLength), cancellationToken).ConfigureAwait(false);
             #endif
             return buffer;
         }

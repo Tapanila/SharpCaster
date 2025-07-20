@@ -43,11 +43,11 @@ namespace Sharpcaster.Channels
         {
             try
             {
-                var response = await SendAsync(messageRequestId, messagePayload, application.TransportId);
+                var response = await SendAsync(messageRequestId, messagePayload, application.TransportId).ConfigureAwait(false);
                 var mediaStatusMessage = JsonSerializer.Deserialize(response, SharpcasteSerializationContext.Default.MediaStatusMessage);
                 if (DoNotReturnOnLoading && mediaStatusMessage.Status?.FirstOrDefault()?.ExtendedStatus?.PlayerState == PlayerStateType.Loading)
                 {
-                    response = await Client.WaitResponseAsync(messageRequestId);
+                    response = await Client.WaitResponseAsync(messageRequestId).ConfigureAwait(false);
                     mediaStatusMessage = JsonSerializer.Deserialize(response, SharpcasteSerializationContext.Default.MediaStatusMessage);
                 }
                 return mediaStatusMessage.Status?.FirstOrDefault();
@@ -65,7 +65,7 @@ namespace Sharpcaster.Channels
             var chromecastStatus = Client.GetChromecastStatus();
             message.MediaSessionId = MediaStatus?.MediaSessionId ?? throw new ArgumentNullException(nameof(message), "MediaSessionID");
             var messagePayload = JsonSerializer.Serialize(message, serializationContext);
-            return await SendAsync(message.RequestId, messagePayload, chromecastStatus.Applications[0], DoNotReturnOnLoading);
+            return await SendAsync(message.RequestId, messagePayload, chromecastStatus.Applications[0], DoNotReturnOnLoading).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -78,7 +78,7 @@ namespace Sharpcaster.Channels
         {
             var status = Client.GetChromecastStatus();
             var loadMessage = new LoadMessage() { SessionId = status.Application.SessionId, Media = media, AutoPlay = autoPlay };
-            return await SendAsync(loadMessage.RequestId, JsonSerializer.Serialize(loadMessage, SharpcasteSerializationContext.Default.LoadMessage), status.Application);
+            return await SendAsync(loadMessage.RequestId, JsonSerializer.Serialize(loadMessage, SharpcasteSerializationContext.Default.LoadMessage), status.Application).ConfigureAwait(false);
         }
 
         public override Task OnMessageReceivedAsync(string messagePayload, string type)
@@ -121,7 +121,7 @@ namespace Sharpcaster.Channels
         /// <returns>media status</returns>
         public async Task<MediaStatus> PlayAsync()
         {
-            return await SendAsync(new PlayMessage(), SharpcasteSerializationContext.Default.PlayMessage);
+            return await SendAsync(new PlayMessage(), SharpcasteSerializationContext.Default.PlayMessage).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -130,7 +130,7 @@ namespace Sharpcaster.Channels
         /// <returns>media status</returns>
         public async Task<MediaStatus> PauseAsync()
         {
-            return await SendAsync(new PauseMessage(), SharpcasteSerializationContext.Default.PauseMessage);
+            return await SendAsync(new PauseMessage(), SharpcasteSerializationContext.Default.PauseMessage).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -139,7 +139,7 @@ namespace Sharpcaster.Channels
         /// <returns>media status</returns>
         public async Task<MediaStatus> StopAsync()
         {
-            return await SendAsync(new StopMediaMessage(), SharpcasteSerializationContext.Default.StopMediaMessage);
+            return await SendAsync(new StopMediaMessage(), SharpcasteSerializationContext.Default.StopMediaMessage).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -149,14 +149,14 @@ namespace Sharpcaster.Channels
         /// <returns>media status</returns>
         public async Task<MediaStatus> SeekAsync(double seconds)
         {
-            return await SendAsync(new SeekMessage() { CurrentTime = seconds }, SharpcasteSerializationContext.Default.SeekMessage);
+            return await SendAsync(new SeekMessage() { CurrentTime = seconds }, SharpcasteSerializationContext.Default.SeekMessage).ConfigureAwait(false);
         }
 
         public async Task<MediaStatus?> QueueLoadAsync(QueueItem[] items, RepeatModeType repeatMode = RepeatModeType.OFF, int startIndex = 0)
         {
             var chromecastStatus = Client.GetChromecastStatus();
             var queueLoadMessage = new QueueLoadMessage() { SessionId = chromecastStatus.Application.SessionId, Items = items, RepeatMode = repeatMode, StartIndex = startIndex };
-            var response = await SendAsync(queueLoadMessage.RequestId, JsonSerializer.Serialize(queueLoadMessage, SharpcasteSerializationContext.Default.QueueLoadMessage), chromecastStatus.Application.TransportId);
+            var response = await SendAsync(queueLoadMessage.RequestId, JsonSerializer.Serialize(queueLoadMessage, SharpcasteSerializationContext.Default.QueueLoadMessage), chromecastStatus.Application.TransportId).ConfigureAwait(false);
             var mediaStatusMessage = JsonSerializer.Deserialize(response, SharpcasteSerializationContext.Default.MediaStatusMessage);
             if (mediaStatusMessage != null && mediaStatusMessage.Status != null)
             {
@@ -168,46 +168,46 @@ namespace Sharpcaster.Channels
         public async Task<MediaStatus> QueueNextAsync()
         {
             //For some reason the request id is only returned with the first message that might be buffering, idle or playing and rest of the messages are without it
-            await SendAsync(new QueueUpdateMessage { Jump = 1 }, SharpcasteSerializationContext.Default.QueueUpdateMessage, false);
-            return await GetMediaStatusAsync();
+            await SendAsync(new QueueUpdateMessage { Jump = 1 }, SharpcasteSerializationContext.Default.QueueUpdateMessage, false).ConfigureAwait(false);
+            return await GetMediaStatusAsync().ConfigureAwait(false);
         }
 
         public async Task<MediaStatus> QueuePrevAsync()
         {
             //For some reason the request id is only returned with the first message that might be buffering, idle or playing and rest of the messages are without it
-            await SendAsync(new QueueUpdateMessage { Jump = -1}, SharpcasteSerializationContext.Default.QueueUpdateMessage, false);
-            return await GetMediaStatusAsync();
+            await SendAsync(new QueueUpdateMessage { Jump = -1}, SharpcasteSerializationContext.Default.QueueUpdateMessage, false).ConfigureAwait(false);
+            return await GetMediaStatusAsync().ConfigureAwait(false);
         }
 
         public async Task<MediaStatus> QueueInsertAsync(QueueItem[] items, int? insertBefore = null)
         {
             return await SendAsync(new QueueInsertMessage() { Items = items, InsertBefore = insertBefore },
-                SharpcasteSerializationContext.Default.QueueInsertMessage);
+                SharpcasteSerializationContext.Default.QueueInsertMessage).ConfigureAwait(false);
         }
 
         public async Task<MediaStatus> QueueRemoveAsync(int[] itemIds)
         {
             return await SendAsync(new QueueRemoveMessage() { ItemIds = itemIds },
-                SharpcasteSerializationContext.Default.QueueRemoveMessage);
+                SharpcasteSerializationContext.Default.QueueRemoveMessage).ConfigureAwait(false);
         }
 
         public async Task<MediaStatus> QueueReorderAsync(int[] itemIds, int? insertBefore = null)
         {
             return await SendAsync(new QueueReorderMessage() { ItemIds = itemIds, InsertBefore = insertBefore },
-                SharpcasteSerializationContext.Default.QueueReorderMessage);
+                SharpcasteSerializationContext.Default.QueueReorderMessage).ConfigureAwait(false);
         }
 
         public async Task<MediaStatus> QueueUpdateAsync(QueueItem[] items)
         {
             return await SendAsync(new QueueUpdateMessage() { Items = items },
-                SharpcasteSerializationContext.Default.QueueUpdateMessage);
+                SharpcasteSerializationContext.Default.QueueUpdateMessage).ConfigureAwait(false);
         }
 
         public async Task<QueueItem[]> QueueGetItemsAsync(int[] ids = null)
         {
             var chromecastStatus = Client.GetChromecastStatus();
             var queueGetItemsMessage = new QueueGetItemsMessage() { MediaSessionId = MediaStatus.MediaSessionId, Ids = ids };
-            var response = await SendAsync(queueGetItemsMessage.RequestId, JsonSerializer.Serialize(queueGetItemsMessage, SharpcasteSerializationContext.Default.QueueGetItemsMessage), chromecastStatus.Application.TransportId);
+            var response = await SendAsync(queueGetItemsMessage.RequestId, JsonSerializer.Serialize(queueGetItemsMessage, SharpcasteSerializationContext.Default.QueueGetItemsMessage), chromecastStatus.Application.TransportId).ConfigureAwait(false);
             var queueItemsResponse = JsonSerializer.Deserialize(response, SharpcasteSerializationContext.Default.QueueItemsMessage);
             return queueItemsResponse.Items;
         }
@@ -216,7 +216,7 @@ namespace Sharpcaster.Channels
         {
             var chromecastStatus = Client.GetChromecastStatus();
             var queueGetItemIdsMessage = new QueueGetItemIdsMessage() { MediaSessionId = MediaStatus.MediaSessionId };
-            var response = await SendAsync(queueGetItemIdsMessage.RequestId, JsonSerializer.Serialize(queueGetItemIdsMessage, SharpcasteSerializationContext.Default.QueueGetItemIdsMessage), chromecastStatus.Application.TransportId);
+            var response = await SendAsync(queueGetItemIdsMessage.RequestId, JsonSerializer.Serialize(queueGetItemIdsMessage, SharpcasteSerializationContext.Default.QueueGetItemIdsMessage), chromecastStatus.Application.TransportId).ConfigureAwait(false);
             var queueItemIdsResponse = JsonSerializer.Deserialize(response, SharpcasteSerializationContext.Default.QueueItemIdsMessage);
             return queueItemIdsResponse.Ids;
         }
@@ -225,7 +225,7 @@ namespace Sharpcaster.Channels
         {
             var chromecastStatus = Client.GetChromecastStatus();
             var mediaStatusMessage = new GetStatusMessage();
-            var response = await SendAsync(mediaStatusMessage.RequestId, JsonSerializer.Serialize(mediaStatusMessage, SharpcasteSerializationContext.Default.GetStatusMessage), chromecastStatus.Application.TransportId);
+            var response = await SendAsync(mediaStatusMessage.RequestId, JsonSerializer.Serialize(mediaStatusMessage, SharpcasteSerializationContext.Default.GetStatusMessage), chromecastStatus.Application.TransportId).ConfigureAwait(false);
             var mediaStatus = JsonSerializer.Deserialize(response, SharpcasteSerializationContext.Default.MediaStatusMessage);
             return mediaStatus.Status.FirstOrDefault();
         }

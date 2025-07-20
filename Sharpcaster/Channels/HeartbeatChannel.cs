@@ -41,7 +41,7 @@ namespace Sharpcaster.Channels
         {
             _timer.Stop();
             var pongMessage = new PongMessage();
-            await SendAsync(JsonSerializer.Serialize(pongMessage, SharpcasteSerializationContext.Default.PongMessage));
+            await SendAsync(JsonSerializer.Serialize(pongMessage, SharpcasteSerializationContext.Default.PongMessage)).ConfigureAwait(false);
             _timer.Start();
             Logger?.LogDebug("Pong sent - Heartbeat Timer restarted.");
         }

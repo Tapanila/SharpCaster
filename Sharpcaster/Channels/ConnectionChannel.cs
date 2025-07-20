@@ -24,7 +24,7 @@ namespace Sharpcaster.Channels
         /// </summary>
         public async Task ConnectAsync()
         {
-            await ConnectAsync("receiver-0");
+            await ConnectAsync("receiver-0").ConfigureAwait(false);
         }
 
         /// <summary>
@@ -33,7 +33,7 @@ namespace Sharpcaster.Channels
         public async Task ConnectAsync(string transportId)
         {
             var connectMessage = new ConnectMessage();
-            await SendAsync(JsonSerializer.Serialize(connectMessage, SharpcasteSerializationContext.Default.ConnectMessage), transportId);
+            await SendAsync(JsonSerializer.Serialize(connectMessage, SharpcasteSerializationContext.Default.ConnectMessage), transportId).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -45,9 +45,9 @@ namespace Sharpcaster.Channels
             if (type == "CLOSE")
             {
                 // In order to avoid usage deadlocks we need to spawn a new Task here!?
-                _ = Task.Run(async () => await Client.DisconnectAsync());
+                _ = Task.Run(async () => await Client.DisconnectAsync().ConfigureAwait(false));
             }
-            await base.OnMessageReceivedAsync(messagePayload, type);
+            await base.OnMessageReceivedAsync(messagePayload, type).ConfigureAwait(false);
         }
     }
 }

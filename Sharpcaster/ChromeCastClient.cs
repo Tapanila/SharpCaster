@@ -141,7 +141,9 @@ namespace Sharpcaster
             await _client.ConnectAsync(chromecastReceiver.DeviceUri.Host, chromecastReceiver.Port).ConfigureAwait(false);
 
             //Open SSL stream to Chromecast and bypass all SSL validation
+#pragma warning disable CA5359 // Do Not Disable Certificate Validation
             var secureStream = new SslStream(_client.GetStream(), true, (_, __, ___, ____) => true);
+#pragma warning restore CA5359 // Do Not Disable Certificate Validation
             await secureStream.AuthenticateAsClientAsync(chromecastReceiver.DeviceUri.Host).ConfigureAwait(false);
             _stream = secureStream;
 
@@ -160,79 +162,76 @@ namespace Sharpcaster
             await DisconnectAsync().ConfigureAwait(false);
         }
 
-        private void Receive(CancellationToken cancellationToken)
-        {
-            Task.Run(async () =>
-            {
-                try
-                {
-                    while (true)
-                    {
-                        //First 4 bytes contains the length of the message
-                        var buffer = await _stream!.ReadAsync(4, cancellationToken).ConfigureAwait(false);
-                        if (BitConverter.IsLittleEndian)
-                        {
-                            Array.Reverse(buffer);
-                        }
-                        var length = BitConverter.ToInt32(buffer, 0);
-                        var castMessage = CastMessage.Parser.ParseFrom(await _stream.ReadAsync(length, cancellationToken).ConfigureAwait(false));
-                        //Payload can either be Binary or UTF8 json
-                        var payload = (castMessage.PayloadType == PayloadType.Binary ?
-                            Encoding.UTF8.GetString(castMessage.PayloadBinary.ToByteArray()) : castMessage.PayloadUtf8);
+        private void Receive(CancellationToken cancellationToken) => Task.Run(async () =>
+                                                                              {
+                                                                                  try
+                                                                                  {
+                                                                                      while (true)
+                                                                                      {
+                                                                                          //First 4 bytes contains the length of the message
+                                                                                          var buffer = await _stream!.ReadAsync(4, cancellationToken).ConfigureAwait(false);
+                                                                                          if (BitConverter.IsLittleEndian)
+                                                                                          {
+                                                                                              Array.Reverse(buffer);
+                                                                                          }
+                                                                                          var length = BitConverter.ToInt32(buffer, 0);
+                                                                                          var castMessage = CastMessage.Parser.ParseFrom(await _stream.ReadAsync(length, cancellationToken).ConfigureAwait(false));
+                                                                                          //Payload can either be Binary or UTF8 json
+                                                                                          var payload = (castMessage.PayloadType == PayloadType.Binary ?
+                                                                                              Encoding.UTF8.GetString(castMessage.PayloadBinary.ToByteArray()) : castMessage.PayloadUtf8);
 
-                        var channel = Channels.FirstOrDefault(c => c.Namespace == castMessage.Namespace);
-                        if (channel != null)
-                        {
-                            if (channel != HeartbeatChannel)
-                            {
-                                HeartbeatChannel.StopTimeoutTimer();
-                            }
-                            channel?.Logger?.LogTrace("RECEIVED: {payload}", payload);
+                                                                                          var channel = Channels.FirstOrDefault(c => c.Namespace == castMessage.Namespace);
+                                                                                          if (channel != null)
+                                                                                          {
+                                                                                              if (channel != HeartbeatChannel)
+                                                                                              {
+                                                                                                  HeartbeatChannel.StopTimeoutTimer();
+                                                                                              }
+                                                                                              channel?.Logger?.LogTrace("RECEIVED: {payload}", payload);
 
-                            var message = JsonSerializer.Deserialize(payload, SharpcasteSerializationContext.Default.MessageWithId);
-                            if (MessageTypes.TryGetValue(message.Type, out Type type))
-                            {
-                                try
-                                {
-                                    await channel.OnMessageReceivedAsync(payload, message.Type).ConfigureAwait(false);
-                                    if (message.HasRequestId)
-                                    {
-                                        WaitingTasks.TryRemove(message.RequestId, out SharpCasterTaskCompletionSource? tcs);
-                                        tcs?.SetResult(payload);
-                                        if (tcs == null)
-                                            _logger?.LogTrace("No TaskCompletionSource found for RequestId: {RequestId}, CompletionSourceCount: {CompletionSourceCount}, Type: {Type} ", message.RequestId, WaitingTasks.Count, message.Type);
-                                    }
-                                }
-                                catch (Exception ex)
-                                {
-                                    _logger?.LogError("Exception processing the Response: {Message}", ex.Message);
-                                    if (message.HasRequestId)
-                                    {
-                                        WaitingTasks.TryRemove(message.RequestId, out SharpCasterTaskCompletionSource? tcs);
-                                        tcs?.SetException(ex);
-                                    }
-                                }
-                            }
-                            else
-                            {
-                                _logger?.LogError("The received Message of Type '{ty}' can not be converted to its response Type." +
-                                   " An implementing IMessage class is missing!", message.Type);
-                                Debugger.Break();
-                            }
-                        }
-                        else
-                        {
-                            _logger?.LogError("Couldn't parse the channel from: {NameSpace} : {Payload}", castMessage.Namespace, payload);
-                        }
-                    }
-                }
-                catch (Exception exception)
-                {
-                    _logger?.LogError("Error in receive loop: {Message}", exception.Message);
-                    ReceiveTcs.SetResult(true);
-                }
-            }, cancellationToken);
-        }
+                                                                                              var message = JsonSerializer.Deserialize(payload, SharpcasteSerializationContext.Default.MessageWithId);
+                                                                                              if (MessageTypes.TryGetValue(message.Type, out Type type))
+                                                                                              {
+                                                                                                  try
+                                                                                                  {
+                                                                                                      await channel.OnMessageReceivedAsync(payload, message.Type).ConfigureAwait(false);
+                                                                                                      if (message.HasRequestId)
+                                                                                                      {
+                                                                                                          WaitingTasks.TryRemove(message.RequestId, out SharpCasterTaskCompletionSource? tcs);
+                                                                                                          tcs?.SetResult(payload);
+                                                                                                          if (tcs == null)
+                                                                                                              _logger?.LogTrace("No TaskCompletionSource found for RequestId: {RequestId}, CompletionSourceCount: {CompletionSourceCount}, Type: {Type} ", message.RequestId, WaitingTasks.Count, message.Type);
+                                                                                                      }
+                                                                                                  }
+                                                                                                  catch (Exception ex)
+                                                                                                  {
+                                                                                                      _logger?.LogError("Exception processing the Response: {Message}", ex.Message);
+                                                                                                      if (message.HasRequestId)
+                                                                                                      {
+                                                                                                          WaitingTasks.TryRemove(message.RequestId, out SharpCasterTaskCompletionSource? tcs);
+                                                                                                          tcs?.SetException(ex);
+                                                                                                      }
+                                                                                                  }
+                                                                                              }
+                                                                                              else
+                                                                                              {
+                                                                                                  _logger?.LogError("The received Message of Type '{ty}' can not be converted to its response Type." +
+                                                                                                     " An implementing IMessage class is missing!", message.Type);
+                                                                                                  Debugger.Break();
+                                                                                              }
+                                                                                          }
+                                                                                          else
+                                                                                          {
+                                                                                              _logger?.LogError("Couldn't parse the channel from: {NameSpace} : {Payload}", castMessage.Namespace, payload);
+                                                                                          }
+                                                                                      }
+                                                                                  }
+                                                                                  catch (Exception exception)
+                                                                                  {
+                                                                                      _logger?.LogError("Error in receive loop: {Message}", exception.Message);
+                                                                                      ReceiveTcs.SetResult(true);
+                                                                                  }
+                                                                              }, cancellationToken);
 
         public async Task SendAsync(ILogger logger, string ns, string messagePayload, string destinationId)
         {
@@ -265,15 +264,12 @@ namespace Sharpcaster
             }
         }
 
-        private CastMessage CreateCastMessage(string ns, string destinationId)
+        private CastMessage CreateCastMessage(string ns, string destinationId) => new CastMessage()
         {
-            return new CastMessage()
-            {
-                Namespace = ns,
-                SourceId = SenderId.ToString(),
-                DestinationId = destinationId
-            };
-        }
+            Namespace = ns,
+            SourceId = SenderId.ToString(),
+            DestinationId = destinationId
+        };
 
         public async Task<string> SendAsync(ILogger logger, string ns, int messageRequestId, string messagePayload, string destinationId)
         {
@@ -300,10 +296,7 @@ namespace Sharpcaster
             await Dispose().ConfigureAwait(false);
         }
 
-        public async Task Dispose()
-        {
-            await Dispose(true).ConfigureAwait(false);
-        }
+        public async Task Dispose() => await Dispose(true).ConfigureAwait(false);
 
         private async Task Dispose(bool waitReceiveTask)
         {
@@ -342,20 +335,14 @@ namespace Sharpcaster
         /// <summary>
         /// Raises the Disconnected event
         /// </summary>
-        protected virtual void OnDisconnected()
-        {
-            Disconnected?.Invoke(this, EventArgs.Empty);
-        }
+        protected virtual void OnDisconnected() => Disconnected?.Invoke(this, EventArgs.Empty);
 
         /// <summary>
         /// Gets a channel
         /// </summary>
         /// <typeparam name="TChannel">channel type</typeparam>
         /// <returns>a channel</returns>
-        public TChannel GetChannel<TChannel>() where TChannel : IChromecastChannel
-        {
-            return Channels.OfType<TChannel>().FirstOrDefault();
-        }
+        public TChannel GetChannel<TChannel>() where TChannel : IChromecastChannel => Channels.OfType<TChannel>().FirstOrDefault();
 
         public async Task<ChromecastStatus> LaunchApplicationAsync(string applicationId, bool joinExistingApplicationSession = true)
         {
@@ -381,14 +368,8 @@ namespace Sharpcaster
         }
 
 
-        public ChromecastStatus GetChromecastStatus()
-        {
-            return ReceiverChannel.ReceiverStatus;
-        }
+        public ChromecastStatus GetChromecastStatus() => ReceiverChannel.ReceiverStatus;
 
-        public MediaStatus GetMediaStatus()
-        {
-            return MediaChannel.MediaStatus;
-        }
+        public MediaStatus GetMediaStatus() => MediaChannel.MediaStatus;
     }
 }

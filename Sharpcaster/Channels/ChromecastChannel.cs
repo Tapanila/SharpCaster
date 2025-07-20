@@ -54,7 +54,7 @@ namespace Sharpcaster.Channels
         /// <param name="destinationId">destination identifier</param>
         protected async Task<string> SendAsync(int messageRequestId, string messagePayload, string destinationId = DefaultIdentifiers.DESTINATION_ID)
         {
-            return await Client.SendAsync(Logger, Namespace, messageRequestId, messagePayload, destinationId);
+            return await Client.SendAsync(Logger, Namespace, messageRequestId, messagePayload, destinationId).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -64,7 +64,7 @@ namespace Sharpcaster.Channels
         /// <param name="destinationId">destination identifier</param>
         protected async Task SendAsync(string messagePayload, string destinationId = DefaultIdentifiers.DESTINATION_ID)
         {
-            await Client.SendAsync(Logger, Namespace, messagePayload, destinationId);
+            await Client.SendAsync(Logger, Namespace, messagePayload, destinationId).ConfigureAwait(false);
         }
 
         /// <summary>

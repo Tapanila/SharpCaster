@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text.Json.Serialization;
 
@@ -11,7 +12,7 @@ namespace Sharpcaster.Models.ChromecastStatus
     public class ChromecastStatus
     {
         [JsonPropertyName("applications")]
-        public List<ChromecastApplication> Applications { get; set; }
+        public ReadOnlyCollection<ChromecastApplication> Applications { get; set; }
 
         [JsonPropertyName("isActiveInput")]
         public bool IsActiveInput { get; set; }
