@@ -88,6 +88,11 @@ namespace Sharpcaster.Extensions
     [JsonSerializable(typeof(DefaultActionPolicy))]
     [JsonSerializable(typeof(SenderPlatform))]
     [JsonSerializable(typeof(ReceiverAction))]
+    [JsonSerializable(typeof(SkipAdMessage))]
+    [JsonSerializable(typeof(SetPlaybackRateMessage))]
+    [JsonSerializable(typeof(UserActionMessage))]
+    [JsonSerializable(typeof(EditTracksInfoMessage))]
+    [JsonSerializable(typeof(StreamTransferMessage))]
     public partial class SharpcasteSerializationContext : JsonSerializerContext
     {
     }

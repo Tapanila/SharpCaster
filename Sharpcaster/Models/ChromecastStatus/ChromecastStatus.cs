@@ -12,7 +12,7 @@ namespace Sharpcaster.Models.ChromecastStatus
     public class ChromecastStatus
     {
         [JsonPropertyName("applications")]
-        public ReadOnlyCollection<ChromecastApplication> Applications { get; set; }
+        public Collection<ChromecastApplication> Applications { get; set; }
 
         [JsonPropertyName("isActiveInput")]
         public bool IsActiveInput { get; set; }

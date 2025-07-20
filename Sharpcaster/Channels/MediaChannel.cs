@@ -30,27 +30,28 @@ namespace Sharpcaster.Channels
         public event EventHandler<InvalidRequestMessage> InvalidRequest;
         public event EventHandler<MediaStatus> StatusChanged;
 
-        public MediaStatus MediaStatus { get => mediaStatus; }
-        private MediaStatus mediaStatus;
+        public MediaStatus? MediaStatus { get => mediaStatus; }
+        private MediaStatus? mediaStatus;
         /// <summary>
         /// Initializes a new instance of MediaChannel class
         /// </summary>
-        public MediaChannel(ILogger<MediaChannel> logger = null) : base("media", logger)
+        public MediaChannel(ILogger<MediaChannel>? logger = null) : base("media", logger)
         {
         }
 
-        private async Task<MediaStatus> SendAsync(int messageRequestId, string messagePayload, ChromecastApplication application, bool DoNotReturnOnLoading = true)
+        private async Task<MediaStatus?> SendAsync(int messageRequestId, string messagePayload, ChromecastApplication application, bool DoNotReturnOnLoading = true)
         {
             try
             {
                 var response = await SendAsync(messageRequestId, messagePayload, application.TransportId).ConfigureAwait(false);
                 var mediaStatusMessage = JsonSerializer.Deserialize(response, SharpcasteSerializationContext.Default.MediaStatusMessage);
-                if (DoNotReturnOnLoading && mediaStatusMessage.Status?.FirstOrDefault()?.ExtendedStatus?.PlayerState == PlayerStateType.Loading)
+                if (DoNotReturnOnLoading && mediaStatusMessage?.Status?.FirstOrDefault()?.ExtendedStatus?.PlayerState == PlayerStateType.Loading)
                 {
                     response = await Client.WaitResponseAsync(messageRequestId).ConfigureAwait(false);
                     mediaStatusMessage = JsonSerializer.Deserialize(response, SharpcasteSerializationContext.Default.MediaStatusMessage);
                 }
-                return mediaStatusMessage.Status?.FirstOrDefault();
+                mediaStatus = mediaStatusMessage?.Status?.FirstOrDefault();
+                return mediaStatus;
             }
             catch (Exception ex)
             {
@@ -60,7 +61,7 @@ namespace Sharpcaster.Channels
             }
         }
 
-        private async Task<MediaStatus> SendAsync<T>(T message, JsonTypeInfo<T> serializationContext, bool DoNotReturnOnLoading = true) where T : MediaSessionMessage
+        private async Task<MediaStatus?> SendAsync<T>(T message, JsonTypeInfo<T> serializationContext, bool DoNotReturnOnLoading = true) where T : MediaSessionMessage
         {
             var chromecastStatus = Client.GetChromecastStatus();
             message.MediaSessionId = MediaStatus?.MediaSessionId ?? throw new ArgumentNullException(nameof(message), "MediaSessionID");
@@ -74,7 +75,7 @@ namespace Sharpcaster.Channels
         /// <param name="media">media to load</param>
         /// <param name="autoPlay">true to play the media directly, false otherwise</param>
         /// <returns>media status</returns>
-        public async Task<MediaStatus> LoadAsync(Media media, bool autoPlay = true)
+        public async Task<MediaStatus?> LoadAsync(Media media, bool autoPlay = true)
         {
             var status = Client.GetChromecastStatus();
             var loadMessage = new LoadMessage() { SessionId = status.Application.SessionId, Media = media, AutoPlay = autoPlay };
@@ -103,7 +104,7 @@ namespace Sharpcaster.Channels
                     return Task.CompletedTask;
                 case "MEDIA_STATUS":
                     var mediaStatusMessage = JsonSerializer.Deserialize(messagePayload, SharpcasteSerializationContext.Default.MediaStatusMessage);
-                    mediaStatus = mediaStatusMessage.Status.FirstOrDefault();
+                    mediaStatus = mediaStatusMessage?.Status.FirstOrDefault();
                     StatusChanged?.Invoke(this, MediaStatus);
                     return Task.CompletedTask;
                 case "QUEUE_CHANGE":
@@ -119,7 +120,7 @@ namespace Sharpcaster.Channels
         /// Plays the media
         /// </summary>
         /// <returns>media status</returns>
-        public async Task<MediaStatus> PlayAsync()
+        public async Task<MediaStatus?> PlayAsync()
         {
             return await SendAsync(new PlayMessage(), SharpcasteSerializationContext.Default.PlayMessage).ConfigureAwait(false);
         }
@@ -128,7 +129,7 @@ namespace Sharpcaster.Channels
         /// Pauses the media
         /// </summary>
         /// <returns>media status</returns>
-        public async Task<MediaStatus> PauseAsync()
+        public async Task<MediaStatus?> PauseAsync()
         {
             return await SendAsync(new PauseMessage(), SharpcasteSerializationContext.Default.PauseMessage).ConfigureAwait(false);
         }
@@ -228,6 +229,74 @@ namespace Sharpcaster.Channels
             var response = await SendAsync(mediaStatusMessage.RequestId, JsonSerializer.Serialize(mediaStatusMessage, SharpcasteSerializationContext.Default.GetStatusMessage), chromecastStatus.Application.TransportId).ConfigureAwait(false);
             var mediaStatus = JsonSerializer.Deserialize(response, SharpcasteSerializationContext.Default.MediaStatusMessage);
             return mediaStatus.Status.FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Skips the current ad
+        /// </summary>
+        /// <returns>media status</returns>
+        public async Task<MediaStatus?> SkipAdAsync()
+        {
+            return await SendAsync(new SkipAdMessage(), SharpcasteSerializationContext.Default.SkipAdMessage).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Shuffles the queue
+        /// </summary>
+        /// <returns>media status</returns>
+        public async Task<MediaStatus?> QueueShuffleAsync(bool shuffle = true)
+        {
+            return await SendAsync(new QueueUpdateMessage { Shuffle = shuffle }, SharpcasteSerializationContext.Default.QueueUpdateMessage).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Sets the queue repeat mode
+        /// </summary>
+        /// <param name="repeatMode">repeat mode to set</param>
+        /// <returns>media status</returns>
+        public async Task<MediaStatus?> QueueSetRepeatModeAsync(RepeatModeType repeatMode)
+        {
+            return await SendAsync(new QueueUpdateMessage { RepeatMode = repeatMode }, SharpcasteSerializationContext.Default.QueueUpdateMessage).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Sets the playback rate
+        /// </summary>
+        /// <param name="playbackRate">playback rate (e.g., 0.5 for half speed, 2.0 for double speed)</param>
+        /// <returns>media status</returns>
+        public async Task<MediaStatus?> SetPlaybackRateAsync(double playbackRate)
+        {
+            return await SendAsync(new SetPlaybackRateMessage() { PlaybackRate = playbackRate }, SharpcasteSerializationContext.Default.SetPlaybackRateMessage).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Sends a user action
+        /// </summary>
+        /// <param name="userAction">user action to send</param>
+        /// <returns>media status</returns>
+        public async Task<MediaStatus?> SendUserActionAsync(UserAction userAction)
+        {
+            return await SendAsync(new UserActionMessage() { UserAction = userAction }, SharpcasteSerializationContext.Default.UserActionMessage).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Edits track information
+        /// </summary>
+        /// <param name="editTracksInfo">edit tracks information</param>
+        /// <returns>media status</returns>
+        public async Task<MediaStatus?> EditTracksAsync(EditTracksInfoRequest editTracksInfo)
+        {
+            return await SendAsync(new EditTracksInfoMessage() { EditTracksInfoRequest = editTracksInfo }, SharpcasteSerializationContext.Default.EditTracksInfoMessage).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Transfers stream to another device
+        /// </summary>
+        /// <param name="transferRequest">stream transfer request</param>
+        /// <returns>media status</returns>
+        public async Task<MediaStatus?> StreamTransferAsync(object transferRequest)
+        {
+            return await SendAsync(new StreamTransferMessage() { TransferRequest = transferRequest }, SharpcasteSerializationContext.Default.StreamTransferMessage).ConfigureAwait(false);
         }
     }
 }

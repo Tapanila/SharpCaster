@@ -12,8 +12,8 @@ namespace Sharpcaster.Test.Aot
         [TestMethod]
         public void TestConnectMessageSerialization()
         {
-            IMessage connectMessage = new ConnectMessage();
-            var requestId = ((IMessageWithId)connectMessage).RequestId;
+            var connectMessage = new ConnectMessage();
+            var requestId = connectMessage.RequestId;
 
             var output = JsonSerializer.Serialize(connectMessage, SharpcasteSerializationContext.Default.ConnectMessage);
             Assert.AreEqual("{\"requestId\":" + requestId + ",\"type\":\"CONNECT\"}", output);
@@ -22,7 +22,7 @@ namespace Sharpcaster.Test.Aot
         [TestMethod]
         public void TestPingMessageSerialization()
         {
-            IMessage pingMessage = new PingMessage();
+            var pingMessage = new PingMessage();
 
             var output = JsonSerializer.Serialize(pingMessage, SharpcasteSerializationContext.Default.PingMessage);
             Assert.AreEqual("{\"type\":\"PING\"}", output);

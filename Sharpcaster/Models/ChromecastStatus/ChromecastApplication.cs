@@ -13,7 +13,7 @@ namespace Sharpcaster.Models.ChromecastStatus
         public string DisplayName { get; set; }
 
         [JsonPropertyName("namespaces")]
-        public ReadOnlyCollection<Namespace> Namespaces { get; set; }
+        public Collection<Namespace> Namespaces { get; set; }
 
         [JsonPropertyName("sessionId")]
         public string SessionId { get; set; }
