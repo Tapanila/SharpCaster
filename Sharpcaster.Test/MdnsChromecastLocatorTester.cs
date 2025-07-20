@@ -1,19 +1,18 @@
-﻿using Sharpcaster.Interfaces;
-using Sharpcaster.Models;
+﻿using Sharpcaster.Models;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
+using Sharpcaster.Test.helper;
 
 namespace Sharpcaster.Test
 {
-    [Collection("SingleCollection")]
-    public class MdnsChromecastLocatorTester
+    public class MdnsChromecastLocatorTester()
     {
         [Fact]
         public async Task SearchChromecasts()
         {
-            IChromecastLocator locator = new MdnsChromecastLocator();
+            var locator = new MdnsChromecastLocator();
             var chromecasts = await locator.FindReceiversAsync();
             Assert.NotEmpty(chromecasts);
         }
@@ -22,32 +21,40 @@ namespace Sharpcaster.Test
         public async Task SearchChromecastsTrickerEvent()
         {
             int counter = 0;
-            IChromecastLocator locator = new MdnsChromecastLocator();
-            locator.ChromecastReceivedFound += delegate (object sender, ChromecastReceiver e)
+            var locator = new MdnsChromecastLocator();
+            locator.ChromecastReceiverFound += (object sender, ChromecastReceiverEventArgs e) =>
             {
                 counter++;
             };
+            
+            // Start continuous discovery to trigger events
+            locator.StartContinuousDiscovery(TimeSpan.FromSeconds(1));
+            
+            // Wait for events to be fired
+            await Task.Delay(TimeSpan.FromSeconds(7), Xunit.TestContext.Current.CancellationToken);
+            
+            // Stop discovery
+            locator.StopContinuousDiscovery();
+            
+            // Also test async method still works
             var chromecasts = await locator.FindReceiversAsync();
             Assert.NotEmpty(chromecasts);
             Assert.NotEqual(0, counter);
         }
 
         [Fact(Skip = "This fails if Chromecast is quick to answer")]
-
         public async Task SearchChromecastsWithTooShortTimeout()
         {
-            IChromecastLocator locator = new MdnsChromecastLocator();
-            CancellationTokenSource cancellationTokenSource = new(TimeSpan.FromMilliseconds(0));
-            var chromecasts = await locator.FindReceiversAsync(cancellationTokenSource.Token);
+            var locator = new MdnsChromecastLocator();
+            var chromecasts = await locator.FindReceiversAsync(TimeSpan.FromMilliseconds(1));
             Assert.Empty(chromecasts);
         }
 
         [Fact]
-        public async Task SearchChromecastsCancellationToken()
+        public async Task SearchChromecastsWithTimeout()
         {
-            IChromecastLocator locator = new MdnsChromecastLocator();
-            var source = new CancellationTokenSource(TimeSpan.FromMilliseconds(1500));
-            var chromecasts = await locator.FindReceiversAsync(source.Token);
+            var locator = new MdnsChromecastLocator();
+            var chromecasts = await locator.FindReceiversAsync(TimeSpan.FromSeconds(5));
             Assert.NotEmpty(chromecasts);
         }
     }

@@ -152,10 +152,10 @@ namespace Sharpcaster.Channels
             return await SendAsync(new SeekMessage() { CurrentTime = seconds }, SharpcasteSerializationContext.Default.SeekMessage);
         }
 
-        public async Task<MediaStatus?> QueueLoadAsync(QueueItem[] items, long? currentTime = null, RepeatModeType repeatMode = RepeatModeType.OFF, long? startIndex = null)
+        public async Task<MediaStatus?> QueueLoadAsync(QueueItem[] items, RepeatModeType repeatMode = RepeatModeType.OFF, int startIndex = 0)
         {
             var chromecastStatus = Client.GetChromecastStatus();
-            var queueLoadMessage = new QueueLoadMessage() { SessionId = chromecastStatus.Application.SessionId, Items = items, CurrentTime = currentTime, RepeatMode = repeatMode, StartIndex = startIndex };
+            var queueLoadMessage = new QueueLoadMessage() { SessionId = chromecastStatus.Application.SessionId, Items = items, RepeatMode = repeatMode, StartIndex = startIndex };
             var response = await SendAsync(queueLoadMessage.RequestId, JsonSerializer.Serialize(queueLoadMessage, SharpcasteSerializationContext.Default.QueueLoadMessage), chromecastStatus.Application.TransportId);
             var mediaStatusMessage = JsonSerializer.Deserialize(response, SharpcasteSerializationContext.Default.MediaStatusMessage);
             if (mediaStatusMessage != null && mediaStatusMessage.Status != null)
@@ -179,19 +179,19 @@ namespace Sharpcaster.Channels
             return await GetMediaStatusAsync();
         }
 
-        public async Task<MediaStatus> QueueInsertAsync(QueueItem[] items, long? insertBefore = null)
+        public async Task<MediaStatus> QueueInsertAsync(QueueItem[] items, int? insertBefore = null)
         {
             return await SendAsync(new QueueInsertMessage() { Items = items, InsertBefore = insertBefore },
                 SharpcasteSerializationContext.Default.QueueInsertMessage);
         }
 
-        public async Task<MediaStatus> QueueRemoveAsync(long[] itemIds)
+        public async Task<MediaStatus> QueueRemoveAsync(int[] itemIds)
         {
             return await SendAsync(new QueueRemoveMessage() { ItemIds = itemIds },
                 SharpcasteSerializationContext.Default.QueueRemoveMessage);
         }
 
-        public async Task<MediaStatus> QueueReorderAsync(long[] itemIds, long? insertBefore = null)
+        public async Task<MediaStatus> QueueReorderAsync(int[] itemIds, int? insertBefore = null)
         {
             return await SendAsync(new QueueReorderMessage() { ItemIds = itemIds, InsertBefore = insertBefore },
                 SharpcasteSerializationContext.Default.QueueReorderMessage);

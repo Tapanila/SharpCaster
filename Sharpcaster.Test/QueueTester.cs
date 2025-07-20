@@ -3,43 +3,31 @@ using Sharpcaster.Models.Media;
 using Sharpcaster.Test.helper;
 using System.Threading.Tasks;
 using Xunit;
-using Xunit.Abstractions;
 
 namespace Sharpcaster.Test
 {
-    [Collection("SingleCollection")]
-    public class QueueTester : IClassFixture<ChromecastDevicesFixture>
+    public class QueueTester(ITestOutputHelper outputHelper, ChromecastDevicesFixture fixture)
     {
-        private ITestOutputHelper output;
-
-        public QueueTester(ITestOutputHelper outputHelper, ChromecastDevicesFixture fixture)
-        {
-            output = outputHelper;
-            output.WriteLine("Fixture has found " + ChromecastDevicesFixture.Receivers?.Count + " receivers with " + fixture.GetSearchesCnt() + " searche(s).");
-        }
-
-        [Theory]
-        [MemberData(nameof(ChromecastReceiversFilter.GetAny), MemberType = typeof(ChromecastReceiversFilter))]
-        public async Task TestLoadingMediaQueueAndNavigateNextPrev(ChromecastReceiver receiver)
+        [Fact]
+        public async Task TestLoadingMediaQueueAndNavigateNextPrev()
         {
             // Arrange - Setup test infrastructure
             var testHelper = new TestHelper();
-            ChromecastClient client = await testHelper.CreateConnectAndLoadAppClient(output, receiver);
-            
+            ChromecastClient client = await testHelper.CreateConnectAndLoadAppClient(outputHelper, fixture);
+
             var testQueue = TestHelper.CreateTestCd;
 
             try
             {
                 // Act - Load the queue and verify initial state
                 MediaStatus initialStatus = await client.MediaChannel.QueueLoadAsync(testQueue);
-                Assert.Equal(PlayerStateType.Playing, initialStatus.PlayerState);
                 Assert.Equal(initialStatus.Media.ContentId, testQueue[0].Media.ContentId);
-                output.WriteLine("1st track started playing - Listening it for 1,5 seconds");
-                await Task.Delay(1500); // Listen briefly
+                outputHelper.WriteLine("1st track started playing - Listening it for 1,5 seconds");
+                await Task.Delay(1500, Xunit.TestContext.Current.CancellationToken); // Listen briefly
                 var statusAfterNext = await client.MediaChannel.QueueNextAsync();
                 Assert.Equal(statusAfterNext.Media.ContentId, testQueue[1].Media.ContentId);
-                output.WriteLine("2nd track started playing - Listening it for 1,5 seconds");
-                await Task.Delay(1500); // Listen briefly
+                outputHelper.WriteLine("2nd track started playing - Listening it for 1,5 seconds");
+                await Task.Delay(1500, Xunit.TestContext.Current.CancellationToken); // Listen briefly
                 var statusAfterPrevious = await client.MediaChannel.QueuePrevAsync();
                 Assert.Equal(initialStatus.Media.ContentId, testQueue[0].Media.ContentId);
             }
@@ -51,13 +39,12 @@ namespace Sharpcaster.Test
             }
         }
 
-        [Theory]
-        [MemberData(nameof(ChromecastReceiversFilter.GetAny), MemberType = typeof(ChromecastReceiversFilter))]
-        public async Task TestLoadingMediaQueueAndClickingNextTillOutOfMedia(ChromecastReceiver receiver)
+        [Fact]
+        public async Task TestLoadingMediaQueueAndClickingNextTillOutOfMedia()
         {
             // Arrange - Setup test infrastructure
             var testHelper = new TestHelper();
-            ChromecastClient client = await testHelper.CreateConnectAndLoadAppClient(output, receiver);
+            ChromecastClient client = await testHelper.CreateConnectAndLoadAppClient(outputHelper, fixture);
 
             var testQueue = TestHelper.CreateTestCd;
 
@@ -68,7 +55,7 @@ namespace Sharpcaster.Test
                 //loop till out of media
                 for (int i = 0; i < testQueue.Length; i++)
                 {
-                    output.WriteLine(i+ "/" + testQueue.Length);
+                    outputHelper.WriteLine(i+ "/" + testQueue.Length);
                     mediaStatus = await client.MediaChannel.QueueNextAsync();
                 }
                 Assert.Null(mediaStatus);

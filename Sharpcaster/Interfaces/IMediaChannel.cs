@@ -50,12 +50,12 @@ namespace Sharpcaster.Interfaces
         /// <param name="seconds">time in seconds</param>
         /// <returns>media status</returns>
         Task<MediaStatus> SeekAsync(double seconds);
-        Task<MediaStatus?> QueueLoadAsync(QueueItem[] items, long? currentTime = null, RepeatModeType repeatMode = RepeatModeType.OFF, long? startIndex = null);
+        Task<MediaStatus?> QueueLoadAsync(QueueItem[] items, RepeatModeType repeatMode = RepeatModeType.OFF, int startIndex = 0);
         Task<MediaStatus> QueueNextAsync();
         Task<MediaStatus> QueuePrevAsync();
-        Task<MediaStatus> QueueInsertAsync(QueueItem[] items, long? insertBefore = null);
-        Task<MediaStatus> QueueRemoveAsync(long[] itemIds);
-        Task<MediaStatus> QueueReorderAsync(long[] itemIds, long? insertBefore = null);
+        Task<MediaStatus> QueueInsertAsync(QueueItem[] items, int? insertBefore = null);
+        Task<MediaStatus> QueueRemoveAsync(int[] itemIds);
+        Task<MediaStatus> QueueReorderAsync(int[] itemIds, int? insertBefore = null);
         Task<MediaStatus> QueueUpdateAsync(QueueItem[] items);
         Task<QueueItem[]> QueueGetItemsAsync(int[] ids = null);
         Task<int[]> QueueGetItemIdsAsync();

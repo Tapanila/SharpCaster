@@ -1,9 +1,7 @@
 ﻿using Sharpcaster.Test.helper;
 using System;
 using System.Threading.Tasks;
-using Xunit.Abstractions;
 using Xunit;
-using Sharpcaster.Models;
 using Sharpcaster.Channels;
 using System.Net.Http;
 using System.Net;
@@ -12,38 +10,28 @@ using System.Net.Http.Json;
 
 namespace Sharpcaster.Test
 {
-    public class SpotifyTester : IClassFixture<ChromecastDevicesFixture>
+    public class SpotifyTester(ITestOutputHelper outputHelper, ChromecastDevicesFixture fixture)
     {
-        private readonly ITestOutputHelper output;
-
-        public SpotifyTester(ITestOutputHelper outputHelper, ChromecastDevicesFixture fixture)
-        {
-            output = outputHelper;
-            output.WriteLine("Fixture has found " + ChromecastDevicesFixture.Receivers?.Count + " receivers with " + fixture.GetSearchesCnt() + " searche(s).");
-        }
-
-        [Theory]
-        [MemberData(nameof(ChromecastReceiversFilter.GetAny), MemberType = typeof(ChromecastReceiversFilter))]
-        public async Task TestChromecastGetInfo(ChromecastReceiver receiver)
+        [Fact]
+        public async ValueTask TestChromecastGetInfo()
         {
             var TestHelper = new TestHelper();
             var SpotifyStatusUpdated = false;
-            ChromecastClient client = await TestHelper.CreateConnectAndLoadAppClient(output, receiver, "CC32E753");
+            ChromecastClient client = await TestHelper.CreateConnectAndLoadAppClient(outputHelper, fixture, "CC32E753");
             client.GetChannel<SpotifyChannel>().SpotifyStatusUpdated += (sender, status) =>
             {
-                output.WriteLine("ClientId: " + status.ClientID);
+                outputHelper.WriteLine("ClientId: " + status.ClientID);
                 SpotifyStatusUpdated = true;
             };
 
             await client.GetChannel<SpotifyChannel>().GetSpotifyInfo();
-            await Task.Delay(300);
+            await Task.Delay(300, Xunit.TestContext.Current.CancellationToken);
             await client.ReceiverChannel.StopApplication();
             Assert.True(SpotifyStatusUpdated);
         }
 
-        [Theory(Skip = "Requires spotify cookies inserted to code")]
-        [MemberData(nameof(ChromecastReceiversFilter.GetChromecastUltra), MemberType = typeof(ChromecastReceiversFilter))]
-        public async Task TestChromecastWholeFlow(ChromecastReceiver receiver)
+        [Fact(Skip = "requires clientid and deviceid")]
+        public async ValueTask TestChromecastWholeFlow()
         {
             var TestHelper = new TestHelper();
             var SpotifyStatusUpdated = false;
@@ -52,7 +40,7 @@ namespace Sharpcaster.Test
             var spotifyDeviceId = "";
 
             var spotifyAccessToken = await GetSpotifyAccessToken();
-            ChromecastClient client = await TestHelper.CreateConnectAndLoadAppClient(output, receiver, "CC32E753");
+            ChromecastClient client = await TestHelper.CreateConnectAndLoadAppClient(outputHelper, fixture, "CC32E753");
             client.GetChannel<SpotifyChannel>().SpotifyStatusUpdated += async (sender, status) =>
             {
                 spotifyClientId = status.ClientID;
@@ -64,12 +52,12 @@ namespace Sharpcaster.Test
 
             client.GetChannel<SpotifyChannel>().AddUserResponseReceived += (sender, e) =>
             {
-                output.WriteLine("AddUserResponseReceived: " + e.StatusString);
+                outputHelper.WriteLine("AddUserResponseReceived: " + e.StatusString);
                 UserAddedToChromecast = true;
             };
 
             await client.GetChannel<SpotifyChannel>().GetSpotifyInfo();
-            await Task.Delay(1500);
+            await Task.Delay(1500, Xunit.TestContext.Current.CancellationToken);
             Assert.True(SpotifyStatusUpdated);
             Assert.True(UserAddedToChromecast);
         }

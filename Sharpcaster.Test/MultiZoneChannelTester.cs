@@ -4,28 +4,16 @@ using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 using Sharpcaster.Test.helper;
-using Xunit.Abstractions;
 
 namespace Sharpcaster.Test
 {
-    public class MultiZoneChannelTester : IClassFixture<ChromecastDevicesFixture>
+    public class MultiZoneChannelTester(ITestOutputHelper outputHelper, ChromecastDevicesFixture fixture)
     {
-        private ITestOutputHelper output;
-
-        public MultiZoneChannelTester(ITestOutputHelper outputHelper, ChromecastDevicesFixture fixture)
-        {
-            output = outputHelper;
-            output.WriteLine("Fixture has found " + ChromecastDevicesFixture.Receivers?.Count + " receivers with " + fixture.GetSearchesCnt() + " searche(s).");
-        }
-
-        [Theory]
-        [MemberData(nameof(ChromecastReceiversFilter.GetGoogleCastGroup), MemberType = typeof(ChromecastReceiversFilter))]
-        //[MemberData(nameof(CCDevices.GetJblSpeaker), MemberType = typeof(CCDevices))]
-        //[MemberData(nameof(CCDevices.GetAny), MemberType = typeof(CCDevices))]
-        public async Task TestingMultiZone(ChromecastReceiver receiver)
+        [Fact]
+        public async Task TestingMultiZone()
         {
             var TestHelper = new TestHelper();
-            ChromecastClient client = await TestHelper.CreateConnectAndLoadAppClient(output, receiver);
+            ChromecastClient client = await TestHelper.CreateConnectAndLoadAppClient(outputHelper, fixture);
             AutoResetEvent _autoResetEvent = new(false);
 
             //We are going to load video & start playing it
@@ -56,12 +44,12 @@ namespace Sharpcaster.Test
             {
                 if (i % 2 == 0)
                 {
-                    await Task.Delay(1000);
+                    await Task.Delay(1000, Xunit.TestContext.Current.CancellationToken);
                     await client.ReceiverChannel.SetVolume(0.2);
                 }
                 else
                 {
-                    await Task.Delay(1000);
+                    await Task.Delay(1000, Xunit.TestContext.Current.CancellationToken);
                     await client.ReceiverChannel.SetVolume(0.3);
                 }
             }

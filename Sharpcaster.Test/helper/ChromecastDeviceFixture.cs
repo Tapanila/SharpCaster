@@ -1,35 +1,41 @@
 ﻿using Sharpcaster.Models;
+using Sharpcaster.Test.helper;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Xunit;
 
+[assembly: AssemblyFixture(typeof(ChromecastDevicesFixture))]
 namespace Sharpcaster.Test.helper
 {
     // Define a TestFixture to be used by different test classes
-    public class ChromecastDevicesFixture : IDisposable
+    public class ChromecastDevicesFixture : IAsyncLifetime
     {
         // This needs to be static to be used by the MemberData functions of the ChromecastReceiversFilter class allowing to annotate [Theories] with specific list of devices.
-        public static List<ChromecastReceiver> Receivers = [];
-        public static int NumberOfSearches;
+        public List<ChromecastReceiver> Receivers = [];
+        private int NumberOfSearches = 0;
 
-        static ChromecastDevicesFixture()
+        public async ValueTask InitializeAsync()
         {
             MdnsChromecastLocator locator = new();
-            var t = locator.FindReceiversAsync();
-            t.Wait();
-            Receivers = t.Result.ToList();
+            var receivers = await locator.FindReceiversAsync(TimeSpan.FromMilliseconds(500));
+            receivers = receivers.Any() ? receivers : await locator.FindReceiversAsync(TimeSpan.FromSeconds(2));
+            receivers = receivers.Any() ? receivers : await locator.FindReceiversAsync(TimeSpan.FromSeconds(5));
+            receivers = receivers.Any() ? receivers : await locator.FindReceiversAsync(TimeSpan.FromSeconds(8));
+            Receivers = [.. receivers];
             NumberOfSearches++;
+        }
+
+        public ValueTask DisposeAsync()
+        {
+            //Receivers.Clear();
+            return ValueTask.CompletedTask;
         }
 
         public int GetSearchesCnt()
         {
             return NumberOfSearches;
-        }
-
-        public void Dispose()
-        {
-            //Receivers.Clear();
         }
     }
 

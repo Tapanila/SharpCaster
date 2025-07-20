@@ -31,5 +31,12 @@ namespace Sharpcaster.Messages
             get { return (int)(_requestId ?? (_requestId = Interlocked.Increment(ref _id))); }
             set { _requestId = value; }
         }
+
+        /// <summary>
+        /// Custom data for the receiver application
+        /// </summary>
+        [JsonPropertyName("customData")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public object? CustomData { get; set; }
     }
 }

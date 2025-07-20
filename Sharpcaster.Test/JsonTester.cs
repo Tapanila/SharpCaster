@@ -4,11 +4,11 @@ using Sharpcaster.Interfaces;
 using Sharpcaster.Messages.Connection;
 using System.Text.Json;
 using Xunit;
+using Sharpcaster.Test.helper;
 
 namespace Sharpcaster.Test
 {
-    [Collection("SingleCollection")]
-    public class JsonTester
+    public class JsonTester()
     {
         [Fact]
         public void TestConnectMessage()
@@ -19,7 +19,5 @@ namespace Sharpcaster.Test
             var output = JsonSerializer.Serialize(connectMessage, SharpcasteSerializationContext.Default.ConnectMessage);
             Assert.Equal("{\"requestId\":" + requestId +  ",\"type\":\"CONNECT\"}", output);
         }
-
-
     }
 }

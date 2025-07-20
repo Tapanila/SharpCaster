@@ -18,8 +18,7 @@ namespace Sharpcaster.Messages.Queue
         /// In this way the sender app does not need to map between the local and remote queue positions or saves one extra QUEUE_UPDATE request.
         /// </summary>
         [JsonPropertyName("startIndex")]
-        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public long? StartIndex { get; set; }
+        public int StartIndex { get; set; } = 0;
         /// <summary>
         /// Behavior of the queue when all items have been played.
         /// </summary>
@@ -27,14 +26,5 @@ namespace Sharpcaster.Messages.Queue
         [JsonConverter(typeof(RepeatModeEnumConverter))]
         public RepeatModeType RepeatMode { get; set; }
 
-        /// <summary>
-        /// Seconds (since the beginning of content) to start playback of the first item to be played.
-        /// If provided, this value will take precedence over the startTime value provided at the QueueItem level but only the first time the item is played.
-        /// This is to cover the common case where the user casts the item that was playing locally so the currentTime does not apply to the item permanently like the QueueItem startTime does.
-        /// It avoids having to reset the startTime dynamically (that may not be possible if the phone has gone to sleep).
-        /// </summary>
-        [JsonPropertyName("currentTime")]
-        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public long? CurrentTime { get; set; }
     }
 }

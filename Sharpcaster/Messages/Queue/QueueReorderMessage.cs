@@ -20,7 +20,7 @@ namespace Sharpcaster.Messages.Queue
         /// If any of the items does not exist it will be ignored. Must not be null or empty.
         /// </summary>
         [JsonPropertyName("itemIds")]
-        public long[] ItemIds { get; set; }
+        public int[] ItemIds { get; set; } = null!;
 
         /// <summary>
         /// ID of the item that will be located immediately after the reordered list.
@@ -29,6 +29,6 @@ namespace Sharpcaster.Messages.Queue
         /// </summary>
         [JsonPropertyName("insertBefore")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public long? InsertBefore { get; set; }
+        public int? InsertBefore { get; set; }
     }
 }

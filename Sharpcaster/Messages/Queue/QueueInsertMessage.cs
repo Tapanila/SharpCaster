@@ -22,6 +22,6 @@ namespace Sharpcaster.Messages.Queue
         /// </summary>
         [JsonPropertyName("insertBefore")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public long? InsertBefore { get; set; }
+        public int? InsertBefore { get; set; }
     }
 }

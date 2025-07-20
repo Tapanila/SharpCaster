@@ -1,10 +1,4 @@
-﻿using System;
-using System.Linq;
-using System.Threading.Tasks;
-using Sharpcaster.Models;
-using Sharpcaster;
-
-namespace Sharpcaster.Test.Aot
+﻿namespace Sharpcaster.Test.Aot
 {
     [TestClass]
     public class ChromecastApplicationTester
@@ -15,7 +9,7 @@ namespace Sharpcaster.Test.Aot
             // Test 1: Discover at least one Chromecast device
             var locator = new MdnsChromecastLocator();
             var receivers = await locator.FindReceiversAsync();
-            if (receivers == null || receivers.Count() == 0)
+            if (receivers?.Any() != true)
             {
                 throw new Exception("No Chromecast devices found on the network.");
             }

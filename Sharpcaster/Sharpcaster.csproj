@@ -8,15 +8,25 @@
     <PackageVersion>0.0.0</PackageVersion>
     <Authors>Teemu Tapanila</Authors>
     <Owners>Teemu Tapanila</Owners>
-    <Description>SharpCaster is a C# library to control Chromecast devices from your dotnet application.</Description>
-    <Copyright>Copyright 2016 Teemu Tapanila</Copyright>
-    <PackageTags>Chromecast SharpCaster C#</PackageTags>
+    <Description>Cross-platform .NET SDK for Google Chromecast with media control, queue management, and Native AOT support. Discover devices, stream media, and build custom Cast applications with async/await APIs.</Description>
+    <Summary>Modern .NET library for Chromecast integration with full media control and device discovery</Summary>
+    <Copyright>Copyright 2016-2025 Teemu Tapanila</Copyright>
+    <PackageTags>chromecast;google-cast;media-streaming;media-control;device-discovery;mdns;cast-protocol;dotnet;csharp;aot;net9;netstandard;cross-platform;async;queue-management;volume-control</PackageTags>
+    <PackageReleaseNotes>See https://github.com/Tapanila/SharpCaster/releases for release notes</PackageReleaseNotes>
     <PackageProjectUrl>https://github.com/Tapanila/SharpCaster</PackageProjectUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageIcon>sharpcaster-logo-64x64.png</PackageIcon>
     <PackageReadmeFile>README.md</PackageReadmeFile>
 	<IsAotCompatible Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net9.0'))">true</IsAotCompatible>
 	<Nullable>enable</Nullable>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <Deterministic>true</Deterministic>
+    <ContinuousIntegrationBuild Condition="'$(CI)' == 'true'">true</ContinuousIntegrationBuild>
+    <EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
+	<AnalysisMode>All</AnalysisMode>
   </PropertyGroup>
 
     <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
@@ -44,7 +54,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="System.Text.Json" Version="9.0.7" />
-    <PackageReference Include="Tmds.MDns" Version="0.8.0" />
+    <PackageReference Include="Zeroconf" Version="3.7.16" />
   </ItemGroup>
 
 </Project>

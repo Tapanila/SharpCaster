@@ -5,6 +5,7 @@ namespace Sharpcaster.Models.Media
     /// <summary>
     /// Media metadata
     /// </summary>
+    /// <see href="https://developers.google.com/cast/docs/reference/web_sender/chrome.cast.media#.MediaMetadata">Google Cast MediaMetadata Documentation</see>
     [JsonDerivedType(typeof(MovieMetadata))]
     [JsonDerivedType(typeof(TVShowMetadata))]
     [JsonDerivedType(typeof(MusicTrackMetadata))]

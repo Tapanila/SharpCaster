@@ -47,8 +47,8 @@ namespace Sharpcaster
         public MultiZoneChannel MultiZoneChannel => GetChannel<MultiZoneChannel>();
 
         private ILogger _logger = null;
-        private TcpClient _client;
-        private SslStream _stream;
+        private TcpClient? _client;
+        private SslStream? _stream;
         private CancellationTokenSource _cancellationTokenSource;
         private TaskCompletionSource<bool> ReceiveTcs { get; set; }
         private SemaphoreSlim SendSemaphoreSlim { get; } = new SemaphoreSlim(1, 1);
@@ -57,7 +57,7 @@ namespace Sharpcaster
         private IEnumerable<IChromecastChannel> Channels { get; set; }
         private ConcurrentDictionary<int, SharpCasterTaskCompletionSource> WaitingTasks { get; } = new ConcurrentDictionary<int, SharpCasterTaskCompletionSource>();
 
-        public ChromecastClient(ILoggerFactory loggerFactory = null)
+        public ChromecastClient(ILoggerFactory? loggerFactory = null)
         {
             var serviceCollection = new ServiceCollection();
 
@@ -134,15 +134,15 @@ namespace Sharpcaster
             {
                 throw new ArgumentNullException(nameof(chromecastReceiver.DeviceUri));
             }
-            await Dispose();
+            await Dispose().ConfigureAwait(false);
             FriendlyName = chromecastReceiver.Name;
 
             _client = new TcpClient();
-            await _client.ConnectAsync(chromecastReceiver.DeviceUri.Host, chromecastReceiver.Port);
+            await _client.ConnectAsync(chromecastReceiver.DeviceUri.Host, chromecastReceiver.Port).ConfigureAwait(false);
 
             //Open SSL stream to Chromecast and bypass all SSL validation
             var secureStream = new SslStream(_client.GetStream(), true, (_, __, ___, ____) => true);
-            await secureStream.AuthenticateAsClientAsync(chromecastReceiver.DeviceUri.Host);
+            await secureStream.AuthenticateAsClientAsync(chromecastReceiver.DeviceUri.Host).ConfigureAwait(false);
             _stream = secureStream;
 
             _cancellationTokenSource = new CancellationTokenSource();
@@ -150,14 +150,14 @@ namespace Sharpcaster
             Receive(_cancellationTokenSource.Token);
             HeartbeatChannel.StartTimeoutTimer();
             HeartbeatChannel.StatusChanged += HeartBeatTimedOut;
-            await ConnectionChannel.ConnectAsync();
-            return await ReceiverChannel.GetChromecastStatusAsync();
+            await ConnectionChannel.ConnectAsync().ConfigureAwait(false);
+            return await ReceiverChannel.GetChromecastStatusAsync().ConfigureAwait(false);
         }
 
         private async void HeartBeatTimedOut(object sender, EventArgs e)
         {
             _logger?.LogError("Heartbeat timeout - Disconnecting client.");
-            await DisconnectAsync();
+            await DisconnectAsync().ConfigureAwait(false);
         }
 
         private void Receive(CancellationToken cancellationToken)
@@ -169,13 +169,13 @@ namespace Sharpcaster
                     while (true)
                     {
                         //First 4 bytes contains the length of the message
-                        var buffer = await _stream.ReadAsync(4, cancellationToken);
+                        var buffer = await _stream!.ReadAsync(4, cancellationToken).ConfigureAwait(false);
                         if (BitConverter.IsLittleEndian)
                         {
                             Array.Reverse(buffer);
                         }
                         var length = BitConverter.ToInt32(buffer, 0);
-                        var castMessage = CastMessage.Parser.ParseFrom(await _stream.ReadAsync(length, cancellationToken));
+                        var castMessage = CastMessage.Parser.ParseFrom(await _stream.ReadAsync(length, cancellationToken).ConfigureAwait(false));
                         //Payload can either be Binary or UTF8 json
                         var payload = (castMessage.PayloadType == PayloadType.Binary ?
                             Encoding.UTF8.GetString(castMessage.PayloadBinary.ToByteArray()) : castMessage.PayloadUtf8);
@@ -194,7 +194,7 @@ namespace Sharpcaster
                             {
                                 try
                                 {
-                                    await channel.OnMessageReceivedAsync(payload, message.Type);
+                                    await channel.OnMessageReceivedAsync(payload, message.Type).ConfigureAwait(false);
                                     if (message.HasRequestId)
                                     {
                                         WaitingTasks.TryRemove(message.RequestId, out SharpCasterTaskCompletionSource? tcs);
@@ -235,30 +235,30 @@ namespace Sharpcaster
             }, cancellationToken);
         }
 
-        public async Task SendAsync(ILogger channelLogger, string ns, string messagePayload, string destinationId)
+        public async Task SendAsync(ILogger logger, string ns, string messagePayload, string destinationId)
         {
             var castMessage = CreateCastMessage(ns, destinationId);
             castMessage.PayloadUtf8 = messagePayload;
-            await SendAsync(channelLogger, castMessage);
+            await SendAsync(logger, castMessage).ConfigureAwait(false);
         }
 
-        private async Task SendAsync(ILogger channelLogger, CastMessage castMessage)
+        private async Task SendAsync(ILogger logger, CastMessage castMessage)
         {
-            await SendSemaphoreSlim.WaitAsync();
+            await SendSemaphoreSlim.WaitAsync().ConfigureAwait(false);
             try
             {
-                (channelLogger ?? _logger)?.LogTrace("SENT: {NameSpace} - {DestinationId}: {PayloadUtf8}", castMessage.Namespace, castMessage.DestinationId, castMessage.PayloadUtf8);
+                (logger ?? _logger)?.LogTrace("SENT: {NameSpace} - {DestinationId}: {PayloadUtf8}", castMessage.Namespace, castMessage.DestinationId, castMessage.PayloadUtf8);
 #if NETSTANDARD2_0
                 byte[] message = castMessage.ToProto();
 #else
                 ReadOnlyMemory<byte> message = castMessage.ToProto();
 #endif
 #if NETSTANDARD2_0
-                await _stream.WriteAsync(message, 0, message.Length);
+                await _stream!.WriteAsync(message, 0, message.Length);
 #else
-                await _stream.WriteAsync(message);
+                await _stream!.WriteAsync(message).ConfigureAwait(false);
 #endif
-                await _stream.FlushAsync();
+                await _stream.FlushAsync().ConfigureAwait(false);
             }
             finally
             {
@@ -276,19 +276,19 @@ namespace Sharpcaster
             };
         }
 
-        public async Task<string> SendAsync(ILogger channelLogger, string ns, int messageRequestId, string messagePayload, string destinationId)
+        public async Task<string> SendAsync(ILogger logger, string ns, int messageRequestId, string messagePayload, string destinationId)
         {
             var taskCompletionSource = new SharpCasterTaskCompletionSource();
             WaitingTasks[messageRequestId] = taskCompletionSource;
-            await SendAsync(channelLogger, ns, messagePayload, destinationId);
-            return await taskCompletionSource.Task.TimeoutAfter(RECEIVE_TIMEOUT);
+            await SendAsync(logger, ns, messagePayload, destinationId).ConfigureAwait(false);
+            return await taskCompletionSource.Task.TimeoutAfter(RECEIVE_TIMEOUT).ConfigureAwait(false);
         }
 
         public async Task<string> WaitResponseAsync(int messageRequestId)
         {
             var taskCompletionSource = new SharpCasterTaskCompletionSource();
             WaitingTasks[messageRequestId] = taskCompletionSource;
-            return await taskCompletionSource.Task.TimeoutAfter(RECEIVE_TIMEOUT);
+            return await taskCompletionSource.Task.TimeoutAfter(RECEIVE_TIMEOUT).ConfigureAwait(false);
         }
 
         public async Task DisconnectAsync()
@@ -300,13 +300,13 @@ namespace Sharpcaster
             HeartbeatChannel.StopTimeoutTimer();
             HeartbeatChannel.StatusChanged -= HeartBeatTimedOut;
             _cancellationTokenSource.Cancel(true);
-            await Task.Delay(100);
-            await Dispose();
+            await Task.Delay(100).ConfigureAwait(false);
+            await Dispose().ConfigureAwait(false);
         }
 
-        private async Task Dispose()
+        public async Task Dispose()
         {
-            await Dispose(true);
+            await Dispose(true).ConfigureAwait(false);
         }
 
         private async Task Dispose(bool waitReceiveTask)
@@ -314,11 +314,11 @@ namespace Sharpcaster
             if (_client != null)
             {
                 WaitingTasks.Clear();
-                Dispose(_stream, () => _stream = null);
+                Dispose(_stream!, () => _stream = null);
                 Dispose(_client, () => _client = null);
                 if (waitReceiveTask && ReceiveTcs != null)
                 {
-                    await ReceiveTcs.Task;
+                    await ReceiveTcs.Task.ConfigureAwait(false);
                 }
                 OnDisconnected();
             }
@@ -369,19 +369,19 @@ namespace Sharpcaster
                 var runningApplication = status?.Applications?.FirstOrDefault(x => x.AppId == applicationId);
                 if (runningApplication != null)
                 {
-                    await ConnectionChannel.ConnectAsync(runningApplication.TransportId);
+                    await ConnectionChannel.ConnectAsync(runningApplication.TransportId).ConfigureAwait(false);
                     //Check if the application is using the media namespace
                     //If so go and get the media status
                     if (runningApplication.Namespaces.Where(ns => ns.Name == "urn:x-cast:com.google.cast.media") != null)
                     {
-                        await MediaChannel.GetMediaStatusAsync();
+                        await MediaChannel.GetMediaStatusAsync().ConfigureAwait(false);
                     }
-                    return await ReceiverChannel.GetChromecastStatusAsync();
+                    return await ReceiverChannel.GetChromecastStatusAsync().ConfigureAwait(false);
                 }
             }
-            var newApplication = await ReceiverChannel.LaunchApplicationAsync(applicationId);
-            await ConnectionChannel.ConnectAsync(newApplication.Application.TransportId);
-            return await ReceiverChannel.GetChromecastStatusAsync();
+            var newApplication = await ReceiverChannel.LaunchApplicationAsync(applicationId).ConfigureAwait(false);
+            await ConnectionChannel.ConnectAsync(newApplication.Application.TransportId).ConfigureAwait(false);
+            return await ReceiverChannel.GetChromecastStatusAsync().ConfigureAwait(false);
         }
 
         private IEnumerable<IStatusChannel<object>> GetStatusChannels()
