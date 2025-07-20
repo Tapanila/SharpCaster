@@ -46,7 +46,7 @@ namespace Sharpcaster
         public ConnectionChannel ConnectionChannel => GetChannel<ConnectionChannel>();
         public MultiZoneChannel MultiZoneChannel => GetChannel<MultiZoneChannel>();
 
-        private ILogger _logger = null;
+        private ILogger? _logger;
         private TcpClient? _client;
         private SslStream? _stream;
         private CancellationTokenSource _cancellationTokenSource;
@@ -229,7 +229,6 @@ namespace Sharpcaster
                 catch (Exception exception)
                 {
                     _logger?.LogError("Error in receive loop: {Message}", exception.Message);
-                    //await Dispose(false);
                     ReceiveTcs.SetResult(true);
                 }
             }, cancellationToken);
@@ -295,6 +294,7 @@ namespace Sharpcaster
         {
             HeartbeatChannel.StopTimeoutTimer();
             HeartbeatChannel.StatusChanged -= HeartBeatTimedOut;
+            HeartbeatChannel.Dispose();
             _cancellationTokenSource.Cancel(true);
             await Task.Delay(100).ConfigureAwait(false);
             await Dispose().ConfigureAwait(false);

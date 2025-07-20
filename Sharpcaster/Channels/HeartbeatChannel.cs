@@ -3,6 +3,7 @@ using Sharpcaster.Extensions;
 using Sharpcaster.Interfaces;
 using Sharpcaster.Messages.Heartbeat;
 using System;
+using System.Reactive.Disposables;
 using System.Text.Json;
 using System.Threading.Tasks;
 using System.Timers;
@@ -12,15 +13,16 @@ namespace Sharpcaster.Channels
     /// <summary>
     /// Heartbeat channel. Responds to ping messages with pong message
     /// </summary>
-    public class HeartbeatChannel : ChromecastChannel
+    public class HeartbeatChannel : ChromecastChannel, IDisposable
     {
         //private ILogger _logger = null;
         private readonly Timer _timer;
+        private bool disposedValue;
 
         /// <summary>
         /// Initializes a new instance of HeartbeatChannel class
         /// </summary>
-        public HeartbeatChannel(ILogger<HeartbeatChannel> logger = null) : base("tp.heartbeat", logger)
+        public HeartbeatChannel(ILogger<HeartbeatChannel>? logger = null) : base("tp.heartbeat", logger)
         {
             _timer = new Timer(10000); // timeout is 10 seconds.
                                        // Because Chromecast only waits for 8 seconds for response
@@ -29,6 +31,7 @@ namespace Sharpcaster.Channels
         }
 
         public event EventHandler StatusChanged;
+
 
         /// <summary>
         /// Called when a message for this channel is received
@@ -59,6 +62,25 @@ namespace Sharpcaster.Channels
         {
             Logger?.LogInformation("Heartbeat timeout");
             StatusChanged?.Invoke(this, e);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    _timer?.Dispose();
+                }
+
+                disposedValue = true;
+            }
+        }
+
+        public void Dispose()
+        {
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
         }
     }
 }

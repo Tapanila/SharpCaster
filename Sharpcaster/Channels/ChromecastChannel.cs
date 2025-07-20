@@ -10,7 +10,7 @@ namespace Sharpcaster.Channels
     public abstract class ChromecastChannel : IChromecastChannel
     {
         private const string BASE_NAMESPACE = "urn:x-cast:com.google.cast";
-        public ILogger Logger { get; }
+        public ILogger? Logger { get; }
 
         /// <summary>
         /// Initialization
@@ -24,7 +24,7 @@ namespace Sharpcaster.Channels
         /// </summary>
         /// <param name="ns">namespace</param>
         /// <param name="useBaseNamespace">When true add urn:x-cast:com.google.cast to beginning of namespace</param>
-        protected ChromecastChannel(string ns, ILogger logger, bool useBaseNamespace = true)
+        protected ChromecastChannel(string ns, ILogger? logger, bool useBaseNamespace = true)
         {
             Logger = logger;
             if (useBaseNamespace)

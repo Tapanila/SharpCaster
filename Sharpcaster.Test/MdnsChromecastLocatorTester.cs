@@ -42,11 +42,11 @@ namespace Sharpcaster.Test
             Assert.NotEqual(0, counter);
         }
 
-        [Fact(Skip = "This fails if Chromecast is quick to answer")]
+        [Fact]
         public async Task SearchChromecastsWithTooShortTimeout()
         {
             var locator = new MdnsChromecastLocator();
-            var chromecasts = await locator.FindReceiversAsync(TimeSpan.FromMilliseconds(1));
+            var chromecasts = await locator.FindReceiversAsync(TimeSpan.FromMicroseconds(1));
             Assert.Empty(chromecasts);
         }
 

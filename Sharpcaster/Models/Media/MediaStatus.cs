@@ -39,7 +39,8 @@ namespace Sharpcaster.Models.Media
         /// Gets or sets the supported media commands
         /// </summary>
         [JsonPropertyName("supportedMediaCommands")]
-        public int SupportedMediaCommands { get; set; }
+        [JsonConverter(typeof(MediaCommandEnumConverter))]
+        public MediaCommand SupportedMediaCommands { get; set; }
 
         /// <summary>
         /// Gets or sets the volume

@@ -67,9 +67,9 @@ namespace Sharpcaster
             try
             {
                 var responses = await ZeroconfResolver.ResolveAsync(
-                    "_googlecast._tcp.local.", 
-                    discoveryTimeout).ConfigureAwait(false);
-                
+                    "_googlecast._tcp.local.",
+                    scanTime: discoveryTimeout).ConfigureAwait(false);
+
                 var responsesList = responses.ToList();
                 _mdnsDiscoveryResponsesFound(_logger, responsesList.Count, null);
                 

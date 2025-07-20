@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.Globalization;
+using System.Text.Json.Serialization;
 using Sharpcaster.Interfaces;
 
 namespace Sharpcaster.Messages
@@ -26,7 +27,7 @@ namespace Sharpcaster.Messages
                 if (firstCharacter)
                 {
                     firstCharacter = false;
-                    result += char.ToUpper(c).ToString();
+                    result += char.ToUpper(c, CultureInfo.InvariantCulture).ToString();
                 }
                 else if (char.IsUpper(c))
                 {
@@ -34,7 +35,7 @@ namespace Sharpcaster.Messages
                 }
                 else
                 {
-                    result += char.ToUpper(c).ToString();
+                    result += char.ToUpper(c, CultureInfo.InvariantCulture).ToString();
                 }
             }
             Type = result;

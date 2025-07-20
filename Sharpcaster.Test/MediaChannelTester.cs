@@ -1,4 +1,5 @@
-﻿using Sharpcaster.Interfaces;
+﻿using Sharpcaster.Channels;
+using Sharpcaster.Interfaces;
 using Sharpcaster.Messages.Media;
 using Sharpcaster.Models;
 using Sharpcaster.Models.Media;
@@ -39,7 +40,7 @@ namespace Sharpcaster.Test
                 };
 
                 AutoResetEvent _disconnectReceived = new(false);
-                IMediaChannel mediaChannel = client.MediaChannel;
+                MediaChannel mediaChannel = client.MediaChannel;
 
                 mediaChannel.StatusChanged += (object sender, MediaStatus e) =>
                 {
@@ -72,6 +73,36 @@ namespace Sharpcaster.Test
             {
                 Assert.Fail("This test only runs with a 'JBL Playlist' device and also needs manual operations!");
             }
+            await client.DisconnectAsync();
+        }
+        [Fact]
+        public async Task TestMediaSupportedCommandsWithSingleMediaFile()
+        {
+            var TestHelper = new TestHelper();
+            ChromecastClient client = await TestHelper.CreateConnectAndLoadAppClient(outputHelper, fixture.Receivers[0]);
+            var media = new Media
+            {
+                ContentUrl = "https://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/mp4/DesigningForGoogleCast.mp4"
+            };
+            MediaStatus status = await client.MediaChannel.LoadAsync(media);
+            Assert.NotNull(status);
+            Assert.Equal(
+                MediaCommand.ALL_BASIC_MEDIA | MediaCommand.STREAM_TRANSFER,
+                status.SupportedMediaCommands);
+            await client.DisconnectAsync();
+        }
+
+        [Fact]
+        public async Task TestMediaSupportedCommandsWithQueue()
+        {
+            var TestHelper = new TestHelper();
+            ChromecastClient client = await TestHelper.CreateConnectAndLoadAppClient(outputHelper, fixture.Receivers[0]);
+            var testQueue = TestHelper.CreateTestCd;
+            MediaStatus status = await client.MediaChannel.QueueLoadAsync(testQueue);
+            Assert.NotNull(status);
+            Assert.Equal(
+                MediaCommand.ALL_BASIC_MEDIA | MediaCommand.STREAM_TRANSFER,
+                status.SupportedMediaCommands);
             await client.DisconnectAsync();
         }
 
