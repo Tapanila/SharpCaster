@@ -12,7 +12,7 @@ namespace Sharpcaster.Channels
     /// <summary>
     /// ReceiverChannel, Receives ChromecastStatus, volume, starting and stopping application
     /// </summary>
-    public class ReceiverChannel : ChromecastChannel, IReceiverChannel
+    public class ReceiverChannel : ChromecastChannel
     {
         public ChromecastStatus ReceiverStatus { get => receiverStatus; }
         private ChromecastStatus receiverStatus;

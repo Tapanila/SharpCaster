@@ -11,7 +11,7 @@ namespace Sharpcaster.Interfaces
         /// <summary>
         /// Gets or sets the sender
         /// </summary>
-        IChromecastClient Client { get; set; }
+        ChromecastClient Client { get; set; }
 
         /// <summary>
         /// Gets the full namespace

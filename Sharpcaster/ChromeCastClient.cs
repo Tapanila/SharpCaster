@@ -29,7 +29,7 @@ using static Extensions.Api.CastChannel.CastMessage.Types;
 
 namespace Sharpcaster
 {
-    public class ChromecastClient : IChromecastClient
+    public class ChromecastClient
     {
         private const int RECEIVE_TIMEOUT = 30000;
 
@@ -40,10 +40,10 @@ namespace Sharpcaster
         public Guid SenderId { get; } = Guid.NewGuid();
         public string FriendlyName { get; set; }
 
-        public IMediaChannel MediaChannel => GetChannel<IMediaChannel>();
-        public IHeartbeatChannel HeartbeatChannel => GetChannel<IHeartbeatChannel>();
-        public IReceiverChannel ReceiverChannel => GetChannel<IReceiverChannel>();
-        public IConnectionChannel ConnectionChannel => GetChannel<IConnectionChannel>();
+        public MediaChannel MediaChannel => GetChannel<MediaChannel>();
+        public HeartbeatChannel HeartbeatChannel => GetChannel<HeartbeatChannel>();
+        public ReceiverChannel ReceiverChannel => GetChannel<ReceiverChannel>();
+        public ConnectionChannel ConnectionChannel => GetChannel<ConnectionChannel>();
         public MultiZoneChannel MultiZoneChannel => GetChannel<MultiZoneChannel>();
 
         private ILogger _logger = null;
@@ -293,10 +293,6 @@ namespace Sharpcaster
 
         public async Task DisconnectAsync()
         {
-            foreach (var channel in GetStatusChannels())
-            {
-                channel.ClearStatus();
-            }
             HeartbeatChannel.StopTimeoutTimer();
             HeartbeatChannel.StatusChanged -= HeartBeatTimedOut;
             _cancellationTokenSource.Cancel(true);
@@ -384,19 +380,6 @@ namespace Sharpcaster
             return await ReceiverChannel.GetChromecastStatusAsync().ConfigureAwait(false);
         }
 
-        private IEnumerable<IStatusChannel<object>> GetStatusChannels()
-        {
-            return Channels.OfType<IStatusChannel<object>>();
-        }
-
-        /// <summary>
-        /// Gets the differents statuses
-        /// </summary>
-        /// <returns>a dictionnary of namespace/status</returns>
-        public IDictionary<string, object> GetStatuses()
-        {
-            return GetStatusChannels().ToDictionary(c => c.Namespace, c => c.Status);
-        }
 
         public ChromecastStatus GetChromecastStatus()
         {

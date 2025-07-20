@@ -19,7 +19,7 @@ namespace Sharpcaster.Channels
     /// <summary>
     /// Media channel
     /// </summary>
-    public class MediaChannel : ChromecastChannel, IMediaChannel
+    public class MediaChannel : ChromecastChannel
     {
         /// <summary>
         /// Raised when error is received

@@ -12,7 +12,7 @@ namespace Sharpcaster.Channels
     /// <summary>
     /// Heartbeat channel. Responds to ping messages with pong message
     /// </summary>
-    public class HeartbeatChannel : ChromecastChannel, IHeartbeatChannel
+    public class HeartbeatChannel : ChromecastChannel
     {
         //private ILogger _logger = null;
         private readonly Timer _timer;

@@ -40,7 +40,7 @@ namespace Sharpcaster.Channels
         /// <summary>
         /// Gets or sets the sender
         /// </summary>
-        public virtual IChromecastClient Client { get; set; }
+        public virtual ChromecastClient Client { get; set; }
 
         /// <summary>
         /// Gets the full namespace

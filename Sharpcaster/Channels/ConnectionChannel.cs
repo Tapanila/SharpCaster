@@ -10,7 +10,7 @@ namespace Sharpcaster.Channels
     /// <summary>
     /// Connection channel, Responsible for opening connection to Chromecast and receiving Closed message
     /// </summary>
-    public class ConnectionChannel : ChromecastChannel, IConnectionChannel
+    public class ConnectionChannel : ChromecastChannel
     {
         /// <summary>
         /// Initializes a new instance of ConnectionChannel class

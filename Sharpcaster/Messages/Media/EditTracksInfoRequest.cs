@@ -1,7 +1,8 @@
 using System.Text.Json.Serialization;
 using Sharpcaster.Messages;
+using Sharpcaster.Models.Media;
 
-namespace Sharpcaster.Models.Media
+namespace Sharpcaster.Messages.Media
 {
     /// <summary>
     /// A request to modify the text tracks style or change the tracks status
