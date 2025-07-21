@@ -56,6 +56,7 @@ namespace Sharpcaster
         private Dictionary<string, Type> MessageTypes { get; set; }
         private IEnumerable<IChromecastChannel> Channels { get; set; }
         private ConcurrentDictionary<int, SharpCasterTaskCompletionSource> WaitingTasks { get; } = new ConcurrentDictionary<int, SharpCasterTaskCompletionSource>();
+        private IServiceProvider _serviceProvider;
 
         public ChromecastClient(ILoggerFactory? loggerFactory = null)
         {
@@ -106,14 +107,14 @@ namespace Sharpcaster
 
         private void Init(IServiceCollection serviceCollection)
         {
-            var serviceProvider = serviceCollection.BuildServiceProvider();
-            var channels = serviceProvider.GetServices<IChromecastChannel>();
-            var messages = serviceProvider.GetServices<IMessage>();
+            _serviceProvider = serviceCollection.BuildServiceProvider();
+            var channels = _serviceProvider.GetServices<IChromecastChannel>();
+            var messages = _serviceProvider.GetServices<IMessage>();
 
             MessageTypes = messages.Where(t => !string.IsNullOrEmpty(t.Type)).ToDictionary(m => m.Type, m => m.GetType());
             Channels = channels;
 
-            _logger = serviceProvider.GetService<ILogger<ChromecastClient>>();
+            _logger = _serviceProvider.GetService<ILogger<ChromecastClient>>();
             _logger?.LogDebug("MessageTypes: {MessageTypes}", MessageTypes.Keys.ToString(","));
             _logger?.LogDebug("Channels: {Channels}", Channels.ToString(","));
 
@@ -291,6 +292,10 @@ namespace Sharpcaster
             HeartbeatChannel.StopTimeoutTimer();
             HeartbeatChannel.StatusChanged -= HeartBeatTimedOut;
             HeartbeatChannel.Dispose();
+            
+            // Recreate HeartbeatChannel since it's been disposed
+            RecreateHeartbeatChannel();
+            
             _cancellationTokenSource.Cancel(true);
             await Task.Delay(100).ConfigureAwait(false);
             await Dispose().ConfigureAwait(false);
@@ -336,6 +341,29 @@ namespace Sharpcaster
         /// Raises the Disconnected event
         /// </summary>
         protected virtual void OnDisconnected() => Disconnected?.Invoke(this, EventArgs.Empty);
+
+        /// <summary>
+        /// Recreates the HeartbeatChannel after disposal
+        /// </summary>
+        private void RecreateHeartbeatChannel()
+        {
+            // Remove the disposed HeartbeatChannel from the channels collection
+            var channelsList = Channels.ToList();
+            var disposedHeartbeat = channelsList.OfType<HeartbeatChannel>().FirstOrDefault();
+            if (disposedHeartbeat != null)
+            {
+                channelsList.Remove(disposedHeartbeat);
+                
+                // Create a new HeartbeatChannel instance using the service provider
+                var newHeartbeat = _serviceProvider.GetService<HeartbeatChannel>() ?? 
+                                   new HeartbeatChannel(_serviceProvider.GetService<ILogger<HeartbeatChannel>>());
+                newHeartbeat.Client = this;
+                channelsList.Add(newHeartbeat);
+                
+                // Update the channels collection
+                Channels = channelsList;
+            }
+        }
 
         /// <summary>
         /// Gets a channel
