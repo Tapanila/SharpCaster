@@ -136,7 +136,7 @@ namespace Sharpcaster.Test.helper
         public async Task<ChromecastClient> CreateAndConnectClient(ITestOutputHelper output, ChromecastReceiver receiver)
         {
             TestOutput = output;
-            TestOutput?.WriteLine("Using Receiver '" + receiver.Model + "' at " + receiver.DeviceUri);
+            TestOutput?.WriteLine("Using Receiver '" + receiver.Model + "' at " + receiver.DeviceUri + " Name: '" + receiver.Name + "' Version: " + receiver.Version);
             ChromecastClient cc = GetClientWithTestOutput(output);
             await cc.ConnectChromecast(receiver);
             return cc;
