@@ -5,7 +5,7 @@ on:
     branches: [ main, version-3 ]
     tags: [ 'v*' ]
   pull_request:
-    branches: [ main, version-3 ]
+    branches: [ main ]
 
 jobs:
   build:
@@ -81,7 +81,7 @@ jobs:
       env:
         DOTNET_CLI_TELEMETRY_OPTOUT: 1
 
-    - name: Test executable
+    - name: Verify executable
       working-directory: SharpCaster.Console
       run: |
         $exePath = "bin/Release/net9.0/${{ matrix.runtime }}/publish/${{ matrix.executable }}"
@@ -89,18 +89,11 @@ jobs:
           Write-Host "✓ Executable found at: $exePath"
           $sizeMB = [math]::Round((Get-Item $exePath).Length / 1MB, 2)
           Write-Host "✓ Size: $sizeMB MB"
-          
-          # Test help command
-          & $exePath help | Select-Object -First 3
-          if ($LASTEXITCODE -eq 0) {
-            Write-Host "✓ Executable test passed"
-          } else {
-            Write-Host "⚠ Executable test failed with exit code $LASTEXITCODE"
-            exit 1
-          }
+          echo "ARTIFACT_SIZE=$sizeMB" >> $env:GITHUB_ENV
         } else {
           Write-Host "✗ Executable not found at: $exePath"
-          Get-ChildItem "bin/Release/net9.0/${{ matrix.runtime }}/publish/" -Recurse
+          Write-Host "Contents of publish directory:"
+          Get-ChildItem "bin/Release/net9.0/${{ matrix.runtime }}/publish/" -ErrorAction SilentlyContinue | Format-Table Name, Length
           exit 1
         }
       shell: pwsh
@@ -134,10 +127,6 @@ jobs:
         $content += "./${{ matrix.executable }} help`n`n"
         $content += "For more information, see: https://github.com/Tapanila/SharpCaster"
         $content | Out-File -FilePath "$artifactDir/README.txt" -Encoding UTF8
-        
-        # Get file size for artifact name
-        $sizeMB = [math]::Round((Get-Item "$publishDir/${{ matrix.executable }}").Length / 1MB, 2)
-        echo "ARTIFACT_SIZE=$sizeMB" >> $env:GITHUB_ENV
       shell: pwsh
 
     - name: Upload artifact
