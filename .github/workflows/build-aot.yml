@@ -1,0 +1,220 @@
+name: Build AOT Executables
+
+on:
+  push:
+    branches: [ main, version-3 ]
+    tags: [ 'v*' ]
+  pull_request:
+    branches: [ main, version-3 ]
+
+jobs:
+  build:
+    name: Build ${{ matrix.os }} ${{ matrix.arch }}
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      matrix:
+        include:
+          # Windows builds
+          - os: windows
+            arch: x64
+            runner: windows-latest
+            runtime: win-x64
+            executable: SharpCaster.Console.exe
+          - os: windows
+            arch: arm64
+            runner: windows-latest
+            runtime: win-arm64
+            executable: SharpCaster.Console.exe
+          
+          # Linux builds
+          - os: linux
+            arch: x64
+            runner: ubuntu-latest
+            runtime: linux-x64
+            executable: SharpCaster.Console
+          - os: linux
+            arch: arm64
+            runner: ubuntu-latest
+            runtime: linux-arm64
+            executable: SharpCaster.Console
+          
+          # macOS builds
+          - os: macos
+            arch: x64
+            runner: macos-13  # Intel runner
+            runtime: osx-x64
+            executable: SharpCaster.Console
+          - os: macos
+            arch: arm64
+            runner: macos-latest  # Apple Silicon runner
+            runtime: osx-arm64
+            executable: SharpCaster.Console
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '9.0.x'
+
+    # Platform-specific prerequisites
+    - name: Install Linux dependencies
+      if: matrix.os == 'linux'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y clang zlib1g-dev
+
+    - name: Install macOS dependencies
+      if: matrix.os == 'macos'
+      run: |
+        # Xcode command line tools should already be available on GitHub runners
+        xcode-select --print-path || echo "Xcode tools not found, but may still work"
+
+    - name: Restore dependencies
+      run: dotnet restore SharpCaster.sln
+
+    - name: Build AOT executable
+      working-directory: SharpCaster.Console
+      run: dotnet publish -r ${{ matrix.runtime }} -c Release --verbosity normal
+      env:
+        DOTNET_CLI_TELEMETRY_OPTOUT: 1
+
+    - name: Test executable
+      working-directory: SharpCaster.Console
+      run: |
+        $exePath = "bin/Release/net9.0/${{ matrix.runtime }}/publish/${{ matrix.executable }}"
+        if (Test-Path $exePath) {
+          Write-Host "✓ Executable found at: $exePath"
+          $sizeMB = [math]::Round((Get-Item $exePath).Length / 1MB, 2)
+          Write-Host "✓ Size: $sizeMB MB"
+          
+          # Test help command
+          & $exePath help | Select-Object -First 3
+          if ($LASTEXITCODE -eq 0) {
+            Write-Host "✓ Executable test passed"
+          } else {
+            Write-Host "⚠ Executable test failed with exit code $LASTEXITCODE"
+            exit 1
+          }
+        } else {
+          Write-Host "✗ Executable not found at: $exePath"
+          Get-ChildItem "bin/Release/net9.0/${{ matrix.runtime }}/publish/" -Recurse
+          exit 1
+        }
+      shell: pwsh
+
+    - name: Prepare artifact
+      working-directory: SharpCaster.Console
+      run: |
+        $publishDir = "bin/Release/net9.0/${{ matrix.runtime }}/publish"
+        $artifactDir = "artifact-${{ matrix.runtime }}"
+        
+        # Create artifact directory
+        New-Item -ItemType Directory -Force -Path $artifactDir
+        
+        # Copy executable and any required files
+        Copy-Item "$publishDir/${{ matrix.executable }}" "$artifactDir/"
+        
+        # Create info file
+        $content = "SharpCaster Console - AOT Build`n"
+        $content += "===============================`n"
+        $content += "Platform: ${{ matrix.os }} ${{ matrix.arch }}`n"
+        $content += "Runtime: ${{ matrix.runtime }}`n"
+        $content += "Build Date: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss UTC')`n"
+        $content += "Commit: $env:GITHUB_SHA`n"
+        $content += "Branch: $env:GITHUB_REF_NAME`n`n"
+        $content += "Usage:`n"
+        $content += "------`n"
+        $content += "# Interactive mode`n"
+        $content += "./${{ matrix.executable }}`n`n"
+        $content += "# Command-line mode`n"
+        $content += "./${{ matrix.executable }} `"device-name`" play `"https://example.com/video.mp4`"`n"
+        $content += "./${{ matrix.executable }} help`n`n"
+        $content += "For more information, see: https://github.com/Tapanila/SharpCaster"
+        $content | Out-File -FilePath "$artifactDir/README.txt" -Encoding UTF8
+        
+        # Get file size for artifact name
+        $sizeMB = [math]::Round((Get-Item "$publishDir/${{ matrix.executable }}").Length / 1MB, 2)
+        echo "ARTIFACT_SIZE=$sizeMB" >> $env:GITHUB_ENV
+      shell: pwsh
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: SharpCaster-Console-${{ matrix.runtime }}-${{ env.ARTIFACT_SIZE }}MB
+        path: SharpCaster.Console/artifact-${{ matrix.runtime }}/
+        retention-days: 30
+
+  # Create release if this is a tag
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Download all artifacts
+      uses: actions/download-artifact@v4
+      with:
+        path: artifacts/
+
+    - name: Prepare release assets
+      run: |
+        cd artifacts
+        for dir in SharpCaster-Console-*/; do
+          runtime=$(echo "$dir" | sed 's/SharpCaster-Console-\(.*\)-.*MB\//\1/')
+          echo "Creating archive for $runtime from $dir"
+          
+          cd "$dir"
+          if [[ "$runtime" == win-* ]]; then
+            # Windows - create zip
+            zip -r "../SharpCaster-Console-${runtime}.zip" .
+          else
+            # Linux/macOS - create tar.gz
+            tar -czf "../SharpCaster-Console-${runtime}.tar.gz" .
+          fi
+          cd ..
+        done
+        
+        # List created files
+        ls -la *.zip *.tar.gz
+
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          artifacts/*.zip
+          artifacts/*.tar.gz
+        draft: false
+        prerelease: false
+        generate_release_notes: true
+        body: |
+          ## SharpCaster Console AOT Builds
+          
+          Self-contained native executables for all supported platforms.
+          No .NET runtime installation required!
+          
+          ### Downloads:
+          - **Windows x64**: `SharpCaster-Console-win-x64.zip`
+          - **Windows ARM64**: `SharpCaster-Console-win-arm64.zip`
+          - **Linux x64**: `SharpCaster-Console-linux-x64.tar.gz`
+          - **Linux ARM64**: `SharpCaster-Console-linux-arm64.tar.gz`
+          - **macOS Intel**: `SharpCaster-Console-osx-x64.tar.gz`
+          - **macOS Apple Silicon**: `SharpCaster-Console-osx-arm64.tar.gz`
+          
+          ### Usage:
+          ```bash
+          # Interactive mode
+          ./SharpCaster.Console
+          
+          # Command-line mode
+          ./SharpCaster.Console "Living Room TV" play "https://example.com/video.mp4"
+          ```
+          
+          For detailed usage instructions, see the README.txt file included in each download.
