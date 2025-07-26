@@ -61,10 +61,24 @@ jobs:
 
     # Platform-specific prerequisites
     - name: Install Linux dependencies
-      if: matrix.os == 'linux'
+      if: matrix.os == 'linux' && matrix.arch == 'x64'
       run: |
         sudo apt-get update
         sudo apt-get install -y clang zlib1g-dev
+
+    - name: Install Linux dependencies (ARM64)
+      if: matrix.os == 'linux' && matrix.arch == 'arm64'
+      run: |
+        sudo dpkg --add-architecture arm64
+        sudo bash -c 'cat > /etc/apt/sources.list.d/arm64.list <<EOF
+        deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports/ noble main restricted
+        deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports/ noble-updates main restricted
+        deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports/ noble-backports main restricted universe multiverse
+        EOF'
+        sudo sed -i -e 's/deb http/deb [arch=amd64] http/g' /etc/apt/sources.list
+        sudo sed -i -e 's/deb mirror/deb [arch=amd64] mirror/g' /etc/apt/sources.list
+        sudo apt update
+        sudo apt install -y clang llvm binutils-aarch64-linux-gnu gcc-aarch64-linux-gnu zlib1g-dev:arm64
 
     - name: Install macOS dependencies
       if: matrix.os == 'macos'
