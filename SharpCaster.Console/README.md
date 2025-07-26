@@ -2,8 +2,6 @@
 
 A beautiful, feature-rich console application for controlling Chromecast devices with an intuitive interface powered by [Spectre.Console](https://spectreconsole.net/).
 
-![SharpCaster Console Demo](https://via.placeholder.com/800x400/1e1e2e/cdd6f4?text=SharpCaster+Console+Controller)
-
 ## ✨ Features
 
 - 🔍 **Device Discovery** - Automatically discover Chromecast devices on your network
@@ -19,7 +17,6 @@ A beautiful, feature-rich console application for controlling Chromecast devices
 
 ### Prerequisites
 
-- .NET 9.0 or later
 - Chromecast device(s) on the same network
 - Network access for device discovery
 
@@ -284,33 +281,6 @@ dotnet run --project SharpCaster.Console --configuration Release
 dotnet run --project SharpCaster.Console --verbosity detailed
 ```
 
-## ✨ Recent Improvements
-
-### v3.0 Updates - Guided Flow Experience
-
-- **🚀 Redesigned User Flow**: Complete overhaul to create a natural, step-by-step experience
-- **📋 Guided Workflow**: Application now guides users through discovery → selection → control phases
-- **🎯 Context-Aware Menus**: Different menu options available based on current application state
-- **🔄 Smart Navigation**: Seamless transitions between discovery, connection, and control modes
-- **💡 Quick Start Guide**: Built-in tutorial shows users exactly what to do next
-
-### v2.0 Updates
-
-- **🎨 Fixed Emoji Display**: Resolved issues with emoji rendering in menus by properly configuring UTF-8 encoding
-- **🔧 Enhanced Connection Monitoring**: Added real-time connection health checks that run every 30 seconds
-- **⚡ Smart Connection Detection**: Automatic detection of lost connections with helpful error messages
-- **🛡️ Improved Error Handling**: Better error messages with context-specific troubleshooting tips
-- **🔄 Connection Verification**: Post-connection validation ensures device is actually responding
-- **📊 Real-time Status**: Main menu shows current connection status at all times
-
-### Enhanced User Experience
-
-- **🌊 Natural Flow**: Application follows a logical progression from discovery to control
-- **📱 Mobile-like Experience**: Clear states and guided transitions like modern mobile apps
-- **Visual Feedback**: All operations now show spinning progress indicators
-- **Smart Validation**: Input validation prevents invalid URLs and values
-- **Contextual Help**: Troubleshooting tips appear automatically when issues are detected
-- **Graceful Degradation**: Application handles connection loss gracefully and guides users to reconnect
 
 ## 🔧 Troubleshooting
 
@@ -377,9 +347,7 @@ This project is licensed under the MIT License - see the main project LICENSE fi
 
 ## 🙏 Acknowledgments
 
-- Built on top of the excellent [SharpCaster](https://github.com/Tapanila/SharpCaster) library
 - UI powered by [Spectre.Console](https://spectreconsole.net/)
-- Thanks to the Google Cast SDK for the underlying protocol documentation
 
 ---
 

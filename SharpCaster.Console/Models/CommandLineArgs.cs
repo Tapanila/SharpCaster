@@ -10,6 +10,7 @@ public class CommandLineArgs
     public double? SeekTime { get; set; }
     public bool ShowHelp { get; set; }
     public bool ShowDevices { get; set; }
+    public bool ShowVersion { get; set; }
     public bool IsInteractive => string.IsNullOrEmpty(Command);
 }
 
@@ -34,6 +35,12 @@ public static class CommandLineParser
                 case "--help":
                 case "help":
                     result.ShowHelp = true;
+                    return result;
+                    
+                case "--version":
+                case "-v":
+                case "version":
+                    result.ShowVersion = true;
                     return result;
                     
                 case "--list-devices":
@@ -129,6 +136,7 @@ public static class CommandLineParser
         System.Console.WriteLine("  seek <seconds>          Seek to specific time in seconds");
         System.Console.WriteLine("  status                  Show current media status");
         System.Console.WriteLine("  list                    List available devices");
+        System.Console.WriteLine("  version                 Show application version");
         System.Console.WriteLine("  help                    Show this help");
         System.Console.WriteLine();
         System.Console.WriteLine("Options:");
@@ -166,5 +174,47 @@ public static class CommandLineParser
         System.Console.WriteLine("  - Audio: MP3, AAC, WAV, FLAC, OGG and other audio formats");
         System.Console.WriteLine("  - Images: JPG, PNG, GIF, WebP and other image formats");
         System.Console.WriteLine();
+    }
+
+    public static void ShowVersion()
+    {
+        var assembly = System.Reflection.Assembly.GetExecutingAssembly();
+        var version = assembly.GetName().Version?.ToString() ?? "Unknown";
+        
+        // For single-file apps, use AppContext.BaseDirectory instead of Assembly.Location
+        var buildDate = DateTime.Now; // Default fallback
+        try
+        {
+#pragma warning disable IL3000 // Assembly.Location is accessed - handled with fallback for single-file apps
+            var location = assembly.Location;
+#pragma warning restore IL3000
+            if (!string.IsNullOrEmpty(location))
+            {
+                buildDate = System.IO.File.GetLastWriteTime(location);
+            }
+            else
+            {
+                // Single-file app - try to get build date from base directory
+                var baseDir = System.AppContext.BaseDirectory;
+                var exePath = System.Diagnostics.Process.GetCurrentProcess().MainModule?.FileName;
+                if (!string.IsNullOrEmpty(exePath) && System.IO.File.Exists(exePath))
+                {
+                    buildDate = System.IO.File.GetLastWriteTime(exePath);
+                }
+            }
+        }
+        catch
+        {
+            // Fallback to current time if we can't determine build date
+        }
+        
+        System.Console.WriteLine($"SharpCaster Console v{version}");
+        System.Console.WriteLine($"Build Date: {buildDate:yyyy-MM-dd HH:mm:ss}");
+        System.Console.WriteLine($"Runtime: {System.Runtime.InteropServices.RuntimeInformation.FrameworkDescription}");
+        System.Console.WriteLine($"Platform: {System.Runtime.InteropServices.RuntimeInformation.OSDescription}");
+        System.Console.WriteLine($"Architecture: {System.Runtime.InteropServices.RuntimeInformation.OSArchitecture}");
+        System.Console.WriteLine();
+        System.Console.WriteLine("A .NET Chromecast controller library and console application");
+        System.Console.WriteLine("https://github.com/Tapanila/SharpCaster");
     }
 }

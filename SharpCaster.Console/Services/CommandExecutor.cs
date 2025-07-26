@@ -34,6 +34,12 @@ public class CommandExecutor
                 return 0;
             }
 
+            if (args.ShowVersion)
+            {
+                CommandLineParser.ShowVersion();
+                return 0;
+            }
+
             if (args.ShowDevices)
             {
                 return await ListDevicesAsync();

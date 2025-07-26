@@ -28,7 +28,7 @@ class Program
         var serviceProvider = services.BuildServiceProvider();
 
         // Check if this is command-line mode or interactive mode
-        if (!commandLineArgs.IsInteractive || commandLineArgs.ShowHelp || commandLineArgs.ShowDevices)
+        if (!commandLineArgs.IsInteractive || commandLineArgs.ShowHelp || commandLineArgs.ShowDevices || commandLineArgs.ShowVersion)
         {
             // Command-line mode
             var commandExecutor = serviceProvider.GetRequiredService<CommandExecutor>();

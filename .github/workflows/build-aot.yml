@@ -81,22 +81,34 @@ jobs:
       env:
         DOTNET_CLI_TELEMETRY_OPTOUT: 1
 
-    - name: Rename executable
+    - name: Rename executable (Windows)
+      if: matrix.os == 'windows'
       working-directory: SharpCaster.Console
       run: |
         $publishDir = "bin/Release/net9.0/${{ matrix.runtime }}/publish"
         if (Test-Path "$publishDir/SharpCaster.Console.exe") {
           Rename-Item "$publishDir/SharpCaster.Console.exe" "$publishDir/${{ matrix.executable }}"
           Write-Host "✓ Renamed SharpCaster.Console.exe to ${{ matrix.executable }}"
-        } elseif (Test-Path "$publishDir/SharpCaster.Console") {
-          Rename-Item "$publishDir/SharpCaster.Console" "$publishDir/${{ matrix.executable }}"
-          Write-Host "✓ Renamed SharpCaster.Console to ${{ matrix.executable }}"
         } else {
-          Write-Host "✗ Could not find executable to rename"
+          Write-Host "✗ Could not find SharpCaster.Console.exe to rename"
           Get-ChildItem $publishDir
           exit 1
         }
       shell: pwsh
+
+    - name: Rename executable (Unix)
+      if: matrix.os != 'windows'
+      working-directory: SharpCaster.Console
+      run: |
+        publishDir="bin/Release/net9.0/${{ matrix.runtime }}/publish"
+        if [ -f "$publishDir/SharpCaster.Console" ]; then
+          mv "$publishDir/SharpCaster.Console" "$publishDir/${{ matrix.executable }}"
+          echo "✓ Renamed SharpCaster.Console to ${{ matrix.executable }}"
+        else
+          echo "✗ Could not find SharpCaster.Console to rename"
+          ls -la "$publishDir"
+          exit 1
+        fi
 
     - name: Verify executable
       working-directory: SharpCaster.Console

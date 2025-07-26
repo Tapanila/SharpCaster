@@ -43,7 +43,11 @@ public class UIHelper
         
         AnsiConsole.WriteLine();
         AnsiConsole.MarkupLine("[dim]A powerful console interface for controlling Chromecast devices[/]");
-        AnsiConsole.MarkupLine("[dim]💡 Your session history will be preserved throughout - no screen clearing![/]");
+        
+        // Show version information
+        var assembly = System.Reflection.Assembly.GetExecutingAssembly();
+        var version = assembly.GetName().Version?.ToString() ?? "Unknown";
+        AnsiConsole.MarkupLine($"[dim]Version: [/][yellow]{version}[/]");
         AnsiConsole.WriteLine();
         
         // Show the flow steps
