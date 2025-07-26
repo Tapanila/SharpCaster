@@ -19,36 +19,36 @@ jobs:
             arch: x64
             runner: windows-latest
             runtime: win-x64
-            executable: SharpCaster.Console.exe
+            executable: sharpcaster.exe
           - os: windows
             arch: arm64
             runner: windows-latest
             runtime: win-arm64
-            executable: SharpCaster.Console.exe
-          
+            executable: sharpcaster.exe
+
           # Linux builds
           - os: linux
             arch: x64
             runner: ubuntu-latest
             runtime: linux-x64
-            executable: SharpCaster.Console
+            executable: sharpcaster
           - os: linux
             arch: arm64
             runner: ubuntu-24.04-arm
             runtime: linux-arm64
-            executable: SharpCaster.Console
-          
+            executable: sharpcaster
+
           # macOS builds
           - os: macos
             arch: x64
             runner: macos-13  # Intel runner
             runtime: osx-x64
-            executable: SharpCaster.Console
+            executable: sharpcaster
           - os: macos
             arch: arm64
             runner: macos-latest  # Apple Silicon runner
             runtime: osx-arm64
-            executable: SharpCaster.Console
+            executable: sharpcaster
 
     steps:
     - name: Checkout code
@@ -80,6 +80,23 @@ jobs:
       run: dotnet publish -r ${{ matrix.runtime }} -c Release --verbosity normal
       env:
         DOTNET_CLI_TELEMETRY_OPTOUT: 1
+
+    - name: Rename executable
+      working-directory: SharpCaster.Console
+      run: |
+        $publishDir = "bin/Release/net9.0/${{ matrix.runtime }}/publish"
+        if (Test-Path "$publishDir/SharpCaster.Console.exe") {
+          Rename-Item "$publishDir/SharpCaster.Console.exe" "$publishDir/${{ matrix.executable }}"
+          Write-Host "✓ Renamed SharpCaster.Console.exe to ${{ matrix.executable }}"
+        } elseif (Test-Path "$publishDir/SharpCaster.Console") {
+          Rename-Item "$publishDir/SharpCaster.Console" "$publishDir/${{ matrix.executable }}"
+          Write-Host "✓ Renamed SharpCaster.Console to ${{ matrix.executable }}"
+        } else {
+          Write-Host "✗ Could not find executable to rename"
+          Get-ChildItem $publishDir
+          exit 1
+        }
+      shell: pwsh
 
     - name: Verify executable
       working-directory: SharpCaster.Console
