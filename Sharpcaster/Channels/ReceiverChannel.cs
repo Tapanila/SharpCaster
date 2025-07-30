@@ -17,6 +17,9 @@ namespace Sharpcaster.Channels
         public ChromecastStatus ReceiverStatus { get => receiverStatus; }
         private ChromecastStatus receiverStatus;
 
+        private static readonly Action<ILogger, double, Exception?> LogInvalidVolumeLevel =
+            LoggerMessage.Define<double>(LogLevel.Error, new EventId(3001, "InvalidVolumeLevel"), "level must be between 0.0 and 1.0 - is {Level}");
+
         public ReceiverChannel(ILogger<ReceiverChannel>? logger = null) : base("receiver", logger)
         {
         }
@@ -51,7 +54,7 @@ namespace Sharpcaster.Channels
         {
             if (level < 0 || level > 1.0)
             {
-                Logger?.LogError("level must be between 0.0 and 1.0 - is {Level}", level);
+                if (Logger != null) LogInvalidVolumeLevel(Logger, level, null);
                 throw new ArgumentException("level must be between 0.0 and 1.0", nameof(level));
             }
             var setVolumeMessage = new SetVolumeMessage() { Volume = new Models.Volume() { Level = level } };

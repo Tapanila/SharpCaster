@@ -32,6 +32,9 @@ namespace Sharpcaster.Channels
 
         public MediaStatus? MediaStatus { get => mediaStatus; }
         private MediaStatus? mediaStatus;
+
+        private static readonly Action<ILogger, string, Exception?> LogErrorSendingMessage =
+            LoggerMessage.Define<string>(LogLevel.Error, new EventId(2001, "SendMessageError"), "Error sending message: {ExceptionMessage}");
         /// <summary>
         /// Initializes a new instance of MediaChannel class
         /// </summary>
@@ -55,7 +58,7 @@ namespace Sharpcaster.Channels
             }
             catch (Exception ex)
             {
-                Logger?.LogError("Error sending message: {ExceptionMessage}", ex.Message);
+                if (Logger != null) LogErrorSendingMessage(Logger, ex.Message, ex);
                 mediaStatus = null;
                 throw;
             }

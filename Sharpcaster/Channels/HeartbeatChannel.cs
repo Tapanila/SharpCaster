@@ -19,6 +19,18 @@ namespace Sharpcaster.Channels
         private readonly Timer _timer;
         private bool disposedValue;
 
+        private static readonly Action<ILogger, Exception?> LogPongSent =
+            LoggerMessage.Define(LogLevel.Debug, new EventId(1001, nameof(OnMessageReceivedAsync)), "Pong sent - Heartbeat Timer restarted.");
+
+        private static readonly Action<ILogger, Exception?> LogHeartbeatTimerStarted =
+            LoggerMessage.Define(LogLevel.Trace, new EventId(1002, nameof(StartTimeoutTimer)), "Started heartbeat timeout timer");
+
+        private static readonly Action<ILogger, Exception?> LogHeartbeatTimerStopped =
+            LoggerMessage.Define(LogLevel.Trace, new EventId(1003, nameof(StopTimeoutTimer)), "Stopped heartbeat timeout timer");
+
+        private static readonly Action<ILogger, Exception?> LogHeartbeatTimeout =
+            LoggerMessage.Define(LogLevel.Information, new EventId(1004, nameof(TimerElapsed)), "Heartbeat timeout");
+
         /// <summary>
         /// Initializes a new instance of HeartbeatChannel class
         /// </summary>
@@ -43,24 +55,24 @@ namespace Sharpcaster.Channels
             var pongMessage = new PongMessage();
             await SendAsync(JsonSerializer.Serialize(pongMessage, SharpcasteSerializationContext.Default.PongMessage)).ConfigureAwait(false);
             _timer.Start();
-            Logger?.LogDebug("Pong sent - Heartbeat Timer restarted.");
+            if (Logger != null) LogPongSent(Logger, null);
         }
 
         public void StartTimeoutTimer()
         {
             _timer.Start();
-            Logger?.LogTrace("Started heartbeat timeout timer");
+            if (Logger != null) LogHeartbeatTimerStarted(Logger, null);
         }
 
         public void StopTimeoutTimer()
         {
             _timer.Stop();
-            Logger?.LogTrace("Stopped heartbeat timeout timer");
+            if (Logger != null) LogHeartbeatTimerStopped(Logger, null);
         }
 
         private void TimerElapsed(object sender, ElapsedEventArgs e)
         {
-            Logger?.LogInformation("Heartbeat timeout");
+            if (Logger != null) LogHeartbeatTimeout(Logger, null);
             StatusChanged?.Invoke(this, e);
         }
 

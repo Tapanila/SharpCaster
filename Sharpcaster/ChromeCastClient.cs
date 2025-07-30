@@ -47,6 +47,39 @@ namespace Sharpcaster
         public MultiZoneChannel MultiZoneChannel => GetChannel<MultiZoneChannel>();
 
         private ILogger? _logger;
+
+        private static readonly Action<ILogger, string, Exception?> LogMessageTypes =
+            LoggerMessage.Define<string>(LogLevel.Debug, new EventId(4001, "MessageTypes"), "MessageTypes: {MessageTypes}");
+
+        private static readonly Action<ILogger, string, Exception?> LogChannels =
+            LoggerMessage.Define<string>(LogLevel.Debug, new EventId(4002, "Channels"), "Channels: {Channels}");
+
+        private static readonly Action<ILogger, Exception?> LogHeartbeatTimeout =
+            LoggerMessage.Define(LogLevel.Error, new EventId(4003, "HeartbeatTimeout"), "Heartbeat timeout - Disconnecting client.");
+
+        private static readonly Action<ILogger, string, Exception?> LogReceivedMessage =
+            LoggerMessage.Define<string>(LogLevel.Trace, new EventId(4004, "ReceivedMessage"), "RECEIVED: {Payload}");
+
+        private static readonly Action<ILogger, int, int, string, Exception?> LogNoTaskCompletionSource =
+            LoggerMessage.Define<int, int, string>(LogLevel.Trace, new EventId(4005, "NoTaskCompletionSource"), "No TaskCompletionSource found for RequestId: {RequestId}, CompletionSourceCount: {CompletionSourceCount}, Type: {Type} ");
+
+        private static readonly Action<ILogger, string, Exception?> LogExceptionProcessingResponse =
+            LoggerMessage.Define<string>(LogLevel.Error, new EventId(4006, "ExceptionProcessingResponse"), "Exception processing the Response: {Message}");
+
+        private static readonly Action<ILogger, string, Exception?> LogMessageConversionError =
+            LoggerMessage.Define<string>(LogLevel.Error, new EventId(4007, "MessageConversionError"), "The received Message of Type '{Ty}' can not be converted to its response Type. Please add it to the registered Services in Dependency Injection");
+
+        private static readonly Action<ILogger, string, string, Exception?> LogChannelParseError =
+            LoggerMessage.Define<string, string>(LogLevel.Error, new EventId(4008, "ChannelParseError"), "Couldn't parse the channel from: {NameSpace} : {Payload}");
+
+        private static readonly Action<ILogger, string, Exception?> LogReceiveLoopError =
+            LoggerMessage.Define<string>(LogLevel.Error, new EventId(4009, "ReceiveLoopError"), "Error in receive loop: {Message}");
+
+        private static readonly Action<ILogger, string, string, string, Exception?> LogSentMessage =
+            LoggerMessage.Define<string, string, string>(LogLevel.Trace, new EventId(4010, "SentMessage"), "SENT: {NameSpace} - {DestinationId}: {PayloadUtf8}");
+
+        private static readonly Action<ILogger, string, Exception?> LogDisposeError =
+            LoggerMessage.Define<string>(LogLevel.Error, new EventId(4011, "DisposeError"), "Error on disposing. {Message}");
         private TcpClient? _client;
         private SslStream? _stream;
         private CancellationTokenSource _cancellationTokenSource;
@@ -115,8 +148,8 @@ namespace Sharpcaster
             Channels = channels;
 
             _logger = _serviceProvider.GetService<ILogger<ChromecastClient>>();
-            _logger?.LogDebug("MessageTypes: {MessageTypes}", MessageTypes.Keys.ToString(","));
-            _logger?.LogDebug("Channels: {Channels}", Channels.ToString(","));
+            if (_logger != null) LogMessageTypes(_logger, string.Join(",", MessageTypes.Keys), null);
+            if (_logger != null) LogChannels(_logger, string.Join(",", Channels.Select(c => c.GetType().Name)), null);
 
             foreach (var channel in Channels)
             {
@@ -159,7 +192,7 @@ namespace Sharpcaster
 
         private async void HeartBeatTimedOut(object sender, EventArgs e)
         {
-            _logger?.LogError("Heartbeat timeout - Disconnecting client.");
+            if (_logger != null) LogHeartbeatTimeout(_logger, null);
             await DisconnectAsync().ConfigureAwait(false);
         }
 
@@ -188,7 +221,7 @@ namespace Sharpcaster
                                                                                               {
                                                                                                   HeartbeatChannel.StopTimeoutTimer();
                                                                                               }
-                                                                                              channel?.Logger?.LogTrace("RECEIVED: {Payload}", payload);
+                                                                                              if (channel?.Logger != null) LogReceivedMessage(channel.Logger, payload, null);
 
                                                                                               var message = JsonSerializer.Deserialize(payload, SharpcasteSerializationContext.Default.MessageWithId);
                                                                                               if (MessageTypes.TryGetValue(message.Type, out Type type))
@@ -201,12 +234,12 @@ namespace Sharpcaster
                                                                                                           WaitingTasks.TryRemove(message.RequestId, out SharpCasterTaskCompletionSource? tcs);
                                                                                                           tcs?.SetResult(payload);
                                                                                                           if (tcs == null)
-                                                                                                              _logger?.LogTrace("No TaskCompletionSource found for RequestId: {RequestId}, CompletionSourceCount: {CompletionSourceCount}, Type: {Type} ", message.RequestId, WaitingTasks.Count, message.Type);
+                                                                                                              if (_logger != null) LogNoTaskCompletionSource(_logger, message.RequestId, WaitingTasks.Count, message.Type, null);
                                                                                                       }
                                                                                                   }
                                                                                                   catch (Exception ex)
                                                                                                   {
-                                                                                                      _logger?.LogError("Exception processing the Response: {Message}", ex.Message);
+                                                                                                      if (_logger != null) LogExceptionProcessingResponse(_logger, ex.Message, ex);
                                                                                                       if (message.HasRequestId)
                                                                                                       {
                                                                                                           WaitingTasks.TryRemove(message.RequestId, out SharpCasterTaskCompletionSource? tcs);
@@ -216,20 +249,19 @@ namespace Sharpcaster
                                                                                               }
                                                                                               else
                                                                                               {
-                                                                                                  _logger?.LogError("The received Message of Type '{Ty}' can not be converted to its response Type." +
-                                                                                                     " An implementing IMessage class is missing!", message.Type);
+                                                                                                  if (_logger != null) LogMessageConversionError(_logger, message.Type, null);
                                                                                                   Debugger.Break();
                                                                                               }
                                                                                           }
                                                                                           else
                                                                                           {
-                                                                                              _logger?.LogError("Couldn't parse the channel from: {NameSpace} : {Payload}", castMessage.Namespace, payload);
+                                                                                              if (_logger != null) LogChannelParseError(_logger, castMessage.Namespace, payload, null);
                                                                                           }
                                                                                       }
                                                                                   }
                                                                                   catch (Exception exception)
                                                                                   {
-                                                                                      _logger?.LogError("Error in receive loop: {Message}", exception.Message);
+                                                                                      if (_logger != null) LogReceiveLoopError(_logger, exception.Message, exception);
                                                                                       ReceiveTcs.SetResult(true);
                                                                                   }
                                                                               }, cancellationToken);
@@ -246,7 +278,8 @@ namespace Sharpcaster
             await SendSemaphoreSlim.WaitAsync().ConfigureAwait(false);
             try
             {
-                (logger ?? _logger)?.LogTrace("SENT: {NameSpace} - {DestinationId}: {PayloadUtf8}", castMessage.Namespace, castMessage.DestinationId, castMessage.PayloadUtf8);
+                var loggerToUse = logger ?? _logger;
+                if (loggerToUse != null) LogSentMessage(loggerToUse, castMessage.Namespace, castMessage.DestinationId, castMessage.PayloadUtf8, null);
 #if NETSTANDARD2_0
                 byte[] message = castMessage.ToProto();
 #else
@@ -328,7 +361,7 @@ namespace Sharpcaster
                 }
                 catch (Exception ex)
                 {
-                    _logger?.LogError("Error on disposing. {Message}", ex.Message);
+                    if (_logger != null) LogDisposeError(_logger, ex.Message, ex);
                 }
                 finally
                 {
