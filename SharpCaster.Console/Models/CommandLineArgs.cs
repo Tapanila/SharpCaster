@@ -3,6 +3,7 @@ namespace SharpCaster.Console.Models;
 public class CommandLineArgs
 {
     public string? DeviceName { get; set; }
+    public string? DeviceIpAddress { get; set; }
     public string? Command { get; set; }
     public string? MediaUrl { get; set; }
     public string? MediaTitle { get; set; }
@@ -68,6 +69,14 @@ public static class CommandLineParser
                     result.Command = "seek";
                     break;
                     
+                case "--ip":
+                case "-i":
+                    if (i + 1 < args.Length)
+                    {
+                        result.DeviceIpAddress = args[++i];
+                    }
+                    break;
+                    
                 case "--title":
                 case "-t":
                     if (i + 1 < args.Length)
@@ -116,16 +125,21 @@ public static class CommandLineParser
                (uri.Scheme == "http" || uri.Scheme == "https");
     }
     
+    private static bool IsIPAddress(string value)
+    {
+        return System.Net.IPAddress.TryParse(value, out _);
+    }
+    
     public static void ShowHelp()
     {
         System.Console.WriteLine();
-        System.Console.WriteLine("SharpCaster Console Controller - Command Line Usage");
+        System.Console.WriteLine("sharpcaster - Command Line Usage");
         System.Console.WriteLine();
         System.Console.WriteLine("Interactive Mode:");
-        System.Console.WriteLine("  SharpCaster.Console");
+        System.Console.WriteLine("  sharpcaster");
         System.Console.WriteLine();
         System.Console.WriteLine("Command Line Mode:");
-        System.Console.WriteLine("  SharpCaster.Console <device-name> <command> [options]");
+        System.Console.WriteLine("  sharpcaster <device-name> <command> [options]");
         System.Console.WriteLine();
         System.Console.WriteLine("Commands:");
         System.Console.WriteLine("  play <url>              Cast and play media from URL");
@@ -140,29 +154,35 @@ public static class CommandLineParser
         System.Console.WriteLine("  help                    Show this help");
         System.Console.WriteLine();
         System.Console.WriteLine("Options:");
+        System.Console.WriteLine("  --ip <ip-address>       Connect directly to device IP (skips discovery)");
+        System.Console.WriteLine("  -i <ip-address>         Short form of --ip");
         System.Console.WriteLine("  --title <title>         Set media title (for play/cast commands)");
         System.Console.WriteLine("  -t <title>              Short form of --title");
         System.Console.WriteLine();
         System.Console.WriteLine("Examples:");
         System.Console.WriteLine("  # Interactive mode");
-        System.Console.WriteLine("  SharpCaster.Console");
+        System.Console.WriteLine("  sharpcaster");
         System.Console.WriteLine();
         System.Console.WriteLine("  # List available devices");
-        System.Console.WriteLine("  SharpCaster.Console list");
+        System.Console.WriteLine("  sharpcaster list");
         System.Console.WriteLine();
         System.Console.WriteLine("  # Cast media to specific device");
-        System.Console.WriteLine("  SharpCaster.Console \"Living Room TV\" play \"https://example.com/video.mp4\"");
+        System.Console.WriteLine("  sharpcaster \"Living Room TV\" play \"https://example.com/video.mp4\"");
         System.Console.WriteLine();
         System.Console.WriteLine("  # Cast with custom title");
-        System.Console.WriteLine("  SharpCaster.Console \"Office TV\" play \"https://example.com/video.mp4\" --title \"My Video\"");
+        System.Console.WriteLine("  sharpcaster \"Office TV\" play \"https://example.com/video.mp4\" --title \"My Video\"");
+        System.Console.WriteLine();
+        System.Console.WriteLine("  # Connect directly using IP address (skips discovery)");
+        System.Console.WriteLine("  sharpcaster --ip 192.168.1.100 play \"https://example.com/video.mp4\"");
+        System.Console.WriteLine("  sharpcaster -i 192.168.1.100 status");
         System.Console.WriteLine();
         System.Console.WriteLine("  # Control playback");
-        System.Console.WriteLine("  SharpCaster.Console \"Kitchen Speaker\" pause");
-        System.Console.WriteLine("  SharpCaster.Console \"Bedroom TV\" volume 0.7");
-        System.Console.WriteLine("  SharpCaster.Console \"Living Room TV\" seek 120");
+        System.Console.WriteLine("  sharpcaster \"Kitchen Speaker\" pause");
+        System.Console.WriteLine("  sharpcaster \"Bedroom TV\" volume 0.7");
+        System.Console.WriteLine("  sharpcaster \"Living Room TV\" seek 120");
         System.Console.WriteLine();
         System.Console.WriteLine("  # Check status");
-        System.Console.WriteLine("  SharpCaster.Console \"Office TV\" status");
+        System.Console.WriteLine("  sharpcaster \"Office TV\" status");
         System.Console.WriteLine();
         System.Console.WriteLine("Device Matching:");
         System.Console.WriteLine("  - Device names are matched case-insensitively");
@@ -208,7 +228,7 @@ public static class CommandLineParser
             // Fallback to current time if we can't determine build date
         }
         
-        System.Console.WriteLine($"SharpCaster Console v{version}");
+        System.Console.WriteLine($"sharpcaster v{version}");
         System.Console.WriteLine($"Build Date: {buildDate:yyyy-MM-dd HH:mm:ss}");
         System.Console.WriteLine($"Runtime: {System.Runtime.InteropServices.RuntimeInformation.FrameworkDescription}");
         System.Console.WriteLine($"Platform: {System.Runtime.InteropServices.RuntimeInformation.OSDescription}");

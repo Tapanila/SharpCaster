@@ -45,33 +45,57 @@ public class CommandExecutor
                 return await ListDevicesAsync();
             }
 
-            if (string.IsNullOrEmpty(args.DeviceName) || string.IsNullOrEmpty(args.Command))
+            if (string.IsNullOrEmpty(args.Command))
             {
-                System.Console.WriteLine("Error: Device name and command are required for command-line mode.");
-                System.Console.WriteLine("Use 'SharpCaster.Console help' for usage information.");
+                System.Console.WriteLine("Error: Command is required for command-line mode.");
+                System.Console.WriteLine("Use 'sharpcaster help' for usage information.");
                 return 1;
             }
 
-            // Discover devices
-            await DiscoverDevicesQuietAsync();
-            
-            if (_state.Devices.Count == 0)
-            {
-                System.Console.WriteLine("Error: No Chromecast devices found on the network.");
-                return 1;
-            }
+            Sharpcaster.Models.ChromecastReceiver device;
 
-            // Find matching device
-            var device = FindDevice(args.DeviceName);
-            if (device == null)
+            // Handle direct IP connection
+            if (!string.IsNullOrEmpty(args.DeviceIpAddress))
             {
-                System.Console.WriteLine($"Error: Device '{args.DeviceName}' not found.");
-                System.Console.WriteLine("Available devices:");
-                foreach (var d in _state.Devices)
+                if (!System.Net.IPAddress.TryParse(args.DeviceIpAddress, out _))
                 {
-                    System.Console.WriteLine($"  - {d.Name} ({d.Model})");
+                    System.Console.WriteLine($"Error: Invalid IP address '{args.DeviceIpAddress}'.");
+                    return 1;
                 }
-                return 1;
+
+                device = CreateDeviceFromIpAddress(args.DeviceIpAddress);
+                System.Console.WriteLine($"Connecting directly to {args.DeviceIpAddress}...");
+            }
+            else
+            {
+                // Discover devices and find by name
+                if (string.IsNullOrEmpty(args.DeviceName))
+                {
+                    System.Console.WriteLine("Error: Either device name or IP address is required for command-line mode.");
+                    System.Console.WriteLine("Use 'sharpcaster help' for usage information.");
+                    return 1;
+                }
+
+                await DiscoverDevicesQuietAsync();
+                
+                if (_state.Devices.Count == 0)
+                {
+                    System.Console.WriteLine("Error: No Chromecast devices found on the network.");
+                    return 1;
+                }
+
+                // Find matching device
+                device = FindDevice(args.DeviceName);
+                if (device == null)
+                {
+                    System.Console.WriteLine($"Error: Device '{args.DeviceName}' not found.");
+                    System.Console.WriteLine("Available devices:");
+                    foreach (var d in _state.Devices)
+                    {
+                        System.Console.WriteLine($"  - {d.Name} ({d.Model})");
+                    }
+                    return 1;
+                }
             }
 
             // Connect to device
@@ -84,7 +108,10 @@ public class CommandExecutor
                 return 1;
             }
 
-            System.Console.WriteLine($"Connected to {device.Name}");
+            var connectionInfo = !string.IsNullOrEmpty(args.DeviceIpAddress) 
+                ? $"device at {args.DeviceIpAddress}" 
+                : device.Name;
+            System.Console.WriteLine($"Connected to {connectionInfo}");
 
             // Execute command
             return await ExecuteSpecificCommandAsync(args);
@@ -180,6 +207,20 @@ public class CommandExecutor
         return partialMatch;
     }
 
+    private Sharpcaster.Models.ChromecastReceiver CreateDeviceFromIpAddress(string ipAddress)
+    {
+        return new Sharpcaster.Models.ChromecastReceiver
+        {
+            DeviceUri = new Uri($"https://{ipAddress}:8009"),
+            Name = $"Chromecast at {ipAddress}",
+            Port = 8009,
+            Model = "Unknown",
+            Version = "Unknown",
+            Status = "0",
+            ExtraInformation = new Dictionary<string, string>()
+        };
+    }
+
     private async Task<int> ExecuteSpecificCommandAsync(CommandLineArgs args)
     {
         try
@@ -221,7 +262,7 @@ public class CommandExecutor
                     
                 default:
                     System.Console.WriteLine($"Error: Unknown command '{args.Command}'.");
-                    System.Console.WriteLine("Use 'SharpCaster.Console help' for available commands.");
+                    System.Console.WriteLine("Use 'sharpcaster help' for available commands.");
                     return 1;
             }
         }

@@ -133,3 +133,92 @@ The MediaChannel now supports comprehensive Google Cast SDK functionality:
 - All MediaChannel methods return nullable `MediaStatus?` for error handling
 - Use `MediaStatus.SupportedMediaCommands` to check available commands
 - Monitor `MediaChannel.StatusChanged` event for real-time updates
+
+## SharpCaster Console Application
+
+The console application (`SharpCaster.Console`) provides both interactive and command-line interfaces for controlling Chromecast devices. The executable is distributed as `sharpcaster` for end users.
+
+### Running the Console Application
+```bash
+# Build console application
+dotnet build SharpCaster.Console/SharpCaster.Console.csproj
+
+# Run in interactive mode
+dotnet run --project SharpCaster.Console/SharpCaster.Console.csproj
+
+# Run with command line arguments
+dotnet run --project SharpCaster.Console/SharpCaster.Console.csproj -- <args>
+```
+
+### Command Line Usage
+
+#### Basic Commands
+- `help` - Show usage information
+- `list` - List available Chromecast devices on network
+- `version` - Show application version information
+
+#### Media Control Commands
+- `play <url>` - Cast and play media from URL
+- `pause` - Pause current media
+- `stop` - Stop current media  
+- `volume <0.0-1.0>` - Set volume level
+- `seek <seconds>` - Seek to specific time
+- `status` - Show current device and media status
+
+#### Device Connection Options
+- **Discovery Mode (Default)**: `sharpcaster <device-name> <command>`
+  - Uses mDNS discovery to find devices on network
+  - Supports partial name matching (case-insensitive)
+  - Example: `sharpcaster "Living Room TV" play "https://example.com/video.mp4"`
+
+- **Direct IP Mode**: `sharpcaster --ip <ip-address> <command>`
+  - Connects directly to device IP address, bypassing discovery
+  - Faster connection when IP is known
+  - Useful for automation and scripting
+  - Example: `sharpcaster --ip 192.168.1.100 play "https://example.com/video.mp4"`
+
+#### Additional Options
+- `--title <title>` or `-t <title>` - Set custom media title
+- `--ip <ip-address>` or `-i <ip-address>` - Connect directly to IP (skips discovery)
+
+#### Examples
+```bash
+# Interactive mode
+sharpcaster
+
+# List devices
+sharpcaster list
+
+# Play media on discovered device
+sharpcaster "Office TV" play "https://example.com/video.mp4" --title "My Video"
+
+# Connect directly to IP and play media
+sharpcaster --ip 192.168.1.100 play "https://example.com/video.mp4"
+
+# Control playback
+sharpcaster "Kitchen Speaker" pause
+sharpcaster --ip 192.168.1.100 volume 0.7
+sharpcaster "Bedroom TV" seek 120
+
+# Check status
+sharpcaster "Living Room TV" status
+```
+
+### Console Application Architecture
+
+#### Key Components
+- **Program.cs** - Entry point with dependency injection setup
+- **CommandLineArgs.cs** - Command line argument parsing and validation
+- **CommandExecutor.cs** - Executes commands in non-interactive mode
+- **DeviceService.cs** - Device discovery and connection management
+- **ApplicationFlows.cs** - Interactive mode user interface flows
+- **Controllers/** - Media and queue control logic
+- **UI/UIHelper.cs** - Console UI utilities using Spectre.Console
+
+#### Direct IP Connection Feature
+When `--ip` option is used:
+1. IP address validation using `System.Net.IPAddress.TryParse()`
+2. Creates `ChromecastReceiver` object directly with IP:8009
+3. Skips mDNS discovery entirely for faster connection
+4. Handles connection failures with clear error messages
+5. Works with all media control commands
