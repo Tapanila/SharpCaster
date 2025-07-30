@@ -515,7 +515,7 @@ namespace Sharpcaster.Test
 
             var style = new TextTrackStyle
             {
-                EdgeColor = CastColor.Colors.Green, // Using predefined color
+                EdgeColor = CastColors.Green, // Using predefined color
                 ForegroundColor = CastColor.FromRgb(255, 255, 255), // White text
                 BackgroundColor = CastColor.FromRgba(0, 0, 0, 128), // Semi-transparent black background  
                 EdgeType = TextTrackEdgeType.OUTLINE,

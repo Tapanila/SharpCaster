@@ -95,12 +95,12 @@ namespace Sharpcaster.Test
             {
                 Url = "https://mallow.fi/",
                 Type = "load",
-                SessionId = client.GetChromecastStatus().Application.SessionId
+                SessionId = client.ChromecastStatus.Application.SessionId
             };
 
             var requestPayload = JsonSerializer.Serialize(req, WebMessageSerializationContext.Default.WebMessage);
 
-            await client.SendAsync(null, "urn:x-cast:com.boombatower.chromecast-dashboard", requestPayload, client.GetChromecastStatus().Application.SessionId);
+            await client.SendAsync(null, "urn:x-cast:com.boombatower.chromecast-dashboard", requestPayload, client.ChromecastStatus.Application.SessionId);
         }
     }
 }

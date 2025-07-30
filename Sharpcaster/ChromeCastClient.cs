@@ -376,7 +376,7 @@ namespace Sharpcaster
         {
             if (joinExistingApplicationSession)
             {
-                var status = GetChromecastStatus();
+                var status = ChromecastStatus;
                 var runningApplication = status?.Applications?.FirstOrDefault(x => x.AppId == applicationId);
                 if (runningApplication != null)
                 {
@@ -396,8 +396,8 @@ namespace Sharpcaster
         }
 
 
-        public ChromecastStatus GetChromecastStatus() => ReceiverChannel.ReceiverStatus;
+        public ChromecastStatus ChromecastStatus => ReceiverChannel.ReceiverStatus;
 
-        public MediaStatus GetMediaStatus() => MediaChannel.MediaStatus;
+        public MediaStatus? MediaStatus => MediaChannel.MediaStatus;
     }
 }

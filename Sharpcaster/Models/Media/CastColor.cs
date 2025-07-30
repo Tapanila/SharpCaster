@@ -13,7 +13,7 @@ namespace Sharpcaster.Models.Media
     {
         private readonly string _value;
 
-        private CastColor(string value)
+        public CastColor(string value)
         {
             _value = value ?? throw new ArgumentNullException(nameof(value));
         }
@@ -128,25 +128,6 @@ namespace Sharpcaster.Models.Media
         }
 
         /// <summary>
-        /// Predefined common colors
-        /// </summary>
-        public static class Colors
-        {
-            public static readonly CastColor Transparent = new CastColor("#00000000");
-            public static readonly CastColor Black = new CastColor("#000000FF");
-            public static readonly CastColor White = new CastColor("#FFFFFFFF");
-            public static readonly CastColor Red = new CastColor("#FF0000FF");
-            public static readonly CastColor Green = new CastColor("#00FF00FF");
-            public static readonly CastColor Blue = new CastColor("#0000FFFF");
-            public static readonly CastColor Yellow = new CastColor("#FFFF00FF");
-            public static readonly CastColor Cyan = new CastColor("#00FFFFFF");
-            public static readonly CastColor Magenta = new CastColor("#FF00FFFF");
-            public static readonly CastColor Gray = new CastColor("#808080FF");
-            public static readonly CastColor DarkGray = new CastColor("#404040FF");
-            public static readonly CastColor LightGray = new CastColor("#C0C0C0FF");
-        }
-
-        /// <summary>
         /// Returns the color as a hex string suitable for Cast API
         /// </summary>
         /// <returns>Hex color string</returns>
@@ -175,6 +156,25 @@ namespace Sharpcaster.Models.Media
     }
 
     /// <summary>
+    /// Predefined common colors
+    /// </summary>
+    public static class CastColors
+    {
+        public static readonly CastColor Transparent = new("#00000000");
+        public static readonly CastColor Black = new("#000000FF");
+        public static readonly CastColor White = new("#FFFFFFFF");
+        public static readonly CastColor Red = new("#FF0000FF");
+        public static readonly CastColor Green = new("#00FF00FF");
+        public static readonly CastColor Blue = new("#0000FFFF");
+        public static readonly CastColor Yellow = new("#FFFF00FF");
+        public static readonly CastColor Cyan = new("#00FFFFFF");
+        public static readonly CastColor Magenta = new("#FF00FFFF");
+        public static readonly CastColor Gray = new("#808080FF");
+        public static readonly CastColor DarkGray = new("#404040FF");
+        public static readonly CastColor LightGray = new("#C0C0C0FF");
+    }
+
+    /// <summary>
     /// JSON converter for CastColor
     /// </summary>
     public class CastColorConverter : JsonConverter<CastColor>
@@ -182,7 +182,7 @@ namespace Sharpcaster.Models.Media
         public override CastColor Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
             var value = reader.GetString();
-            return string.IsNullOrEmpty(value) ? CastColor.Colors.Transparent : CastColor.FromHex(value);
+            return string.IsNullOrEmpty(value) ? CastColors.Transparent : CastColor.FromHex(value);
         }
 
         public override void Write(Utf8JsonWriter writer, CastColor value, JsonSerializerOptions options)

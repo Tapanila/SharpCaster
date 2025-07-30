@@ -61,7 +61,7 @@ namespace Sharpcaster.Channels
                     DeviceAPI_isGroup = false
                 }
             };
-            await SendAsync(JsonSerializer.Serialize(spotifyInfoMessage, SharpcasteSerializationContext.Default.GetInfoMessage), Client.GetChromecastStatus().Application.TransportId).ConfigureAwait(false);
+            await SendAsync(JsonSerializer.Serialize(spotifyInfoMessage, SharpcasteSerializationContext.Default.GetInfoMessage), Client.ChromecastStatus.Application.TransportId).ConfigureAwait(false);
         }
 
         public async Task AddUser(string accessToken)
@@ -74,7 +74,7 @@ namespace Sharpcaster.Channels
                     TokenType = "accesstoken"
                 }
             };
-            await SendAsync(addUserMessage.RequestId, JsonSerializer.Serialize(addUserMessage, SharpcasteSerializationContext.Default.AddUserMessage), Client.GetChromecastStatus().Application.TransportId).ConfigureAwait(false);
+            await SendAsync(addUserMessage.RequestId, JsonSerializer.Serialize(addUserMessage, SharpcasteSerializationContext.Default.AddUserMessage), Client.ChromecastStatus.Application.TransportId).ConfigureAwait(false);
         }
 
         public string SpotifyDeviceId

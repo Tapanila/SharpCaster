@@ -44,12 +44,12 @@ namespace Sharpcaster.Test
         [Fact]
         public void TestCastColorPredefinedColors()
         {
-            Assert.Equal("#FF0000FF", CastColor.Colors.Red.ToString());
-            Assert.Equal("#00FF00FF", CastColor.Colors.Green.ToString());
-            Assert.Equal("#0000FFFF", CastColor.Colors.Blue.ToString());
-            Assert.Equal("#FFFFFFFF", CastColor.Colors.White.ToString());
-            Assert.Equal("#000000FF", CastColor.Colors.Black.ToString());
-            Assert.Equal("#00000000", CastColor.Colors.Transparent.ToString());
+            Assert.Equal("#FF0000FF", CastColors.Red.ToString());
+            Assert.Equal("#00FF00FF", CastColors.Green.ToString());
+            Assert.Equal("#0000FFFF", CastColors.Blue.ToString());
+            Assert.Equal("#FFFFFFFF", CastColors.White.ToString());
+            Assert.Equal("#000000FF", CastColors.Black.ToString());
+            Assert.Equal("#00000000", CastColors.Transparent.ToString());
         }
 
         [Fact]
@@ -72,13 +72,13 @@ namespace Sharpcaster.Test
         {
             var style = new TextTrackStyle
             {
-                EdgeColor = CastColor.Colors.Green,
+                EdgeColor = CastColors.Green,
                 ForegroundColor = CastColor.FromRgb(255, 255, 255),
                 BackgroundColor = CastColor.FromRgba(0, 0, 0, 128),
                 WindowColor = CastColor.FromHsl(240, 50, 75)
             };
 
-            Assert.Equal(CastColor.Colors.Green, style.EdgeColor);
+            Assert.Equal(CastColors.Green, style.EdgeColor);
             Assert.Equal("#FFFFFFFF", style.ForegroundColor?.ToString());
             Assert.Equal("#00000080", style.BackgroundColor?.ToString());
             Assert.Equal("#9F9FDFFF", style.WindowColor?.ToString());

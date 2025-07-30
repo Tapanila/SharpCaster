@@ -25,7 +25,7 @@ namespace Sharpcaster.Test
             var TestHelper = new TestHelper();
             var client = await TestHelper.CreateConnectAndLoadAppClient(outputHelper, fixture.Receivers[0]);
 
-            Assert.NotNull(client.GetChromecastStatus());
+            Assert.NotNull(client.ChromecastStatus);
             AutoResetEvent _autoResetEvent = new(false);
 
             client.Disconnected += (sender, args) =>
