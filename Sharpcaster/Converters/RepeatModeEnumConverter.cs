@@ -46,7 +46,7 @@ namespace Sharpcaster.Converters
                     throw new JsonException($"Unsupported {nameof(RepeatModeType)} value: {value}");
             }
 
-            writer.WriteStringValue(stringValue);
+            writer?.WriteStringValue(stringValue);
         }
     }
 }

@@ -18,7 +18,7 @@ namespace Sharpcaster.Extensions
             {
                 if (stream == null)
                 {
-                    throw new ObjectDisposedException(nameof(stream));
+                    throw new ArgumentNullException(nameof(stream));
                 }
                 bytesRead = await stream.ReadAsync(buffer, totalBytesRead, bufferLength - totalBytesRead, cancellationToken);
                 if (bytesRead == 0)
@@ -28,7 +28,7 @@ namespace Sharpcaster.Extensions
                 totalBytesRead += bytesRead;
             }
             #else
-            ObjectDisposedException.ThrowIf(stream == null, stream);
+            ArgumentNullException.ThrowIfNull(stream);
             await stream.ReadExactlyAsync(buffer.AsMemory(0, bufferLength), cancellationToken).ConfigureAwait(false);
             #endif
             return buffer;

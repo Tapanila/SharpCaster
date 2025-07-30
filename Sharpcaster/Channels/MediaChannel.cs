@@ -55,7 +55,7 @@ namespace Sharpcaster.Channels
             }
             catch (Exception ex)
             {
-                Logger?.LogError("Error sending message: {exceptionMessage}", ex.Message);
+                Logger?.LogError("Error sending message: {ExceptionMessage}", ex.Message);
                 mediaStatus = null;
                 throw;
             }

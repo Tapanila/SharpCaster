@@ -1,8 +1,9 @@
+using Sharpcaster.Converters;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text.Json.Serialization;
-using Sharpcaster.Converters;
 
 namespace Sharpcaster.Models.Media
 {
@@ -117,15 +118,37 @@ namespace Sharpcaster.Models.Media
     public static class MediaCommandExtensions
     {
         /// <summary>
+        /// All available individual media commands (excluding combined flags like ALL_BASIC_MEDIA and QUEUE_REPEAT)
+        /// </summary>
+        private static readonly MediaCommand[] AllIndividualCommands = 
+        {
+            MediaCommand.PAUSE,
+            MediaCommand.SEEK,
+            MediaCommand.STREAM_VOLUME,
+            MediaCommand.STREAM_MUTE,
+            MediaCommand.QUEUE_NEXT,
+            MediaCommand.QUEUE_PREV,
+            MediaCommand.QUEUE_SHUFFLE,
+            MediaCommand.SKIP_AD,
+            MediaCommand.QUEUE_REPEAT_ALL,
+            MediaCommand.QUEUE_REPEAT_ONE,
+            MediaCommand.EDIT_TRACKS,
+            MediaCommand.PLAYBACK_RATE,
+            MediaCommand.LIKE,
+            MediaCommand.DISLIKE,
+            MediaCommand.FOLLOW,
+            MediaCommand.UNFOLLOW,
+            MediaCommand.STREAM_TRANSFER
+        };
+
+        /// <summary>
         /// Gets all individual commands that are set in the combined flags value
         /// </summary>
         /// <param name="combinedCommands">The combined MediaCommand flags value</param>
         /// <returns>An enumerable of individual MediaCommand values</returns>
         public static IEnumerable<MediaCommand> GetIndividualCommands(this MediaCommand combinedCommands)
         {
-            return Enum.GetValues(typeof(MediaCommand))
-                .Cast<MediaCommand>()
-                .Where(command => command != 0 && combinedCommands.HasFlag(command));
+            return AllIndividualCommands.Where(command => combinedCommands.HasFlag(command));
         }
 
         /// <summary>

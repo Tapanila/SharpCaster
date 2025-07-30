@@ -3,7 +3,7 @@
 namespace Sharpcaster.Messages
 {
     [AttributeUsage(AttributeTargets.All, AllowMultiple = false)]
-    public class ReceptionMessageAttribute : Attribute
+    public sealed class ReceptionMessageAttribute : Attribute
     {
     }
 }

@@ -51,7 +51,7 @@ namespace Sharpcaster.Channels
         {
             if (level < 0 || level > 1.0)
             {
-                Logger?.LogError("level must be between 0.0 and 1.0 - is {level}", level);
+                Logger?.LogError("level must be between 0.0 and 1.0 - is {Level}", level);
                 throw new ArgumentException("level must be between 0.0 and 1.0", nameof(level));
             }
             var setVolumeMessage = new SetVolumeMessage() { Volume = new Models.Volume() { Level = level } };

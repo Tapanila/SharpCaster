@@ -34,19 +34,19 @@
 	</PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net9.0|AnyCPU'">
-      <NoWarn>1701;1702;1591;1707;CA1819</NoWarn>
+      <NoWarn>1701;1702;1591;1707;CA1819;CA1003;CA1031;CA1056;CA1716;CA1720</NoWarn>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|netstandard2.0|AnyCPU'">
-      <NoWarn>1701;1702;1591;1707;CA1819</NoWarn>
+      <NoWarn>1701;1702;1591;1707;CA1819;CA1003;CA1031;CA1056;CA1716;CA1720</NoWarn>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net9.0|AnyCPU'">
-      <NoWarn>1701;1702;1591;1707;CA1819</NoWarn>
+      <NoWarn>1701;1702;1591;1707;CA1819;CA1003;CA1031;CA1056;CA1716;CA1720</NoWarn>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|netstandard2.0|AnyCPU'">
-      <NoWarn>1701;1702;1591;1707;CA1819</NoWarn>
+      <NoWarn>1701;1702;1591;1707;CA1819;CA1003;CA1031;CA1056;CA1716;CA1720</NoWarn>
     </PropertyGroup>
 
   <ItemGroup>

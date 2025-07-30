@@ -131,9 +131,9 @@ namespace Sharpcaster
 
         public async Task<ChromecastStatus> ConnectChromecast(ChromecastReceiver chromecastReceiver)
         {
-            if (chromecastReceiver.DeviceUri == null)
+            if (chromecastReceiver?.DeviceUri == null)
             {
-                throw new ArgumentNullException(nameof(chromecastReceiver.DeviceUri));
+                throw new ArgumentNullException(nameof(chromecastReceiver));
             }
             await Dispose().ConfigureAwait(false);
             FriendlyName = chromecastReceiver.Name;
@@ -188,7 +188,7 @@ namespace Sharpcaster
                                                                                               {
                                                                                                   HeartbeatChannel.StopTimeoutTimer();
                                                                                               }
-                                                                                              channel?.Logger?.LogTrace("RECEIVED: {payload}", payload);
+                                                                                              channel?.Logger?.LogTrace("RECEIVED: {Payload}", payload);
 
                                                                                               var message = JsonSerializer.Deserialize(payload, SharpcasteSerializationContext.Default.MessageWithId);
                                                                                               if (MessageTypes.TryGetValue(message.Type, out Type type))
@@ -216,7 +216,7 @@ namespace Sharpcaster
                                                                                               }
                                                                                               else
                                                                                               {
-                                                                                                  _logger?.LogError("The received Message of Type '{ty}' can not be converted to its response Type." +
+                                                                                                  _logger?.LogError("The received Message of Type '{Ty}' can not be converted to its response Type." +
                                                                                                      " An implementing IMessage class is missing!", message.Type);
                                                                                                   Debugger.Break();
                                                                                               }
@@ -370,7 +370,7 @@ namespace Sharpcaster
         /// </summary>
         /// <typeparam name="TChannel">channel type</typeparam>
         /// <returns>a channel</returns>
-        public TChannel GetChannel<TChannel>() where TChannel : IChromecastChannel => Channels.OfType<TChannel>().FirstOrDefault();
+        public TChannel? GetChannel<TChannel>() where TChannel : IChromecastChannel => Channels.OfType<TChannel>().FirstOrDefault();
 
         public async Task<ChromecastStatus> LaunchApplicationAsync(string applicationId, bool joinExistingApplicationSession = true)
         {

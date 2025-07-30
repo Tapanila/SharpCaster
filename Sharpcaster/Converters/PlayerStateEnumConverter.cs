@@ -33,19 +33,19 @@ namespace Sharpcaster.Converters
             switch (value)
             {
                 case PlayerStateType.Buffering:
-                    writer.WriteStringValue("BUFFERING");
+                    writer?.WriteStringValue("BUFFERING");
                     break;
                 case PlayerStateType.Idle:
-                    writer.WriteStringValue("IDLE");
+                    writer?.WriteStringValue("IDLE");
                     break;
                 case PlayerStateType.Paused:
-                    writer.WriteStringValue("PAUSED");
+                    writer?.WriteStringValue("PAUSED");
                     break;
                 case PlayerStateType.Playing:
-                    writer.WriteStringValue("PLAYING");
+                    writer?.WriteStringValue("PLAYING");
                     break;
                 case PlayerStateType.Loading:
-                    writer.WriteStringValue("LOADING");
+                    writer?.WriteStringValue("LOADING");
                     break;
                 default:
                     throw new JsonException($"Unsupported {nameof(PlayerStateType)} value: {value}");

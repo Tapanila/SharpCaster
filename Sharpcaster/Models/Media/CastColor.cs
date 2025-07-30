@@ -9,7 +9,7 @@ namespace Sharpcaster.Models.Media
     /// Represents a color for Cast text track styling with support for multiple formats
     /// </summary>
     [JsonConverter(typeof(CastColorConverter))]
-    public readonly struct CastColor
+    public readonly struct CastColor : IEquatable<CastColor>
     {
         private readonly string _value;
 
@@ -152,6 +152,57 @@ namespace Sharpcaster.Models.Media
         public static implicit operator string(CastColor color)
         {
             return color.ToString();
+        }
+
+        /// <summary>
+        /// Determines whether the specified CastColor is equal to the current CastColor
+        /// </summary>
+        /// <param name="other">The CastColor to compare with the current CastColor</param>
+        /// <returns>true if the specified CastColor is equal to the current CastColor; otherwise, false</returns>
+        public bool Equals(CastColor other)
+        {
+            return string.Equals(_value, other._value, StringComparison.OrdinalIgnoreCase);
+        }
+
+        /// <summary>
+        /// Determines whether the specified object is equal to the current CastColor
+        /// </summary>
+        /// <param name="obj">The object to compare with the current CastColor</param>
+        /// <returns>true if the specified object is equal to the current CastColor; otherwise, false</returns>
+        public override bool Equals(object? obj)
+        {
+            return obj is CastColor other && Equals(other);
+        }
+
+        /// <summary>
+        /// Returns the hash code for this CastColor
+        /// </summary>
+        /// <returns>A 32-bit signed integer hash code</returns>
+        public override int GetHashCode()
+        {
+            return StringComparer.OrdinalIgnoreCase.GetHashCode(_value ?? "#000000FF");
+        }
+
+        /// <summary>
+        /// Determines whether two specified CastColor instances are equal
+        /// </summary>
+        /// <param name="left">The first CastColor to compare</param>
+        /// <param name="right">The second CastColor to compare</param>
+        /// <returns>true if the CastColor instances are equal; otherwise, false</returns>
+        public static bool operator ==(CastColor left, CastColor right)
+        {
+            return left.Equals(right);
+        }
+
+        /// <summary>
+        /// Determines whether two specified CastColor instances are not equal
+        /// </summary>
+        /// <param name="left">The first CastColor to compare</param>
+        /// <param name="right">The second CastColor to compare</param>
+        /// <returns>true if the CastColor instances are not equal; otherwise, false</returns>
+        public static bool operator !=(CastColor left, CastColor right)
+        {
+            return !left.Equals(right);
         }
     }
 

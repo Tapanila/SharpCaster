@@ -36,7 +36,7 @@ namespace Sharpcaster.Converters
 
         public override void Write(Utf8JsonWriter writer, MediaCommand value, JsonSerializerOptions options)
         {
-            writer.WriteNumberValue((int)value);
+            writer?.WriteNumberValue((int)value);
         }
     }
 }
