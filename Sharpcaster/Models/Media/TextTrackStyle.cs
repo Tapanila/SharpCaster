@@ -8,18 +8,18 @@ namespace Sharpcaster.Models.Media
     public class TextTrackStyle
     {
         /// <summary>
-        /// Gets or sets the background color in RGBA format
+        /// Gets or sets the background color
         /// </summary>
         [JsonPropertyName("backgroundColor")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public string? BackgroundColor { get; set; }
+        public CastColor? BackgroundColor { get; set; }
 
         /// <summary>
-        /// Gets or sets the edge color in RGBA format
+        /// Gets or sets the edge color
         /// </summary>
         [JsonPropertyName("edgeColor")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public string? EdgeColor { get; set; }
+        public CastColor? EdgeColor { get; set; }
 
         /// <summary>
         /// Gets or sets the edge type
@@ -57,18 +57,18 @@ namespace Sharpcaster.Models.Media
         public TextTrackFontStyle? FontStyle { get; set; }
 
         /// <summary>
-        /// Gets or sets the foreground color in RGBA format
+        /// Gets or sets the foreground color
         /// </summary>
         [JsonPropertyName("foregroundColor")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public string? ForegroundColor { get; set; }
+        public CastColor? ForegroundColor { get; set; }
 
         /// <summary>
-        /// Gets or sets the window color in RGBA format
+        /// Gets or sets the window color
         /// </summary>
         [JsonPropertyName("windowColor")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public string? WindowColor { get; set; }
+        public CastColor? WindowColor { get; set; }
 
         /// <summary>
         /// Gets or sets the window corner radius

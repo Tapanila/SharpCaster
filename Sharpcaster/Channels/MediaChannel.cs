@@ -70,15 +70,22 @@ namespace Sharpcaster.Channels
         }
 
         /// <summary>
-        /// Loads a media
+        /// Loads a media with specific active tracks
         /// </summary>
         /// <param name="media">media to load</param>
         /// <param name="autoPlay">true to play the media directly, false otherwise</param>
+        /// <param name="activeTrackIds">array of track IDs that should be active</param>
         /// <returns>media status</returns>
-        public async Task<MediaStatus?> LoadAsync(Media media, bool autoPlay = true)
+        public async Task<MediaStatus?> LoadAsync(Media media, bool autoPlay = true, int[]? activeTrackIds = null)
         {
             var status = Client.GetChromecastStatus();
-            var loadMessage = new LoadMessage() { SessionId = status.Application.SessionId, Media = media, AutoPlay = autoPlay };
+            var loadMessage = new LoadMessage() 
+            { 
+                SessionId = status.Application.SessionId, 
+                Media = media, 
+                AutoPlay = autoPlay,
+                ActiveTrackIds = activeTrackIds
+            };
             return await SendAsync(loadMessage.RequestId, JsonSerializer.Serialize(loadMessage, SharpcasteSerializationContext.Default.LoadMessage), status.Application).ConfigureAwait(false);
         }
 

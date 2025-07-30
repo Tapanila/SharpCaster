@@ -495,5 +495,64 @@ namespace Sharpcaster.Test
             await Task.Delay(2000, Xunit.TestContext.Current.CancellationToken);
             Assert.True(errorHappened);
         }
+
+        [Fact]
+        public async Task TestLoadingMediaWithSubtitles()
+        {
+            var TestHelper = new TestHelper();
+            ChromecastClient client = await TestHelper.CreateConnectAndLoadAppClient(outputHelper, fixture.Receivers[0]);
+
+            var subtitleTrack = new Track
+            {
+                TrackId = 1,
+                Type = TrackType.TEXT,
+                Subtype = TextTrackType.SUBTITLES,
+                TrackContentId = "https://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/tracks/DesigningForGoogleCast-en.vtt",
+                TrackContentType = "text/vtt",
+                Name = "English Subtitles",
+                Language = "en"
+            };
+
+            var style = new TextTrackStyle
+            {
+                EdgeColor = CastColor.Colors.Green, // Using predefined color
+                ForegroundColor = CastColor.FromRgb(255, 255, 255), // White text
+                BackgroundColor = CastColor.FromRgba(0, 0, 0, 128), // Semi-transparent black background  
+                EdgeType = TextTrackEdgeType.OUTLINE,
+                FontFamily = "sans-serif",
+                FontGenericFamily = TextTrackFontGenericFamily.SANS_SERIF,
+                FontScale = 1.0,
+                FontStyle = TextTrackFontStyle.NORMAL,
+            };
+
+            var media = new Media
+            {
+                ContentUrl = "https://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/mp4/DesigningForGoogleCast.mp4",
+                ContentType = "video/mp4",
+                Tracks = [subtitleTrack],
+                TextTrackStyle = style
+            };
+
+            // Load media with active subtitle track
+            MediaStatus status = await client.MediaChannel.LoadAsync(media, true, [subtitleTrack.TrackId]);
+
+            Assert.Equal(PlayerStateType.Playing, status.PlayerState);
+            Assert.Single(status.Items);
+            Assert.Equal(status.CurrentItemId, status.Items[0].ItemId);
+            
+            // Verify that the media has tracks
+            var currentItem = status.Items[0];
+            Assert.NotNull(currentItem.Media);
+            Assert.NotNull(currentItem.Media.Tracks);
+            Assert.Single(currentItem.Media.Tracks);
+            
+            var loadedTrack = currentItem.Media.Tracks[0];
+            Assert.Equal(TrackType.TEXT, loadedTrack.Type);
+            Assert.Equal(TextTrackType.SUBTITLES, loadedTrack.Subtype);
+            Assert.Equal("English Subtitles", loadedTrack.Name);
+            Assert.Equal("en", loadedTrack.Language);
+
+            await client.DisconnectAsync();
+        }
     }
 }
