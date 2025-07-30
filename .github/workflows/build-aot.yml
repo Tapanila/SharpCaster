@@ -87,7 +87,7 @@ jobs:
       run: |
         $publishDir = "bin/Release/net9.0/${{ matrix.runtime }}/publish"
         if (Test-Path "$publishDir/SharpCaster.Console.exe") {
-          Rename-Item "$publishDir/SharpCaster.Console.exe" "$publishDir/${{ matrix.executable }}"
+          Rename-Item "$publishDir/SharpCaster.Console.exe" "${{ matrix.executable }}"
           Write-Host "✓ Renamed SharpCaster.Console.exe to ${{ matrix.executable }}"
         } else {
           Write-Host "✗ Could not find SharpCaster.Console.exe to rename"
