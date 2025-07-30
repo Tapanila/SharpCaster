@@ -23,6 +23,7 @@ namespace Sharpcaster.Channels
         /// Initialization
         /// </summary>
         /// <param name="ns">namespace</param>
+        /// <param name="logger">logger instance</param>
         /// <param name="useBaseNamespace">When true add urn:x-cast:com.google.cast to beginning of namespace</param>
         protected ChromecastChannel(string ns, ILogger? logger, bool useBaseNamespace = true)
         {
@@ -50,7 +51,8 @@ namespace Sharpcaster.Channels
         /// <summary>
         /// Sends a message
         /// </summary>
-        /// <param name="message">message to send</param>
+        /// <param name="messageRequestId">message request identifier</param>
+        /// <param name="messagePayload">message payload to send</param>
         /// <param name="destinationId">destination identifier</param>
         protected async Task<string> SendAsync(int messageRequestId, string messagePayload, string destinationId = DefaultIdentifiers.DESTINATION_ID)
         {
@@ -60,7 +62,7 @@ namespace Sharpcaster.Channels
         /// <summary>
         /// Sends a message
         /// </summary>
-        /// <param name="message">message to send</param>
+        /// <param name="messagePayload">message payload to send</param>
         /// <param name="destinationId">destination identifier</param>
         protected async Task SendAsync(string messagePayload, string destinationId = DefaultIdentifiers.DESTINATION_ID)
         {
@@ -70,7 +72,8 @@ namespace Sharpcaster.Channels
         /// <summary>
         /// Called when a message for this channel is received
         /// </summary>
-        /// <param name="message">message to process</param>
+        /// <param name="messagePayload">message payload to process</param>
+        /// <param name="type">message type</param>
         public virtual Task OnMessageReceivedAsync(string messagePayload, string type)
         {
             return Task.CompletedTask;

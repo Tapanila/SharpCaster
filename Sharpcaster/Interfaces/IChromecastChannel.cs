@@ -23,7 +23,8 @@ namespace Sharpcaster.Interfaces
         /// <summary>
         /// Called when a message for this channel is received
         /// </summary>
-        /// <param name="messagePayload">message to process</param>
+        /// <param name="messagePayload">message payload to process</param>
+        /// <param name="type">message type</param>
         Task OnMessageReceivedAsync(string messagePayload, string type);
     }
 }
