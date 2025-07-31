@@ -41,12 +41,12 @@ namespace Sharpcaster.Channels
         /// <summary>
         /// Gets or sets the sender
         /// </summary>
-        public virtual ChromecastClient Client { get; set; }
+        public virtual ChromecastClient Client { get; set; } = null!;
 
         /// <summary>
         /// Gets the full namespace
         /// </summary>
-        public string Namespace { get; protected set; }
+        public string Namespace { get; protected set; } = string.Empty;
 
         /// <summary>
         /// Sends a message

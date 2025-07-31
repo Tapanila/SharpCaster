@@ -42,7 +42,7 @@ namespace Sharpcaster.Channels
             _timer.AutoReset = false;
         }
 
-        public event EventHandler StatusChanged;
+        public event EventHandler? StatusChanged;
 
 
         /// <summary>

@@ -24,11 +24,11 @@ namespace Sharpcaster.Channels
         /// <summary>
         /// Raised when error is received
         /// </summary>
-        public event EventHandler<ErrorMessage> ErrorHappened;
-        public event EventHandler<LoadCancelledMessage> LoadCancelled;
-        public event EventHandler<LoadFailedMessage> LoadFailed;    
-        public event EventHandler<InvalidRequestMessage> InvalidRequest;
-        public event EventHandler<MediaStatus> StatusChanged;
+        public event EventHandler<ErrorMessage>? ErrorHappened;
+        public event EventHandler<LoadCancelledMessage>? LoadCancelled;
+        public event EventHandler<LoadFailedMessage>? LoadFailed;
+        public event EventHandler<InvalidRequestMessage>? InvalidRequest;
+        public event EventHandler<MediaStatus>? StatusChanged;
 
         public MediaStatus? MediaStatus { get => mediaStatus; }
         private MediaStatus? mediaStatus;

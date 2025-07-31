@@ -12,14 +12,14 @@ namespace Sharpcaster.Channels
         /// <summary>
         /// Raised when the status has changed
         /// </summary>
-        public event EventHandler<MultiZoneStatus> StatusChanged;
+        public event EventHandler<MultiZoneStatus>? StatusChanged;
 
         /// <summary>
         /// Raised when device has been updated
         /// </summary>
-        public event EventHandler<Device> DeviceUpdated;
+        public event EventHandler<Device>? DeviceUpdated;
 
-        public MultiZoneStatus Status { get; set; }
+        public MultiZoneStatus? Status { get; set; }
 
         public MultiZoneChannel(ILogger<MultiZoneChannel> logger = null) : base("multizone", logger)
         {
@@ -36,12 +36,18 @@ namespace Sharpcaster.Channels
             {
                 case "MULTIZONE_STATUS":
                     var multizoneStatusMessage = JsonSerializer.Deserialize(messagePayload, SharpcasteSerializationContext.Default.MultizoneStatusMessage);
-                    Status = multizoneStatusMessage.Status;
-                    StatusChanged?.Invoke(this, multizoneStatusMessage.Status);
+                    if (multizoneStatusMessage?.Status != null)
+                    {
+                        Status = multizoneStatusMessage.Status;
+                        StatusChanged?.Invoke(this, multizoneStatusMessage.Status);
+                    }
                     break;
                 case "DEVICE_UPDATED":
                     var deviceUpdatedMessage = JsonSerializer.Deserialize(messagePayload, SharpcasteSerializationContext.Default.DeviceUpdatedMessage);
-                    DeviceUpdated?.Invoke(this, deviceUpdatedMessage.Device);
+                    if (deviceUpdatedMessage?.Device != null)
+                    {
+                        DeviceUpdated?.Invoke(this, deviceUpdatedMessage.Device);
+                    }
                     break;
                 default:
                     break;

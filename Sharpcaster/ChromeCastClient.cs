@@ -36,9 +36,9 @@ namespace Sharpcaster
         /// <summary>
         /// Raised when the sender is disconnected
         /// </summary>
-        public event EventHandler Disconnected;
+        public event EventHandler? Disconnected;
         public Guid SenderId { get; } = Guid.NewGuid();
-        public string FriendlyName { get; set; }
+        public string FriendlyName { get; set; } = string.Empty;
 
         public MediaChannel MediaChannel => GetChannel<MediaChannel>();
         public HeartbeatChannel HeartbeatChannel => GetChannel<HeartbeatChannel>();
@@ -82,14 +82,14 @@ namespace Sharpcaster
             LoggerMessage.Define<string>(LogLevel.Error, new EventId(4011, "DisposeError"), "Error on disposing. {Message}");
         private TcpClient? _client;
         private SslStream? _stream;
-        private CancellationTokenSource _cancellationTokenSource;
-        private TaskCompletionSource<bool> ReceiveTcs { get; set; }
+        private CancellationTokenSource _cancellationTokenSource = new();
+        private TaskCompletionSource<bool> ReceiveTcs { get; set; } = new();
         private SemaphoreSlim SendSemaphoreSlim { get; } = new SemaphoreSlim(1, 1);
-        private JsonSerializerOptions _jsonSerializerOptions;
-        private Dictionary<string, Type> MessageTypes { get; set; }
-        private IEnumerable<IChromecastChannel> Channels { get; set; }
+        private JsonSerializerOptions _jsonSerializerOptions = new();
+        private Dictionary<string, Type> MessageTypes { get; set; } = new();
+        private IEnumerable<IChromecastChannel> Channels { get; set; } = new List<IChromecastChannel>();
         private ConcurrentDictionary<int, SharpCasterTaskCompletionSource> WaitingTasks { get; } = new ConcurrentDictionary<int, SharpCasterTaskCompletionSource>();
-        private IServiceProvider _serviceProvider;
+        private IServiceProvider _serviceProvider = null!;
 
         public ChromecastClient(ILoggerFactory? loggerFactory = null)
         {
@@ -224,11 +224,12 @@ namespace Sharpcaster
                                                                                               if (channel?.Logger != null) LogReceivedMessage(channel.Logger, payload, null);
 
                                                                                               var message = JsonSerializer.Deserialize(payload, SharpcasteSerializationContext.Default.MessageWithId);
-                                                                                              if (MessageTypes.TryGetValue(message.Type, out Type type))
+                                                                                              if (message != null && MessageTypes.TryGetValue(message.Type, out Type type))
                                                                                               {
                                                                                                   try
                                                                                                   {
-                                                                                                      await channel.OnMessageReceivedAsync(payload, message.Type).ConfigureAwait(false);
+                                                                                                      if (channel != null)
+                                                                                                          await channel.OnMessageReceivedAsync(payload, message.Type).ConfigureAwait(false);
                                                                                                       if (message.HasRequestId)
                                                                                                       {
                                                                                                           WaitingTasks.TryRemove(message.RequestId, out SharpCasterTaskCompletionSource? tcs);
@@ -322,9 +323,13 @@ namespace Sharpcaster
 
         public async Task DisconnectAsync()
         {
-            HeartbeatChannel.StopTimeoutTimer();
-            HeartbeatChannel.StatusChanged -= HeartBeatTimedOut;
-            HeartbeatChannel.Dispose();
+            if (HeartbeatChannel != null)
+            {
+                HeartbeatChannel.StopTimeoutTimer();
+                HeartbeatChannel.StatusChanged -= HeartBeatTimedOut;
+                HeartbeatChannel.Dispose();
+            }
+
             
             // Recreate HeartbeatChannel since it's been disposed
             RecreateHeartbeatChannel();
@@ -403,7 +408,15 @@ namespace Sharpcaster
         /// </summary>
         /// <typeparam name="TChannel">channel type</typeparam>
         /// <returns>a channel</returns>
-        public TChannel? GetChannel<TChannel>() where TChannel : IChromecastChannel => Channels.OfType<TChannel>().FirstOrDefault();
+        public TChannel GetChannel<TChannel>() where TChannel : IChromecastChannel
+        {
+            var channel = Channels.OfType<TChannel>().First();
+            if (channel == null)
+            {
+                throw new ArgumentNullException($"Channel of type {typeof(TChannel).Name} not found.");
+            }
+            return channel;
+        }
 
         public async Task<ChromecastStatus> LaunchApplicationAsync(string applicationId, bool joinExistingApplicationSession = true)
         {

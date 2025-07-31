@@ -13,9 +13,9 @@ namespace Sharpcaster.Channels
 {
     public class SpotifyChannel : ChromecastChannel
     {
-        public event EventHandler<SpotifyStatus> SpotifyStatusUpdated;
-        public SpotifyStatus SpotifyStatus { get; set; }
-        public event EventHandler<AddUserResponseMessagePayload> AddUserResponseReceived;
+        public event EventHandler<SpotifyStatus>? SpotifyStatusUpdated;
+        public SpotifyStatus? SpotifyStatus { get; set; }
+        public event EventHandler<AddUserResponseMessagePayload>? AddUserResponseReceived;
 
         public SpotifyChannel(ILogger<SpotifyChannel> logger = null) : base("urn:x-cast:com.spotify.chromecast.secure.v1", logger, false)
         {
@@ -32,12 +32,18 @@ namespace Sharpcaster.Channels
             {
                 case "getInfoResponse":
                     var getInfoResponseMessage = JsonSerializer.Deserialize(messagePayload, SharpcasteSerializationContext.Default.GetInfoResponseMessage);
-                    SpotifyStatus = getInfoResponseMessage.Payload;
-                    SpotifyStatusUpdated?.Invoke(this, getInfoResponseMessage.Payload);
+                    if (getInfoResponseMessage?.Payload != null)
+                    {
+                        SpotifyStatus = getInfoResponseMessage.Payload;
+                        SpotifyStatusUpdated?.Invoke(this, getInfoResponseMessage.Payload);
+                    }
                     break;
                 case "addUserResponse":
                     var addUserResponseMessage = JsonSerializer.Deserialize(messagePayload, SharpcasteSerializationContext.Default.AddUserResponseMessage);
-                    AddUserResponseReceived?.Invoke(this, addUserResponseMessage.Payload);
+                    if (addUserResponseMessage?.Payload != null)
+                    {
+                        AddUserResponseReceived?.Invoke(this, addUserResponseMessage.Payload);
+                    }
                     break;
             }
 
