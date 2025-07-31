@@ -22,6 +22,18 @@ A beautiful, feature-rich console application for controlling Chromecast devices
 
 ### Installation
 
+#### Option 1: Homebrew (macOS/Linux)
+
+```bash
+# Add the tap
+brew tap Tapanila/sharpcaster
+
+# Install SharpCaster
+brew install sharpcaster
+```
+
+#### Option 2: Build from Source
+
 1. Clone the repository:
 ```bash
 git clone https://github.com/Tapanila/SharpCaster.git
