@@ -32,7 +32,14 @@ brew tap Tapanila/sharpcaster
 brew install sharpcaster
 ```
 
-#### Option 2: Build from Source
+#### Option 2: Chocolatey (Windows)
+
+```powershell
+# Install SharpCaster
+choco install sharpcaster --pre
+```
+
+#### Option 3: Build from Source
 
 1. Clone the repository:
 ```bash
