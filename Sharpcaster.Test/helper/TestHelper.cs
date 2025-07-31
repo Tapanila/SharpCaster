@@ -104,6 +104,7 @@ namespace Sharpcaster.Test.helper
         private Mock<ILogger<T>> CreateILoggerMock<T>()
         {
             Mock<ILogger<T>> retVal = new();
+            retVal.Setup(x => x.IsEnabled(It.IsAny<LogLevel>())).Returns(true);
             retVal.Setup(x => x.Log(
                 It.IsAny<LogLevel>(),
                 It.IsAny<EventId>(),
@@ -139,6 +140,7 @@ namespace Sharpcaster.Test.helper
             AssertableTestLog = assertableLog;
 
             var loggerGeneric = new Mock<ILogger>();
+            loggerGeneric.Setup(x => x.IsEnabled(It.IsAny<LogLevel>())).Returns(true);
             loggerGeneric.Setup(x => x.Log(
                 It.IsAny<LogLevel>(),
                 It.IsAny<EventId>(),

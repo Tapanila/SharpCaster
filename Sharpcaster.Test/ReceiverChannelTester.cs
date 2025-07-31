@@ -1,4 +1,5 @@
 ﻿using Sharpcaster.Models;
+using Sharpcaster.Models.Media;
 using Sharpcaster.Test.helper;
 using System.Threading.Tasks;
 using Xunit;
@@ -32,17 +33,24 @@ namespace Sharpcaster.Test
         public async Task TestVolume()
         {
             var TestHelper = new TestHelper();
-            var client = await TestHelper.CreateAndConnectClient(outputHelper, fixture);
+            var client = await TestHelper.CreateConnectAndLoadAppClient(outputHelper, fixture);
+            
+            var media = new Media
+            {
+                ContentUrl = "https://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/mp4/DesigningForGoogleCast.mp4"
+            };
+
+            await client.MediaChannel.LoadAsync(media);
 
             var status = await client.ReceiverChannel.SetVolume(0.1);
             Assert.Equal(0.1, status.Volume.Level.Value, precision: 1);
-
-            await Task.Delay(500, Xunit.TestContext.Current.CancellationToken);      // My Chromecast Audio device (somtimes) needs this delay here to pass the test, because the first volume requests triggers a lot of responses 
-                                        // (some of them on a 'multizone' channel) with eualizer data !? and the 2nd request does not get the new volume but another answer with old 0.1 as volume !!!
-                                        // It happens always if this test runs directly after the TestStoppingApplication!?
-
             status = await client.ReceiverChannel.SetVolume(0.3);
             Assert.Equal(0.3, status.Volume.Level.Value, precision: 1);
+            status = await client.ReceiverChannel.SetVolume(0.5);
+            Assert.Equal(0.5, status.Volume.Level.Value, precision: 1);
+            status = await client.ReceiverChannel.SetVolume(0.8);
+            Assert.Equal(0.8, status.Volume.Level.Value, precision: 1);
+            await client.DisconnectAsync();
         }
 
         [Fact]

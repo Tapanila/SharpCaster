@@ -148,7 +148,7 @@ namespace Sharpcaster
             Channels = channels;
 
             _logger = _serviceProvider.GetService<ILogger<ChromecastClient>>();
-            if (_logger != null) LogMessageTypes(_logger, string.Join(",", MessageTypes.Keys), null);
+            if (_logger != null) LogMessageTypes(_logger, $"[{string.Join(",", MessageTypes.Keys)}]", null);
             if (_logger != null) LogChannels(_logger, string.Join(",", Channels.Select(c => c.GetType().Name)), null);
 
             foreach (var channel in Channels)
