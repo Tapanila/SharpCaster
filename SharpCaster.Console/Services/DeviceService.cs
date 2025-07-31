@@ -3,6 +3,7 @@ using Sharpcaster.Models;
 using Spectre.Console;
 using SharpCaster.Console.Models;
 using SharpCaster.Console.UI;
+using System.Linq;
 
 namespace SharpCaster.Console.Services;
 
@@ -81,6 +82,9 @@ public class DeviceService
             _state.LastConnectionCheck = DateTime.Now;
             _ui.AddSeparator();
             AnsiConsole.MarkupLine($"[green]✅ Successfully connected to {_state.SelectedDevice.Name}![/]");
+            
+            // Check for existing applications and offer to join them
+            await CheckAndJoinExistingApplicationAsync();
         }
         catch (Exception ex)
         {
@@ -155,5 +159,78 @@ public class DeviceService
         }
 
         return Task.FromResult(true);
+    }
+
+    private async Task CheckAndJoinExistingApplicationAsync()
+    {
+        if (_state.Client == null || !_state.IsConnected)
+            return;
+
+        try
+        {
+            // Refresh receiver status to get the most current application information
+            await _state.Client.ReceiverChannel.GetChromecastStatusAsync();
+            var receiverStatus = _state.Client.ReceiverChannel.ReceiverStatus;
+            
+            if (receiverStatus?.Applications != null && receiverStatus.Applications.Count > 0)
+            {
+                var runningApp = receiverStatus.Applications.FirstOrDefault();
+                if (runningApp != null && !string.IsNullOrEmpty(runningApp.DisplayName))
+                {
+                    _ui.AddSeparator("🎯 Existing Application Detected");
+                    AnsiConsole.MarkupLine($"[yellow]Found existing application: [bold]{runningApp.DisplayName}[/][/]");
+                    AnsiConsole.MarkupLine($"[dim]App ID: {runningApp.AppId}[/]");
+                    if (!string.IsNullOrEmpty(runningApp.StatusText))
+                    {
+                        AnsiConsole.MarkupLine($"[dim]Status: {runningApp.StatusText}[/]");
+                    }
+                    AnsiConsole.WriteLine();
+
+                    var shouldJoin = AnsiConsole.Confirm("[yellow]Would you like to join this existing application?[/]");
+                    
+                    if (shouldJoin)
+                    {
+                        await AnsiConsole.Status()
+                            .Spinner(Spinner.Known.Star)
+                            .SpinnerStyle(Style.Parse("green"))
+                            .StartAsync("Joining existing application...", async ctx =>
+                            {
+                                // Use LaunchApplicationAsync with joinExistingApplicationSession = true
+                                // This will join the existing app instead of launching a new one
+                                await _state.Client.LaunchApplicationAsync(runningApp.AppId, joinExistingApplicationSession: true);
+                            });
+                        
+                        AnsiConsole.MarkupLine($"[green]✅ Successfully joined {runningApp.DisplayName}![/]");
+                        
+                        // If it's a media application, try to get current media status
+                        var hasMediaNamespace = runningApp.Namespaces?.Any(ns => ns.Name == "urn:x-cast:com.google.cast.media") == true;
+                        if (hasMediaNamespace)
+                        {
+                            try
+                            {
+                                var mediaStatus = await _state.Client.MediaChannel.GetMediaStatusAsync();
+                                if (mediaStatus != null)
+                                {
+                                    AnsiConsole.MarkupLine($"[cyan]📺 Current media: {mediaStatus.Media?.Metadata?.Title ?? "Unknown"}[/]");
+                                    AnsiConsole.MarkupLine($"[cyan]🎮 Player state: {mediaStatus.PlayerState}[/]");
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                AnsiConsole.MarkupLine($"[dim]Could not retrieve media status: {ex.Message}[/]");
+                            }
+                        }
+                    }
+                    else
+                    {
+                        AnsiConsole.MarkupLine("[dim]Skipping existing application. You can cast new media or control the device normally.[/]");
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            AnsiConsole.MarkupLine($"[dim]Could not check for existing applications: {ex.Message}[/]");
+        }
     }
 }

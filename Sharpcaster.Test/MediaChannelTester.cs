@@ -115,14 +115,6 @@ namespace Sharpcaster.Test
             QueueItem[] MyCd = helper.TestHelper.CreateTestCd;
 
             MediaStatus status = await client.MediaChannel.QueueLoadAsync(MyCd);
-            //while the state is not playing retry for 5 times max with incremental delay
-            for (int i = 0; i < 5 && status.PlayerState != PlayerStateType.Playing; i++)
-            {
-                outputHelper.WriteLine("Waiting for media to start playing, current state: " + status.PlayerState);
-                await Task.Delay(100 * (i^2), Xunit.TestContext.Current.CancellationToken);
-                status = await client.MediaChannel.GetMediaStatusAsync();
-            }
-
             Assert.Equal(PlayerStateType.Playing, status.PlayerState);
             Assert.Equal(2, status.Items.Count());           // The status message only contains the next (and if available Prev) Track/QueueItem!
             Assert.Equal(status.CurrentItemId, status.Items[0].ItemId);
