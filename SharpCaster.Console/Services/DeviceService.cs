@@ -184,6 +184,12 @@ public class DeviceService
                 var runningApp = receiverStatus.Applications.FirstOrDefault();
                 if (runningApp != null && !string.IsNullOrEmpty(runningApp.DisplayName))
                 {
+                    // Skip joining prompt for Backdrop (default screensaver app)
+                    if (runningApp.AppId == "E8C28D3C")
+                    {
+                        return;
+                    }
+
                     _ui.AddSeparator("🎯 Existing Application Detected");
                     AnsiConsole.MarkupLine($"[yellow]Found existing application: [bold]{runningApp.DisplayName}[/][/]");
                     AnsiConsole.MarkupLine($"[dim]App ID: {runningApp.AppId}[/]");
