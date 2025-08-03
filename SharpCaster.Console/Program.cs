@@ -45,8 +45,17 @@ class Program
 
     private static void ConfigureServices(IServiceCollection services)
     {
-        // Add logging
-        services.AddLogging(builder => builder.AddConsole().SetMinimumLevel(LogLevel.Information));
+        // Register memory log service first
+        services.AddSingleton<MemoryLogService>();
+        services.AddSingleton<LogViewerService>();
+        
+        // Add logging with memory provider
+        services.AddLogging(builder =>
+        {
+            builder.AddDebug().SetMinimumLevel(LogLevel.Trace);
+            builder.Services.AddSingleton<ILoggerProvider>(provider =>
+                new MemoryLoggerProvider(provider.GetRequiredService<MemoryLogService>()));
+        });
         
         // Register application state as singleton
         services.AddSingleton<ApplicationState>();
@@ -101,6 +110,9 @@ public class SharpCasterApplication
     {
         try
         {
+            // Log application startup
+            _logger.LogInformation("SharpCaster Console application starting");
+            
             // Show welcome message
             _ui.ShowWelcome();
             

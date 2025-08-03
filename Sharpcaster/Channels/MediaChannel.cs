@@ -38,7 +38,7 @@ namespace Sharpcaster.Channels
         /// <summary>
         /// Initializes a new instance of MediaChannel class
         /// </summary>
-        public MediaChannel(ILogger<MediaChannel>? logger = null) : base("media", logger)
+        public MediaChannel(ILogger? logger = null) : base("media", logger)
         {
         }
 

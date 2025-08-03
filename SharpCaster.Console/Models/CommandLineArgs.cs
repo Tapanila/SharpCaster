@@ -12,6 +12,7 @@ public class CommandLineArgs
     public bool ShowHelp { get; set; }
     public bool ShowDevices { get; set; }
     public bool ShowVersion { get; set; }
+    public bool ShowLogs { get; set; }
     public bool IsInteractive => string.IsNullOrEmpty(Command);
 }
 
@@ -47,7 +48,7 @@ public static class CommandLineParser
                 case "--list-devices":
                 case "list":
                     result.ShowDevices = true;
-                    return result;
+                    break;
                     
                 case "play":
                 case "pause":
@@ -83,6 +84,11 @@ public static class CommandLineParser
                     {
                         result.MediaTitle = args[++i];
                     }
+                    break;
+                    
+                case "--logs":
+                case "-l":
+                    result.ShowLogs = true;
                     break;
                     
                 default:
@@ -158,6 +164,8 @@ public static class CommandLineParser
         System.Console.WriteLine("  -i <ip-address>         Short form of --ip");
         System.Console.WriteLine("  --title <title>         Set media title (for play/cast commands)");
         System.Console.WriteLine("  -t <title>              Short form of --title");
+        System.Console.WriteLine("  --logs                  Show application logs after command execution");
+        System.Console.WriteLine("  -l                      Short form of --logs");
         System.Console.WriteLine();
         System.Console.WriteLine("Examples:");
         System.Console.WriteLine("  # Interactive mode");
@@ -181,8 +189,10 @@ public static class CommandLineParser
         System.Console.WriteLine("  sharpcaster \"Bedroom TV\" volume 0.7");
         System.Console.WriteLine("  sharpcaster \"Living Room TV\" seek 120");
         System.Console.WriteLine();
-        System.Console.WriteLine("  # Check status");
+        System.Console.WriteLine("  # Check status and view logs");
         System.Console.WriteLine("  sharpcaster \"Office TV\" status");
+        System.Console.WriteLine("  sharpcaster \"Office TV\" status --logs");
+        System.Console.WriteLine("  sharpcaster --ip 192.168.1.100 play \"video.mp4\" --logs");
         System.Console.WriteLine();
         System.Console.WriteLine("Device Matching:");
         System.Console.WriteLine("  - Device names are matched case-insensitively");

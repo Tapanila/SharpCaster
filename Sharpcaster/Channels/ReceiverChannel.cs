@@ -20,7 +20,7 @@ namespace Sharpcaster.Channels
         private static readonly Action<ILogger, double, Exception?> LogInvalidVolumeLevel =
             LoggerMessage.Define<double>(LogLevel.Error, new EventId(3001, "InvalidVolumeLevel"), "level must be between 0.0 and 1.0 - is {Level}");
 
-        public ReceiverChannel(ILogger<ReceiverChannel>? logger = null) : base("receiver", logger)
+        public ReceiverChannel(ILogger? logger = null) : base("receiver", logger)
         {
         }
         public event EventHandler<LaunchStatusMessage>? LaunchStatusChanged;

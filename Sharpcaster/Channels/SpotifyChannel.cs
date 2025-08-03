@@ -17,7 +17,7 @@ namespace Sharpcaster.Channels
         public SpotifyStatus? SpotifyStatus { get; set; }
         public event EventHandler<AddUserResponseMessagePayload>? AddUserResponseReceived;
 
-        public SpotifyChannel(ILogger<SpotifyChannel> logger = null) : base("urn:x-cast:com.spotify.chromecast.secure.v1", logger, false)
+        public SpotifyChannel(ILogger? logger = null) : base("urn:x-cast:com.spotify.chromecast.secure.v1", logger, false)
         {
         }
 

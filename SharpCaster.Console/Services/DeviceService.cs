@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging;
 using Sharpcaster;
 using Sharpcaster.Models;
 using Spectre.Console;
@@ -11,11 +12,15 @@ public class DeviceService
 {
     private readonly ApplicationState _state;
     private readonly UIHelper _ui;
+    private readonly ILogger<Sharpcaster.ChromecastClient> _chromecastLogger;
+    private readonly ILogger<DeviceService> _logger;
 
-    public DeviceService(ApplicationState state, UIHelper ui)
+    public DeviceService(ApplicationState state, UIHelper ui, ILogger<Sharpcaster.ChromecastClient> chromecastLogger, ILogger<DeviceService> logger)
     {
         _state = state;
         _ui = ui;
+        _chromecastLogger = chromecastLogger;
+        _logger = logger;
     }
 
     public async Task DiscoverDevicesAsync()
@@ -29,9 +34,9 @@ public class DeviceService
             await AnsiConsole.Status()
                 .Spinner(Spinner.Known.Dots)
                 .SpinnerStyle(Style.Parse("green"))
-                .StartAsync("Scanning network (this may take a few seconds)...", async ctx =>
+                .StartAsync("Scanning network (this will take a few seconds)...", async ctx =>
                 {
-                    var devices = await _state.Locator!.FindReceiversAsync(TimeSpan.FromSeconds(8));
+                    var devices = await _state.Locator!.FindReceiversAsync(TimeSpan.FromSeconds(2));
                     _state.Devices.AddRange(devices);
                 });
 
@@ -62,9 +67,11 @@ public class DeviceService
                 .StartAsync($"Connecting to {_state.SelectedDevice.Name}...", async ctx =>
                 {
                     _state.Client?.Dispose();
-                    _state.Client = new Sharpcaster.ChromecastClient();
+                    _logger.LogInformation("Creating ChromecastClient with logger for device: {DeviceName}", _state.SelectedDevice.Name);
+                    _state.Client = new Sharpcaster.ChromecastClient(_chromecastLogger);
                     
                     ctx.Status("Establishing connection...");
+                    _logger.LogInformation("Connecting to Chromecast device: {DeviceName} at {DeviceUri}", _state.SelectedDevice.Name, _state.SelectedDevice.DeviceUri);
                     await _state.Client.ConnectChromecast(_state.SelectedDevice);
                     
                     ctx.Status("Verifying connection...");

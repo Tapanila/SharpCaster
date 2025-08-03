@@ -13,6 +13,7 @@ public class ApplicationFlows
     private readonly DeviceService _deviceService;
     private readonly MediaController _mediaController;
     private readonly QueueController _queueController;
+    private readonly LogViewerService _logViewerService;
     private readonly UIHelper _ui;
 
     public ApplicationFlows(
@@ -20,12 +21,14 @@ public class ApplicationFlows
         DeviceService deviceService,
         MediaController mediaController,
         QueueController queueController,
+        LogViewerService logViewerService,
         UIHelper ui)
     {
         _state = state;
         _deviceService = deviceService;
         _mediaController = mediaController;
         _queueController = queueController;
+        _logViewerService = logViewerService;
         _ui = ui;
     }
 
@@ -193,6 +196,7 @@ public class ApplicationFlows
                 "Media controls",
                 "Queue management", 
                 "Device status",
+                "View logs",
                 "Connect to different device",
                 "Search for devices again",
                 "Exit"
@@ -209,6 +213,7 @@ public class ApplicationFlows
                         "Media controls" => "🎮 Media controls",
                         "Queue management" => "📝 Queue management",
                         "Device status" => "📊 Device status",
+                        "View logs" => "📋 View logs",
                         "Connect to different device" => "🔄 Connect to different device",
                         "Search for devices again" => "🔍 Search for devices again",
                         "Exit" => "❌ Exit",
@@ -234,6 +239,10 @@ public class ApplicationFlows
                 case "Device status":
                     _ui.AddSeparator("📊 Device Status");
                     await _mediaController.ShowDeviceStatusAsync();
+                    break;
+                case "View logs":
+                    _ui.AddSeparator("📋 Application Logs");
+                    await _logViewerService.ShowLogViewerAsync();
                     break;
                 case "Connect to different device":
                     _state.IsConnected = false;

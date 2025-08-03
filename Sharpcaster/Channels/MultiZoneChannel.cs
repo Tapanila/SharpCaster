@@ -21,7 +21,7 @@ namespace Sharpcaster.Channels
 
         public MultiZoneStatus? Status { get; set; }
 
-        public MultiZoneChannel(ILogger<MultiZoneChannel> logger = null) : base("multizone", logger)
+        public MultiZoneChannel(ILogger? logger = null) : base("multizone", logger)
         {
         }
 

@@ -76,8 +76,8 @@ namespace Sharpcaster
         private static readonly Action<ILogger, string, Exception?> LogReceiveLoopError =
             LoggerMessage.Define<string>(LogLevel.Error, new EventId(4009, "ReceiveLoopError"), "Error in receive loop: {Message}");
 
-        private static readonly Action<ILogger, string, string, string, Exception?> LogSentMessage =
-            LoggerMessage.Define<string, string, string>(LogLevel.Trace, new EventId(4010, "SentMessage"), "SENT: {NameSpace} - {DestinationId}: {PayloadUtf8}");
+        private static readonly Action<ILogger, string, string, string,string, Exception?> LogSentMessage =
+            LoggerMessage.Define<string,string, string, string>(LogLevel.Trace, new EventId(4010, "SentMessage"), "[{ChannelName}] SENT: {CastMessage.Namespace} - {CastMessage.DestinationId}: {CastMessage.PayloadUtf8}");
 
         private static readonly Action<ILogger, string, Exception?> LogDisposeError =
             LoggerMessage.Define<string>(LogLevel.Error, new EventId(4011, "DisposeError"), "Error on disposing. {Message}");
@@ -110,20 +110,13 @@ namespace Sharpcaster
 
         private static void RegisterChannels(IServiceCollection services, ILogger<ChromecastClient>? logger)
         {
-            // Create channel-specific loggers using the main logger as a base
-            var connectionLogger = logger != null ? new ChannelLogger<ConnectionChannel>(logger) : null;
-            var heartbeatLogger = logger != null ? new ChannelLogger<HeartbeatChannel>(logger) : null;
-            var receiverLogger = logger != null ? new ChannelLogger<ReceiverChannel>(logger) : null;
-            var mediaLogger = logger != null ? new ChannelLogger<MediaChannel>(logger) : null;
-            var multizoneLogger = logger != null ? new ChannelLogger<MultiZoneChannel>(logger) : null;
-            var spotifyLogger = logger != null ? new ChannelLogger<SpotifyChannel>(logger) : null;
-
-            services.AddTransient<IChromecastChannel>(_ => new ConnectionChannel(connectionLogger));
-            services.AddTransient<IChromecastChannel>(_ => new HeartbeatChannel(heartbeatLogger));
-            services.AddTransient<IChromecastChannel>(_ => new ReceiverChannel(receiverLogger));
-            services.AddTransient<IChromecastChannel>(_ => new MediaChannel(mediaLogger));
-            services.AddTransient<IChromecastChannel>(_ => new MultiZoneChannel(multizoneLogger));
-            services.AddTransient<IChromecastChannel>(_ => new SpotifyChannel(spotifyLogger));
+            // Pass the main logger directly to all channels - they'll include their name in log messages
+            services.AddTransient<IChromecastChannel>(_ => new ConnectionChannel(logger));
+            services.AddTransient<IChromecastChannel>(_ => new HeartbeatChannel(logger));
+            services.AddTransient<IChromecastChannel>(_ => new ReceiverChannel(logger));
+            services.AddTransient<IChromecastChannel>(_ => new MediaChannel(logger));
+            services.AddTransient<IChromecastChannel>(_ => new MultiZoneChannel(logger));
+            services.AddTransient<IChromecastChannel>(_ => new SpotifyChannel(logger));
         }
 
         private static void RegisterMessages(IServiceCollection services)
@@ -288,17 +281,12 @@ namespace Sharpcaster
             await SendSemaphoreSlim.WaitAsync().ConfigureAwait(false);
             try
             {
-                // Log the sent message using the appropriate logger
                 if (logger != null)
                 {
-                    // Use direct logging for channel loggers to ensure proper prefixes like [ConnectionChannel]
-                    logger.LogTrace("SENT: {NameSpace} - {DestinationId}: {PayloadUtf8}", 
-                        castMessage.Namespace, castMessage.DestinationId, castMessage.PayloadUtf8);
-                }
-                else if (_logger != null)
-                {
-                    // Use LoggerMessage.Define for main ChromecastClient logger (more efficient)
-                    LogSentMessage(_logger, castMessage.Namespace, castMessage.DestinationId, castMessage.PayloadUtf8, null);
+                    // Determine channel name from namespace for cleaner logging
+                    var channelName = GetChannelNameFromNamespace(castMessage.Namespace);
+                    var logMessage = $"[{channelName}] SENT: {castMessage.Namespace} - {castMessage.DestinationId}: {castMessage.PayloadUtf8}";
+                    LogSentMessage(logger, channelName, castMessage.Namespace, castMessage.DestinationId, castMessage.PayloadUtf8, null);
                 }
 #if NETSTANDARD2_0
                 byte[] message = castMessage.ToProto();
@@ -324,6 +312,20 @@ namespace Sharpcaster
             SourceId = SenderId.ToString(),
             DestinationId = destinationId
         };
+
+        private static string GetChannelNameFromNamespace(string nameSpace)
+        {
+            return nameSpace switch
+            {
+                "urn:x-cast:com.google.cast.tp.connection" => "ConnectionChannel",
+                "urn:x-cast:com.google.cast.tp.heartbeat" => "HeartbeatChannel", 
+                "urn:x-cast:com.google.cast.receiver" => "ReceiverChannel",
+                "urn:x-cast:com.google.cast.media" => "MediaChannel",
+                "urn:x-cast:com.google.cast.multizone" => "MultiZoneChannel",
+                _ when nameSpace.Contains("spotify") => "SpotifyChannel",
+                _ => "urn:x-cast:unkown"
+            };
+        }
 
         public async Task<string> SendAsync(ILogger? logger, string ns, int messageRequestId, string messagePayload, string destinationId)
         {
@@ -430,11 +432,7 @@ namespace Sharpcaster
         public TChannel GetChannel<TChannel>() where TChannel : IChromecastChannel
         {
             var channel = Channels.OfType<TChannel>().First();
-            if (channel == null)
-            {
-                throw new ArgumentNullException($"Channel of type {typeof(TChannel).Name} not found.");
-            }
-            return channel;
+            return channel == null ? throw new ArgumentNullException($"Channel of type {typeof(TChannel).Name} not found.") : channel;
         }
 
         public async Task<ChromecastStatus> LaunchApplicationAsync(string applicationId, bool joinExistingApplicationSession = true)
@@ -466,40 +464,4 @@ namespace Sharpcaster
         public MediaStatus? MediaStatus => MediaChannel.MediaStatus;
     }
 
-    /// <summary>
-    /// A logger wrapper that uses the main ChromecastClient logger but prefixes logs with the channel name
-    /// </summary>
-    /// <typeparam name="T">The channel type</typeparam>
-    internal class ChannelLogger<T> : ILogger<T>
-    {
-        private readonly ILogger _baseLogger;
-        private readonly string _categoryName;
-
-        public ChannelLogger(ILogger baseLogger)
-        {
-            _baseLogger = baseLogger;
-            _categoryName = typeof(T).Name;
-        }
-
-        public IDisposable? BeginScope<TState>(TState state) where TState : notnull
-        {
-            return _baseLogger.BeginScope(state);
-        }
-
-        public bool IsEnabled(LogLevel logLevel)
-        {
-            return _baseLogger.IsEnabled(logLevel);
-        }
-
-        public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter)
-        {
-            if (!IsEnabled(logLevel))
-                return;
-
-            var originalMessage = formatter(state, exception);
-            var prefixedMessage = $"[{_categoryName}] {originalMessage}";
-            
-            _baseLogger.Log(logLevel, eventId, prefixedMessage, exception, (msg, ex) => msg);
-        }
-    }
 }

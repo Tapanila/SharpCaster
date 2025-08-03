@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging;
 using Sharpcaster.Models.Media;
 using Spectre.Console;
 using SharpCaster.Console.Models;
@@ -9,12 +10,16 @@ public class CommandExecutor
 {
     private readonly ApplicationState _state;
     private readonly DeviceService _deviceService;
+    private readonly MemoryLogService _memoryLogService;
+    private readonly ILogger<Sharpcaster.ChromecastClient> _chromecastLogger;
     private readonly UIHelper _ui;
 
-    public CommandExecutor(ApplicationState state, DeviceService deviceService, UIHelper ui, Sharpcaster.MdnsChromecastLocator locator)
+    public CommandExecutor(ApplicationState state, DeviceService deviceService, MemoryLogService memoryLogService, ILogger<Sharpcaster.ChromecastClient> chromecastLogger, UIHelper ui, Sharpcaster.MdnsChromecastLocator locator)
     {
         _state = state;
         _deviceService = deviceService;
+        _memoryLogService = memoryLogService;
+        _chromecastLogger = chromecastLogger;
         _ui = ui;
         
         // Ensure locator is initialized
@@ -42,7 +47,16 @@ public class CommandExecutor
 
             if (args.ShowDevices)
             {
-                return await ListDevicesAsync();
+                var listResult = await ListDevicesAsync();
+                
+                // Show logs if requested
+                if (args.ShowLogs)
+                {
+                    System.Console.WriteLine();
+                    await ShowLogsAsync();
+                }
+                
+                return listResult;
             }
 
             if (string.IsNullOrEmpty(args.Command))
@@ -114,11 +128,28 @@ public class CommandExecutor
             System.Console.WriteLine($"Connected to {connectionInfo}");
 
             // Execute command
-            return await ExecuteSpecificCommandAsync(args);
+            var result = await ExecuteSpecificCommandAsync(args);
+            
+            // Show logs if requested
+            if (args.ShowLogs)
+            {
+                System.Console.WriteLine();
+                await ShowLogsAsync();
+            }
+            
+            return result;
         }
         catch (Exception ex)
         {
             System.Console.WriteLine($"Error: {ex.Message}");
+            
+            // Show logs if requested even on error
+            if (args.ShowLogs)
+            {
+                System.Console.WriteLine();
+                await ShowLogsAsync();
+            }
+            
             return 1;
         }
         finally
@@ -170,7 +201,7 @@ public class CommandExecutor
         try
         {
             _state.Client?.Dispose();
-            _state.Client = new Sharpcaster.ChromecastClient();
+            _state.Client = new Sharpcaster.ChromecastClient(_chromecastLogger);
             
             await _state.Client.ConnectChromecast(_state.SelectedDevice);
             await Task.Delay(1000); // Give connection time to stabilize
@@ -415,6 +446,47 @@ public class CommandExecutor
         catch (Exception ex)
         {
             System.Console.WriteLine($"Failed to get status: {ex.Message}");
+            return 1;
+        }
+    }
+
+    private async Task<int> ShowLogsAsync()
+    {
+        try
+        {
+            var logs = _memoryLogService.GetRecentLogs(20);
+            
+            if (logs.Count == 0)
+            {
+                System.Console.WriteLine("No logs available.");
+                return 0;
+            }
+
+            System.Console.WriteLine($"\nShowing last {logs.Count} log entries:");
+            System.Console.WriteLine(new string('-', 80));
+            
+            foreach (var log in logs)
+            {
+                var timeStr = log.Timestamp.ToString("HH:mm:ss.fff");
+                var levelStr = log.GetLevelDisplay();
+                var categoryStr = log.Category.Length > 25 ? log.Category.Substring(0, 22) + "..." : log.Category;
+                
+                System.Console.WriteLine($"{timeStr} [{levelStr}] {categoryStr}: {log.Message}");
+                
+                if (log.Exception != null)
+                {
+                    System.Console.WriteLine($"    Exception: {log.Exception.GetType().Name}: {log.Exception.Message}");
+                }
+            }
+            
+            System.Console.WriteLine(new string('-', 80));
+            System.Console.WriteLine($"Total logs in memory: {_memoryLogService.Count}");
+            
+            return 0;
+        }
+        catch (Exception ex)
+        {
+            System.Console.WriteLine($"Failed to show logs: {ex.Message}");
             return 1;
         }
     }

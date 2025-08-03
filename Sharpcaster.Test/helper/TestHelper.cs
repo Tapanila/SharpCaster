@@ -98,7 +98,7 @@ namespace Sharpcaster.Test.helper
             TestOutput = output;
             ILoggerFactory lFactory = CreateMockedLoggerFactory(assertableLog);
 
-            return new ChromecastClient(loggerFactory: lFactory);
+            return new ChromecastClient(logger: lFactory.CreateLogger<ChromecastClient>());
         }
 
         private Mock<ILogger<T>> CreateILoggerMock<T>()
