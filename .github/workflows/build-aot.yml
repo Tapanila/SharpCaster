@@ -3,7 +3,7 @@ name: Build AOT Executables
 on:
   push:
     branches: [ main, version-3 ]
-    tags: [ 'v*' ]
+    tags: [ '[0-9]+.[0-9]+.[0-9]+*' ]
   pull_request:
     branches: [ main ]
 
@@ -244,8 +244,9 @@ jobs:
     # Publish to Chocolatey
     - name: Update Chocolatey package with dynamic checksums
       run: |
-        # Extract version from tag (remove 'v' prefix)
-        VERSION=${GITHUB_REF#refs/tags/v}
+        # Extract version from tag (remove 'v' prefix if present)
+        VERSION=${GITHUB_REF#refs/tags/}
+        VERSION=${VERSION#v}
         echo "Publishing version: $VERSION"
         
         # Calculate checksums for the new .exe files
@@ -268,7 +269,8 @@ jobs:
 
     - name: Pack and publish Chocolatey package
       run: |
-        VERSION=${GITHUB_REF#refs/tags/v}
+        VERSION=${GITHUB_REF#refs/tags/}
+        VERSION=${VERSION#v}
         cd chocolatey
         
         # Install choco (dotnet tool)
