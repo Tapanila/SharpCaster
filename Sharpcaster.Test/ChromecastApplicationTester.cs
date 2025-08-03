@@ -1,6 +1,6 @@
 ﻿using Sharpcaster.Models;
-using Sharpcaster.Test.customChannel;
-using Sharpcaster.Test.customMessage;
+using Sharpcaster.Messages.Web;
+using Sharpcaster.Extensions;
 using Sharpcaster.Test.helper;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -98,7 +98,7 @@ namespace Sharpcaster.Test
                 SessionId = client.ChromecastStatus.Application.SessionId
             };
 
-            var requestPayload = JsonSerializer.Serialize(req, WebMessageSerializationContext.Default.WebMessage);
+            var requestPayload = JsonSerializer.Serialize(req, SharpcasteSerializationContext.Default.WebMessage);
 
             await client.SendAsync(null, "urn:x-cast:com.boombatower.chromecast-dashboard", requestPayload, client.ChromecastStatus.Application.SessionId);
         }

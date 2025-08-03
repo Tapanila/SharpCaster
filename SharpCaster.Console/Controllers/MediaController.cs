@@ -1,9 +1,12 @@
+using Sharpcaster.Extensions;
+using Sharpcaster.Messages.Web;
 using Sharpcaster.Models.Media;
 using Sharpcaster.Models.Queue;
 using Spectre.Console;
 using SharpCaster.Console.Models;
 using SharpCaster.Console.Services;
 using SharpCaster.Console.UI;
+using System.Text.Json;
 
 namespace SharpCaster.Console.Controllers;
 
@@ -100,6 +103,115 @@ public class MediaController
         {
             _ui.AddSeparator("❌ Casting Error");
             AnsiConsole.MarkupLine($"[red]❌ Casting failed: {ex.Message}[/]");
+            
+            if (ex.Message.Contains("timeout") || ex.Message.Contains("connection"))
+            {
+                _state.IsConnected = false;
+                AnsiConsole.MarkupLine("[yellow]⚠️  Connection may have been lost. Try reconnecting.[/]");
+            }
+        }
+    }
+
+    public async Task CastWebsiteAsync()
+    {
+        if (!await _deviceService.EnsureConnectedAsync())
+            return;
+
+        var url = AnsiConsole.Prompt(
+            new TextPrompt<string>("[yellow]Enter website URL:[/]")
+                .PromptStyle("green")
+                .ValidationErrorMessage("[red]Please enter a valid URL[/]")
+                .Validate(url => 
+                {
+                    if (!Uri.TryCreate(url, UriKind.Absolute, out var uri) || 
+                        (uri.Scheme != "http" && uri.Scheme != "https"))
+                    {
+                        return ValidationResult.Error("[red]Must be a valid http or https URL[/]");
+                    }
+                    return ValidationResult.Success();
+                }));
+
+        try
+        {
+            await AnsiConsole.Status()
+                .Spinner(Spinner.Known.Star2)
+                .SpinnerStyle(Style.Parse("yellow"))
+                .StartAsync("Loading website on Chromecast...", async ctx =>
+                {
+                    ctx.Status("Launching dashboard receiver...");
+                    await _state.Client!.LaunchApplicationAsync("F7FD2183");
+
+                    var req = new WebMessage
+                    {
+                        Url = url,
+                        Type = "load",
+                        SessionId = _state.Client.ChromecastStatus.Application.SessionId
+                    };
+
+                    var requestPayload = JsonSerializer.Serialize(req, SharpcasteSerializationContext.Default.WebMessage);
+
+                    ctx.Status("Loading website...");
+                    await _state.Client.SendAsync(null, "urn:x-cast:com.boombatower.chromecast-dashboard", requestPayload, _state.Client.ChromecastStatus.Application.SessionId);
+                });
+            
+            _ui.AddSeparator();
+            AnsiConsole.MarkupLine("[green]✅ Website loaded successfully![/]");
+            AnsiConsole.MarkupLine($"[dim]Displaying: {url}[/]");
+        }
+        catch (Exception ex)
+        {
+            _ui.AddSeparator("❌ Website Loading Error");
+            AnsiConsole.MarkupLine($"[red]❌ Website loading failed: {ex.Message}[/]");
+            
+            if (ex.Message.Contains("timeout") || ex.Message.Contains("connection"))
+            {
+                _state.IsConnected = false;
+                AnsiConsole.MarkupLine("[yellow]⚠️  Connection may have been lost. Try reconnecting.[/]");
+            }
+        }
+    }
+
+    public async Task StopApplicationAsync()
+    {
+        if (!await _deviceService.EnsureConnectedAsync())
+            return;
+
+        try
+        {
+            await AnsiConsole.Status()
+                .Spinner(Spinner.Known.Star2)
+                .SpinnerStyle(Style.Parse("yellow"))
+                .StartAsync("Stopping application...", async ctx =>
+                {
+                    var receiverStatus = _state.Client!.ReceiverChannel.ReceiverStatus;
+                    if (receiverStatus?.Applications?.Any() == true)
+                    {
+                        var app = receiverStatus.Applications.First();
+                        ctx.Status($"Stopping '{app.DisplayName}'...");
+                        await _state.Client.ReceiverChannel.StopApplication();
+                    }
+                    else
+                    {
+                        ctx.Status("No applications running");
+                    }
+                });
+            
+            _ui.AddSeparator();
+            var status = _state.Client!.ReceiverChannel.ReceiverStatus;
+            if (status?.Applications?.Any() == true)
+            {
+                var app = status.Applications.First();
+                AnsiConsole.MarkupLine($"[green]✅ Application '{app.DisplayName}' stopped successfully![/]");
+            }
+            else
+            {
+                AnsiConsole.MarkupLine("[yellow]ℹ️ No applications were running[/]");
+            }
+        }
+        catch (Exception ex)
+        {
+            _ui.AddSeparator("❌ Stop Application Error");
+            AnsiConsole.MarkupLine($"[red]❌ Failed to stop application: {ex.Message}[/]");
             
             if (ex.Message.Contains("timeout") || ex.Message.Contains("connection"))
             {

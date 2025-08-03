@@ -193,7 +193,9 @@ public class ApplicationFlows
             var choices = new[]
             {
                 "Cast media",
+                "Website display",
                 "Media controls",
+                "Stop application",
                 "Queue management", 
                 "Device status",
                 "View logs",
@@ -210,7 +212,9 @@ public class ApplicationFlows
                     .UseConverter(choice => choice switch
                     {
                         "Cast media" => "📺 Cast media",
+                        "Website display" => "🌐 Website display",
                         "Media controls" => "🎮 Media controls",
+                        "Stop application" => "⏹️ Stop application",
                         "Queue management" => "📝 Queue management",
                         "Device status" => "📊 Device status",
                         "View logs" => "📋 View logs",
@@ -227,6 +231,14 @@ public class ApplicationFlows
                 case "Cast media":
                     _ui.AddSeparator("🎬 Casting Media");
                     await _mediaController.CastMediaAsync();
+                    break;
+                case "Website display":
+                    _ui.AddSeparator("🌐 Website Display");
+                    await _mediaController.CastWebsiteAsync();
+                    break;
+                case "Stop application":
+                    _ui.AddSeparator("⏹️ Stop Application");
+                    await _mediaController.StopApplicationAsync();
                     break;
                 case "Media controls":
                     _ui.AddSeparator("🎮 Media Controls");

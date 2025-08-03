@@ -53,7 +53,9 @@ public static class CommandLineParser
                 case "play":
                 case "pause":
                 case "stop":
+                case "stop-app":
                 case "status":
+                case "website":
                     result.Command = arg;
                     break;
                     
@@ -152,9 +154,11 @@ public static class CommandLineParser
         System.Console.WriteLine("  cast <url>              Alias for 'play'");
         System.Console.WriteLine("  pause                   Pause current media");
         System.Console.WriteLine("  stop                    Stop current media");
+        System.Console.WriteLine("  stop-app                Stop the currently running application");
         System.Console.WriteLine("  volume <0.0-1.0>        Set volume (0.0 = mute, 1.0 = max)");
         System.Console.WriteLine("  seek <seconds>          Seek to specific time in seconds");
         System.Console.WriteLine("  status                  Show current media status");
+        System.Console.WriteLine("  website <url>           Open and display a website");
         System.Console.WriteLine("  list                    List available devices");
         System.Console.WriteLine("  version                 Show application version");
         System.Console.WriteLine("  help                    Show this help");
@@ -180,6 +184,9 @@ public static class CommandLineParser
         System.Console.WriteLine("  # Cast with custom title");
         System.Console.WriteLine("  sharpcaster \"Office TV\" play \"https://example.com/video.mp4\" --title \"My Video\"");
         System.Console.WriteLine();
+        System.Console.WriteLine("  # Display a website");
+        System.Console.WriteLine("  sharpcaster \"Office TV\" website \"https://www.google.com\"");
+        System.Console.WriteLine();
         System.Console.WriteLine("  # Connect directly using IP address (skips discovery)");
         System.Console.WriteLine("  sharpcaster --ip 192.168.1.100 play \"https://example.com/video.mp4\"");
         System.Console.WriteLine("  sharpcaster -i 192.168.1.100 status");
@@ -188,6 +195,7 @@ public static class CommandLineParser
         System.Console.WriteLine("  sharpcaster \"Kitchen Speaker\" pause");
         System.Console.WriteLine("  sharpcaster \"Bedroom TV\" volume 0.7");
         System.Console.WriteLine("  sharpcaster \"Living Room TV\" seek 120");
+        System.Console.WriteLine("  sharpcaster \"Office TV\" stop-app");
         System.Console.WriteLine();
         System.Console.WriteLine("  # Check status and view logs");
         System.Console.WriteLine("  sharpcaster \"Office TV\" status");

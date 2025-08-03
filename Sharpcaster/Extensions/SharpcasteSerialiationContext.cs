@@ -7,6 +7,7 @@ using Sharpcaster.Messages.Multizone;
 using Sharpcaster.Messages.Queue;
 using Sharpcaster.Messages.Receiver;
 using Sharpcaster.Messages.Spotify;
+using Sharpcaster.Messages.Web;
 using Sharpcaster.Models.Media;
 using Sharpcaster.Models.ChromecastStatus;
 using Sharpcaster.Models.Cast;
@@ -93,6 +94,7 @@ namespace Sharpcaster.Extensions
     [JsonSerializable(typeof(UserActionMessage))]
     [JsonSerializable(typeof(EditTracksInfoMessage))]
     [JsonSerializable(typeof(StreamTransferMessage))]
+    [JsonSerializable(typeof(WebMessage))]
     public partial class SharpcasteSerializationContext : JsonSerializerContext
     {
     }

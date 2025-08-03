@@ -1,8 +1,12 @@
 using Microsoft.Extensions.Logging;
+using Sharpcaster.Extensions;
+using Sharpcaster.Messages.Web;
 using Sharpcaster.Models.Media;
-using Spectre.Console;
 using SharpCaster.Console.Models;
 using SharpCaster.Console.UI;
+using Spectre.Console;
+using System.Text.Json;
+using static Google.Protobuf.Compiler.CodeGeneratorResponse.Types;
 
 namespace SharpCaster.Console.Services;
 
@@ -272,6 +276,9 @@ public class CommandExecutor
                 case "stop":
                     return await StopMediaAsync();
                     
+                case "stop-app":
+                    return await StopApplicationAsync();
+                    
                 case "volume":
                     if (!args.Volume.HasValue)
                     {
@@ -290,6 +297,14 @@ public class CommandExecutor
                     
                 case "status":
                     return await ShowStatusAsync();
+                    
+                case "website":
+                    if (string.IsNullOrEmpty(args.MediaUrl))
+                    {
+                        System.Console.WriteLine("Error: Website URL is required for website command.");
+                        return 1;
+                    }
+                    return await StartWebsiteAsync(args.MediaUrl);
                     
                 default:
                     System.Console.WriteLine($"Error: Unknown command '{args.Command}'.");
@@ -378,6 +393,30 @@ public class CommandExecutor
         }
     }
 
+    private async Task<int> StopApplicationAsync()
+    {
+        try
+        {
+            var receiverStatus = _state.Client!.ReceiverChannel.ReceiverStatus;
+            if (receiverStatus?.Applications?.Any() == true)
+            {
+                var app = receiverStatus.Applications.First();
+                await _state.Client.ReceiverChannel.StopApplication();
+                System.Console.WriteLine($"Application '{app.DisplayName}' stopped");
+            }
+            else
+            {
+                System.Console.WriteLine("No applications running");
+            }
+            return 0;
+        }
+        catch (Exception ex)
+        {
+            System.Console.WriteLine($"Failed to stop application: {ex.Message}");
+            return 1;
+        }
+    }
+
     private async Task<int> SetVolumeAsync(double volume)
     {
         try
@@ -446,6 +485,54 @@ public class CommandExecutor
         catch (Exception ex)
         {
             System.Console.WriteLine($"Failed to get status: {ex.Message}");
+            return 1;
+        }
+    }
+
+    private async Task<int> StartWebsiteAsync(string url)
+    {
+        try
+        {
+            // Validate URL
+            if (!Uri.TryCreate(url, UriKind.Absolute, out var uri) || 
+                (uri.Scheme != "http" && uri.Scheme != "https"))
+            {
+                System.Console.WriteLine("Error: Invalid website URL. Must be a valid http or https URL.");
+                return 1;
+            }
+
+            
+
+            try
+            {
+                // Launch Default Media Receiver
+                await _state.Client!.LaunchApplicationAsync("F7FD2183");
+
+
+                var req = new WebMessage
+                {
+                    Url = url,
+                    Type = "load",
+                    SessionId = _state.Client.ChromecastStatus.Application.SessionId
+                };
+
+                var requestPayload = JsonSerializer.Serialize(req, SharpcasteSerializationContext.Default.WebMessage);
+
+                await _state.Client.SendAsync(_chromecastLogger, "urn:x-cast:com.boombatower.chromecast-dashboard", requestPayload, _state.Client.ChromecastStatus.Application.SessionId);
+
+                System.Console.WriteLine($"Successfully opened website on Chromecast");
+                return 0;
+            }
+            catch (Exception ex)
+            {
+                System.Console.WriteLine();
+                System.Console.WriteLine($"Website loading failed: {ex.Message}");
+                return 1;
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Console.WriteLine($"Failed to open website: {ex.Message}");
             return 1;
         }
     }
