@@ -288,18 +288,7 @@ namespace Sharpcaster
             await SendSemaphoreSlim.WaitAsync().ConfigureAwait(false);
             try
             {
-                // Log the sent message using the appropriate logger
-                if (logger != null)
-                {
-                    // Use direct logging for channel loggers to ensure proper prefixes like [ConnectionChannel]
-                    logger.LogTrace("SENT: {NameSpace} - {DestinationId}: {PayloadUtf8}", 
-                        castMessage.Namespace, castMessage.DestinationId, castMessage.PayloadUtf8);
-                }
-                else if (_logger != null)
-                {
-                    // Use LoggerMessage.Define for main ChromecastClient logger (more efficient)
-                    LogSentMessage(_logger, castMessage.Namespace, castMessage.DestinationId, castMessage.PayloadUtf8, null);
-                }
+                if (logger != null) LogSentMessage(logger, castMessage.Namespace, castMessage.DestinationId, castMessage.PayloadUtf8, null);     
 #if NETSTANDARD2_0
                 byte[] message = castMessage.ToProto();
 #else

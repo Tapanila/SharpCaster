@@ -173,10 +173,15 @@ public class DeviceService
         if (_state.Client == null || !_state.IsConnected)
             return;
 
+        
         try
         {
+            var hasReceiverNamespace = _state.Client.ChromecastStatus.Application.Namespaces?.Any(ns => ns.Name == "urn:x-cast:com.google.cast.receiver") == true;
             // Refresh receiver status to get the most current application information
-            await _state.Client.ReceiverChannel.GetChromecastStatusAsync();
+            if (hasReceiverNamespace)
+            {
+                await _state.Client.ReceiverChannel.GetChromecastStatusAsync();
+            }
             var receiverStatus = _state.Client.ReceiverChannel.ReceiverStatus;
             
             if (receiverStatus?.Applications != null && receiverStatus.Applications.Count > 0)
