@@ -187,12 +187,16 @@ jobs:
         cd artifacts
         for dir in SharpCaster-Console-*/; do
           runtime=$(echo "$dir" | sed 's/SharpCaster-Console-\(.*\)-.*MB\//\1/')
-          echo "Creating archive for $runtime from $dir"
+          echo "Processing $runtime from $dir"
           
           cd "$dir"
           if [[ "$runtime" == win-* ]]; then
-            # Windows - create zip
-            zip -r "../SharpCaster-Console-${runtime}.zip" .
+            # Windows - copy .exe directly with renamed filename
+            if [[ "$runtime" == "win-x64" ]]; then
+              cp sharpcaster.exe "../sharpcaster-win-x64.exe"
+            elif [[ "$runtime" == "win-arm64" ]]; then
+              cp sharpcaster.exe "../sharpcaster-win-arm.exe"
+            fi
           else
             # Linux/macOS - create tar.gz
             tar -czf "../SharpCaster-Console-${runtime}.tar.gz" .
@@ -201,13 +205,13 @@ jobs:
         done
         
         # List created files
-        ls -la *.zip *.tar.gz
+        ls -la *.exe *.tar.gz
 
     - name: Create Release
       uses: softprops/action-gh-release@v1
       with:
         files: |
-          artifacts/*.zip
+          artifacts/*.exe
           artifacts/*.tar.gz
         draft: false
         prerelease: false
@@ -219,8 +223,8 @@ jobs:
           No .NET runtime installation required!
           
           ### Downloads:
-          - **Windows x64**: `SharpCaster-Console-win-x64.zip`
-          - **Windows ARM64**: `SharpCaster-Console-win-arm64.zip`
+          - **Windows x64**: `sharpcaster-win-x64.exe`
+          - **Windows ARM64**: `sharpcaster-win-arm.exe`
           - **Linux x64**: `SharpCaster-Console-linux-x64.tar.gz`
           - **Linux ARM64**: `SharpCaster-Console-linux-arm64.tar.gz`
           - **macOS Intel**: `SharpCaster-Console-osx-x64.tar.gz`
@@ -236,3 +240,44 @@ jobs:
           ```
           
           For detailed usage instructions, see the README.txt file included in each download.
+
+    # Publish to Chocolatey
+    - name: Update Chocolatey package with dynamic checksums
+      run: |
+        # Extract version from tag (remove 'v' prefix)
+        VERSION=${GITHUB_REF#refs/tags/v}
+        echo "Publishing version: $VERSION"
+        
+        # Calculate checksums for the new .exe files
+        X64_CHECKSUM=$(sha256sum artifacts/sharpcaster-win-x64.exe | cut -d' ' -f1 | tr '[:lower:]' '[:upper:]')
+        ARM_CHECKSUM=$(sha256sum artifacts/sharpcaster-win-arm.exe | cut -d' ' -f1 | tr '[:lower:]' '[:upper:]')
+        
+        echo "x64 checksum: $X64_CHECKSUM"
+        echo "ARM checksum: $ARM_CHECKSUM"
+        
+        # Update nuspec version
+        sed -i "s/<version>.*<\/version>/<version>$VERSION<\/version>/" chocolatey/sharpcaster.nuspec
+        
+        # Update chocolateyinstall.ps1 with new version and checksums
+        sed -i "s|3.0.0-beta1|$VERSION|g" chocolatey/tools/chocolateyinstall.ps1
+        sed -i "s/96BADBF9CFF4D21B31773388EEDC345FD0807B4922A34271097896030FBBB24E/$ARM_CHECKSUM/" chocolatey/tools/chocolateyinstall.ps1
+        sed -i "s/3E62F16C9663FD1674AFC9F685F0F250CC5F7643A4F4DFAA82678D534DE8B084/$X64_CHECKSUM/" chocolatey/tools/chocolateyinstall.ps1
+
+    - name: Install .NET SDK
+      uses: actions/setup-dotnet@v4
+
+    - name: Pack and publish Chocolatey package
+      run: |
+        VERSION=${GITHUB_REF#refs/tags/v}
+        cd chocolatey
+        
+        # Install choco (dotnet tool)
+        dotnet tool install --global chocolatey.tool
+        
+        # Pack the package
+        choco pack sharpcaster.nuspec
+        
+        # Push to Chocolatey (requires CHOCOLATEY_API_KEY secret)
+        choco push sharpcaster.$VERSION.nupkg --source https://push.chocolatey.org/ --api-key ${{ secrets.CHOCOLATEY_API_KEY }}
+      env:
+        CHOCOLATEY_API_KEY: ${{ secrets.CHOCOLATEY_API_KEY }}
