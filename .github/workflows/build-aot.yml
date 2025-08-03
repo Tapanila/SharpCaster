@@ -167,7 +167,7 @@ jobs:
 
   # Create release if this is a tag
   release:
-    if: startsWith(github.ref, 'refs/tags/v')
+    if: startsWith(github.ref, 'refs/tags/')
     needs: build
     runs-on: ubuntu-latest
     permissions:
@@ -233,10 +233,10 @@ jobs:
           ### Usage:
           ```bash
           # Interactive mode
-          ./SharpCaster.Console
+          ./sharpcaster
           
           # Command-line mode
-          ./SharpCaster.Console "Living Room TV" play "https://example.com/video.mp4"
+          ./sharpcaster "Living Room TV" play "https://example.com/video.mp4"
           ```
           
           For detailed usage instructions, see the README.txt file included in each download.
@@ -244,9 +244,7 @@ jobs:
     # Publish to Chocolatey
     - name: Update Chocolatey package with dynamic checksums
       run: |
-        # Extract version from tag (remove 'v' prefix if present)
         VERSION=${GITHUB_REF#refs/tags/}
-        VERSION=${VERSION#v}
         echo "Publishing version: $VERSION"
         
         # Calculate checksums for the new .exe files
