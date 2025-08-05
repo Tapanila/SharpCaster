@@ -3,9 +3,10 @@ name: Build AOT Executables
 on:
   push:
     branches: [ main, version-3 ]
-    tags: [ '[0-9]+.[0-9]+.[0-9]+*' ]
   pull_request:
     branches: [ main ]
+  release:
+    types: [published]
 
 jobs:
   build:
@@ -221,37 +222,10 @@ jobs:
         # List created files
         ls -la *.exe *.tar.gz
 
-    - name: Create Release
+    - name: Upload Release Assets
       uses: softprops/action-gh-release@v1
       with:
-        tag_name: ${{ env.VERSION }}
-        name: SharpCaster v${{ env.VERSION }}
         files: |
           artifacts/*.exe
           artifacts/*.tar.gz
-        draft: false
-        prerelease: false
-        generate_release_notes: true
-        body: |
-          ## SharpCaster Console AOT Builds
-          
-          Self-contained native executables for all supported platforms.
-          No .NET runtime installation required!
-          
-          ### Downloads:
-          - **Windows x64**: `sharpcaster-win-x64.exe`
-          - **Windows ARM64**: `sharpcaster-win-arm.exe`
-          - **Linux x64**: `SharpCaster-Console-linux-x64.tar.gz`
-          - **Linux ARM64**: `SharpCaster-Console-linux-arm64.tar.gz`
-          - **macOS Intel**: `SharpCaster-Console-osx-x64.tar.gz`
-          - **macOS Apple Silicon**: `SharpCaster-Console-osx-arm64.tar.gz`
-          
-          ### Usage:
-          ```bash
-          # Interactive mode
-          ./sharpcaster
-          
-          # Command-line mode
-          ./sharpcaster "Living Room TV" play "https://example.com/video.mp4"
-          ```
 
