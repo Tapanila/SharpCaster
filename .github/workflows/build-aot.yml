@@ -254,44 +254,4 @@ jobs:
           # Command-line mode
           ./sharpcaster "Living Room TV" play "https://example.com/video.mp4"
           ```
-          
-          For detailed usage instructions, see the README.txt file included in each download.
 
-    # Publish to Chocolatey
-    - name: Update Chocolatey package with dynamic checksums
-      run: |
-        echo "Publishing version: $VERSION"
-        
-        # Calculate checksums for the new .exe files
-        X64_CHECKSUM=$(sha256sum artifacts/sharpcaster-win-x64.exe | cut -d' ' -f1 | tr '[:lower:]' '[:upper:]')
-        ARM_CHECKSUM=$(sha256sum artifacts/sharpcaster-win-arm.exe | cut -d' ' -f1 | tr '[:lower:]' '[:upper:]')
-        
-        echo "x64 checksum: $X64_CHECKSUM"
-        echo "ARM checksum: $ARM_CHECKSUM"
-        
-        # Update nuspec version
-        sed -i "s/<version>.*<\/version>/<version>$VERSION<\/version>/" chocolatey/sharpcaster.nuspec
-        
-        # Update chocolateyinstall.ps1 with new version and checksums
-        sed -i "s|3.0.0-beta1|$VERSION|g" chocolatey/tools/chocolateyinstall.ps1
-        sed -i "s/96BADBF9CFF4D21B31773388EEDC345FD0807B4922A34271097896030FBBB24E/$ARM_CHECKSUM/" chocolatey/tools/chocolateyinstall.ps1
-        sed -i "s/3E62F16C9663FD1674AFC9F685F0F250CC5F7643A4F4DFAA82678D534DE8B084/$X64_CHECKSUM/" chocolatey/tools/chocolateyinstall.ps1
-
-    - name: Pack and publish Chocolatey package
-      run: |
-        cd chocolatey
-        
-        # Install mono and nuget for Chocolatey packaging
-        sudo apt-get update
-        sudo apt-get install -y mono-complete wget
-        
-        # Download nuget.exe and pack
-        wget -q https://dist.nuget.org/win-x86-commandline/latest/nuget.exe
-        mono nuget.exe pack sharpcaster.nuspec
-        
-        # Upload to Chocolatey using curl
-        curl -X PUT "https://push.chocolatey.org/api/v2/package" \
-             -H "X-NuGet-ApiKey: ${{ secrets.CHOCOLATEY_API_KEY }}" \
-             -F "package=@sharpcaster.$VERSION.nupkg"
-      env:
-        CHOCOLATEY_API_KEY: ${{ secrets.CHOCOLATEY_API_KEY }}
