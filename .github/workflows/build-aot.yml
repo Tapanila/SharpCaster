@@ -6,28 +6,11 @@ on:
     tags: [ '[0-9]+.[0-9]+.[0-9]+*' ]
   pull_request:
     branches: [ main ]
-  workflow_dispatch:
-    inputs:
-      build_all_platforms:
-        description: 'Build for all platforms (otherwise Windows x64 only)'
-        required: false
-        default: false
-        type: boolean
-      force_release:
-        description: 'Force create release (ignores tag requirement)'
-        required: false
-        default: false
-        type: boolean
-      release_version:
-        description: 'Version for release (e.g., 3.1.0) - required if force_release is true'
-        required: false
-        type: string
 
 jobs:
   build:
     name: Build ${{ matrix.os }} ${{ matrix.arch }}
     runs-on: ${{ matrix.runner }}
-    if: ${{ !matrix.exclude_on_manual }}
     strategy:
       matrix:
         include:
@@ -42,7 +25,6 @@ jobs:
             runner: windows-latest
             runtime: win-arm64
             executable: sharpcaster.exe
-            exclude_on_manual: ${{ github.event_name == 'workflow_dispatch' && !inputs.build_all_platforms }}
 
           # Linux builds  
           - os: linux
@@ -50,13 +32,11 @@ jobs:
             runner: ubuntu-latest
             runtime: linux-x64
             executable: sharpcaster
-            exclude_on_manual: ${{ github.event_name == 'workflow_dispatch' && !inputs.build_all_platforms }}
           - os: linux
             arch: arm64
             runner: ubuntu-24.04-arm
             runtime: linux-arm64
             executable: sharpcaster
-            exclude_on_manual: ${{ github.event_name == 'workflow_dispatch' && !inputs.build_all_platforms }}
 
           # macOS builds
           - os: macos
@@ -64,13 +44,11 @@ jobs:
             runner: macos-13  # Intel runner
             runtime: osx-x64
             executable: sharpcaster
-            exclude_on_manual: ${{ github.event_name == 'workflow_dispatch' && !inputs.build_all_platforms }}
           - os: macos
             arch: arm64
             runner: macos-latest  # Apple Silicon runner
             runtime: osx-arm64
             executable: sharpcaster
-            exclude_on_manual: ${{ github.event_name == 'workflow_dispatch' && !inputs.build_all_platforms }}
 
     steps:
     - name: Checkout code
@@ -187,9 +165,9 @@ jobs:
         path: SharpCaster.Console/artifact-${{ matrix.runtime }}/
         retention-days: 30
 
-  # Create release if this is a tag or forced via manual dispatch
+  # Create release if this is a tag
   release:
-    if: startsWith(github.ref, 'refs/tags/') || (github.event_name == 'workflow_dispatch' && inputs.force_release)
+    if: startsWith(github.ref, 'refs/tags/')
     needs: build
     runs-on: ubuntu-latest
     permissions:
