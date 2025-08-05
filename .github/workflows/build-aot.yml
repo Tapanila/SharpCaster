@@ -7,6 +7,7 @@ on:
   pull_request:
     branches: [ main ]
   workflow_dispatch:
+    branches: [ main, version-3 ]
     inputs:
       build_all_platforms:
         description: 'Build for all platforms (otherwise Windows x64 only)'
