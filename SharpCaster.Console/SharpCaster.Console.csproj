@@ -21,9 +21,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="9.0.7" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.7" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.7" />
+    <PackageReference Include="Microsoft.DotNet.ILCompiler" Version="9.0.8" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="9.0.8" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.8" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.8" />
+  <PackageReference Include="Microsoft.NET.ILLink.Tasks" Version="9.0.8" />
     <PackageReference Include="Spectre.Console" Version="0.50.0" />
   </ItemGroup>
 
