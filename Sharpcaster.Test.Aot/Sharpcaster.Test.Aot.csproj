@@ -34,10 +34,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.DotNet.ILCompiler" Version="9.0.8" />
+    <PackageReference Include="Microsoft.NET.ILLink.Tasks" Version="9.0.8" />
 
-    <PackageReference Include="MSTest.Engine" Version="1.0.0-alpha.25317.1" />
+    <PackageReference Include="MSTest.Engine" Version="1.0.0-alpha.25379.8" />
 
-    <PackageReference Include="MSTest.SourceGeneration" Version="1.0.0-alpha.25317.1" />
+    <PackageReference Include="MSTest.SourceGeneration" Version="1.0.0-alpha.25379.8" />
     <PackageReference Update="MSTest.TestFramework" Version="3.9.3" />
   </ItemGroup>
 
