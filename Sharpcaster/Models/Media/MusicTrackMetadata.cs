@@ -10,27 +10,35 @@ namespace Sharpcaster.Models.Media
         }
 
         [JsonPropertyName("songName")]
-        public string SongName { get; set; }
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public string? SongName { get; set; }
 
         [JsonPropertyName("albumName")]
-        public string AlbumName { get; set; }
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public string? AlbumName { get; set; }
 
         [JsonPropertyName("albumArtist")]
-        public string AlbumArtist { get; set; }
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public string? AlbumArtist { get; set; }
 
         [JsonPropertyName("artist")]
-        public string Artist { get; set; }
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public string? Artist { get; set; }
 
         [JsonPropertyName("composer")]
-        public string Composer { get; set; }
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public string? Composer { get; set; }
 
         [JsonPropertyName("trackNumber")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public int? TrackNumber { get; set; }
 
         [JsonPropertyName("discNumber")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public int? DiscNumber { get; set; }
 
         [JsonPropertyName("releaseDate")]
-        public string ReleaseDate { get; set; }
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public string? ReleaseDate { get; set; }
     }
 }

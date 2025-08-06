@@ -20,7 +20,7 @@ namespace Sharpcaster.Models.Media
         /// Gets or sets the playback rate
         /// </summary>
         [JsonPropertyName("playbackRate")]
-        public int PlaybackRate { get; set; }
+        public double PlaybackRate { get; set; }
 
         /// <summary>
         /// Gets or sets the player state
@@ -81,6 +81,7 @@ namespace Sharpcaster.Models.Media
 
         /// <summary>
         /// Gets or sets the queue data
+        /// Only contains two queue items: the current item and the next item
         /// </summary>
         [JsonPropertyName("queueData")]
         public QueueData QueueData { get; set; }

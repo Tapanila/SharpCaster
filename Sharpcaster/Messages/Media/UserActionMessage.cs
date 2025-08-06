@@ -6,7 +6,7 @@ namespace Sharpcaster.Messages.Media
     /// <summary>
     /// User action message
     /// </summary>
-    public class UserActionMessage : MediaSessionMessage
+    public class UserActionMessage : Message
     {
         /// <summary>
         /// Gets or sets the user action

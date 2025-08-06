@@ -132,6 +132,9 @@ namespace Sharpcaster.Channels
                 StatusChanged?.Invoke(this, MediaStatus);
             }
                     return Task.CompletedTask;
+                case "QUEUE_ITEMS":
+                //{"type":"QUEUE_ITEMS","requestId":908492678,"items":[{"itemId":9,"media":{"contentId":"Aquarium","contentUrl":"https://incompetech.com/music/royalty-free/mp3-royaltyfree/Aquarium.mp3","streamType":2,"contentType":"audio/mpeg","mediaCategory":"AUDIO","duration":144.013078},"orderId":0}],"sequenceNumber":0}
+                case "QUEUE_ITEM_IDS":
                 case "QUEUE_CHANGE":
                     return Task.CompletedTask;
             }
@@ -272,7 +275,7 @@ namespace Sharpcaster.Channels
         /// <returns>media status</returns>
         public async Task<MediaStatus?> QueueShuffleAsync(bool shuffle = true)
         {
-            return await SendAsync(new QueueUpdateMessage { Shuffle = shuffle }, SharpcasteSerializationContext.Default.QueueUpdateMessage).ConfigureAwait(false);
+            return await SendAsync(new QueueUpdateMessage { Shuffle = shuffle }, SharpcasteSerializationContext.Default.QueueUpdateMessage, false).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -300,29 +303,21 @@ namespace Sharpcaster.Channels
         /// </summary>
         /// <param name="userAction">user action to send</param>
         /// <returns>media status</returns>
-        public async Task<MediaStatus?> SendUserActionAsync(UserAction userAction)
+        [Obsolete("SenUserAction doesn't work. If you need this open a Github issue.", true)]
+        public async Task SendUserActionAsync(UserAction userAction)
         {
-            return await SendAsync(new UserActionMessage() { UserAction = userAction }, SharpcasteSerializationContext.Default.UserActionMessage).ConfigureAwait(false);
+            var userActionMessage = new UserActionMessage() { UserAction = userAction };
+            var message = JsonSerializer.Serialize(userActionMessage, SharpcasteSerializationContext.Default.UserActionMessage);
+            await SendAsync(message).ConfigureAwait(false);
         }
 
         /// <summary>
         /// Edits track information
         /// </summary>
-        /// <param name="editTracksInfo">edit tracks information</param>
         /// <returns>media status</returns>
-        public async Task<MediaStatus?> EditTracksAsync(EditTracksInfoRequest editTracksInfo)
+        public async Task<MediaStatus?> EditTracksAsync(int[]? activeTrackIds = null, TextTrackStyle? textTrackStyle = null, string? language = null, object? customData = null)
         {
-            return await SendAsync(new EditTracksInfoMessage() { EditTracksInfoRequest = editTracksInfo }, SharpcasteSerializationContext.Default.EditTracksInfoMessage).ConfigureAwait(false);
-        }
-
-        /// <summary>
-        /// Transfers stream to another device
-        /// </summary>
-        /// <param name="transferRequest">stream transfer request</param>
-        /// <returns>media status</returns>
-        public async Task<MediaStatus?> StreamTransferAsync(object transferRequest)
-        {
-            return await SendAsync(new StreamTransferMessage() { TransferRequest = transferRequest }, SharpcasteSerializationContext.Default.StreamTransferMessage).ConfigureAwait(false);
+            return await SendAsync(new EditTracksInfoMessage () { ActiveTrackIds = activeTrackIds, TextTrackStyle = textTrackStyle, Language = language, CustomData = customData }, SharpcasteSerializationContext.Default.EditTracksInfoMessage).ConfigureAwait(false);
         }
     }
 }

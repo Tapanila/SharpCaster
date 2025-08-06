@@ -65,7 +65,6 @@ namespace Sharpcaster.Extensions
     [JsonSerializable(typeof(VideoInformation))]
     [JsonSerializable(typeof(BreakStatus))]
     [JsonSerializable(typeof(HdrType))]
-    [JsonSerializable(typeof(EditTracksInfoRequest))]
     [JsonSerializable(typeof(IdleReason))]
     [JsonSerializable(typeof(MediaCommand))]
     [JsonSerializable(typeof(ResumeState))]
@@ -93,7 +92,6 @@ namespace Sharpcaster.Extensions
     [JsonSerializable(typeof(SetPlaybackRateMessage))]
     [JsonSerializable(typeof(UserActionMessage))]
     [JsonSerializable(typeof(EditTracksInfoMessage))]
-    [JsonSerializable(typeof(StreamTransferMessage))]
     [JsonSerializable(typeof(WebMessage))]
     public partial class SharpcasteSerializationContext : JsonSerializerContext
     {

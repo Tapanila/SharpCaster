@@ -546,5 +546,142 @@ namespace Sharpcaster.Test
 
             await client.DisconnectAsync();
         }
+
+        [Fact]
+        public async Task TestSeekAsync()
+        {
+            var TestHelper = new TestHelper();
+            ChromecastClient client = await TestHelper.CreateConnectAndLoadAppClient(outputHelper, fixture.Receivers[0]);
+
+            var media = new Media
+            {
+                ContentUrl = "https://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/mp4/DesigningForGoogleCast.mp4"
+            };
+
+            MediaStatus status = await client.MediaChannel.LoadAsync(media);
+            Assert.Equal(PlayerStateType.Playing, status.PlayerState);
+
+            // Wait a bit for media to start
+            await Task.Delay(2000, Xunit.TestContext.Current.CancellationToken);
+
+            // Seek to 30 seconds
+            MediaStatus seekStatus = await client.MediaChannel.SeekAsync(30.0);
+            Assert.True(seekStatus.CurrentTime >= 30.0, "Seek did not reach the expected time.");
+
+            await client.DisconnectAsync();
+        }
+
+        [Fact]
+        public async Task TestSetPlaybackRateAsync()
+        {
+            var TestHelper = new TestHelper();
+            ChromecastClient client = await TestHelper.CreateConnectAndLoadAppClient(outputHelper, fixture.Receivers[0]);
+
+            var media = new Media
+            {
+                ContentUrl = "https://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/mp4/DesigningForGoogleCast.mp4"
+            };
+
+            MediaStatus status = await client.MediaChannel.LoadAsync(media);
+            Assert.Equal(PlayerStateType.Playing, status.PlayerState);
+
+            // Wait a bit for media to start
+            await Task.Delay(2000, Xunit.TestContext.Current.CancellationToken);
+
+            // Set playback rate to 1.5x speed
+            MediaStatus playbackRateStatus = await client.MediaChannel.SetPlaybackRateAsync(1.5);
+            Assert.Equal(1.5, playbackRateStatus.PlaybackRate);
+
+            await client.DisconnectAsync();
+        }
+
+        [Fact]
+        public async Task TestSendUserActionAsync()
+        {
+            var TestHelper = new TestHelper();
+            ChromecastClient client = await TestHelper.CreateConnectAndLoadAppClient(outputHelper, fixture.Receivers[0]);
+
+            var media = new Media
+            {
+                ContentUrl = "https://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/mp4/DesigningForGoogleCast.mp4"
+            };
+
+            MediaStatus status = await client.MediaChannel.LoadAsync(media);
+            Assert.Equal(PlayerStateType.Playing, status.PlayerState);
+
+            // Wait a bit for media to start
+            await Task.Delay(2000, Xunit.TestContext.Current.CancellationToken);
+
+            // Send a like user action
+            var userAction = UserAction.DISLIKE;
+            
+            await client.MediaChannel.SendUserActionAsync(userAction);
+
+            var statusAfterAction = await client.MediaChannel.GetMediaStatusAsync();
+
+            await client.DisconnectAsync();
+        }
+
+        [Fact]
+        public async Task TestEditTracksAsync()
+        {
+            var TestHelper = new TestHelper();
+            ChromecastClient client = await TestHelper.CreateConnectAndLoadAppClient(outputHelper, fixture.Receivers[0]);
+
+            var subtitleTrack = new Track
+            {
+                TrackId = 1,
+                Type = TrackType.TEXT,
+                Subtype = TextTrackType.SUBTITLES,
+                TrackContentId = "https://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/tracks/DesigningForGoogleCast-en.vtt",
+                TrackContentType = "text/vtt",
+                Name = "English Subtitles",
+                Language = "en"
+            };
+
+            var media = new Media
+            {
+                ContentUrl = "https://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/mp4/DesigningForGoogleCast.mp4",
+                ContentType = "video/mp4",
+                Tracks = [subtitleTrack]
+            };
+
+            MediaStatus status = await client.MediaChannel.LoadAsync(media);
+            Assert.Equal(PlayerStateType.Playing, status.PlayerState);
+
+            // Wait a bit for media to start
+            await Task.Delay(2000, Xunit.TestContext.Current.CancellationToken);
+
+            MediaStatus editTracksStatus = await client.MediaChannel.EditTracksAsync([1]);
+            Assert.Equal([1], editTracksStatus.ActiveTrackIds);
+
+            await client.DisconnectAsync();
+        }
+
+
+        [Fact]
+        public async Task TestGetMediaStatusAsync()
+        {
+            var TestHelper = new TestHelper();
+            ChromecastClient client = await TestHelper.CreateConnectAndLoadAppClient(outputHelper, fixture.Receivers[0]);
+
+            var media = new Media
+            {
+                ContentUrl = "https://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/mp4/DesigningForGoogleCast.mp4"
+            };
+
+            MediaStatus status = await client.MediaChannel.LoadAsync(media);
+            Assert.Equal(PlayerStateType.Playing, status.PlayerState);
+
+            // Wait a bit for media to start
+            await Task.Delay(2000, Xunit.TestContext.Current.CancellationToken);
+
+            // Get current media status
+            MediaStatus currentStatus = await client.MediaChannel.GetMediaStatusAsync();
+            Assert.NotNull(currentStatus);
+            Assert.True(currentStatus.MediaSessionId > 0);
+
+            await client.DisconnectAsync();
+        }
     }
 }
