@@ -260,6 +260,7 @@ namespace Sharpcaster.Channels
         /// Skips the current ad
         /// </summary>
         /// <returns>media status</returns>
+        [Obsolete("SkipAd doesn't work. If you need this open a Github issue.", true)]
         public async Task<MediaStatus?> SkipAdAsync()
         {
             return await SendAsync(new SkipAdMessage(), SharpcasteSerializationContext.Default.SkipAdMessage).ConfigureAwait(false);

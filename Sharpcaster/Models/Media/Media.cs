@@ -13,6 +13,7 @@ namespace Sharpcaster.Models.Media
         /// Gets or sets the content identifier
         /// </summary>
         [JsonPropertyName("contentId")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public string? ContentId { get; set; }
 
         /// <summary>
