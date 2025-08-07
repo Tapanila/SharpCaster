@@ -26,10 +26,14 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Update="Microsoft.Testing.Extensions.TrxReport" Version="1.7.3" />
+    <PackageReference Update="Microsoft.Testing.Extensions.TrxReport" Version="1.8.1" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Update="Microsoft.Testing.Platform.MSBuild" Version="1.7.3" />
+    <PackageReference Update="Microsoft.Testing.Platform.MSBuild" Version="1.8.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Update="MSTest.TestFramework" Version="3.10.1" />
   </ItemGroup>
 </Project>
