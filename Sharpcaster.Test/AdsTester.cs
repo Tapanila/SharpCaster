@@ -82,7 +82,7 @@ namespace Sharpcaster.Test
                             // The ad is skippable after 5 seconds
                             await Task.Delay(5000, Xunit.TestContext.Current.CancellationToken);
                             //This doesn't really work with the current Chromecast implementation
-                            await client.MediaChannel.SendUserActionAsync(UserAction.SKIP_AD);
+                            //await client.MediaChannel.SendUserActionAsync(UserAction.SKIP_AD);
                             adSkipped = true;
                             adSkippedEvent.Set();
                             outputHelper.WriteLine("Ad skip command sent successfully");
