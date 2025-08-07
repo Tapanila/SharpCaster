@@ -61,8 +61,12 @@ namespace Sharpcaster.Channels
             var response = await SendAsync(setVolumeMessage.RequestId, JsonSerializer.Serialize(setVolumeMessage, SharpcasteSerializationContext.Default.SetVolumeMessage)).ConfigureAwait(false);
             var status = JsonSerializer.Deserialize(response, SharpcasteSerializationContext.Default.ReceiverStatusMessage);
 
-            if (status?.Status.Volume?.Level != level)
+            //precision of 1 decimal place
+            if (status?.Status.Volume?.Level == null || Math.Abs(status.Status.Volume.Level.Value - level) > 0.1)
             {
+                if (status?.Status.Volume != null)
+                    Logger.LogDebug("Volume level is {currentVolume} and it was supposed to be {newLevel}", status.Status.Volume.Level, level);
+                setVolumeMessage = new SetVolumeMessage() { Volume = new Models.Volume() { Level = level } };
                 response = await SendAsync(setVolumeMessage.RequestId, JsonSerializer.Serialize(setVolumeMessage, SharpcasteSerializationContext.Default.SetVolumeMessage)).ConfigureAwait(false);
                 status = JsonSerializer.Deserialize(response, SharpcasteSerializationContext.Default.ReceiverStatusMessage);
             }
