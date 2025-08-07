@@ -44,7 +44,8 @@ namespace Sharpcaster.Channels
 
         public async Task<ChromecastStatus?> SetMute(bool muted)
         {
-            var setVolumeMessage = new SetVolumeMessage() { Volume = new Models.Volume() { Muted = muted } };
+            var mediaSessionId = Client?.MediaStatus?.MediaSessionId;
+            var setVolumeMessage = new SetVolumeMessage() { Volume = new Models.Volume() { Muted = muted }, MediaSessionId = mediaSessionId };
             var response = await SendAsync(setVolumeMessage.RequestId, JsonSerializer.Serialize(setVolumeMessage, SharpcasteSerializationContext.Default.SetVolumeMessage)).ConfigureAwait(false);
             var status = JsonSerializer.Deserialize(response, SharpcasteSerializationContext.Default.ReceiverStatusMessage);
             return status?.Status;
@@ -57,7 +58,8 @@ namespace Sharpcaster.Channels
                 if (Logger != null) LogInvalidVolumeLevel(Logger, level, null);
                 throw new ArgumentException("level must be between 0.0 and 1.0", nameof(level));
             }
-            var setVolumeMessage = new SetVolumeMessage() { Volume = new Models.Volume() { Level = level } };
+            var mediaSessionId = Client?.MediaStatus?.MediaSessionId;
+            var setVolumeMessage = new SetVolumeMessage() { Volume = new Models.Volume() { Level = level }, MediaSessionId = mediaSessionId };
             var response = await SendAsync(setVolumeMessage.RequestId, JsonSerializer.Serialize(setVolumeMessage, SharpcasteSerializationContext.Default.SetVolumeMessage)).ConfigureAwait(false);
             var status = JsonSerializer.Deserialize(response, SharpcasteSerializationContext.Default.ReceiverStatusMessage);
 
@@ -66,7 +68,7 @@ namespace Sharpcaster.Channels
             {
                 if (status?.Status.Volume != null)
                     Logger.LogDebug("Volume level is {currentVolume} and it was supposed to be {newLevel}", status.Status.Volume.Level, level);
-                setVolumeMessage = new SetVolumeMessage() { Volume = new Models.Volume() { Level = level } };
+                setVolumeMessage = new SetVolumeMessage() { Volume = new Models.Volume() { Level = level }, MediaSessionId = mediaSessionId };
                 response = await SendAsync(setVolumeMessage.RequestId, JsonSerializer.Serialize(setVolumeMessage, SharpcasteSerializationContext.Default.SetVolumeMessage)).ConfigureAwait(false);
                 status = JsonSerializer.Deserialize(response, SharpcasteSerializationContext.Default.ReceiverStatusMessage);
             }
