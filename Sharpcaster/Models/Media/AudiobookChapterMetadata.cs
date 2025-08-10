@@ -10,12 +10,15 @@ namespace Sharpcaster.Models.Media
         }
 
         [JsonPropertyName("bookTitle")]
-        public string BookTitle { get; set; }
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public string? BookTitle { get; set; }
 
         [JsonPropertyName("chapterNumber")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public int? ChapterNumber { get; set; }
 
         [JsonPropertyName("chapterTitle")]
-        public string ChapterTitle { get; set; }
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public string? ChapterTitle { get; set; }
     }
 }

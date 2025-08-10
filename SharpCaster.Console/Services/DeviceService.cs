@@ -106,6 +106,7 @@ public class DeviceService
             _state.Client?.Dispose();
             _state.Client = null;
             _state.IsConnected = false;
+            _state.ClearApplicationState();
         }
     }
 

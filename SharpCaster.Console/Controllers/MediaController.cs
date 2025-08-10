@@ -68,8 +68,21 @@ public class MediaController
                 .SpinnerStyle(Style.Parse("yellow"))
                 .StartAsync("Launching media receiver and loading content...", async ctx =>
                 {
-                    ctx.Status("Launching Default Media Receiver...");
-                    var receiver = await _state.Client!.LaunchApplicationAsync("CC1AD845"); // Default Media Receiver
+                    const string defaultMediaReceiver = "B3419EF5"; // Default Media Receiver
+                    
+                    // Only launch application if we haven't already launched it or if it's different
+                    if (!_state.HasLaunchedApplication || _state.CurrentApplicationId != defaultMediaReceiver)
+                    {
+                        ctx.Status("Launching Default Media Receiver...");
+                        var receiver = await _state.Client!.LaunchApplicationAsync(defaultMediaReceiver, false);
+                        _state.SetApplicationLaunched(defaultMediaReceiver);
+                    }
+                    else
+                    {
+                        ctx.Status("Using already launched Default Media Receiver...");
+                        var receiver = await _state.Client!.LaunchApplicationAsync(defaultMediaReceiver);
+                        _state.SetApplicationLaunched(defaultMediaReceiver);
+                    }
                     
                     var media = new Media
                     {
@@ -138,8 +151,19 @@ public class MediaController
                 .SpinnerStyle(Style.Parse("yellow"))
                 .StartAsync("Loading website on Chromecast...", async ctx =>
                 {
-                    ctx.Status("Launching dashboard receiver...");
-                    await _state.Client!.LaunchApplicationAsync("F7FD2183");
+                    const string dashboardReceiver = "F7FD2183";
+                    
+                    // Only launch application if we haven't already launched it or if it's different
+                    if (!_state.HasLaunchedApplication || _state.CurrentApplicationId != dashboardReceiver)
+                    {
+                        ctx.Status("Launching dashboard receiver...");
+                        await _state.Client!.LaunchApplicationAsync(dashboardReceiver);
+                        _state.SetApplicationLaunched(dashboardReceiver);
+                    }
+                    else
+                    {
+                        ctx.Status("Using already launched dashboard receiver...");
+                    }
 
                     var req = new WebMessage
                     {
@@ -189,6 +213,7 @@ public class MediaController
                         var app = receiverStatus.Applications.First();
                         ctx.Status($"Stopping '{app.DisplayName}'...");
                         await _state.Client.ReceiverChannel.StopApplication();
+                        _state.ClearApplicationState(); // Clear application state after stopping
                     }
                     else
                     {
@@ -234,7 +259,10 @@ public class MediaController
                 "Pause", 
                 "Stop",
                 "Seek",
-                "Set volume",
+                "Set device volume",
+                "Set media volume",
+                "Mute/Unmute device",
+                "Mute/Unmute media",
                 "Get media status",
                 "Back to main menu"
             };
@@ -249,7 +277,10 @@ public class MediaController
                         "Pause" => "⏸️ Pause",
                         "Stop" => "⏹️ Stop",
                         "Seek" => "⏭️ Seek",
-                        "Set volume" => "🔊 Set volume",
+                        "Set device volume" => "🔊 Set device volume",
+                        "Set media volume" => "🎵 Set media volume",
+                        "Mute/Unmute device" => "🔇 Mute/Unmute device",
+                        "Mute/Unmute media" => "🔈 Mute/Unmute media",
                         "Get media status" => "📊 Get media status",
                         "Back to main menu" => "🔙 Back to main menu",
                         _ => choice
@@ -304,18 +335,61 @@ public class MediaController
                         _ui.AddSeparator();
                         break;
                         
-                    case "Set volume":
-                        var volume = AnsiConsole.Prompt(
-                            new TextPrompt<double>("[yellow]Enter volume (0.0 - 1.0):[/]")
+                    case "Set device volume":
+                        var deviceVolume = AnsiConsole.Prompt(
+                            new TextPrompt<double>("[yellow]Enter device volume (0.0 - 1.0):[/]")
                                 .PromptStyle("green")
                                 .ValidationErrorMessage("[red]Volume must be between 0.0 and 1.0[/]")
                                 .Validate(v => v >= 0 && v <= 1));
                         
-                        await AnsiConsole.Status().StartAsync($"Setting volume to {volume:P0}...", async ctx =>
+                        await AnsiConsole.Status().StartAsync($"Setting device volume to {deviceVolume:P0}...", async ctx =>
                         {
-                            await _state.Client.ReceiverChannel.SetVolume(volume);
+                            await _state.Client.ReceiverChannel.SetVolume(deviceVolume);
                         });
-                        AnsiConsole.MarkupLine($"[green]🔊 Volume set to {volume:P0}[/]");
+                        AnsiConsole.MarkupLine($"[green]🔊 Device volume set to {deviceVolume:P0}[/]");
+                        _ui.AddSeparator();
+                        break;
+                        
+                    case "Set media volume":
+                        var mediaVolume = AnsiConsole.Prompt(
+                            new TextPrompt<double>("[yellow]Enter media stream volume (0.0 - 1.0):[/]")
+                                .PromptStyle("green")
+                                .ValidationErrorMessage("[red]Volume must be between 0.0 and 1.0[/]")
+                                .Validate(v => v >= 0 && v <= 1));
+                        
+                        await AnsiConsole.Status().StartAsync($"Setting media volume to {mediaVolume:P0}...", async ctx =>
+                        {
+                            var status = await mediaChannel.SetVolumeAsync(mediaVolume);
+                            if (status == null) throw new Exception("Failed to set media volume");
+                        });
+                        AnsiConsole.MarkupLine($"[green]🎵 Media volume set to {mediaVolume:P0}[/]");
+                        _ui.AddSeparator();
+                        break;
+                        
+                    case "Mute/Unmute device":
+                        var currentDeviceStatus = _state.Client.ReceiverChannel.ReceiverStatus;
+                        var isDeviceMuted = currentDeviceStatus?.Volume?.Muted == true;
+                        var newDeviceMuteState = !isDeviceMuted;
+                        
+                        await AnsiConsole.Status().StartAsync($"{(newDeviceMuteState ? "Muting" : "Unmuting")} device...", async ctx =>
+                        {
+                            await _state.Client.ReceiverChannel.SetMute(newDeviceMuteState);
+                        });
+                        AnsiConsole.MarkupLine($"[green]🔇 Device {(newDeviceMuteState ? "muted" : "unmuted")}[/]");
+                        _ui.AddSeparator();
+                        break;
+                        
+                    case "Mute/Unmute media":
+                        var currentMediaStatus = await mediaChannel.GetMediaStatusAsync();
+                        var isMediaMuted = currentMediaStatus?.Volume?.Muted == true;
+                        var newMediaMuteState = !isMediaMuted;
+                        
+                        await AnsiConsole.Status().StartAsync($"{(newMediaMuteState ? "Muting" : "Unmuting")} media stream...", async ctx =>
+                        {
+                            var status = await mediaChannel.SetMuteAsync(newMediaMuteState);
+                            if (status == null) throw new Exception("Failed to set media mute state");
+                        });
+                        AnsiConsole.MarkupLine($"[green]🔈 Media stream {(newMediaMuteState ? "muted" : "unmuted")}[/]");
                         _ui.AddSeparator();
                         break;
                         

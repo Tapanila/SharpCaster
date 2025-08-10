@@ -79,6 +79,7 @@ dotnet pack --configuration Release Sharpcaster/Sharpcaster.csproj
 - Separate AOT test project for Native AOT compatibility verification
 - Integration tests require actual Chromecast devices on network
 - Test environment always has Chromecast devices connected and available
+- **Important**: Tests can take up to 10 minutes to complete as they perform real network operations with Chromecast devices
 
 ### Key Dependencies
 - `Google.Protobuf` - Protocol buffer serialization for Cast protocol communication
@@ -97,6 +98,8 @@ The MediaChannel now supports comprehensive Google Cast SDK functionality:
 - `PauseAsync()` - Pause media
 - `StopAsync()` - Stop media
 - `SeekAsync(double seconds)` - Seek to specific time
+- `SetVolumeAsync(double level)` - Set media stream volume level
+- `SetMuteAsync(bool muted)` - Set media stream mute state
 
 #### Queue Management
 - `QueueLoadAsync(QueueItem[] items, RepeatModeType repeatMode, int startIndex)` - Load queue
@@ -161,7 +164,8 @@ dotnet run --project SharpCaster.Console/SharpCaster.Console.csproj -- <args>
 - `play <url>` - Cast and play media from URL
 - `pause` - Pause current media
 - `stop` - Stop current media  
-- `volume <0.0-1.0>` - Set volume level
+- `volume <0.0-1.0>` - Set device volume level (ReceiverChannel)
+- `media-volume <0.0-1.0>` - Set media stream volume level (MediaChannel)
 - `seek <seconds>` - Seek to specific time
 - `status` - Show current device and media status
 
@@ -198,6 +202,7 @@ sharpcaster --ip 192.168.1.100 play "https://example.com/video.mp4"
 # Control playback
 sharpcaster "Kitchen Speaker" pause
 sharpcaster --ip 192.168.1.100 volume 0.7
+sharpcaster "Living Room TV" media-volume 0.5
 sharpcaster "Bedroom TV" seek 120
 
 # Check status

@@ -37,7 +37,19 @@ namespace Sharpcaster.Test
             
             var media = new Media
             {
-                ContentUrl = "https://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/mp4/DesigningForGoogleCast.mp4"
+                ContentUrl = "https://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/mp4/DesigningForGoogleCast.mp4",
+                ContentType = "video/mp4",
+                Metadata = new MediaMetadata
+                {
+                    Title = "Designing for Google Cast",
+                    Images = new[]
+                    {
+                        new Image
+                        {
+                            Url = "https://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/poster/DesigningForGoogleCast.jpg"
+                        }
+                    }
+                },
             };
 
             await client.MediaChannel.LoadAsync(media);

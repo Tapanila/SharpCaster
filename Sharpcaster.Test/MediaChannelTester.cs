@@ -683,5 +683,29 @@ namespace Sharpcaster.Test
 
             await client.DisconnectAsync();
         }
+
+        [Fact]
+        public async Task TestVolumeWithMediaChannel()
+        {
+            var TestHelper = new TestHelper();
+            var client = await TestHelper.CreateConnectAndLoadAppClient(outputHelper, fixture);
+
+            var media = new Media
+            {
+                ContentUrl = "https://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/mp4/DesigningForGoogleCast.mp4"
+            };
+
+            await client.MediaChannel.LoadAsync(media);
+
+            var status = await client.MediaChannel.SetVolumeAsync(0.1);
+            Assert.Equal(0.1, status.Volume.Level.Value, precision: 1);
+            status = await client.MediaChannel.SetVolumeAsync(0.3);
+            Assert.Equal(0.3, status.Volume.Level.Value, precision: 1);
+            status = await client.MediaChannel.SetVolumeAsync(0.5);
+            Assert.Equal(0.5, status.Volume.Level.Value, precision: 1);
+            status = await client.MediaChannel.SetVolumeAsync(0.8);
+            Assert.Equal(0.8, status.Volume.Level.Value, precision: 1);
+            await client.DisconnectAsync();
+        }
     }
 }

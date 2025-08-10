@@ -319,5 +319,37 @@ namespace Sharpcaster.Channels
         {
             return await SendAsync(new EditTracksInfoMessage () { ActiveTrackIds = activeTrackIds, TextTrackStyle = textTrackStyle, Language = language, CustomData = customData }, SharpcasteSerializationContext.Default.EditTracksInfoMessage).ConfigureAwait(false);
         }
+
+        /// <summary>
+        /// Sets the media stream volume level
+        /// </summary>
+        /// <param name="level">volume level between 0.0 and 1.0</param>
+        /// <returns>media status</returns>
+        public async Task<MediaStatus?> SetVolumeAsync(double level)
+        {
+            if (level < 0 || level > 1.0)
+            {
+                throw new ArgumentException("level must be between 0.0 and 1.0", nameof(level));
+            }
+            var status = await SendAsync(new SetVolumeMessage() { Volume = new Models.Volume { Level = level } }, SharpcasteSerializationContext.Default.SetVolumeMessage).ConfigureAwait(false);
+            if (status?.Volume?.Level == null || Math.Abs(status.Volume.Level.Value - level) > 0.1)
+            {
+                if (status?.Volume != null)
+                    Logger.LogDebug("Volume level is {currentVolume} and it was supposed to be {newLevel}", status.Volume.Level, level);
+
+                status = await SendAsync(new SetVolumeMessage() { Volume = new Models.Volume { Level = level } }, SharpcasteSerializationContext.Default.SetVolumeMessage).ConfigureAwait(false);
+            }
+            return status;
+        }
+
+        /// <summary>
+        /// Sets the media stream mute state
+        /// </summary>
+        /// <param name="muted">true to mute, false to unmute</param>
+        /// <returns>media status</returns>
+        public async Task<MediaStatus?> SetMuteAsync(bool muted)
+        {
+            return await SendAsync(new SetVolumeMessage() { Volume = new Models.Volume { Muted = muted } }, SharpcasteSerializationContext.Default.SetVolumeMessage).ConfigureAwait(false);
+        }
     }
 }

@@ -10,15 +10,19 @@ namespace Sharpcaster.Models.Media
         }
 
         [JsonPropertyName("seriesTitle")]
-        public string SeriesTitle { get; set; }
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public string? SeriesTitle { get; set; }
 
         [JsonPropertyName("episode")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public int? Episode { get; set; }
 
         [JsonPropertyName("season")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public int? Season { get; set; }
 
         [JsonPropertyName("originalAirdate")]
-        public string OriginalAirdate { get; set; }
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public string? OriginalAirdate { get; set; }
     }
 }

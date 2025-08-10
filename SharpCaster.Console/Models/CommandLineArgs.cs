@@ -155,7 +155,8 @@ public static class CommandLineParser
         System.Console.WriteLine("  pause                   Pause current media");
         System.Console.WriteLine("  stop                    Stop current media");
         System.Console.WriteLine("  stop-app                Stop the currently running application");
-        System.Console.WriteLine("  volume <0.0-1.0>        Set volume (0.0 = mute, 1.0 = max)");
+        System.Console.WriteLine("  volume <0.0-1.0>        Set device volume (0.0 = mute, 1.0 = max)");
+        System.Console.WriteLine("  media-volume <0.0-1.0>  Set media stream volume (0.0 = mute, 1.0 = max)");
         System.Console.WriteLine("  seek <seconds>          Seek to specific time in seconds");
         System.Console.WriteLine("  status                  Show current media status");
         System.Console.WriteLine("  website <url>           Open and display a website");
@@ -194,6 +195,7 @@ public static class CommandLineParser
         System.Console.WriteLine("  # Control playback");
         System.Console.WriteLine("  sharpcaster \"Kitchen Speaker\" pause");
         System.Console.WriteLine("  sharpcaster \"Bedroom TV\" volume 0.7");
+        System.Console.WriteLine("  sharpcaster \"Living Room TV\" media-volume 0.5");
         System.Console.WriteLine("  sharpcaster \"Living Room TV\" seek 120");
         System.Console.WriteLine("  sharpcaster \"Office TV\" stop-app");
         System.Console.WriteLine();
