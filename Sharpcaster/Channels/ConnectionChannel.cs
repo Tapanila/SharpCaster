@@ -15,7 +15,7 @@ namespace Sharpcaster.Channels
         /// <summary>
         /// Initializes a new instance of ConnectionChannel class
         /// </summary>
-        public ConnectionChannel(ILogger? log = null) : base("tp.connection", log)
+        public ConnectionChannel(ILogger? logger = null) : base("tp.connection", logger)
         {
         }
 
@@ -45,8 +45,8 @@ namespace Sharpcaster.Channels
         {
             if (type == "CLOSE")
             {
-                // In order to avoid usage deadlocks we need to spawn a new Task here!?
-                _ = Task.Run(async () => await Client.DisconnectAsync().ConfigureAwait(false));
+                Logger?.LogDebug("Connection closed by Chromecast, message: {messagePayload}", messagePayload);
+                await Client.DisconnectAsync().ConfigureAwait(false);
             }
             await base.OnMessageReceivedAsync(messagePayload, type).ConfigureAwait(false);
         }

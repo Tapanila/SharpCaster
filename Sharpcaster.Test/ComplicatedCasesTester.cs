@@ -182,5 +182,24 @@ namespace Sharpcaster.Test
 
 
         }
+
+        [Fact]
+        public async Task TestingJoiningMultipleTimes()
+        {
+            var TestHelper = new TestHelper();
+            var client = await TestHelper.CreateConnectAndLoadAppClient(outputHelper, fixture);
+
+
+            //This should cause issues
+            try { 
+                await client.LaunchApplicationAsync("CC1AD845");
+            } catch (Exception ex)
+            {
+                Assert.IsType<TaskCanceledException>(ex);
+                Assert.Contains("Client disconnected before receiving response.", ex.Message);
+            }
+
+
+        }
     }
 }

@@ -331,6 +331,12 @@ namespace Sharpcaster
 
         public async Task DisconnectAsync()
         {
+            foreach (var task in WaitingTasks)
+            {
+                task.Value?.SetException(new TaskCanceledException("Client disconnected before receiving response."));
+            }
+            WaitingTasks.Clear();
+
             if (HeartbeatChannel != null)
             {
                 HeartbeatChannel.StopTimeoutTimer();
