@@ -103,11 +103,8 @@ namespace Sharpcaster.Channels
                     {
                         receiverStatus = receiverStatusMessage.Status;
                         SafeInvokeEvent(ReceiverStatusChanged, this, ReceiverStatus);
-                    } else
-                    {
-                        var i = 0;
-                    }
-                        break;
+                    } 
+                    break;
 
             }
             return base.OnMessageReceivedAsync(messagePayload, type);
