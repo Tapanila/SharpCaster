@@ -35,14 +35,14 @@ namespace Sharpcaster.Channels
                     if (getInfoResponseMessage?.Payload != null)
                     {
                         SpotifyStatus = getInfoResponseMessage.Payload;
-                        SpotifyStatusUpdated?.Invoke(this, getInfoResponseMessage.Payload);
+                        SafeInvokeEvent(SpotifyStatusUpdated, this, getInfoResponseMessage.Payload);
                     }
                     break;
                 case "addUserResponse":
                     var addUserResponseMessage = JsonSerializer.Deserialize(messagePayload, SharpcasteSerializationContext.Default.AddUserResponseMessage);
                     if (addUserResponseMessage?.Payload != null)
                     {
-                        AddUserResponseReceived?.Invoke(this, addUserResponseMessage.Payload);
+                        SafeInvokeEvent(AddUserResponseReceived, this, addUserResponseMessage.Payload);
                     }
                     break;
             }

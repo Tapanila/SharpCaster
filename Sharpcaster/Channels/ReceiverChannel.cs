@@ -90,14 +90,14 @@ namespace Sharpcaster.Channels
             {
                 case "LAUNCH_STATUS":
                     var launchStatusMessage = JsonSerializer.Deserialize(messagePayload, SharpcasteSerializationContext.Default.LaunchStatusMessage);
-                    LaunchStatusChanged?.Invoke(this, launchStatusMessage);
+                    SafeInvokeEvent(LaunchStatusChanged, this, launchStatusMessage);
                     break;
                 case "RECEIVER_STATUS":
                     var receiverStatusMessage = JsonSerializer.Deserialize(messagePayload, SharpcasteSerializationContext.Default.ReceiverStatusMessage);
                     if (receiverStatusMessage?.Status != null)
                     {
                         receiverStatus = receiverStatusMessage.Status;
-                        ReceiverStatusChanged?.Invoke(this, ReceiverStatus);
+                        SafeInvokeEvent(ReceiverStatusChanged, this, ReceiverStatus);
                     }
                     break;
 

@@ -39,14 +39,14 @@ namespace Sharpcaster.Channels
                     if (multizoneStatusMessage?.Status != null)
                     {
                         Status = multizoneStatusMessage.Status;
-                        StatusChanged?.Invoke(this, multizoneStatusMessage.Status);
+                        SafeInvokeEvent(StatusChanged, this, multizoneStatusMessage.Status);
                     }
                     break;
                 case "DEVICE_UPDATED":
                     var deviceUpdatedMessage = JsonSerializer.Deserialize(messagePayload, SharpcasteSerializationContext.Default.DeviceUpdatedMessage);
                     if (deviceUpdatedMessage?.Device != null)
                     {
-                        DeviceUpdated?.Invoke(this, deviceUpdatedMessage.Device);
+                        SafeInvokeEvent(DeviceUpdated, this, deviceUpdatedMessage.Device);
                     }
                     break;
                 default:

@@ -74,7 +74,7 @@ namespace Sharpcaster.Channels
         private void TimerElapsed(object sender, ElapsedEventArgs e)
         {
             if (Logger != null) LogHeartbeatTimeout(Logger, null);
-            StatusChanged?.Invoke(this, e);
+            SafeInvokeEvent(StatusChanged, this, e);
         }
 
         protected virtual void Dispose(bool disposing)

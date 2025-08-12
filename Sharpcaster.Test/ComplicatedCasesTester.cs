@@ -201,5 +201,35 @@ namespace Sharpcaster.Test
 
 
         }
+
+        [Fact]
+        public async Task TestSlowStatusHandlerAsync()
+        {
+            var TestHelper = new TestHelper();
+            ChromecastClient client = await TestHelper.CreateConnectAndLoadAppClient(outputHelper, fixture.Receivers[0]);
+
+            // Register malicious handler
+            client.MediaChannel.StatusChanged += (sender, args) => {
+                Task.Delay(10000).Wait();
+            };
+
+            var media = new Media
+            {
+                ContentUrl = "https://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/mp4/DesigningForGoogleCast.mp4"
+            };
+
+            MediaStatus status = await client.MediaChannel.LoadAsync(media);
+            Assert.Equal(PlayerStateType.Playing, status.PlayerState);
+
+            // Wait a bit for media to start
+            await Task.Delay(2000, Xunit.TestContext.Current.CancellationToken);
+
+            // Get current media status
+            MediaStatus currentStatus = await client.MediaChannel.GetMediaStatusAsync();
+            Assert.NotNull(currentStatus);
+            Assert.True(currentStatus.MediaSessionId > 0);
+
+            await client.DisconnectAsync();
+        }
     }
 }

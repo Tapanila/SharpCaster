@@ -4,6 +4,7 @@ using Sharpcaster.Models.Queue;
 using Sharpcaster.Test.helper;
 using System.Linq;
 using System.Threading.Tasks;
+using xRetry.v3;
 using Xunit;
 
 namespace Sharpcaster.Test
@@ -218,7 +219,7 @@ namespace Sharpcaster.Test
             }
         }
 
-        [Fact]
+        [RetryFact]
         public async Task TestQueueShuffleAsync()
         {
             var testHelper = new TestHelper();

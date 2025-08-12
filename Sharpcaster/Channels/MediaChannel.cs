@@ -100,37 +100,37 @@ namespace Sharpcaster.Channels
                     var loadFailedMessage = JsonSerializer.Deserialize(messagePayload, SharpcasteSerializationContext.Default.LoadFailedMessage);
                     if (loadFailedMessage != null)
                     {
-                        LoadFailed?.Invoke(this, loadFailedMessage);
+                        SafeInvokeEvent(LoadFailed, this, loadFailedMessage);
                     }
                     return Task.CompletedTask;
                 case "LOAD_CANCELLED":
                     var loadCancelledMessage = JsonSerializer.Deserialize(messagePayload, SharpcasteSerializationContext.Default.LoadCancelledMessage);
                     if (loadCancelledMessage != null)
                     {
-                        LoadCancelled?.Invoke(this, loadCancelledMessage);
+                        SafeInvokeEvent(LoadCancelled, this, loadCancelledMessage);
                     }
                     return Task.CompletedTask;
                 case "INVALID_REQUEST":
                     var invalidRequestMessage = JsonSerializer.Deserialize(messagePayload, SharpcasteSerializationContext.Default.InvalidRequestMessage);
                     if (invalidRequestMessage != null)
                     {
-                        InvalidRequest?.Invoke(this, invalidRequestMessage);
+                        SafeInvokeEvent(InvalidRequest, this, invalidRequestMessage);
                     }
                     return Task.CompletedTask;
                 case "ERROR":
                     var errorMessage = JsonSerializer.Deserialize(messagePayload, SharpcasteSerializationContext.Default.ErrorMessage);
                     if (errorMessage != null)
                     {
-                        ErrorHappened?.Invoke(this, errorMessage);
+                        SafeInvokeEvent(ErrorHappened, this, errorMessage);
                     }
                     return Task.CompletedTask;
                 case "MEDIA_STATUS":
                     var mediaStatusMessage = JsonSerializer.Deserialize(messagePayload, SharpcasteSerializationContext.Default.MediaStatusMessage);
                     mediaStatus = mediaStatusMessage?.Status.FirstOrDefault();
                     if (MediaStatus != null)
-            {
-                StatusChanged?.Invoke(this, MediaStatus);
-            }
+                    {
+                        SafeInvokeEvent(StatusChanged, this, MediaStatus);
+                    }
                     return Task.CompletedTask;
                 case "QUEUE_ITEMS":
                 //{"type":"QUEUE_ITEMS","requestId":908492678,"items":[{"itemId":9,"media":{"contentId":"Aquarium","contentUrl":"https://incompetech.com/music/royalty-free/mp3-royaltyfree/Aquarium.mp3","streamType":2,"contentType":"audio/mpeg","mediaCategory":"AUDIO","duration":144.013078},"orderId":0}],"sequenceNumber":0}

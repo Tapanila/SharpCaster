@@ -99,11 +99,11 @@ namespace Sharpcaster
         public ChromecastClient(ILogger<ChromecastClient>? logger)
         {
             _logger = logger;
-            
+
             var serviceCollection = new ServiceCollection();
             RegisterChannels(serviceCollection, logger);
             RegisterMessages(serviceCollection);
-            
+
             _serviceProvider = serviceCollection.BuildServiceProvider();
             InitializeClient();
         }
@@ -171,7 +171,7 @@ namespace Sharpcaster
         }
 
 
-        public async Task<ChromecastStatus> ConnectChromecast(ChromecastReceiver chromecastReceiver)
+        public async Task<ChromecastStatus?> ConnectChromecast(ChromecastReceiver chromecastReceiver)
         {
             if (chromecastReceiver?.DeviceUri == null)
             {
@@ -288,7 +288,7 @@ namespace Sharpcaster
             await SendSemaphoreSlim.WaitAsync().ConfigureAwait(false);
             try
             {
-                if (logger != null) LogSentMessage(logger, castMessage.Namespace, castMessage.DestinationId, castMessage.PayloadUtf8, null);     
+                if (logger != null) LogSentMessage(logger, castMessage.Namespace, castMessage.DestinationId, castMessage.PayloadUtf8, null);
 #if NETSTANDARD2_0
                 byte[] message = castMessage.ToProto();
 #else
@@ -344,10 +344,10 @@ namespace Sharpcaster
                 HeartbeatChannel.Dispose();
             }
 
-            
+
             // Recreate HeartbeatChannel since it's been disposed
             RecreateHeartbeatChannel();
-            
+
             _cancellationTokenSource.Cancel(true);
             await Task.Delay(100).ConfigureAwait(false);
             await Dispose().ConfigureAwait(false);
@@ -405,13 +405,13 @@ namespace Sharpcaster
             if (disposedHeartbeat != null)
             {
                 channelsList.Remove(disposedHeartbeat);
-                
+
                 // Create a new HeartbeatChannel instance using the service provider
-                var newHeartbeat = _serviceProvider.GetService<HeartbeatChannel>() ?? 
+                var newHeartbeat = _serviceProvider.GetService<HeartbeatChannel>() ??
                                    new HeartbeatChannel(_serviceProvider.GetService<ILogger<HeartbeatChannel>>());
                 newHeartbeat.Client = this;
                 channelsList.Add(newHeartbeat);
-                
+
                 // Update the channels collection
                 Channels = channelsList;
             }
@@ -493,7 +493,7 @@ namespace Sharpcaster
 
             var originalMessage = formatter(state, exception);
             var prefixedMessage = $"[{_categoryName}] {originalMessage}";
-            
+
             _baseLogger.Log(logLevel, eventId, prefixedMessage, exception, (msg, ex) => msg);
         }
     }

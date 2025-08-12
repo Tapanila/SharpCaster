@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using Sharpcaster.Interfaces;
+using System;
 using System.Threading.Tasks;
 
 namespace Sharpcaster.Channels
@@ -77,6 +78,55 @@ namespace Sharpcaster.Channels
         public virtual Task OnMessageReceivedAsync(string messagePayload, string type)
         {
             return Task.CompletedTask;
+        }
+
+        /// <summary>
+        /// Safely invokes an event handler asynchronously to prevent blocking the receive loop
+        /// </summary>
+        /// <typeparam name="T">Event argument type</typeparam>
+        /// <param name="eventHandler">Event handler to invoke</param>
+        /// <param name="sender">Event sender</param>
+        /// <param name="args">Event arguments</param>
+        protected static void SafeInvokeEvent<T>(EventHandler<T>? eventHandler, object sender, T args)
+        {
+            if (eventHandler != null)
+            {
+                Task.Run(() =>
+                {
+                    try
+                    {
+                        eventHandler.Invoke(sender, args);
+                    }
+                    catch
+                    {
+                        // Swallow exceptions from event handlers to prevent them from crashing the receive loop
+                    }
+                });
+            }
+        }
+
+        /// <summary>
+        /// Safely invokes an event handler asynchronously to prevent blocking the receive loop
+        /// </summary>
+        /// <param name="eventHandler">Event handler to invoke</param>
+        /// <param name="sender">Event sender</param>
+        /// <param name="args">Event arguments</param>
+        protected static void SafeInvokeEvent(EventHandler? eventHandler, object sender, EventArgs args)
+        {
+            if (eventHandler != null)
+            {
+                Task.Run(() =>
+                {
+                    try
+                    {
+                        eventHandler.Invoke(sender, args);
+                    }
+                    catch
+                    {
+                        // Swallow exceptions from event handlers to prevent them from crashing the receive loop
+                    }
+                });
+            }
         }
     }
 }
