@@ -28,76 +28,66 @@ public class MediaController
         if (!await _deviceService.EnsureConnectedAsync())
             return;
 
-        var mediaTypes = new[]
+        var urlOptions = new[]
         {
-            "Video (MP4/WebM/etc)",
-            "Audio (MP3/AAC/etc)",
-            "Image (JPG/PNG/etc)"
+            "Sample Video (Designing for Google Cast)",
+            "Sample Audio (Arcane - Kevin MacLeod)",
+            "Custom URL"
         };
 
-        var mediaType = AnsiConsole.Prompt(
+        var urlChoice = AnsiConsole.Prompt(
             new SelectionPrompt<string>()
-                .Title("[yellow]What type of media would you like to cast?[/]")
-                .AddChoices(mediaTypes)
-                .UseConverter(type => type switch
+                .Title("[yellow]Select media to cast:[/]")
+                .AddChoices(urlOptions)
+                .UseConverter(choice => choice switch
                 {
-                    "Video (MP4/WebM/etc)" => "🎬 Video (MP4/WebM/etc)",
-                    "Audio (MP3/AAC/etc)" => "🎵 Audio (MP3/AAC/etc)",
-                    "Image (JPG/PNG/etc)" => "🖼️ Image (JPG/PNG/etc)",
-                    _ => type
+                    "Sample Video (Designing for Google Cast)" => "🎬 Sample Video (Designing for Google Cast)",
+                    "Sample Audio (Arcane - Kevin MacLeod)" => "🎵 Sample Audio (Arcane - Kevin MacLeod)",
+                    "Custom URL" => "🔗 Custom URL",
+                    _ => choice
                 }));
-        
-        var url = AnsiConsole.Prompt(
-            new TextPrompt<string>("[yellow]Enter media URL:[/]")
-                .PromptStyle("green")
-                .ValidationErrorMessage("[red]Please enter a valid URL[/]")
-                .Validate(url => Uri.TryCreate(url, UriKind.Absolute, out _)));
 
-        var title = AnsiConsole.Prompt(
-            new TextPrompt<string>("[yellow]Enter media title (optional):[/]")
-                .PromptStyle("green")
-                .AllowEmpty());
+        string url;
+        string title;
 
-        if (string.IsNullOrWhiteSpace(title))
-            title = "Untitled Media";
+        switch (urlChoice)
+        {
+            case "Sample Video (Designing for Google Cast)":
+                url = "https://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/mp4/DesigningForGoogleCast.mp4";
+                title = "Designing for Google Cast";
+                break;
+            case "Sample Audio (Arcane - Kevin MacLeod)":
+                url = "https://incompetech.com/music/royalty-free/mp3-royaltyfree/Arcane.mp3";
+                title = "Arcane";
+                break;
+            case "Custom URL":
+                url = AnsiConsole.Prompt(
+                    new TextPrompt<string>("[yellow]Enter media URL:[/]")
+                        .PromptStyle("green")
+                        .ValidationErrorMessage("[red]Please enter a valid URL[/]")
+                        .Validate(url => Uri.TryCreate(url, UriKind.Absolute, out _)));
+                title = "Custom Media";
+                break;
+            default:
+                throw new InvalidOperationException("Invalid URL choice");
+        }
 
         try
         {
             await AnsiConsole.Status()
                 .Spinner(Spinner.Known.Star2)
                 .SpinnerStyle(Style.Parse("yellow"))
-                .StartAsync("Launching media receiver and loading content...", async ctx =>
+                .StartAsync("Loading content...", async ctx =>
                 {
-                    const string defaultMediaReceiver = "B3419EF5"; // Default Media Receiver
-                    
-                    // Only launch application if we haven't already launched it or if it's different
-                    if (!_state.HasLaunchedApplication || _state.CurrentApplicationId != defaultMediaReceiver)
-                    {
-                        ctx.Status("Launching Default Media Receiver...");
-                        var receiver = await _state.Client!.LaunchApplicationAsync(defaultMediaReceiver, false);
-                        _state.SetApplicationLaunched(defaultMediaReceiver);
-                    }
-                    else
-                    {
-                        ctx.Status("Using already launched Default Media Receiver...");
-                        var receiver = await _state.Client!.LaunchApplicationAsync(defaultMediaReceiver);
-                        _state.SetApplicationLaunched(defaultMediaReceiver);
-                    }
-                    
+                    var contentType = DetectMediaType(url);
                     var media = new Media
                     {
                         ContentId = url,
-                        ContentType = mediaType switch
-                        {
-                            "Video (MP4/WebM/etc)" => "video/mp4",
-                            "Audio (MP3/AAC/etc)" => "audio/mpeg",
-                            "Image (JPG/PNG/etc)" => "image/jpeg",
-                            _ => "video/mp4"
-                        },
+                        ContentType = contentType,
                         StreamType = StreamType.Buffered,
                         Metadata = new MediaMetadata
                         {
-                            MetadataType = MetadataType.Default,
+                            MetadataType = GetMetadataType(contentType),
                             Title = title
                         }
                     };
@@ -152,17 +142,27 @@ public class MediaController
                 .StartAsync("Loading website on Chromecast...", async ctx =>
                 {
                     const string dashboardReceiver = "F7FD2183";
-                    
-                    // Only launch application if we haven't already launched it or if it's different
-                    if (!_state.HasLaunchedApplication || _state.CurrentApplicationId != dashboardReceiver)
+
+                    if (_state.Client!.ChromecastStatus.Application?.AppId == dashboardReceiver)
                     {
-                        ctx.Status("Launching dashboard receiver...");
-                        await _state.Client!.LaunchApplicationAsync(dashboardReceiver);
-                        _state.SetApplicationLaunched(dashboardReceiver);
+                        ctx.Status("Dashboard receiver already running");
                     }
                     else
                     {
-                        ctx.Status("Using already launched dashboard receiver...");
+                        if (_state.Client.ChromecastStatus.Application != null && _state.Client.ChromecastStatus.Application.AppId != "E8C28D3C")
+                        {
+                            ctx.Status("Stopping previous application");
+                            await _state.Client.ReceiverChannel.StopApplication();
+                            await Task.Delay(300); // Wait for stop to complete
+                            await _state.Client.DisconnectAsync();
+                            await Task.Delay(500); // Wait disconnect to complete
+                            await _state.Client.ConnectChromecast(_state.SelectedDevice);
+                        }
+
+                        ctx.Status("Launching dashboard receiver...");
+                        var status = await _state.Client.LaunchApplicationAsync(dashboardReceiver);
+                        if (status == null)
+                            throw new Exception("Failed to launch dashboard receiver");
                     }
 
                     var req = new WebMessage
@@ -213,7 +213,6 @@ public class MediaController
                         var app = receiverStatus.Applications.First();
                         ctx.Status($"Stopping '{app.DisplayName}'...");
                         await _state.Client.ReceiverChannel.StopApplication();
-                        _state.ClearApplicationState(); // Clear application state after stopping
                     }
                     else
                     {
@@ -471,5 +470,30 @@ public class MediaController
                 AnsiConsole.MarkupLine("[yellow]⚠️  Connection may have been lost.[/]");
             }
         }
+    }
+
+    private static string DetectMediaType(string url)
+    {
+        var uri = new Uri(url);
+        var extension = Path.GetExtension(uri.AbsolutePath).ToLowerInvariant();
+        
+        return extension switch
+        {
+            ".mp4" or ".webm" or ".avi" or ".mkv" or ".mov" => "video/mp4",
+            ".mp3" or ".aac" or ".wav" or ".flac" or ".ogg" => "audio/mpeg",
+            ".jpg" or ".jpeg" or ".png" or ".gif" or ".webp" => "image/jpeg",
+            _ => "video/mp4" // Default to video
+        };
+    }
+
+    private static MetadataType GetMetadataType(string contentType)
+    {
+        return contentType switch
+        {
+            var ct when ct.StartsWith("video/") => MetadataType.Movie,
+            var ct when ct.StartsWith("audio/") => MetadataType.Music,
+            var ct when ct.StartsWith("image/") => MetadataType.Photo,
+            _ => MetadataType.Default
+        };
     }
 }

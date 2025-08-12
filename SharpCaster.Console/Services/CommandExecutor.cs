@@ -161,7 +161,6 @@ public class CommandExecutor
             // Cleanup
             _state.Client?.Dispose();
             _state.Locator?.Dispose();
-            _state.ClearApplicationState();
         }
     }
 
@@ -226,7 +225,6 @@ public class CommandExecutor
             _state.Client?.Dispose();
             _state.Client = null;
             _state.IsConnected = false;
-            _state.ClearApplicationState();
             throw new Exception($"Connection failed: {ex.Message}");
         }
     }
@@ -335,22 +333,6 @@ public class CommandExecutor
         {
             System.Console.WriteLine($"Casting media: {url}");
 
-            const string defaultMediaReceiver = "B3419EF5";
-            
-            // Only launch application if we haven't already launched it or if it's different
-            if (!_state.HasLaunchedApplication || _state.CurrentApplicationId != defaultMediaReceiver)
-            {
-                System.Console.WriteLine("Launching Default Media Receiver...");
-                await _state.Client!.LaunchApplicationAsync(defaultMediaReceiver, false);
-                _state.SetApplicationLaunched(defaultMediaReceiver);
-            }
-            else
-            {
-                System.Console.WriteLine("Using already launched Default Media Receiver...");
-                await _state.Client!.LaunchApplicationAsync(defaultMediaReceiver);
-                _state.SetApplicationLaunched(defaultMediaReceiver);
-            }
-            
             var mediaType = DetectMediaType(url);
             var media = new Media
             {
@@ -425,7 +407,6 @@ public class CommandExecutor
             {
                 var app = receiverStatus.Applications.First();
                 await _state.Client.ReceiverChannel.StopApplication();
-                _state.ClearApplicationState(); // Clear application state after stopping
                 System.Console.WriteLine($"Application '{app.DisplayName}' stopped");
             }
             else
@@ -557,17 +538,8 @@ public class CommandExecutor
             {
                 const string dashboardReceiver = "F7FD2183";
                 
-                // Only launch application if we haven't already launched it or if it's different
-                if (!_state.HasLaunchedApplication || _state.CurrentApplicationId != dashboardReceiver)
-                {
-                    System.Console.WriteLine("Launching Dashboard Receiver...");
-                    await _state.Client!.LaunchApplicationAsync(dashboardReceiver, false);
-                    _state.SetApplicationLaunched(dashboardReceiver);
-                }
-                else
-                {
-                    System.Console.WriteLine("Using already launched Dashboard Receiver...");
-                }
+                System.Console.WriteLine("Launching Dashboard Receiver...");
+                await _state.Client!.LaunchApplicationAsync(dashboardReceiver, false);
 
 
                 var req = new WebMessage

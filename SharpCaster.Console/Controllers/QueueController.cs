@@ -190,9 +190,6 @@ public class QueueController
                 .SpinnerStyle(Style.Parse("green"))
                 .StartAsync("Loading queue...", async ctx =>
                 {
-                    ctx.Status("Launching Default Media Receiver...");
-                    await _state.Client!.LaunchApplicationAsync("CC1AD845"); // Default Media Receiver
-                    
                     ctx.Status($"Loading queue with {queueItems.Count} items...");
                     await mediaChannel.QueueLoadAsync(queueItems.ToArray(), RepeatModeType.OFF, 0);
                 });

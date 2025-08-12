@@ -106,7 +106,6 @@ public class DeviceService
             _state.Client?.Dispose();
             _state.Client = null;
             _state.IsConnected = false;
-            _state.ClearApplicationState();
         }
     }
 
@@ -190,9 +189,21 @@ public class DeviceService
                 var runningApp = receiverStatus.Applications.FirstOrDefault();
                 if (runningApp != null && !string.IsNullOrEmpty(runningApp.DisplayName))
                 {
-                    // Skip joining prompt for Backdrop (default screensaver app)
-                    if (runningApp.AppId == "E8C28D3C")
+                    // Skip joining prompt for Backdrop (default screensaver app) and Web Receiver (default web app)
+                    if (runningApp.AppId == "E8C28D3C" || runningApp.AppId == "F7FD2183")
                     {
+                        AnsiConsole.MarkupLine("[dim]Skipping existing application. Launching Default Media Receiver...[/]");
+
+                        await AnsiConsole.Status()
+                            .Spinner(Spinner.Known.Star)
+                            .SpinnerStyle(Style.Parse("blue"))
+                            .StartAsync("Launching Default Media Receiver...", async ctx =>
+                            {
+                                const string defaultMediaReceiver = "B3419EF5";
+                                await _state.Client.LaunchApplicationAsync(defaultMediaReceiver, false);
+                            });
+
+                        AnsiConsole.MarkupLine("[green]✅ Default Media Receiver launched successfully![/]");
                         return;
                     }
 
@@ -242,8 +253,22 @@ public class DeviceService
                     }
                     else
                     {
-                        AnsiConsole.MarkupLine("[dim]Skipping existing application. You can cast new media or control the device normally.[/]");
+                        AnsiConsole.MarkupLine("[dim]Skipping existing application. Launching Default Media Receiver...[/]");
+                        
+                        await AnsiConsole.Status()
+                            .Spinner(Spinner.Known.Star)
+                            .SpinnerStyle(Style.Parse("blue"))
+                            .StartAsync("Launching Default Media Receiver...", async ctx =>
+                            {
+                                const string defaultMediaReceiver = "B3419EF5";
+                                await _state.Client.LaunchApplicationAsync(defaultMediaReceiver, false);
+                            });
+                        
+                        AnsiConsole.MarkupLine("[green]✅ Default Media Receiver launched successfully![/]");
                     }
+                } else
+                {
+                    var i = 0;
                 }
             }
         }

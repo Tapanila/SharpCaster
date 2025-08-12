@@ -261,7 +261,6 @@ public class ApplicationFlows
                     _state.Client?.Dispose();
                     _state.Client = null;
                     _state.SelectedDevice = null;
-                    _state.ClearApplicationState();
                     _ui.AddSeparator("Switching to different device...");
                     await DeviceSelectionFlowAsync();
                     if (_state.IsConnected)
@@ -279,7 +278,6 @@ public class ApplicationFlows
                     _state.Client?.Dispose();
                     _state.Client = null;
                     _state.SelectedDevice = null;
-                    _state.ClearApplicationState();
                     _ui.AddSeparator("Searching for new devices...");
                     await InitialDiscoveryFlowAsync();
                     await DeviceSelectionFlowAsync();
