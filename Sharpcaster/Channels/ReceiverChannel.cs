@@ -78,6 +78,11 @@ namespace Sharpcaster.Channels
 
         public async Task<ChromecastStatus?> StopApplication()
         {
+            if (ReceiverStatus.Application == null || string.IsNullOrEmpty(ReceiverStatus.Application.SessionId))
+            {
+                Logger?.LogWarning("No application is currently running, cannot stop application.");
+                return null;
+            }
             var stopMessage = new StopMessage() { SessionId = ReceiverStatus.Application.SessionId };
             var response = await SendAsync(stopMessage.RequestId, JsonSerializer.Serialize(stopMessage, SharpcasteSerializationContext.Default.StopMessage)).ConfigureAwait(false);
             var status = JsonSerializer.Deserialize(response, SharpcasteSerializationContext.Default.ReceiverStatusMessage);
@@ -98,8 +103,11 @@ namespace Sharpcaster.Channels
                     {
                         receiverStatus = receiverStatusMessage.Status;
                         SafeInvokeEvent(ReceiverStatusChanged, this, ReceiverStatus);
+                    } else
+                    {
+                        var i = 0;
                     }
-                    break;
+                        break;
 
             }
             return base.OnMessageReceivedAsync(messagePayload, type);

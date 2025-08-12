@@ -135,6 +135,7 @@ namespace Sharpcaster.Test
             {
                 ContentUrl = "https://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/mp4/DesigningForGoogleCast.mp4",
                 ContentType = "video/mp4",
+                StreamType = StreamType.Buffered,
                 Metadata = new MediaMetadata
                 {
                     Title = "Designing for Google Cast",
@@ -184,15 +185,17 @@ namespace Sharpcaster.Test
         }
 
         [Fact]
-        public async Task TestingJoiningMultipleTimes()
+        public async Task TestLaunchingFirstDifferentApplicationAndThenLaunchingDifferentWithoutDisconnect()
         {
             var TestHelper = new TestHelper();
-            var client = await TestHelper.CreateConnectAndLoadAppClient(outputHelper, fixture);
-
+            //This will start the default receiver application (B3419EF5)
+            var client = await TestHelper.CreateAndConnectClient(outputHelper, fixture);
+            await client.LaunchApplicationAsync("B3419EF5");
 
             //This should cause issues
             try { 
-                await client.LaunchApplicationAsync("CC1AD845");
+                await client.LaunchApplicationAsync("CC1AD845", false);
+                Assert.Fail("Expected exception was not thrown.");
             } catch (Exception ex)
             {
                 Assert.IsType<TaskCanceledException>(ex);
@@ -200,6 +203,28 @@ namespace Sharpcaster.Test
             }
 
 
+        }
+
+        [Fact]
+        public async Task TestLaunchingFirstDifferentApplicationAndThenLaunchingDifferentWithDisconnect()
+        {
+            var TestHelper = new TestHelper();
+            //This will start the default receiver application (B3419EF5)
+            var client = await TestHelper.CreateAndConnectClient(outputHelper, fixture);
+            await client.LaunchApplicationAsync("B3419EF5");
+
+            await client.DisconnectAsync();
+            client = await TestHelper.CreateAndConnectClient(outputHelper, fixture);
+
+            //This should work fine with disconnect
+            try
+            {
+                await client.LaunchApplicationAsync("CC1AD845", false);
+            }
+            catch (Exception ex)
+            {
+                Assert.Fail("Expected exception was not thrown.");
+            }
         }
 
         [Fact]

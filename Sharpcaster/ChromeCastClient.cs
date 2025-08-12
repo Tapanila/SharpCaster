@@ -333,6 +333,7 @@ namespace Sharpcaster
         {
             foreach (var task in WaitingTasks)
             {
+                _logger?.LogDebug("Cancelling task for RequestId: {RequestId}", task.Key);
                 task.Value?.SetException(new TaskCanceledException("Client disconnected before receiving response."));
             }
             WaitingTasks.Clear();
@@ -432,7 +433,7 @@ namespace Sharpcaster
             return channel;
         }
 
-        public async Task<ChromecastStatus> LaunchApplicationAsync(string applicationId, bool joinExistingApplicationSession = true)
+        public async Task<ChromecastStatus?> LaunchApplicationAsync(string applicationId, bool joinExistingApplicationSession = true)
         {
             if (joinExistingApplicationSession)
             {
