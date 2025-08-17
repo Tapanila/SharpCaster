@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 using Sharpcaster.Test.helper;
+using System.Linq;
 
 namespace Sharpcaster.Test
 {
@@ -28,10 +29,10 @@ namespace Sharpcaster.Test
             };
             
             // Start continuous discovery to trigger events
-            locator.StartContinuousDiscovery(TimeSpan.FromSeconds(1));
+            locator.StartContinuousDiscovery(TimeSpan.FromSeconds(5));
             
             // Wait for events to be fired
-            await Task.Delay(TimeSpan.FromSeconds(7), Xunit.TestContext.Current.CancellationToken);
+            await Task.Delay(TimeSpan.FromMilliseconds(5100), Xunit.TestContext.Current.CancellationToken);
             
             // Stop discovery
             locator.StopContinuousDiscovery();
@@ -46,7 +47,7 @@ namespace Sharpcaster.Test
         public async Task SearchChromecastsWithTooShortTimeout()
         {
             var locator = new MdnsChromecastLocator();
-            var chromecasts = await locator.FindReceiversAsync(TimeSpan.FromMicroseconds(1));
+            var chromecasts = await locator.FindReceiversAsync(TimeSpan.FromMicroseconds(1), TimeSpan.FromMicroseconds(1), TimeSpan.FromMicroseconds(1));
             Assert.Empty(chromecasts);
         }
 
@@ -56,6 +57,14 @@ namespace Sharpcaster.Test
             var locator = new MdnsChromecastLocator();
             var chromecasts = await locator.FindReceiversAsync(TimeSpan.FromSeconds(5));
             Assert.NotEmpty(chromecasts);
+        }
+
+        [Fact]
+        public async Task TestNewProgressiveDiscovery()
+        {
+            var locator = new MdnsChromecastLocator();
+            var chromecasts = await locator.FindReceiversAsync();
+            Assert.Equal(4, chromecasts.Count());
         }
     }
 }

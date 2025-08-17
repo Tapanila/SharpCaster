@@ -53,49 +53,110 @@ namespace Sharpcaster
         }
 
         /// <summary>
-        /// Find the available chromecast receivers (async, no events)
+        /// Find the available chromecast receivers using progressive discovery (async, no events)
+        /// Performs quick scan first, then medium, then full timeout if needed
+        /// Returns early if devices are found at any stage
         /// </summary>
-        /// <param name="timeout">Discovery timeout (default 2 seconds)</param>
+        /// <param name="quickTimeout">First scan timeout (default 400ms)</param>
+        /// <param name="mediumTimeout">Second scan timeout (default 800ms)</param>
+        /// <param name="fullTimeout">Final scan timeout (default 2 seconds)</param>
         /// <returns>Collection of chromecast receivers</returns>
-        public async Task<IEnumerable<ChromecastReceiver>> FindReceiversAsync(TimeSpan? timeout = null)
+        public async Task<IEnumerable<ChromecastReceiver>> FindReceiversAsync(
+            TimeSpan? quickTimeout = null,
+            TimeSpan? mediumTimeout = null,
+            TimeSpan? fullTimeout = null)
         {
-            var discoveryTimeout = timeout ?? TimeSpan.FromSeconds(2);
             var devices = new List<ChromecastReceiver>();
             
-            _mdnsDiscoveryStarted(_logger, discoveryTimeout.TotalMilliseconds, null);
+            // Progressive scan timeouts: quick -> medium -> full
+            var scanTimeouts = new[]
+            {
+                quickTimeout ?? TimeSpan.FromMilliseconds(400),   // 1st scan: very quick
+                mediumTimeout ?? TimeSpan.FromMilliseconds(800),  // 2nd scan: medium speed  
+                fullTimeout ?? TimeSpan.FromSeconds(2)            // 3rd scan: full timeout
+            };
             
-            try
+            _progressiveDiscoveryStarted(_logger, scanTimeouts.Length, scanTimeouts[scanTimeouts.Length - 1].TotalMilliseconds, null);
+            
+            for (int scanIndex = 0; scanIndex < scanTimeouts.Length; scanIndex++)
             {
-                var responses = await ZeroconfResolver.ResolveAsync(
-                    "_googlecast._tcp.local.",
-                    scanTime: discoveryTimeout).ConfigureAwait(false);
-
-                var responsesList = responses.ToList();
-                _mdnsDiscoveryResponsesFound(_logger, responsesList.Count, null);
+                var currentTimeout = scanTimeouts[scanIndex];
+                var scanNumber = scanIndex + 1;
                 
-                foreach (var response in responsesList)
+                _progressiveCheckStarted(_logger, scanNumber, currentTimeout.TotalMilliseconds, null);
+                
+                try
                 {
-                    var chromecast = CreateChromecastReceiver(response);
-                    if (chromecast != null)
+                    var responses = await ZeroconfResolver.ResolveAsync(
+                        "_googlecast._tcp.local.",
+                        scanTime: currentTimeout).ConfigureAwait(false);
+
+                    var responsesList = responses.ToList();
+                    
+                    var scanDevices = new List<ChromecastReceiver>();
+                    foreach (var response in responsesList)
                     {
-                        devices.Add(chromecast);
-                        _chromecastDiscovered(_logger, chromecast.Name, chromecast.DeviceUri.ToString(), chromecast.Port, null);
+                        var chromecast = CreateChromecastReceiver(response);
+                        if (chromecast != null)
+                        {
+                            // Avoid duplicates from previous scans
+                            if (!devices.Any(d => d.DeviceUri.ToString() == chromecast.DeviceUri.ToString() && d.Port == chromecast.Port))
+                            {
+                                devices.Add(chromecast);
+                                scanDevices.Add(chromecast);
+                                _chromecastDiscovered(_logger, chromecast.Name, chromecast.DeviceUri.ToString(), chromecast.Port, null);
+                            }
+                        }
                     }
+                    
+                    _progressiveCheckCompleted(_logger, scanNumber, scanDevices.Count, devices.Count, null);
+                    
+                    // If we found devices in this scan, stop here (early exit optimization)
+                    if (scanDevices.Count > 0)
+                    {
+                        _progressiveDiscoveryCompletedEarly(_logger, scanNumber, devices.Count, null);
+                        break;
+                    }
+                    
+                    _progressiveCheckWaiting(_logger, scanNumber, null);
                 }
-                
-                _mdnsDiscoveryCompleted(_logger, devices.Count, null);
+                catch (OperationCanceledException)
+                {
+                    _progressiveCheckCancelled(_logger, scanNumber, devices.Count, null);
+                    break;
+                }
+                catch (TimeoutException ex)
+                {
+                    _progressiveDiscoveryError(_logger, devices.Count, ex);
+                    // Continue to next scan on timeout
+                }
+                catch (Exception ex)
+                {
+                    _progressiveCheckError(_logger, scanNumber, devices.Count, ex);
+                    // Continue to next scan on error
+                }
             }
-            catch (OperationCanceledException ex)
+            
+            _progressiveDiscoveryCompleted(_logger, devices.Count, null);
+            return devices;
+        }
+
+        /// <summary>
+        /// Process discovery responses and convert to ChromecastReceiver objects
+        /// </summary>
+        private List<ChromecastReceiver> ProcessResponses(IEnumerable<IZeroconfHost> responses, ILogger logger)
+        {
+            var devices = new List<ChromecastReceiver>();
+            var responsesList = responses.ToList();
+            
+            foreach (var response in responsesList)
             {
-                _mdnsDiscoveryCancelled(_logger, devices.Count, ex);
-            }
-            catch (TimeoutException ex)
-            {
-                _mdnsDiscoveryTimedOut(_logger, devices.Count, ex);
-            }
-            catch (Exception ex)
-            {
-                _mdnsDiscoveryError(_logger, devices.Count, ex);
+                var chromecast = CreateChromecastReceiver(response);
+                if (chromecast != null)
+                {
+                    devices.Add(chromecast);
+                    _chromecastDiscovered(logger, chromecast.Name, chromecast.DeviceUri.ToString(), chromecast.Port, null);
+                }
             }
             
             return devices;
@@ -104,9 +165,13 @@ namespace Sharpcaster
         /// <summary>
         /// Start continuous discovery that raises events for found devices
         /// </summary>
-        /// <param name="scanInterval">Time between scans (default 5 seconds)</param>
+        /// <param name="scanInterval">Time between scans (default and minimium is 5 seconds)</param>
         public void StartContinuousDiscovery(TimeSpan? scanInterval = null)
         {
+            if (scanInterval.HasValue && scanInterval.Value.TotalSeconds < 5)
+            {
+                throw new ArgumentException("Scan interval must be at least 5 seconds", nameof(scanInterval));
+            }
             StopContinuousDiscovery();
             
             var interval = scanInterval ?? TimeSpan.FromSeconds(5);
@@ -382,6 +447,67 @@ namespace Sharpcaster
                 LogLevel.Warning,
                 new EventId(1022, nameof(_unexpectedErrorDuringContinuousDiscoveryScan)),
                 "Unexpected error during continuous discovery scan, retrying in 1 second");
+
+        // Progressive discovery logging delegates
+        private static readonly Action<ILogger, int, double, Exception?> _progressiveDiscoveryStarted =
+            LoggerMessage.Define<int, double>(
+                LogLevel.Information,
+                new EventId(1023, nameof(_progressiveDiscoveryStarted)),
+                "Starting progressive mDNS discovery with {CheckCount} check intervals (max timeout: {MaxTimeout}ms)");
+
+        private static readonly Action<ILogger, int, double, Exception?> _progressiveCheckStarted =
+            LoggerMessage.Define<int, double>(
+                LogLevel.Debug,
+                new EventId(1024, nameof(_progressiveCheckStarted)),
+                "Progressive check {CheckNumber} at {Interval}ms - monitoring discovery progress");
+
+        private static readonly Action<ILogger, int, int, int, Exception?> _progressiveCheckCompleted =
+            LoggerMessage.Define<int, int, int>(
+                LogLevel.Debug,
+                new EventId(1025, nameof(_progressiveCheckCompleted)),
+                "Progressive check {CheckNumber} completed. Discovery finished with {NewDevices} devices ({TotalDevices} total)");
+
+        private static readonly Action<ILogger, int, int, Exception?> _progressiveDiscoveryCompletedEarly =
+            LoggerMessage.Define<int, int>(
+                LogLevel.Information,
+                new EventId(1026, nameof(_progressiveDiscoveryCompletedEarly)),
+                "Progressive discovery completed early at check {CheckNumber}. Found {DeviceCount} devices");
+
+        private static readonly Action<ILogger, int, Exception?> _progressiveCheckWaiting =
+            LoggerMessage.Define<int>(
+                LogLevel.Debug,
+                new EventId(1027, nameof(_progressiveCheckWaiting)),
+                "Progressive check {CheckNumber} - discovery still in progress, continuing to next interval");
+
+        private static readonly Action<ILogger, int, int, Exception?> _progressiveCheckCancelled =
+            LoggerMessage.Define<int, int>(
+                LogLevel.Warning,
+                new EventId(1028, nameof(_progressiveCheckCancelled)),
+                "Progressive check {CheckNumber} was cancelled. Returning {DeviceCount} devices found so far");
+
+        private static readonly Action<ILogger, int, int, Exception?> _progressiveCheckError =
+            LoggerMessage.Define<int, int>(
+                LogLevel.Warning,
+                new EventId(1029, nameof(_progressiveCheckError)),
+                "Error during progressive check {CheckNumber}. Continuing to next interval. Found {DeviceCount} devices so far");
+
+        private static readonly Action<ILogger, int, Exception?> _progressiveDiscoveryCancelled =
+            LoggerMessage.Define<int>(
+                LogLevel.Warning,
+                new EventId(1030, nameof(_progressiveDiscoveryCancelled)),
+                "Progressive discovery was cancelled. Returning {DeviceCount} devices found");
+
+        private static readonly Action<ILogger, int, Exception?> _progressiveDiscoveryError =
+            LoggerMessage.Define<int>(
+                LogLevel.Warning,
+                new EventId(1031, nameof(_progressiveDiscoveryError)),
+                "Error during progressive discovery final wait. Returning {DeviceCount} devices found");
+
+        private static readonly Action<ILogger, int, Exception?> _progressiveDiscoveryCompleted =
+            LoggerMessage.Define<int>(
+                LogLevel.Information,
+                new EventId(1032, nameof(_progressiveDiscoveryCompleted)),
+                "Progressive mDNS discovery completed. Found {DeviceCount} Chromecast devices total");
         #endregion
 
         #region IDisposable Implementation
