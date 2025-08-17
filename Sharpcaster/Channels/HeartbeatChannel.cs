@@ -71,6 +71,13 @@ namespace Sharpcaster.Channels
             if (Logger != null) LogHeartbeatTimerStopped(Logger, null);
         }
 
+        public void RestartTimeoutTimer()
+        {
+            _timer.Stop();
+            _timer.Start();
+            if (Logger != null) LogHeartbeatTimerStarted(Logger, null);
+        }
+
         private void TimerElapsed(object sender, ElapsedEventArgs e)
         {
             if (Logger != null) LogHeartbeatTimeout(Logger, null);

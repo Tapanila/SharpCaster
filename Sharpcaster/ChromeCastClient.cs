@@ -228,7 +228,7 @@ namespace Sharpcaster
                     {
                         if (channel != HeartbeatChannel)
                         {
-                            HeartbeatChannel.StopTimeoutTimer();
+                            HeartbeatChannel.RestartTimeoutTimer();
                         }
                         if (channel?.Logger != null) LogReceivedMessage(channel.Logger, payload, null);
 
@@ -298,7 +298,6 @@ namespace Sharpcaster
 #else
                 await _stream!.WriteAsync(message).ConfigureAwait(false);
 #endif
-                await _stream.FlushAsync().ConfigureAwait(false);
             }
             finally
             {

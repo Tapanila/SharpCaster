@@ -94,5 +94,34 @@ namespace Sharpcaster.Test
 
             Assert.Equal(expectedSequence, runSequence);
         }
+
+        [Fact]
+        public async Task TestHeartbeatWithLongDelaysAndMediaControl()
+        {
+            var TestHelper = new TestHelper();
+            ChromecastClient client = await TestHelper.CreateConnectAndLoadAppClient(outputHelper, fixture.Receivers[0]);
+
+            var media = new Media
+            {
+                ContentUrl = "https://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/mp4/DesigningForGoogleCast.mp4"
+            };
+
+            outputHelper.WriteLine("Joining device and waiting for 20 seconds...");
+            await Task.Delay(20000, Xunit.TestContext.Current.CancellationToken);
+
+            outputHelper.WriteLine("Starting media playback...");
+            MediaStatus mediaStatus = await client.MediaChannel.LoadAsync(media);
+            Assert.Equal(PlayerStateType.Playing, mediaStatus.PlayerState);
+
+            outputHelper.WriteLine("Media playing, waiting for another 20 seconds...");
+            await Task.Delay(20000, Xunit.TestContext.Current.CancellationToken);
+
+            outputHelper.WriteLine("Pausing media...");
+            mediaStatus = await client.MediaChannel.PauseAsync();
+            Assert.Equal(PlayerStateType.Paused, mediaStatus.PlayerState);
+
+            outputHelper.WriteLine("Test completed successfully - heartbeat maintained through long delays");
+            await client.DisconnectAsync();
+        }
     }
 }
