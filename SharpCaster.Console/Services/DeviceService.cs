@@ -176,7 +176,15 @@ public class DeviceService
         
         try
         {
-            var hasReceiverNamespace = _state.Client.ChromecastStatus.Application.Namespaces?.Any(ns => ns.Name == "urn:x-cast:com.google.cast.receiver") == true;
+            var application = _state.Client.ChromecastStatus.Application;
+            if (application == null)
+            {
+                AnsiConsole.MarkupLine("[dim]No existing application found. Launching Default Media Receiver...[/]");
+                await _state.Client.LaunchApplicationAsync("B3419EF5", false);
+                AnsiConsole.MarkupLine("[green]✅ Default Media Receiver launched successfully![/]");
+                return;
+            }
+            var hasReceiverNamespace = application?.Namespaces?.Any(ns => ns.Name == "urn:x-cast:com.google.cast.receiver") == true;
             // Refresh receiver status to get the most current application information
             if (hasReceiverNamespace)
             {
