@@ -206,75 +206,74 @@ namespace Sharpcaster
         }
 
         private void Receive(CancellationToken cancellationToken) => Task.Run(async () =>
-                                                                              {
-                                                                                  try
-                                                                                  {
-                                                                                      while (true)
-                                                                                      {
-                                                                                          //First 4 bytes contains the length of the message
-                                                                                          var buffer = await _stream!.ReadAsync(4, cancellationToken).ConfigureAwait(false);
-                                                                                          if (BitConverter.IsLittleEndian)
-                                                                                          {
-                                                                                              Array.Reverse(buffer);
-                                                                                          }
-                                                                                          var length = BitConverter.ToInt32(buffer, 0);
-                                                                                          var castMessage = CastMessage.Parser.ParseFrom(await _stream.ReadAsync(length, cancellationToken).ConfigureAwait(false));
-                                                                                          //Payload can either be Binary or UTF8 json
-                                                                                          var payload = (castMessage.PayloadType == PayloadType.Binary ?
-                                                                                              Encoding.UTF8.GetString(castMessage.PayloadBinary.ToByteArray()) : castMessage.PayloadUtf8);
+        {
+            try
+            {
+                while (true)
+                {
+                    //First 4 bytes contains the length of the message
+                    var buffer = await _stream!.ReadAsync(4, cancellationToken).ConfigureAwait(false);
+                    if (BitConverter.IsLittleEndian)
+                    {
+                        Array.Reverse(buffer);
+                    }
+                    var length = BitConverter.ToInt32(buffer, 0);
+                    var castMessage = CastMessage.Parser.ParseFrom(await _stream.ReadAsync(length, cancellationToken).ConfigureAwait(false));
+                    //Payload can either be Binary or UTF8 json
+                    var payload = (castMessage.PayloadType == PayloadType.Binary ?
+                        Encoding.UTF8.GetString(castMessage.PayloadBinary.ToByteArray()) : castMessage.PayloadUtf8);
 
-                                                                                          var channel = Channels.FirstOrDefault(c => c.Namespace == castMessage.Namespace);
-                                                                                          if (channel != null)
-                                                                                          {
-                                                                                              if (channel != HeartbeatChannel)
-                                                                                              {
-                                                                                                  HeartbeatChannel.StopTimeoutTimer();
-                                                                                              }
-                                                                                              if (channel?.Logger != null) LogReceivedMessage(channel.Logger, payload, null);
+                    var channel = Channels.FirstOrDefault(c => c.Namespace == castMessage.Namespace);
+                    if (channel != null)
+                    {
+                        if (channel != HeartbeatChannel)
+                        {
+                            HeartbeatChannel.StopTimeoutTimer();
+                        }
+                        if (channel?.Logger != null) LogReceivedMessage(channel.Logger, payload, null);
 
-                                                                                              var message = JsonSerializer.Deserialize(payload, SharpcasteSerializationContext.Default.MessageWithId);
-                                                                                              if (message != null && MessageTypes.TryGetValue(message.Type, out Type type))
-                                                                                              {
-                                                                                                  try
-                                                                                                  {
-                                                                                                      if (channel != null)
-                                                                                                          await channel.OnMessageReceivedAsync(payload, message.Type).ConfigureAwait(false);
-                                                                                                      if (message.HasRequestId)
-                                                                                                      {
-                                                                                                          WaitingTasks.TryRemove(message.RequestId, out SharpCasterTaskCompletionSource? tcs);
-                                                                                                          tcs?.SetResult(payload);
-                                                                                                          if (tcs == null)
-                                                                                                              if (_logger != null) LogNoTaskCompletionSource(_logger, message.RequestId, WaitingTasks.Count, message.Type, null);
-                                                                                                      }
-                                                                                                  }
-                                                                                                  catch (Exception ex)
-                                                                                                  {
-                                                                                                      if (_logger != null) LogExceptionProcessingResponse(_logger, ex.Message, ex);
-                                                                                                      if (message.HasRequestId)
-                                                                                                      {
-                                                                                                          WaitingTasks.TryRemove(message.RequestId, out SharpCasterTaskCompletionSource? tcs);
-                                                                                                          tcs?.SetException(ex);
-                                                                                                      }
-                                                                                                  }
-                                                                                              }
-                                                                                              else
-                                                                                              {
-                                                                                                  if (_logger != null) LogMessageConversionError(_logger, message.Type, null);
-                                                                                                  Debugger.Break();
-                                                                                              }
-                                                                                          }
-                                                                                          else
-                                                                                          {
-                                                                                              if (_logger != null) LogChannelParseError(_logger, castMessage.Namespace, payload, null);
-                                                                                          }
-                                                                                      }
-                                                                                  }
-                                                                                  catch (Exception exception)
-                                                                                  {
-                                                                                      if (_logger != null) LogReceiveLoopError(_logger, exception.Message, exception);
-                                                                                      ReceiveTcs.SetResult(true);
-                                                                                  }
-                                                                              }, cancellationToken);
+                        var message = JsonSerializer.Deserialize(payload, SharpcasteSerializationContext.Default.MessageWithId);
+                        if (message != null && MessageTypes.TryGetValue(message.Type, out Type type))
+                        {
+                            try
+                            {
+                                channel?.OnMessageReceived(payload, message.Type);
+                                if (message.HasRequestId)
+                                {
+                                    WaitingTasks.TryRemove(message.RequestId, out SharpCasterTaskCompletionSource? tcs);
+                                    tcs?.SetResult(payload);
+                                    if (tcs == null)
+                                        if (_logger != null) LogNoTaskCompletionSource(_logger, message.RequestId, WaitingTasks.Count, message.Type, null);
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                if (_logger != null) LogExceptionProcessingResponse(_logger, ex.Message, ex);
+                                if (message.HasRequestId)
+                                {
+                                    WaitingTasks.TryRemove(message.RequestId, out SharpCasterTaskCompletionSource? tcs);
+                                    tcs?.SetException(ex);
+                                }
+                            }
+                        }
+                        else
+                        {
+                            if (_logger != null) LogMessageConversionError(_logger, message.Type, null);
+                            Debugger.Break();
+                        }
+                    }
+                    else
+                    {
+                        if (_logger != null) LogChannelParseError(_logger, castMessage.Namespace, payload, null);
+                    }
+                }
+            }
+            catch (Exception exception)
+            {
+                if (_logger != null) LogReceiveLoopError(_logger, exception.Message, exception);
+                ReceiveTcs.SetResult(true);
+            }
+        }, cancellationToken);
 
         public async Task SendAsync(ILogger? logger, string ns, string messagePayload, string destinationId)
         {

@@ -26,7 +26,7 @@ namespace Sharpcaster.Channels
         /// </summary>
         /// <param name="messagePayload">message payload to process</param>
         /// <param name="type">message type</param>
-        public override Task OnMessageReceivedAsync(string messagePayload, string type)
+        public override void OnMessageReceived(string messagePayload, string type)
         {
             switch (type)
             {
@@ -46,8 +46,6 @@ namespace Sharpcaster.Channels
                     }
                     break;
             }
-
-            return base.OnMessageReceivedAsync(messagePayload, type);
         }
 
         /// <summary>

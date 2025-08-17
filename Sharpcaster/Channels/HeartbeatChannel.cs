@@ -20,7 +20,7 @@ namespace Sharpcaster.Channels
         private bool disposedValue;
 
         private static readonly Action<ILogger, Exception?> LogPongSent =
-            LoggerMessage.Define(LogLevel.Debug, new EventId(1001, nameof(OnMessageReceivedAsync)), "Pong sent - Heartbeat Timer restarted.");
+            LoggerMessage.Define(LogLevel.Debug, new EventId(1001, nameof(OnMessageReceived)), "Pong sent - Heartbeat Timer restarted.");
 
         private static readonly Action<ILogger, Exception?> LogHeartbeatTimerStarted =
             LoggerMessage.Define(LogLevel.Trace, new EventId(1002, nameof(StartTimeoutTimer)), "Started heartbeat timeout timer");
@@ -50,7 +50,7 @@ namespace Sharpcaster.Channels
         /// </summary>
         /// <param name="messagePayload">message payload to process</param>
         /// <param name="type">message type</param>
-        public override async Task OnMessageReceivedAsync(string messagePayload, string type)
+        public override async void OnMessageReceived(string messagePayload, string type)
         {
             _timer.Stop();
             var pongMessage = new PongMessage();

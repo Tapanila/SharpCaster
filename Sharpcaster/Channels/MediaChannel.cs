@@ -92,7 +92,7 @@ namespace Sharpcaster.Channels
             return await SendAsync(loadMessage.RequestId, JsonSerializer.Serialize(loadMessage, SharpcasteSerializationContext.Default.LoadMessage), status.Application).ConfigureAwait(false);
         }
 
-        public override Task OnMessageReceivedAsync(string messagePayload, string type)
+        public override void OnMessageReceived(string messagePayload, string type)
         {
             switch (type)
             {
@@ -102,28 +102,28 @@ namespace Sharpcaster.Channels
                     {
                         SafeInvokeEvent(LoadFailed, this, loadFailedMessage);
                     }
-                    return Task.CompletedTask;
+                    return;
                 case "LOAD_CANCELLED":
                     var loadCancelledMessage = JsonSerializer.Deserialize(messagePayload, SharpcasteSerializationContext.Default.LoadCancelledMessage);
                     if (loadCancelledMessage != null)
                     {
                         SafeInvokeEvent(LoadCancelled, this, loadCancelledMessage);
                     }
-                    return Task.CompletedTask;
+                    return;
                 case "INVALID_REQUEST":
                     var invalidRequestMessage = JsonSerializer.Deserialize(messagePayload, SharpcasteSerializationContext.Default.InvalidRequestMessage);
                     if (invalidRequestMessage != null)
                     {
                         SafeInvokeEvent(InvalidRequest, this, invalidRequestMessage);
                     }
-                    return Task.CompletedTask;
+                    return;
                 case "ERROR":
                     var errorMessage = JsonSerializer.Deserialize(messagePayload, SharpcasteSerializationContext.Default.ErrorMessage);
                     if (errorMessage != null)
                     {
                         SafeInvokeEvent(ErrorHappened, this, errorMessage);
                     }
-                    return Task.CompletedTask;
+                    return;
                 case "MEDIA_STATUS":
                     var mediaStatusMessage = JsonSerializer.Deserialize(messagePayload, SharpcasteSerializationContext.Default.MediaStatusMessage);
                     mediaStatus = mediaStatusMessage?.Status.FirstOrDefault();
@@ -131,17 +131,17 @@ namespace Sharpcaster.Channels
                     {
                         SafeInvokeEvent(StatusChanged, this, MediaStatus);
                     }
-                    return Task.CompletedTask;
+                    return;
                 case "QUEUE_ITEMS":
                 //{"type":"QUEUE_ITEMS","requestId":908492678,"items":[{"itemId":9,"media":{"contentId":"Aquarium","contentUrl":"https://incompetech.com/music/royalty-free/mp3-royaltyfree/Aquarium.mp3","streamType":2,"contentType":"audio/mpeg","mediaCategory":"AUDIO","duration":144.013078},"orderId":0}],"sequenceNumber":0}
                 case "QUEUE_ITEM_IDS":
                 case "QUEUE_CHANGE":
-                    return Task.CompletedTask;
+                    return;
             }
 #if DEBUG
             Debugger.Break();
 #endif
-            return Task.CompletedTask;
+            return;
         }
 
         /// <summary>

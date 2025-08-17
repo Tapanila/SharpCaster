@@ -89,13 +89,16 @@ namespace Sharpcaster.Channels
             return status?.Status;
         }
 
-        public override Task OnMessageReceivedAsync(string messagePayload, string type)
+        public override void OnMessageReceived(string messagePayload, string type)
         {
             switch (type)
             {
                 case "LAUNCH_STATUS":
                     var launchStatusMessage = JsonSerializer.Deserialize(messagePayload, SharpcasteSerializationContext.Default.LaunchStatusMessage);
-                    SafeInvokeEvent(LaunchStatusChanged, this, launchStatusMessage);
+                    if (launchStatusMessage?.Status != null)
+                    {
+                        SafeInvokeEvent(LaunchStatusChanged, this, launchStatusMessage);
+                    }
                     break;
                 case "RECEIVER_STATUS":
                     var receiverStatusMessage = JsonSerializer.Deserialize(messagePayload, SharpcasteSerializationContext.Default.ReceiverStatusMessage);
@@ -107,7 +110,6 @@ namespace Sharpcaster.Channels
                     break;
 
             }
-            return base.OnMessageReceivedAsync(messagePayload, type);
         }
     }
 }

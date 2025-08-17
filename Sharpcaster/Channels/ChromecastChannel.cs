@@ -75,9 +75,8 @@ namespace Sharpcaster.Channels
         /// </summary>
         /// <param name="messagePayload">message payload to process</param>
         /// <param name="type">message type</param>
-        public virtual Task OnMessageReceivedAsync(string messagePayload, string type)
+        public virtual void OnMessageReceived(string messagePayload, string type)
         {
-            return Task.CompletedTask;
         }
 
         /// <summary>

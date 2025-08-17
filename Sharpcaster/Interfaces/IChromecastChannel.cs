@@ -25,6 +25,6 @@ namespace Sharpcaster.Interfaces
         /// </summary>
         /// <param name="messagePayload">message payload to process</param>
         /// <param name="type">message type</param>
-        Task OnMessageReceivedAsync(string messagePayload, string type);
+        void OnMessageReceived(string messagePayload, string type);
     }
 }

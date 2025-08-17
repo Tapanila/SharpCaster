@@ -41,14 +41,13 @@ namespace Sharpcaster.Channels
         /// </summary>
         /// <param name="messagePayload">message payload to process</param>
         /// <param name="type">message type</param>
-        public async override Task OnMessageReceivedAsync(string messagePayload, string type)
+        public async override void OnMessageReceived(string messagePayload, string type)
         {
             if (type == "CLOSE")
             {
                 Logger?.LogDebug("Connection closed by Chromecast, message: {messagePayload}", messagePayload);
                 await Client.DisconnectAsync().ConfigureAwait(false);
             }
-            await base.OnMessageReceivedAsync(messagePayload, type).ConfigureAwait(false);
         }
     }
 }
