@@ -274,9 +274,6 @@ public class DeviceService
                         
                         AnsiConsole.MarkupLine("[green]✅ Default Media Receiver launched successfully![/]");
                     }
-                } else
-                {
-                    var i = 0;
                 }
             }
         }

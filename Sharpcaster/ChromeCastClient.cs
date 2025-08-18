@@ -273,7 +273,7 @@ namespace Sharpcaster
                 if (_logger != null) LogReceiveLoopError(_logger, exception.Message, exception);
                 ReceiveTcs.SetResult(true);
             }
-        }, cancellationToken);
+        }, cancellationToken).ConfigureAwait(false);
 
         public async Task SendAsync(ILogger? logger, string ns, string messagePayload, string destinationId)
         {

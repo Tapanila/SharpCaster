@@ -224,6 +224,10 @@ namespace Sharpcaster.Test
             ChromecastClient client = await TestHelper.CreateConnectAndLoadAppClient(outputHelper, fixture.Receivers[0]);
             AutoResetEvent _autoResetEvent = new(false);
 
+            await client.ReceiverChannel.StopApplication();
+            await client.DisconnectAsync();
+            client = await TestHelper.CreateConnectAndLoadAppClient(outputHelper, fixture.Receivers[0]);
+
             var media = new Media
             {
                 ContentUrl = "https://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/mp4/DesigningForGoogleCast.mp4"
@@ -253,11 +257,10 @@ namespace Sharpcaster.Test
 
             runSequence += "1";
             mediaStatus = await client.MediaChannel.LoadAsync(media);
+            await Task.Delay(10, Xunit.TestContext.Current.CancellationToken);
             runSequence += "2";
 
-            //This checks that within 5000 ms we have loaded video and were able to pause it
-            await Task.Delay(3000, Xunit.TestContext.Current.CancellationToken);
-            Assert.True(_autoResetEvent.WaitOne(2000));
+            Assert.True(_autoResetEvent.WaitOne(300));
             runSequence += "3";
             Assert.Equal("R1p2P3", runSequence);
             await client.DisconnectAsync();
