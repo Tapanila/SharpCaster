@@ -11,23 +11,17 @@ namespace Sharpcaster.Models
 
         public SharpCasterTaskCompletionSource()
         {
-            _tcs = new TaskCompletionSource<string>();
+            _tcs = new TaskCompletionSource<string>(TaskCreationOptions.RunContinuationsAsynchronously);
         }
 
         public void SetResult(string parameter)
         {
-            _tcs.SetResult(parameter);
+            _tcs.TrySetResult(parameter);
         }
 
         public void SetException(Exception exception)
         {
-            _tcs.SetException(exception);
+            _tcs.TrySetException(exception);
         }
-    }
-
-    public enum TaskCompletionMethod
-    {
-        SetResult,
-        SetException
     }
 }
