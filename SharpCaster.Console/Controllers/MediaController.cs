@@ -415,6 +415,17 @@ public class MediaController
                                 statusTable.AddRow("[cyan]Progress[/]", $"[white]{progress:F1}%[/]");
                             }
                             
+                            // Display media volume and mute status
+                            if (status.Volume != null)
+                            {
+                                statusTable.AddRow("[cyan]Media Volume[/]", $"[white]{status.Volume.Level:P0}[/]");
+                                statusTable.AddRow("[cyan]Media Muted[/]", status.Volume.Muted == true ? "[red]Yes[/]" : "[green]No[/]");
+                            }
+                            else
+                            {
+                                statusTable.AddRow("[cyan]Media Volume[/]", "[dim]Not available[/]");
+                            }
+                            
                             AnsiConsole.Write(statusTable);
                         }
                         else
