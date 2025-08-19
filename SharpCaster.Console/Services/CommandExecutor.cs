@@ -505,6 +505,16 @@ public class CommandExecutor
                     var progress = (mediaStatus.CurrentTime / mediaStatus.Media.Duration.Value) * 100;
                     System.Console.WriteLine($"Progress: {progress:F1}%");
                 }
+                
+                // Display media volume and mute status
+                if (mediaStatus.Volume != null)
+                {
+                    System.Console.WriteLine($"Media Volume: {mediaStatus.Volume.Level:P0} (Muted: {mediaStatus.Volume.Muted})");
+                }
+                else
+                {
+                    System.Console.WriteLine("Media Volume: Not available");
+                }
             }
             else
             {

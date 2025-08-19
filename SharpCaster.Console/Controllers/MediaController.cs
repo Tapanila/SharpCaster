@@ -66,7 +66,11 @@ public class MediaController
                         .PromptStyle("green")
                         .ValidationErrorMessage("[red]Please enter a valid URL[/]")
                         .Validate(url => Uri.TryCreate(url, UriKind.Absolute, out _)));
-                title = "Custom Media";
+                title = AnsiConsole.Prompt(
+                    new TextPrompt<string>("[yellow]Enter media title (or press Enter for default):[/]")
+                        .PromptStyle("green")
+                        .AllowEmpty()
+                        .DefaultValue("Custom Media"));
                 break;
             default:
                 throw new InvalidOperationException("Invalid URL choice");
