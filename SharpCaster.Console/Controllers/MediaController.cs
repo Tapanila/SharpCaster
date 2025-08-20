@@ -66,7 +66,11 @@ public class MediaController
                         .PromptStyle("green")
                         .ValidationErrorMessage("[red]Please enter a valid URL[/]")
                         .Validate(url => Uri.TryCreate(url, UriKind.Absolute, out _)));
-                title = "Custom Media";
+                title = AnsiConsole.Prompt(
+                    new TextPrompt<string>("[yellow]Enter media title (or press Enter for default):[/]")
+                        .PromptStyle("green")
+                        .AllowEmpty()
+                        .DefaultValue("Custom Media"));
                 break;
             default:
                 throw new InvalidOperationException("Invalid URL choice");
@@ -409,6 +413,17 @@ public class MediaController
                             {
                                 var progress = (status.CurrentTime / status.Media.Duration.Value) * 100;
                                 statusTable.AddRow("[cyan]Progress[/]", $"[white]{progress:F1}%[/]");
+                            }
+                            
+                            // Display media volume and mute status
+                            if (status.Volume != null)
+                            {
+                                statusTable.AddRow("[cyan]Media Volume[/]", $"[white]{status.Volume.Level:P0}[/]");
+                                statusTable.AddRow("[cyan]Media Muted[/]", status.Volume.Muted == true ? "[red]Yes[/]" : "[green]No[/]");
+                            }
+                            else
+                            {
+                                statusTable.AddRow("[cyan]Media Volume[/]", "[dim]Not available[/]");
                             }
                             
                             AnsiConsole.Write(statusTable);
