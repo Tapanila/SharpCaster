@@ -4,31 +4,26 @@ using Sharpcaster.Test.helper;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Xunit;
-using Xunit.Abstractions;
 
 namespace Sharpcaster.Test
 {
-    [Collection("SingleCollection")]
-    public class LoggingTester(ITestOutputHelper outputHelper)
+    public class LoggingTester(ITestOutputHelper outputHelper, ChromecastDevicesFixture fixture)
     {
-        readonly ITestOutputHelper output = outputHelper;
-
         [Fact]
         public void TestLogging()
         {
             var TestHelper = new TestHelper();
             List<string> logLines = [];
-            _ = TestHelper.GetClientWithTestOutput(output, assertableLog: logLines);
+            _ = TestHelper.GetClientWithTestOutput(outputHelper, assertableLog: logLines);
 
             Assert.Equal("MessageTypes: [addUserResponse,getInfoResponse,LAUNCH_ERROR,RECEIVER_STATUS,QUEUE_CHANGE,QUEUE_ITEM_IDS,QUEUE_ITEMS,DEVICE_UPDATED,MULTIZONE_STATUS,ERROR,INVALID_REQUEST,LOAD_CANCELLED,LOAD_FAILED,MEDIA_STATUS,PING,CLOSE,LAUNCH_STATUS]", logLines[0]);
         }
 
-        [Theory]
-        [MemberData(nameof(ChromecastReceiversFilter.GetAny), MemberType = typeof(ChromecastReceiversFilter))]
-        public async Task TestPlayMediaWorksWithoutLogging(ChromecastReceiver receiver)
+        [Fact]
+        public async Task TestPlayMediaWorksWithoutLogging()
         {
             ChromecastClient client = new();
-            await client.ConnectChromecast(receiver);
+            await client.ConnectChromecast(fixture.Receivers[0]);
             await client.LaunchApplicationAsync("B3419EF5", false);
 
             var media = new Media

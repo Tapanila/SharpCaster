@@ -17,13 +17,16 @@ namespace Sharpcaster.Extensions
         /// <returns>T</returns>
         public static async Task<T> TimeoutAfter<T>(this Task<T> task, int delay)
         {
-            await Task.WhenAny(task, Task.Delay(delay));
+            if (task == null)
+            {
+                throw new ArgumentNullException(nameof(task), "Task cannot be null");
+            }
+            await Task.WhenAny(task, Task.Delay(delay)).ConfigureAwait(false);
             if (!task.IsCompleted)
             {
                 throw new TimeoutException();
             }
-
-            return await task;
+            return await task.ConfigureAwait(false);
         }
 
         /// <summary>
@@ -34,13 +37,16 @@ namespace Sharpcaster.Extensions
         /// <returns>T</returns>
         public static async Task TimeoutAfter(this Task task, int delay)
         {
-            await Task.WhenAny(task, Task.Delay(delay));
+            if (task == null)
+            {
+                throw new ArgumentNullException(nameof(task), "Task cannot be null");
+            }
+            await Task.WhenAny(task, Task.Delay(delay)).ConfigureAwait(false);
             if (!task.IsCompleted)
             {
                 throw new TimeoutException();
             }
-
-            await task;
+            await task.ConfigureAwait(false);
         }
     }
 }

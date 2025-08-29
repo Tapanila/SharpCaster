@@ -9,47 +9,30 @@ namespace Sharpcaster.Converters
     {
         public override PlayerStateType Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
-            string enumString = reader.GetString();
-            switch (enumString)
+            string? enumString = reader.GetString();
+            return enumString switch
             {
-                case "BUFFERING":
-                    return PlayerStateType.Buffering;
-                case "IDLE":
-                    return PlayerStateType.Idle;
-                case "PAUSED":
-                    return PlayerStateType.Paused;
-                case "PLAYING":
-                    return PlayerStateType.Playing;
-                case "LOADING":
-                    return PlayerStateType.Loading;
-
-                default:
-                    throw new JsonException($"Invalid value '{enumString}' for {nameof(PlayerStateType)}");
-            }
+                "BUFFERING" => PlayerStateType.Buffering,
+                "IDLE" => PlayerStateType.Idle,
+                "PAUSED" => PlayerStateType.Paused,
+                "PLAYING" => PlayerStateType.Playing,
+                "LOADING" => PlayerStateType.Loading,
+                _ => throw new JsonException($"Invalid value '{enumString}' for {nameof(PlayerStateType)}"),
+            };
         }
 
         public override void Write(Utf8JsonWriter writer, PlayerStateType value, JsonSerializerOptions options)
         {
-            switch (value)
+            string stringValue = value switch
             {
-                case PlayerStateType.Buffering:
-                    writer.WriteStringValue("BUFFERING");
-                    break;
-                case PlayerStateType.Idle:
-                    writer.WriteStringValue("IDLE");
-                    break;
-                case PlayerStateType.Paused:
-                    writer.WriteStringValue("PAUSED");
-                    break;
-                case PlayerStateType.Playing:
-                    writer.WriteStringValue("PLAYING");
-                    break;
-                case PlayerStateType.Loading:
-                    writer.WriteStringValue("LOADING");
-                    break;
-                default:
-                    throw new JsonException($"Unsupported {nameof(PlayerStateType)} value: {value}");
-            }
+                PlayerStateType.Buffering => "BUFFERING",
+                PlayerStateType.Idle => "IDLE",
+                PlayerStateType.Paused => "PAUSED",
+                PlayerStateType.Playing => "PLAYING",
+                PlayerStateType.Loading => "LOADING",
+                _ => throw new JsonException($"Unsupported {nameof(PlayerStateType)} value: {value}"),
+            };
+            writer?.WriteStringValue(stringValue);
         }
     }
 }

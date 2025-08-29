@@ -32,6 +32,7 @@ jobs:
     - name: Build
       run: dotnet build --no-restore --configuration Release /p:Version=${{ env.VERSION }} Sharpcaster/Sharpcaster.csproj
     - name: Package
+      if: github.event_name == 'release' && github.event.action == 'published'
       run: dotnet pack --configuration Release /p:Version=${{ env.VERSION }} /p:packageVersion=${{ env.VERSION }} Sharpcaster/Sharpcaster.csproj
     - name: Push
       if: github.event_name == 'release' && github.event.action == 'published'

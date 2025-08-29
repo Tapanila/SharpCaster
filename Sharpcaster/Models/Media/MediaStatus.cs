@@ -7,6 +7,7 @@ namespace Sharpcaster.Models.Media
     /// <summary>
     /// Media status
     /// </summary>
+    /// <see href="https://developers.google.com/cast/docs/reference/web_sender/chrome.cast.media#.MediaStatus">Google Cast MediaStatus Documentation</see>
     public class MediaStatus
     {
         /// <summary>
@@ -19,7 +20,7 @@ namespace Sharpcaster.Models.Media
         /// Gets or sets the playback rate
         /// </summary>
         [JsonPropertyName("playbackRate")]
-        public int PlaybackRate { get; set; }
+        public double PlaybackRate { get; set; }
 
         /// <summary>
         /// Gets or sets the player state
@@ -38,7 +39,8 @@ namespace Sharpcaster.Models.Media
         /// Gets or sets the supported media commands
         /// </summary>
         [JsonPropertyName("supportedMediaCommands")]
-        public int SupportedMediaCommands { get; set; }
+        [JsonConverter(typeof(MediaCommandEnumConverter))]
+        public MediaCommand SupportedMediaCommands { get; set; }
 
         /// <summary>
         /// Gets or sets the volume
@@ -79,6 +81,7 @@ namespace Sharpcaster.Models.Media
 
         /// <summary>
         /// Gets or sets the queue data
+        /// Only contains two queue items: the current item and the next item
         /// </summary>
         [JsonPropertyName("queueData")]
         public QueueData QueueData { get; set; }
@@ -88,5 +91,54 @@ namespace Sharpcaster.Models.Media
         /// </summary>
         [JsonPropertyName("items")]
         public QueueItem[] Items { get; set; }
+
+        /// <summary>
+        /// Gets or sets the active track IDs
+        /// </summary>
+        [JsonPropertyName("activeTrackIds")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public int[]? ActiveTrackIds { get; set; }
+
+        /// <summary>
+        /// Gets or sets the loading item ID
+        /// </summary>
+        [JsonPropertyName("loadingItemId")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public int? LoadingItemId { get; set; }
+
+        /// <summary>
+        /// Gets or sets the preloaded item ID
+        /// </summary>
+        [JsonPropertyName("preloadedItemId")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public int? PreloadedItemId { get; set; }
+
+        /// <summary>
+        /// Gets or sets the live seekable range
+        /// </summary>
+        [JsonPropertyName("liveSeekableRange")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public LiveSeekableRange? LiveSeekableRange { get; set; }
+
+        /// <summary>
+        /// Gets or sets the video information
+        /// </summary>
+        [JsonPropertyName("videoInfo")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public VideoInformation? VideoInfo { get; set; }
+
+        /// <summary>
+        /// Gets or sets the break status
+        /// </summary>
+        [JsonPropertyName("breakStatus")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public BreakStatus? BreakStatus { get; set; }
+
+        /// <summary>
+        /// Gets or sets custom data
+        /// </summary>
+        [JsonPropertyName("customData")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public object? CustomData { get; set; }
     }
 }

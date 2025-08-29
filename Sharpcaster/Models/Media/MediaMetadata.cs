@@ -5,6 +5,7 @@ namespace Sharpcaster.Models.Media
     /// <summary>
     /// Media metadata
     /// </summary>
+    /// <see href="https://developers.google.com/cast/docs/reference/web_sender/chrome.cast.media#.MediaMetadata">Google Cast MediaMetadata Documentation</see>
     [JsonDerivedType(typeof(MovieMetadata))]
     [JsonDerivedType(typeof(TVShowMetadata))]
     [JsonDerivedType(typeof(MusicTrackMetadata))]
@@ -22,18 +23,21 @@ namespace Sharpcaster.Models.Media
         /// Gets or sets the title
         /// </summary>
         [JsonPropertyName("title")]
-        public string Title { get; set; }
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public string? Title { get; set; }
 
         /// <summary>
         /// Gets or sets the subtitle
         /// </summary>
         [JsonPropertyName("subtitle")]
-        public string SubTitle { get; set; }
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public string? SubTitle { get; set; }
 
         /// <summary>
         /// Gets or sets the images
         /// </summary>
         [JsonPropertyName("images")]
-        public Image[] Images { get; set; }
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public Image[]? Images { get; set; }
     }
 }

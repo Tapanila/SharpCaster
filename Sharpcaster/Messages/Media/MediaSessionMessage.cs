@@ -11,6 +11,7 @@ namespace Sharpcaster.Messages.Media
         /// Gets or sets the media session identifier
         /// </summary>
         [JsonPropertyName("mediaSessionId")]
-        public long MediaSessionId { get; set; }
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public long? MediaSessionId { get; set; }
     }
 }

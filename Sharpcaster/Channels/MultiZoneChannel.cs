@@ -12,41 +12,44 @@ namespace Sharpcaster.Channels
         /// <summary>
         /// Raised when the status has changed
         /// </summary>
-        public event EventHandler<MultiZoneStatus> StatusChanged;
+        public event EventHandler<MultiZoneStatus>? StatusChanged;
 
         /// <summary>
         /// Raised when device has been updated
         /// </summary>
-        public event EventHandler<Device> DeviceUpdated;
+        public event EventHandler<Device>? DeviceUpdated;
 
-        public MultiZoneStatus Status { get; set; }
+        public MultiZoneStatus? Status { get; set; }
 
-        public MultiZoneChannel(ILogger<MultiZoneChannel> logger = null) : base("multizone", logger)
+        public MultiZoneChannel(ILogger? logger = null) : base("multizone", logger)
         {
         }
 
         /// <summary>
         /// Called when a message for this channel is received
         /// </summary>
-        /// <param name="message">message to process</param>
-        public override Task OnMessageReceivedAsync(string messagePayload, string type)
+        /// <param name="messagePayload">message payload to process</param>
+        /// <param name="type">message type</param>
+        public override void OnMessageReceived(string messagePayload, string type)
         {
             switch (type)
             {
                 case "MULTIZONE_STATUS":
                     var multizoneStatusMessage = JsonSerializer.Deserialize(messagePayload, SharpcasteSerializationContext.Default.MultizoneStatusMessage);
-                    Status = multizoneStatusMessage.Status;
-                    StatusChanged?.Invoke(this, multizoneStatusMessage.Status);
+                    if (multizoneStatusMessage?.Status != null)
+                    {
+                        Status = multizoneStatusMessage.Status;
+                        SafeInvokeEvent(StatusChanged, this, multizoneStatusMessage.Status);
+                    }
                     break;
                 case "DEVICE_UPDATED":
                     var deviceUpdatedMessage = JsonSerializer.Deserialize(messagePayload, SharpcasteSerializationContext.Default.DeviceUpdatedMessage);
-                    DeviceUpdated?.Invoke(this, deviceUpdatedMessage.Device);
-                    break;
-                default:
+                    if (deviceUpdatedMessage?.Device != null)
+                    {
+                        SafeInvokeEvent(DeviceUpdated, this, deviceUpdatedMessage.Device);
+                    }
                     break;
             }
-
-            return base.OnMessageReceivedAsync(messagePayload, type);
         }
 
         /// <summary>

@@ -8,85 +8,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Xunit.Abstractions;
+using Xunit;
 
 namespace Sharpcaster.Test.helper
 {
-    public class ChromecastReceiversFilter
-    {
-        public static IEnumerable<object[]> GetAll()
-        {
-            if (ChromecastDevicesFixture.Receivers.Count > 0)
-            {
-                foreach (var cc in ChromecastDevicesFixture.Receivers)
-                {
-                    yield return new object[] { cc };
-                }
-            }
-            else
-            {
-                throw new Exception("This Test needs a Chromecast Receiver to be available on local network!");
-            }
-        }
-
-        public static IEnumerable<object[]> GetAny()
-        {
-            var rec = ChromecastDevicesFixture.Receivers.FirstOrDefault();
-            if (rec != null)
-            {
-                yield return new object[] { rec };
-            }
-            else
-            {
-                throw new Exception("This Test needs a Chromecast Receiver to be available on local network!");
-            }
-        }
-
-        public static IEnumerable<object[]> GetJblSpeaker()
-        {
-            var rec = ChromecastDevicesFixture.Receivers.Where(r => r.Model.StartsWith("JBL")).FirstOrDefault();
-            if (rec != null)
-            {
-                yield return new object[] { rec };
-            }
-            else
-            {
-                yield break;
-            }
-        }
-
-        public static IEnumerable<object[]> GetDefaultDevice()
-        {
-            var rec = ChromecastDevicesFixture.Receivers.Where(r => !r.Model.StartsWith("JBL")).FirstOrDefault();
-            if (rec != null)
-            {
-                yield return new object[] { rec };
-            }
-            else
-            {
-                yield break;
-            }
-        }
-
-        public static IEnumerable<object[]> GetChromecastUltra()
-        {
-            var rec = ChromecastDevicesFixture.Receivers.Where(r => r.Model.StartsWith("Chromecast Ultra")).FirstOrDefault();
-            if (rec != null)
-            {
-                yield return new object[] { rec };
-            }
-            else
-            {
-                yield break;
-            }
-        }
-        public static IEnumerable<object[]> GetGoogleCastGroup()
-        {
-            var rec = ChromecastDevicesFixture.Receivers.Where(r => r.Model.StartsWith("Google Cast Group")).First();
-            yield return new object[] { rec };
-        }
-    }
-
     public class TestContext
     {
         public List<string> AssertableTestLog = null;
@@ -99,11 +24,11 @@ namespace Sharpcaster.Test.helper
         public List<string> AssertableTestLog = null;
         private ITestOutputHelper TestOutput = null;
 
-        public ChromecastReceiver FindChromecast(string receiverName = null)
+        public ChromecastReceiver FindChromecast(ChromecastDevicesFixture fixture, string receiverName = null)
         {
             ChromecastReceiver receiver = null;
 
-            var chromecasts = ChromecastDevicesFixture.Receivers;
+            var chromecasts = fixture.Receivers;
             if (receiverName == null || receiverName == "*")
             {
                 receiver = chromecasts.First();
@@ -124,10 +49,10 @@ namespace Sharpcaster.Test.helper
             return receiver;
         }
 
-        public async Task<ChromecastClient> CreateAndConnectClient(ITestOutputHelper output, string receiverName = null)
+        public async Task<ChromecastClient> CreateAndConnectClient(ITestOutputHelper output, ChromecastDevicesFixture fixture, string receiverName = null)
         {
             TestOutput = output;
-            var chromecast = FindChromecast(receiverName);
+            var chromecast = FindChromecast(fixture, receiverName);
             ChromecastClient cc = GetClientWithTestOutput(output);
             await cc.ConnectChromecast(chromecast);
             return cc;
@@ -142,10 +67,10 @@ namespace Sharpcaster.Test.helper
             return cc;
         }
 
-        public async Task<ChromecastClient> CreateConnectAndLoadAppClient(ITestOutputHelper output, string appId = "B3419EF5")
+        public async Task<ChromecastClient> CreateConnectAndLoadAppClient(ITestOutputHelper output, ChromecastDevicesFixture fixture, string appId = "B3419EF5")
         {
             TestOutput = output;
-            ChromecastClient cc = await CreateAndConnectClient(output);
+            ChromecastClient cc = await CreateAndConnectClient(output, fixture);
             await cc.LaunchApplicationAsync(appId, false);
             return cc;
         }
@@ -158,10 +83,10 @@ namespace Sharpcaster.Test.helper
             return cc;
         }
 
-        public async Task<ChromecastClient> CreateConnectAndLoadAppClient(string appId = "B3419EF5")
+        public async Task<ChromecastClient> CreateConnectAndLoadAppClient(ChromecastDevicesFixture fixture, string appId = "B3419EF5")
         {
             TestOutput = null;
-            var chromecast = FindChromecast();
+            var chromecast = FindChromecast(fixture);
             ChromecastClient cc = new();
             await cc.ConnectChromecast(chromecast);
             await cc.LaunchApplicationAsync(appId, false);
@@ -173,12 +98,13 @@ namespace Sharpcaster.Test.helper
             TestOutput = output;
             ILoggerFactory lFactory = CreateMockedLoggerFactory(assertableLog);
 
-            return new ChromecastClient(loggerFactory: lFactory);
+            return new ChromecastClient(logger: lFactory.CreateLogger<ChromecastClient>());
         }
 
         private Mock<ILogger<T>> CreateILoggerMock<T>()
         {
             Mock<ILogger<T>> retVal = new();
+            retVal.Setup(x => x.IsEnabled(It.IsAny<LogLevel>())).Returns(true);
             retVal.Setup(x => x.Log(
                 It.IsAny<LogLevel>(),
                 It.IsAny<EventId>(),
@@ -214,6 +140,7 @@ namespace Sharpcaster.Test.helper
             AssertableTestLog = assertableLog;
 
             var loggerGeneric = new Mock<ILogger>();
+            loggerGeneric.Setup(x => x.IsEnabled(It.IsAny<LogLevel>())).Returns(true);
             loggerGeneric.Setup(x => x.Log(
                 It.IsAny<LogLevel>(),
                 It.IsAny<EventId>(),

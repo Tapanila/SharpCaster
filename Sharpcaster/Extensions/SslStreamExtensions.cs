@@ -14,12 +14,12 @@ namespace Sharpcaster.Extensions
 
             #if NETSTANDARD2_0
             int bytesRead, totalBytesRead = 0;
+            if (stream == null)
+            {
+                throw new ArgumentNullException(nameof(stream));
+            }
             while (totalBytesRead < bufferLength)
             {
-                if (stream == null)
-                {
-                    throw new ObjectDisposedException(nameof(stream));
-                }
                 bytesRead = await stream.ReadAsync(buffer, totalBytesRead, bufferLength - totalBytesRead, cancellationToken);
                 if (bytesRead == 0)
                 {
@@ -28,8 +28,8 @@ namespace Sharpcaster.Extensions
                 totalBytesRead += bytesRead;
             }
             #else
-            ObjectDisposedException.ThrowIf(stream == null, stream);
-            await stream.ReadExactlyAsync(buffer.AsMemory(0, bufferLength), cancellationToken);
+            ArgumentNullException.ThrowIfNull(stream);
+            await stream.ReadExactlyAsync(buffer.AsMemory(0, bufferLength), cancellationToken).ConfigureAwait(false);
             #endif
             return buffer;
         }

@@ -1,32 +1,21 @@
 ﻿using Sharpcaster.Models;
 using Sharpcaster.Test.helper;
 using System.Threading.Tasks;
-using Xunit.Abstractions;
 using Xunit;
 using Sharpcaster.Models.Media;
 using System.Threading;
 
 namespace Sharpcaster.Test
 {
-    [Collection("SingleCollection")]
-    public class MultipleClientTester : IClassFixture<ChromecastDevicesFixture>
+    public class MultipleClientTester(ITestOutputHelper outputHelper, ChromecastDevicesFixture fixture)
     {
-        private ITestOutputHelper output;
-
-        public MultipleClientTester(ITestOutputHelper outputHelper, ChromecastDevicesFixture fixture)
-        {
-            output = outputHelper;
-            output.WriteLine("Fixture has found " + ChromecastDevicesFixture.Receivers?.Count + " receivers with " + fixture.GetSearchesCnt() + " searche(s).");
-        }
-
-        [Theory]
-        [MemberData(nameof(ChromecastReceiversFilter.GetAny), MemberType = typeof(ChromecastReceiversFilter))]
-        public async Task TestTwoClients(ChromecastReceiver receiver)
+        [Fact]
+        public async Task TestTwoClients()
         {
             var TestHelper = new TestHelper();
             AutoResetEvent _autoResetEvent = new(false);
-            var client1 = await TestHelper.CreateConnectAndLoadAppClient(output, receiver);
-            var client2 = await TestHelper.CreateAndConnectClient(output, receiver);
+            var client1 = await TestHelper.CreateConnectAndLoadAppClient(outputHelper, fixture);
+            var client2 = await TestHelper.CreateAndConnectClient(outputHelper, fixture);
             await client2.LaunchApplicationAsync("B3419EF5", true);
 
             client2.MediaChannel.StatusChanged += (sender, e) =>
@@ -45,16 +34,15 @@ namespace Sharpcaster.Test
             Assert.True(_autoResetEvent.WaitOne(3000));
         }
 
-        [Theory]
-        [MemberData(nameof(ChromecastReceiversFilter.GetAny), MemberType = typeof(ChromecastReceiversFilter))]
-        public async Task TestThreeClients(ChromecastReceiver receiver)
+        [Fact]
+        public async Task TestThreeClients()
         {
             var TestHelper = new TestHelper();
             AutoResetEvent _autoResetEvent2 = new(false);
             AutoResetEvent _autoResetEvent3 = new(false);
-            var client1 = await TestHelper.CreateConnectAndLoadAppClient(output, receiver);
-            var client2 = await TestHelper.CreateAndConnectClient(output, receiver);
-            var client3 = await TestHelper.CreateAndConnectClient(output, receiver);
+            var client1 = await TestHelper.CreateConnectAndLoadAppClient(outputHelper, fixture);
+            var client2 = await TestHelper.CreateAndConnectClient(outputHelper, fixture);
+            var client3 = await TestHelper.CreateAndConnectClient(outputHelper, fixture);
             await client2.LaunchApplicationAsync("B3419EF5", true);
             await client3.LaunchApplicationAsync("B3419EF5", true);
 
@@ -80,14 +68,13 @@ namespace Sharpcaster.Test
             Assert.True(_autoResetEvent3.WaitOne(100));
         }
 
-        [Theory]
-        [MemberData(nameof(ChromecastReceiversFilter.GetAny), MemberType = typeof(ChromecastReceiversFilter))]
-        public async Task TestCommandsFromMultipleDifferentClients(ChromecastReceiver receiver)
+        [Fact]
+        public async Task TestCommandsFromMultipleDifferentClients()
         {
             var TestHelper = new TestHelper();
-            var client1 = await TestHelper.CreateConnectAndLoadAppClient(output, receiver);
-            var client2 = await TestHelper.CreateAndConnectClient(output, receiver);
-            var client3 = await TestHelper.CreateAndConnectClient(output, receiver);
+            var client1 = await TestHelper.CreateConnectAndLoadAppClient(outputHelper, fixture);
+            var client2 = await TestHelper.CreateAndConnectClient(outputHelper, fixture);
+            var client3 = await TestHelper.CreateAndConnectClient(outputHelper, fixture);
             await client2.LaunchApplicationAsync("B3419EF5", true);
             await client3.LaunchApplicationAsync("B3419EF5", true);
 

@@ -19,7 +19,7 @@ namespace Sharpcaster.Models.Queue
         /// Gets or sets a value indicating whether autoplay is enabled or not
         /// </summary>
         [JsonPropertyName("autoPlay")]
-        public bool? IsAutoPlay { get; set; }
+        public bool IsAutoPlay { get; set; } = true;
 
         [JsonPropertyName("orderId")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]

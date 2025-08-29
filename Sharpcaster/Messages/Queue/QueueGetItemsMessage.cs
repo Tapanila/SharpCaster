@@ -6,6 +6,6 @@ namespace Sharpcaster.Messages.Queue
     public class QueueGetItemsMessage : MediaSessionMessage
     {
         [JsonPropertyName("itemIds")]
-        public int[] Ids { get; set; }
+        public int[]? Ids { get; set; }
     }
 }

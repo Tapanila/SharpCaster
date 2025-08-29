@@ -8,6 +8,7 @@ namespace Sharpcaster.Messages
     public class MessageWithSession : MessageWithId
     {
         [JsonPropertyName("sessionId")]
-        public string SessionId { get; set; }
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public string? SessionId { get; set; }
     }
 }

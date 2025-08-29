@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Text.Json.Serialization;
 
 namespace Sharpcaster.Models.ChromecastStatus
@@ -12,7 +13,7 @@ namespace Sharpcaster.Models.ChromecastStatus
         public string DisplayName { get; set; }
 
         [JsonPropertyName("namespaces")]
-        public List<Namespace> Namespaces { get; set; }
+        public Collection<Namespace> Namespaces { get; set; }
 
         [JsonPropertyName("sessionId")]
         public string SessionId { get; set; }

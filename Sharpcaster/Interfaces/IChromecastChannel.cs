@@ -11,19 +11,20 @@ namespace Sharpcaster.Interfaces
         /// <summary>
         /// Gets or sets the sender
         /// </summary>
-        IChromecastClient Client { get; set; }
+        ChromecastClient Client { get; set; }
 
         /// <summary>
         /// Gets the full namespace
         /// </summary>
         string Namespace { get; }
 
-        ILogger Logger { get; }
+        ILogger? Logger { get; }
 
         /// <summary>
         /// Called when a message for this channel is received
         /// </summary>
-        /// <param name="messagePayload">message to process</param>
-        Task OnMessageReceivedAsync(string messagePayload, string type);
+        /// <param name="messagePayload">message payload to process</param>
+        /// <param name="type">message type</param>
+        void OnMessageReceived(string messagePayload, string type);
     }
 }

@@ -24,7 +24,7 @@
 
 ```csharp
 // Discover and connect
-var locator = new MdnsChromecastLocator();
+var locator = new ChromecastLocator();
 var devices = await locator.FindReceiversAsync();
 var client = new ChromecastClient();
 await client.ConnectChromecast(devices.First());
