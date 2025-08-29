@@ -12,6 +12,6 @@ public class ApplicationState
     public bool IsConnected { get; set; }
     public DateTime LastConnectionCheck { get; set; }
     public ILogger? Logger { get; set; }
-    public MdnsChromecastLocator? Locator { get; set; }
+    public ChromecastLocator? Locator { get; set; }
     
 }

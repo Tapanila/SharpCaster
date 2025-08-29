@@ -8,12 +8,12 @@ using System.Linq;
 
 namespace Sharpcaster.Test
 {
-    public class MdnsChromecastLocatorTester()
+    public class ChromecastLocatorTester()
     {
         [Fact]
         public async Task SearchChromecasts()
         {
-            var locator = new MdnsChromecastLocator();
+            var locator = new ChromecastLocator();
             var chromecasts = await locator.FindReceiversAsync();
             Assert.NotEmpty(chromecasts);
         }
@@ -22,7 +22,7 @@ namespace Sharpcaster.Test
         public async Task SearchChromecastsTrickerEvent()
         {
             int counter = 0;
-            var locator = new MdnsChromecastLocator();
+            var locator = new ChromecastLocator();
             locator.ChromecastReceiverFound += (object sender, ChromecastReceiverEventArgs e) =>
             {
                 counter++;
@@ -46,7 +46,7 @@ namespace Sharpcaster.Test
         [Fact]
         public async Task SearchChromecastsWithTooShortTimeout()
         {
-            var locator = new MdnsChromecastLocator();
+            var locator = new ChromecastLocator();
             var chromecasts = await locator.FindReceiversAsync(TimeSpan.FromMicroseconds(1), TimeSpan.FromMicroseconds(1), TimeSpan.FromMicroseconds(1));
             Assert.Empty(chromecasts);
         }
@@ -54,7 +54,7 @@ namespace Sharpcaster.Test
         [Fact]
         public async Task SearchChromecastsWithTimeout()
         {
-            var locator = new MdnsChromecastLocator();
+            var locator = new ChromecastLocator();
             var chromecasts = await locator.FindReceiversAsync(TimeSpan.FromSeconds(5));
             Assert.NotEmpty(chromecasts);
         }
@@ -62,7 +62,7 @@ namespace Sharpcaster.Test
         [Fact]
         public async Task TestNewProgressiveDiscovery()
         {
-            var locator = new MdnsChromecastLocator();
+            var locator = new ChromecastLocator();
             var chromecasts = await locator.FindReceiversAsync();
             Assert.True(chromecasts.Count() >= 3);
         }

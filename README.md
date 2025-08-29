@@ -54,7 +54,7 @@ using Sharpcaster.Models;
 using Sharpcaster.Models.Media;
 
 // Discover Chromecast devices
-var locator = new MdnsChromecastLocator();
+var locator = new ChromecastLocator();
 var cancellationToken = new CancellationTokenSource(TimeSpan.FromSeconds(5)).Token;
 var chromecasts = await locator.FindReceiversAsync(cancellationToken);
 
@@ -107,7 +107,7 @@ public class ChromecastMediaPlayer
     {
         try
         {
-            var locator = new MdnsChromecastLocator();
+            var locator = new ChromecastLocator();
             var devices = await locator.FindReceiversAsync(CancellationToken.None);
             
             _device = deviceName != null 

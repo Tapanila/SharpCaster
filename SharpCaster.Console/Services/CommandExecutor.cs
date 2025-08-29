@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using Sharpcaster;
 using Sharpcaster.Extensions;
 using Sharpcaster.Messages.Web;
 using Sharpcaster.Models.Media;
@@ -6,7 +7,6 @@ using SharpCaster.Console.Models;
 using SharpCaster.Console.UI;
 using Spectre.Console;
 using System.Text.Json;
-using static Google.Protobuf.Compiler.CodeGeneratorResponse.Types;
 
 namespace SharpCaster.Console.Services;
 
@@ -18,7 +18,7 @@ public class CommandExecutor
     private readonly ILogger<Sharpcaster.ChromecastClient> _chromecastLogger;
     private readonly UIHelper _ui;
 
-    public CommandExecutor(ApplicationState state, DeviceService deviceService, MemoryLogService memoryLogService, ILogger<Sharpcaster.ChromecastClient> chromecastLogger, UIHelper ui, Sharpcaster.MdnsChromecastLocator locator)
+    public CommandExecutor(ApplicationState state, DeviceService deviceService, MemoryLogService memoryLogService, ILogger<Sharpcaster.ChromecastClient> chromecastLogger, UIHelper ui, ChromecastLocator locator)
     {
         _state = state;
         _deviceService = deviceService;

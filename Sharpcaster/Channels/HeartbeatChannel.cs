@@ -1,11 +1,8 @@
 ﻿using Microsoft.Extensions.Logging;
 using Sharpcaster.Extensions;
-using Sharpcaster.Interfaces;
 using Sharpcaster.Messages.Heartbeat;
 using System;
-using System.Reactive.Disposables;
 using System.Text.Json;
-using System.Threading.Tasks;
 using System.Timers;
 
 namespace Sharpcaster.Channels
@@ -18,6 +15,7 @@ namespace Sharpcaster.Channels
         //private ILogger _logger = null;
         private readonly Timer _timer;
         private bool disposedValue;
+        private bool _triedToPing;
 
         private static readonly Action<ILogger, Exception?> LogPongSent =
             LoggerMessage.Define(LogLevel.Debug, new EventId(1001, nameof(OnMessageReceived)), "Pong sent - Heartbeat Timer restarted.");
@@ -31,13 +29,23 @@ namespace Sharpcaster.Channels
         private static readonly Action<ILogger, Exception?> LogHeartbeatTimeout =
             LoggerMessage.Define(LogLevel.Information, new EventId(1004, nameof(TimerElapsed)), "Heartbeat timeout");
 
+        private static readonly Action<ILogger, Exception?> LogHeartbeatTimerRestarted =
+            LoggerMessage.Define(LogLevel.Trace, new EventId(1005, nameof(StartTimeoutTimer)), "Restarted heartbeat timeout timer");
+
+        private static readonly Action<ILogger, Exception?> LogPongReceived =
+            LoggerMessage.Define(LogLevel.Debug, new EventId(1006, nameof(OnMessageReceived)), "Pong received - Heartbeat Timer restarted.");
+
+        private static readonly Action<ILogger, Exception?> LogPingSent =
+            LoggerMessage.Define(LogLevel.Debug, new EventId(1008, nameof(OnMessageReceived)), "Ping sent - Heartbeat Timer restarted.");
+
         /// <summary>
         /// Initializes a new instance of HeartbeatChannel class
         /// </summary>
         public HeartbeatChannel(ILogger? logger = null) : base("tp.heartbeat", logger)
         {
             _timer = new Timer(10000); // timeout is 10 seconds.
-                                       // Because Chromecast only waits for 8 seconds for response
+                                       // Normally Chromecast application only waits for 8 seconds before it tries to ping us.
+                                       // So we give it a bit more time.
             _timer.Elapsed += TimerElapsed;
             _timer.AutoReset = false;
         }
@@ -52,6 +60,14 @@ namespace Sharpcaster.Channels
         /// <param name="type">message type</param>
         public override async void OnMessageReceived(string messagePayload, string type)
         {
+            if (type == "PONG")
+            {
+                _triedToPing = false;
+                _timer.Stop();
+                _timer.Start();
+                if (Logger != null) LogPongReceived(Logger, null);
+                return;
+            }
             _timer.Stop();
             var pongMessage = new PongMessage();
             await SendAsync(JsonSerializer.Serialize(pongMessage, SharpcasteSerializationContext.Default.PongMessage)).ConfigureAwait(false);
@@ -73,15 +89,24 @@ namespace Sharpcaster.Channels
 
         public void RestartTimeoutTimer()
         {
+            _triedToPing = false;
             _timer.Stop();
             _timer.Start();
-            if (Logger != null) LogHeartbeatTimerStarted(Logger, null);
+            if (Logger != null) LogHeartbeatTimerRestarted(Logger, null);
         }
 
-        private void TimerElapsed(object sender, ElapsedEventArgs e)
+        private async void TimerElapsed(object sender, ElapsedEventArgs e)
         {
-            if (Logger != null) LogHeartbeatTimeout(Logger, null);
-            SafeInvokeEvent(StatusChanged, this, e);
+            if (_triedToPing)
+            {
+                if (Logger != null) LogHeartbeatTimeout(Logger, null);
+                SafeInvokeEvent(StatusChanged, this, e);
+                return;
+            }
+            var pingMessage = new PingMessage();
+            await SendAsync(JsonSerializer.Serialize(pingMessage, SharpcasteSerializationContext.Default.PingMessage)).ConfigureAwait(false);
+            _triedToPing = true;
+            if (Logger != null) LogPingSent(Logger, null);
         }
 
         protected virtual void Dispose(bool disposing)
@@ -92,7 +117,6 @@ namespace Sharpcaster.Channels
                 {
                     _timer?.Dispose();
                 }
-
                 disposedValue = true;
             }
         }

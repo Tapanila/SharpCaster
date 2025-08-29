@@ -45,7 +45,7 @@ namespace Sharpcaster.Channels
         {
             if (type == "CLOSE")
             {
-                Logger?.LogDebug("Connection closed by Chromecast, message: {messagePayload}", messagePayload);
+                Logger?.LogDebug("Connection closed by Chromecast, message: {MessagePayload}", messagePayload);
                 await Client.DisconnectAsync().ConfigureAwait(false);
             }
         }

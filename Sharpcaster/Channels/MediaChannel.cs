@@ -69,6 +69,10 @@ namespace Sharpcaster.Channels
             var chromecastStatus = Client.ChromecastStatus;
             message.MediaSessionId = MediaStatus?.MediaSessionId ?? throw new InvalidOperationException("MediaSessionID is not available");
             var messagePayload = JsonSerializer.Serialize(message, serializationContext);
+            if (chromecastStatus.Applications == null || chromecastStatus.Applications.Count == 0)
+            {
+                throw new InvalidOperationException("No running applications found");
+            }
             return await SendAsync(message.RequestId, messagePayload, chromecastStatus.Applications[0], DoNotReturnOnLoading).ConfigureAwait(false);
         }
 
@@ -82,10 +86,14 @@ namespace Sharpcaster.Channels
         public async Task<MediaStatus?> LoadAsync(Media media, bool autoPlay = true, int[]? activeTrackIds = null)
         {
             var status = Client.ChromecastStatus;
-            var loadMessage = new LoadMessage() 
+            if (status.Applications == null || status.Applications.Count == 0 || status.Application == null)
+            {
+                throw new InvalidOperationException("No running applications found");
+            }
+            var loadMessage = new LoadMessage()
             { 
-                SessionId = status.Application.SessionId, 
-                Media = media, 
+                SessionId = status.Application.SessionId,
+                Media = media,
                 AutoPlay = autoPlay,
                 ActiveTrackIds = activeTrackIds
             };
@@ -184,10 +192,14 @@ namespace Sharpcaster.Channels
         public async Task<MediaStatus?> QueueLoadAsync(QueueItem[] items, RepeatModeType repeatMode = RepeatModeType.OFF, int startIndex = 0)
         {
             var chromecastStatus = Client.ChromecastStatus;
+            if (chromecastStatus.Application == null)
+            {
+                throw new InvalidOperationException("No running applications found");
+            }
             var queueLoadMessage = new QueueLoadMessage() { SessionId = chromecastStatus.Application.SessionId, Items = items, RepeatMode = repeatMode, StartIndex = startIndex };
             var response = await SendAsync(queueLoadMessage.RequestId, JsonSerializer.Serialize(queueLoadMessage, SharpcasteSerializationContext.Default.QueueLoadMessage), chromecastStatus.Application.TransportId).ConfigureAwait(false);
             var mediaStatusMessage = JsonSerializer.Deserialize(response, SharpcasteSerializationContext.Default.MediaStatusMessage);
-            if (mediaStatusMessage != null && mediaStatusMessage.Status != null)
+            if (mediaStatusMessage?.Status != null)
             {
                 return mediaStatusMessage.Status.FirstOrDefault();
             }
@@ -236,6 +248,10 @@ namespace Sharpcaster.Channels
         {
             var chromecastStatus = Client.ChromecastStatus;
             var queueGetItemsMessage = new QueueGetItemsMessage() { MediaSessionId = MediaStatus?.MediaSessionId ?? throw new InvalidOperationException("MediaSessionID is not available"), Ids = ids };
+            if (chromecastStatus.Application == null)
+            {
+                throw new InvalidOperationException("No running applications found");
+            }
             var response = await SendAsync(queueGetItemsMessage.RequestId, JsonSerializer.Serialize(queueGetItemsMessage, SharpcasteSerializationContext.Default.QueueGetItemsMessage), chromecastStatus.Application.TransportId).ConfigureAwait(false);
             var queueItemsResponse = JsonSerializer.Deserialize(response, SharpcasteSerializationContext.Default.QueueItemsMessage);
             return queueItemsResponse?.Items;
@@ -245,6 +261,10 @@ namespace Sharpcaster.Channels
         {
             var chromecastStatus = Client.ChromecastStatus;
             var queueGetItemIdsMessage = new QueueGetItemIdsMessage() { MediaSessionId = MediaStatus?.MediaSessionId ?? throw new InvalidOperationException("MediaSessionID is not available") };
+            if (chromecastStatus.Application == null)
+            {
+                throw new InvalidOperationException("No running applications found");
+            }
             var response = await SendAsync(queueGetItemIdsMessage.RequestId, JsonSerializer.Serialize(queueGetItemIdsMessage, SharpcasteSerializationContext.Default.QueueGetItemIdsMessage), chromecastStatus.Application.TransportId).ConfigureAwait(false);
             var queueItemIdsResponse = JsonSerializer.Deserialize(response, SharpcasteSerializationContext.Default.QueueItemIdsMessage);
             return queueItemIdsResponse?.Ids;
@@ -254,6 +274,10 @@ namespace Sharpcaster.Channels
         {
             var chromecastStatus = Client.ChromecastStatus;
             var mediaStatusMessage = new GetStatusMessage();
+            if (chromecastStatus.Application == null)
+            {
+                throw new InvalidOperationException("No running applications found");
+            }
             var response = await SendAsync(mediaStatusMessage.RequestId, JsonSerializer.Serialize(mediaStatusMessage, SharpcasteSerializationContext.Default.GetStatusMessage), chromecastStatus.Application.TransportId).ConfigureAwait(false);
             var mediaStatus = JsonSerializer.Deserialize(response, SharpcasteSerializationContext.Default.MediaStatusMessage);
             return mediaStatus?.Status?.FirstOrDefault();
@@ -335,7 +359,7 @@ namespace Sharpcaster.Channels
             if (status?.Volume?.Level == null || Math.Abs(status.Volume.Level.Value - level) > 0.1)
             {
                 if (status?.Volume != null)
-                    Logger.LogDebug("Volume level is {currentVolume} and it was supposed to be {newLevel}", status.Volume.Level, level);
+                    Logger?.LogDebug("Volume level is {CurrentVolume} and it was supposed to be {NewLevel}", status.Volume.Level, level);
 
                 status = await SendAsync(new SetVolumeMessage() { Volume = new Models.Volume { Level = level } }, SharpcasteSerializationContext.Default.SetVolumeMessage).ConfigureAwait(false);
             }

@@ -93,6 +93,13 @@ namespace Sharpcaster.Extensions
     [JsonSerializable(typeof(UserActionMessage))]
     [JsonSerializable(typeof(EditTracksInfoMessage))]
     [JsonSerializable(typeof(WebMessage))]
+    // Media metadata polymorphic types
+    [JsonSerializable(typeof(MediaMetadata))]
+    [JsonSerializable(typeof(MusicTrackMetadata))]
+    [JsonSerializable(typeof(MovieMetadata))]
+    [JsonSerializable(typeof(TVShowMetadata))]
+    [JsonSerializable(typeof(PhotoMetadata))]
+    [JsonSerializable(typeof(AudiobookChapterMetadata))]
     public partial class SharpcasteSerializationContext : JsonSerializerContext
     {
     }

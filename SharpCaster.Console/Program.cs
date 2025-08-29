@@ -61,7 +61,7 @@ class Program
         services.AddSingleton<ApplicationState>();
         
         // Register device locator
-        services.AddSingleton<MdnsChromecastLocator>();
+        services.AddSingleton<ChromecastLocator>();
         
         // Register UI helper
         services.AddSingleton<UIHelper>();
@@ -93,7 +93,7 @@ public class SharpCasterApplication
         ApplicationState state,
         ApplicationFlows flows,
         UIHelper ui,
-        MdnsChromecastLocator locator,
+        ChromecastLocator locator,
         ILogger<SharpCasterApplication> logger)
     {
         _state = state;

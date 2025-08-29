@@ -34,22 +34,22 @@ namespace Sharpcaster
     /// <summary>
     /// Find the available chromecast receivers using mDNS protocol
     /// </summary>
-    public class MdnsChromecastLocator : IDisposable
+    public class ChromecastLocator : IDisposable
     {
         /// <summary>
         /// Occurs when a new Chromecast receiver is found during continuous discovery
         /// </summary>
         public event EventHandler<ChromecastReceiverEventArgs>? ChromecastReceiverFound;
-        private readonly ILogger<MdnsChromecastLocator> _logger;
+        private readonly ILogger<ChromecastLocator> _logger;
         private CancellationTokenSource? _continuousSearchCts;
 
         /// <summary>
-        /// Creates a new instance of MdnsChromecastLocator with a logger
+        /// Creates a new instance of ChromecastLocator with a logger
         /// </summary>
         /// <param name="logger">Logger instance</param>
-        public MdnsChromecastLocator(ILogger<MdnsChromecastLocator>? logger = null)
+        public ChromecastLocator(ILogger<ChromecastLocator>? logger = null)
         {
-            _logger = logger ?? NullLogger<MdnsChromecastLocator>.Instance;
+            _logger = logger ?? NullLogger<ChromecastLocator>.Instance;
         }
 
         /// <summary>

@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
+using Sharpcaster.Converters;
 
 namespace Sharpcaster.Models.Media
 {
@@ -27,6 +28,7 @@ namespace Sharpcaster.Models.Media
         /// Gets or sets the stream type
         /// </summary>
         [JsonPropertyName("streamType")]
+        [JsonConverter(typeof(StreamTypeEnumConverter))]
         public StreamType StreamType { get; set; } = StreamType.Buffered;
 
         /// <summary>
@@ -40,6 +42,7 @@ namespace Sharpcaster.Models.Media
         /// Gets or sets the metadata
         /// </summary>
         [JsonPropertyName("metadata")]
+        [JsonConverter(typeof(MediaMetadataJsonConverter))]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public MediaMetadata? Metadata { get; set; }
 

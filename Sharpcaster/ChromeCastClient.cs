@@ -144,6 +144,7 @@ namespace Sharpcaster
             services.AddTransient(messageInterfaceType, typeof(LoadFailedMessage));
             services.AddTransient(messageInterfaceType, typeof(MediaStatusMessage));
             services.AddTransient(messageInterfaceType, typeof(PingMessage));
+            services.AddTransient(messageInterfaceType, typeof(PongMessage));
             services.AddTransient(messageInterfaceType, typeof(CloseMessage));
             services.AddTransient(messageInterfaceType, typeof(LaunchStatusMessage));
         }
@@ -218,7 +219,7 @@ namespace Sharpcaster
                         Array.Reverse(buffer);
                     }
                     var length = BitConverter.ToInt32(buffer, 0);
-                    var castMessage = CastMessage.Parser.ParseFrom(await _stream.ReadAsync(length, cancellationToken).ConfigureAwait(false));
+                    var castMessage = CastMessage.Parser.ParseFrom(await _stream!.ReadAsync(length, cancellationToken).ConfigureAwait(false));
                     //Payload can either be Binary or UTF8 json
                     var payload = (castMessage.PayloadType == PayloadType.Binary ?
                         Encoding.UTF8.GetString(castMessage.PayloadBinary.ToByteArray()) : castMessage.PayloadUtf8);
@@ -233,7 +234,7 @@ namespace Sharpcaster
                         if (channel?.Logger != null) LogReceivedMessage(channel.Logger, payload, null);
 
                         var message = JsonSerializer.Deserialize(payload, SharpcasteSerializationContext.Default.MessageWithId);
-                        if (message != null && MessageTypes.TryGetValue(message.Type, out Type type))
+                        if (message != null && MessageTypes.TryGetValue(message.Type, out Type? type))
                         {
                             try
                             {
@@ -258,7 +259,13 @@ namespace Sharpcaster
                         }
                         else
                         {
-                            if (_logger != null) LogMessageConversionError(_logger, message.Type, null);
+                            if (_logger != null)
+                            {
+                                if (message?.Type == null)
+                                    LogMessageConversionError(_logger, "null", null);
+                                else
+                                    LogMessageConversionError(_logger, message.Type, null);
+                            }
                             Debugger.Break();
                         }
                     }
@@ -293,11 +300,14 @@ namespace Sharpcaster
 #else
                 ReadOnlyMemory<byte> message = castMessage.ToProto();
 #endif
+                if (_stream != null)
+                {
 #if NETSTANDARD2_0
-                await _stream!.WriteAsync(message, 0, message.Length);
+                await _stream.WriteAsync(message, 0, message.Length);
 #else
-                await _stream!.WriteAsync(message).ConfigureAwait(false);
+                await _stream.WriteAsync(message).ConfigureAwait(false);
 #endif
+                }
             }
             finally
             {
@@ -424,11 +434,7 @@ namespace Sharpcaster
         public TChannel GetChannel<TChannel>() where TChannel : IChromecastChannel
         {
             var channel = Channels.OfType<TChannel>().First();
-            if (channel == null)
-            {
-                throw new ArgumentNullException($"Channel of type {typeof(TChannel).Name} not found.");
-            }
-            return channel;
+            return channel == null ? throw new ArgumentNullException($"Channel of type {typeof(TChannel).Name} not found.") : channel;
         }
 
         public async Task<ChromecastStatus?> LaunchApplicationAsync(string applicationId, bool joinExistingApplicationSession = true)
@@ -450,6 +456,10 @@ namespace Sharpcaster
                 }
             }
             var newApplication = await ReceiverChannel.LaunchApplicationAsync(applicationId).ConfigureAwait(false);
+            if (newApplication?.Application == null)
+            {
+                throw new InvalidOperationException($"Application with id {applicationId} could not be started");
+            }
             await ConnectionChannel.ConnectAsync(newApplication.Application.TransportId).ConfigureAwait(false);
             return await ReceiverChannel.GetChromecastStatusAsync().ConfigureAwait(false);
         }

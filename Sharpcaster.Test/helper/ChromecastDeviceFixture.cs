@@ -18,7 +18,7 @@ namespace Sharpcaster.Test.helper
 
         public async ValueTask InitializeAsync()
         {
-            MdnsChromecastLocator locator = new();
+            ChromecastLocator locator = new();
             var receivers = await locator.FindReceiversAsync(TimeSpan.FromMilliseconds(500));
             receivers = receivers.Any() ? receivers : await locator.FindReceiversAsync(TimeSpan.FromSeconds(2));
             receivers = receivers.Any() ? receivers : await locator.FindReceiversAsync(TimeSpan.FromSeconds(5));
