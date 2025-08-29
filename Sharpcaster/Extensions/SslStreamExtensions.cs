@@ -14,12 +14,12 @@ namespace Sharpcaster.Extensions
 
             #if NETSTANDARD2_0
             int bytesRead, totalBytesRead = 0;
+            if (stream == null)
+            {
+                throw new ArgumentNullException(nameof(stream));
+            }
             while (totalBytesRead < bufferLength)
             {
-                if (stream == null)
-                {
-                    throw new ArgumentNullException(nameof(stream));
-                }
                 bytesRead = await stream.ReadAsync(buffer, totalBytesRead, bufferLength - totalBytesRead, cancellationToken);
                 if (bytesRead == 0)
                 {
