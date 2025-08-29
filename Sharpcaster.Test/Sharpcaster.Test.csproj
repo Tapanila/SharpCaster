@@ -14,10 +14,10 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.8" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
-    <PackageReference Include="Microsoft.Testing.Platform.MSBuild" Version="1.8.2" />
+    <PackageReference Include="Microsoft.Testing.Platform.MSBuild" Version="1.8.3" />
     <PackageReference Include="Moq" Version="4.20.72" />
     <PackageReference Include="System.Text.Json" Version="9.0.8" />
-    <PackageReference Include="xRetry.v3" Version="0.1.0-alpha1" />
+    <PackageReference Include="xRetry.v3" Version="0.1.0-alpha2" />
     <PackageReference Include="xunit.analyzers" Version="1.24.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
