@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "SharpCaster.Console": {
+      "commandName": "Project",
+      "commandLineArgs": "\"My JBL Speaker\" play https://orf-live.ors-shoutcast.at/oe1-q1a"
+    }
+  }
+}

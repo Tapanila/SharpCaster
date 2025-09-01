@@ -131,6 +131,7 @@ public class CommandExecutor
                 : device.Name;
             System.Console.WriteLine($"Connected to {connectionInfo}");
 
+            
             // Execute command
             var result = await ExecuteSpecificCommandAsync(args);
             
@@ -216,11 +217,22 @@ public class CommandExecutor
             {
                 throw new Exception("Connection established but device is not responding");
             }
-            
             _state.IsConnected = true;
             _state.LastConnectionCheck = DateTime.Now;
-        }
-        catch (Exception ex)
+
+            // Check for loaded app
+            var application = _state.Client.ChromecastStatus.Application;
+            if (application == null) {
+                AnsiConsole.MarkupLine("[dim]No existing application found. Launching Default Media Receiver...[/]");
+                await _state.Client.LaunchApplicationAsync("B3419EF5", false);
+                AnsiConsole.MarkupLine("[green]? Default Media Receiver launched successfully![/]");
+                return;
+            } else {
+                AnsiConsole.MarkupLine("[green]Joining existing application {0:appId} ...[/]", application.AppId);
+                await _state.Client.LaunchApplicationAsync(application.AppId, true);
+            }
+
+        } catch (Exception ex)
         {
             _state.Client?.Dispose();
             _state.Client = null;
