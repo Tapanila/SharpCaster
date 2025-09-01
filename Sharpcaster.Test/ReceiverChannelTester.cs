@@ -1,69 +1,75 @@
 ﻿using Sharpcaster.Models;
+using Sharpcaster.Models.Media;
 using Sharpcaster.Test.helper;
 using System.Threading.Tasks;
 using Xunit;
-using Xunit.Abstractions;
 
 namespace Sharpcaster.Test
 {
-    [Collection("SingleCollection")]
-    public class ReceiverChannelTester : IClassFixture<ChromecastDevicesFixture>
+    public class ReceiverChannelTester(ITestOutputHelper outputHelper, ChromecastDevicesFixture fixture)
     {
-        private ITestOutputHelper output;
-
-        public ReceiverChannelTester(ITestOutputHelper outputHelper, ChromecastDevicesFixture fixture)
-        {
-            output = outputHelper;
-            output.WriteLine("Fixture has found " + ChromecastDevicesFixture.Receivers?.Count + " receivers with " + fixture.GetSearchesCnt() + " searche(s).");
-        }
-
-        [Theory]
-        [MemberData(nameof(ChromecastReceiversFilter.GetAny), MemberType = typeof(ChromecastReceiversFilter))]
-        public async Task TestMute(ChromecastReceiver receiver)
+        [Fact]
+        public async Task TestMute()
         {
             var TestHelper = new TestHelper();
-            var client = await TestHelper.CreateAndConnectClient(output, receiver);
+            var client = await TestHelper.CreateAndConnectClient(outputHelper, fixture);
 
             var status = await client.ReceiverChannel.SetMute(true);
 
             Assert.True(status.Volume.Muted);
         }
 
-        [Theory]
-        [MemberData(nameof(ChromecastReceiversFilter.GetAny), MemberType = typeof(ChromecastReceiversFilter))]
-        public async Task TestUnMute(ChromecastReceiver receiver)
+        [Fact]
+        public async Task TestUnMute()
         {
             var TestHelper = new TestHelper();
-            var client = await TestHelper.CreateAndConnectClient(output, receiver);
+            var client = await TestHelper.CreateAndConnectClient(outputHelper, fixture);
 
             var status = await client.ReceiverChannel.SetMute(false);
             Assert.False(status.Volume.Muted);
         }
 
-        [Theory]
-        [MemberData(nameof(ChromecastReceiversFilter.GetAny), MemberType = typeof(ChromecastReceiversFilter))]
-        public async Task TestVolume(ChromecastReceiver receiver)
+        [Fact]
+        public async Task TestVolume()
         {
             var TestHelper = new TestHelper();
-            var client = await TestHelper.CreateAndConnectClient(output, receiver);
+            var client = await TestHelper.CreateConnectAndLoadAppClient(outputHelper, fixture);
+            
+            var media = new Media
+            {
+                ContentUrl = "https://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/mp4/DesigningForGoogleCast.mp4",
+                ContentType = "video/mp4",
+                Metadata = new MediaMetadata
+                {
+                    Title = "Designing for Google Cast",
+                    Images = new[]
+                    {
+                        new Image
+                        {
+                            Url = "https://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/poster/DesigningForGoogleCast.jpg"
+                        }
+                    }
+                },
+            };
+
+            await client.MediaChannel.LoadAsync(media);
 
             var status = await client.ReceiverChannel.SetVolume(0.1);
             Assert.Equal(0.1, status.Volume.Level.Value, precision: 1);
-
-            await Task.Delay(500);      // My Chromecast Audio device (somtimes) needs this delay here to pass the test, because the first volume requests triggers a lot of responses 
-                                        // (some of them on a 'multizone' channel) with eualizer data !? and the 2nd request does not get the new volume but another answer with old 0.1 as volume !!!
-                                        // It happens always if this test runs directly after the TestStoppingApplication!?
-
             status = await client.ReceiverChannel.SetVolume(0.3);
             Assert.Equal(0.3, status.Volume.Level.Value, precision: 1);
+            status = await client.ReceiverChannel.SetVolume(0.5);
+            Assert.Equal(0.5, status.Volume.Level.Value, precision: 1);
+            status = await client.ReceiverChannel.SetVolume(0.8);
+            Assert.Equal(0.8, status.Volume.Level.Value, precision: 1);
+            await client.DisconnectAsync();
         }
 
-        [Theory]
-        [MemberData(nameof(ChromecastReceiversFilter.GetAny), MemberType = typeof(ChromecastReceiversFilter))]
-        public async Task TestStoppingApplication(ChromecastReceiver receiver)
+        [Fact]
+        public async Task TestStoppingApplication()
         {
             var TestHelper = new TestHelper();
-            var client = await TestHelper.CreateAndConnectClient(output, receiver);
+            var client = await TestHelper.CreateAndConnectClient(outputHelper, fixture);
 
             await client.LaunchApplicationAsync("B3419EF5");
 
@@ -71,12 +77,11 @@ namespace Sharpcaster.Test
             Assert.Null(status.Applications);
         }
 
-        [Theory]
-        [MemberData(nameof(ChromecastReceiversFilter.GetAny), MemberType = typeof(ChromecastReceiversFilter))]
-        public async Task TestApplicationLaunchStatusMessage(ChromecastReceiver receiver)
+        [Fact]
+        public async Task TestApplicationLaunchStatusMessage()
         {
-            var TestHelper = new TestHelper(); 
-            var client = await TestHelper.CreateAndConnectClient(output, receiver);
+            var TestHelper = new TestHelper();
+            var client = await TestHelper.CreateAndConnectClient(outputHelper, fixture);
 
             string launchStatus = "";
 

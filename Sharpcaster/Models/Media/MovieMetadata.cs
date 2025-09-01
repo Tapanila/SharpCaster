@@ -19,6 +19,7 @@ namespace Sharpcaster.Models.Media
         /// Gets or sets the studio
         /// </summary>
         [JsonPropertyName("studio")]
-        public string Studio { get; set; }
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public string? Studio { get; set; }
     }
 }

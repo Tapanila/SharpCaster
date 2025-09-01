@@ -4,12 +4,22 @@
 
 [![.NET Build Status](https://github.com/Tapanila/SharpCaster/actions/workflows/dotnet.yml/badge.svg)](https://github.com/Tapanila/SharpCaster/actions/workflows/dotnet.yml)
 [![NuGet Status](http://img.shields.io/nuget/v/SharpCaster.svg?style=flat)](https://www.nuget.org/packages/SharpCaster/)
+[![Chocolatey](https://img.shields.io/chocolatey/v/sharpcaster.svg?style=flat&include_prereleases)](https://community.chocolatey.org/packages/sharpcaster)
+[![Homebrew Tap](https://img.shields.io/badge/homebrew-tap-brightgreen?logo=homebrew&style=flat)](https://github.com/Tapanila/homebrew-sharpcaster)
 
-SharpCaster is a cross-platform C# SDK for communicating with Google Chromecast devices. It enables .NET applications to discover, connect, launch apps, and control media playback on Chromecast devices with support for both .NET Standard 2.0 and .NET 9 (including AOT compilation).
+SharpCaster is a cross-platform toolkit for communicating with Google Chromecast devices. It includes:
+
+- C# SDK (NuGet): A library for .NET apps to discover, connect, launch apps, and control media on Chromecast devices.
+- Sharpcaster Console (CLI): A cross‑platform command-line app for controlling Chromecast from your terminal, distributed via Chocolatey and Homebrew.
+
+C# SDK supports .NET Standard 2.0 and .NET 9 (including Native AOT).
+Sharpcaster console is built with Native AOT for fast startup, low memory usage and doesn't require .NET installed, works on Windows, macOS, and Linux.
 
 ## Table of Contents
 - [Features](#features)
 - [Installation](#installation)
+  - [C# SDK (NuGet)](#c-sdk-nuget)
+  - [Sharpcaster Console (CLI)](#sharpcaster-console-cli)
 - [Quick Start](#quick-start)
 - [Comprehensive Examples](#comprehensive-examples)
 - [Media Queue Management](#media-queue-management)
@@ -34,6 +44,8 @@ SharpCaster is a cross-platform C# SDK for communicating with Google Chromecast 
 
 ## Installation
 
+### C# SDK (NuGet)
+
 Install via NuGet Package Manager:
 ```bash
 Install-Package SharpCaster
@@ -43,6 +55,29 @@ Or via .NET CLI:
 ```bash
 dotnet add package SharpCaster
 ```
+
+### Sharpcaster Console (CLI)
+
+Control Chromecast devices from your terminal.
+
+- Homebrew (macOS/Linux):
+```bash
+brew tap Tapanila/sharpcaster
+brew install sharpcaster
+```
+
+- Chocolatey (Windows):
+```powershell
+choco install sharpcaster --pre
+```
+
+After installation, run `sharpcaster` for interactive mode, or use direct commands like:
+```bash
+sharpcaster list
+sharpcaster "Living Room TV" play "https://example.com/video.mp4" --title "Sample"
+```
+
+For full CLI usage and examples, see `SharpCaster.Console/README.md`.
 
 ## Quick Start
 
@@ -54,7 +89,7 @@ using Sharpcaster.Models;
 using Sharpcaster.Models.Media;
 
 // Discover Chromecast devices
-var locator = new MdnsChromecastLocator();
+var locator = new ChromecastLocator();
 var cancellationToken = new CancellationTokenSource(TimeSpan.FromSeconds(5)).Token;
 var chromecasts = await locator.FindReceiversAsync(cancellationToken);
 
@@ -107,7 +142,7 @@ public class ChromecastMediaPlayer
     {
         try
         {
-            var locator = new MdnsChromecastLocator();
+            var locator = new ChromecastLocator();
             var devices = await locator.FindReceiversAsync(CancellationToken.None);
             
             _device = deviceName != null 

@@ -8,7 +8,7 @@ namespace Sharpcaster.Messages.Chromecast
     /// </summary>
     /// <typeparam name="TStatus">status type</typeparam>
     [ReceptionMessage]
-    public abstract class StatusMessage<TStatus> : MessageWithId, IStatusMessage<TStatus>
+    public abstract class StatusMessage<TStatus> : MessageWithId
     {
         /// <summary>
         /// Gets or sets the status

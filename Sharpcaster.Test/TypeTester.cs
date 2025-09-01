@@ -3,7 +3,7 @@ using Xunit;
 
 namespace Sharpcaster.Test
 {
-    public class MessageTypeTester
+    public class MessageTypeTester()
     {
         [Fact]
         public void TestStopMessageTypeConversion()

@@ -6,19 +6,15 @@ using Xunit;
 
 namespace Sharpcaster.Test
 {
-    [Collection("SingleCollection")]
-    public class MemoryAllocationTester
+    public class MemoryAllocationTester(ChromecastDevicesFixture fixture)
     {
         [Fact]
         public async Task ConnectToChromecastAndLaunchApplication()
         {
             long memoryBefore = GC.GetTotalMemory(true);
-            MdnsChromecastLocator locator = new();
-            var receivers = await locator.FindReceiversAsync();
             var TestHelper = new TestHelper();
             var client = new ChromecastClient();
-            Assert.NotEmpty(receivers);
-            await client.ConnectChromecast(receivers.First());
+            await client.ConnectChromecast(fixture.Receivers[0]);
             var status = await client.LaunchApplicationAsync("B3419EF5");
 
             Assert.Equal("B3419EF5", status.Application.AppId);

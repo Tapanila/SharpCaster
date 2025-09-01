@@ -13,7 +13,7 @@ namespace Sharpcaster.Messages.Queue
         /// Duplicated item IDs will also be ignored. Must not be null or empty.
         /// </summary>
         [JsonPropertyName("itemIds")]
-        public long[] ItemIds { get; set; }
+        public int[] ItemIds { get; set; } = null!;
 
     }
 }

@@ -4,8 +4,9 @@ using System.Collections.Generic;
 namespace Sharpcaster.Models
 {
     /// <summary>
-    /// Describesc chromecast receiver
+    /// Describes chromecast receiver discovered via mDNS
     /// </summary>
+    /// <see href="https://developers.google.com/cast/docs/reference/web_sender/chrome.cast#.Receiver">Google Cast Receiver Documentation</see>
     public class ChromecastReceiver
     {
         /// <summary>

@@ -1,0 +1,231 @@
+name: Build AOT Executables
+
+on:
+  push:
+    branches: [ main, version-3 ]
+  pull_request:
+    branches: [ main ]
+  release:
+    types: [published]
+
+jobs:
+  build:
+    name: Build ${{ matrix.os }} ${{ matrix.arch }}
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      matrix:
+        include:
+          # Windows builds
+          - os: windows
+            arch: x64
+            runner: windows-latest
+            runtime: win-x64
+            executable: sharpcaster.exe
+          - os: windows
+            arch: arm64
+            runner: windows-latest
+            runtime: win-arm64
+            executable: sharpcaster.exe
+
+          # Linux builds  
+          - os: linux
+            arch: x64
+            runner: ubuntu-latest
+            runtime: linux-x64
+            executable: sharpcaster
+          - os: linux
+            arch: arm64
+            runner: ubuntu-24.04-arm
+            runtime: linux-arm64
+            executable: sharpcaster
+
+          # macOS builds
+          - os: macos
+            arch: x64
+            runner: macos-13  # Intel runner
+            runtime: osx-x64
+            executable: sharpcaster
+          - os: macos
+            arch: arm64
+            runner: macos-latest  # Apple Silicon runner
+            runtime: osx-arm64
+            executable: sharpcaster
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '9.0.x'
+
+    # Platform-specific prerequisites
+    - name: Install Linux dependencies
+      if: matrix.os == 'linux'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y clang zlib1g-dev
+       
+    - name: Install macOS dependencies
+      if: matrix.os == 'macos'
+      run: |
+        # Xcode command line tools should already be available on GitHub runners
+        xcode-select --print-path || echo "Xcode tools not found, but may still work"
+
+    - name: Restore dependencies
+      run: dotnet restore SharpCaster.sln
+
+    - name: Build AOT executable
+      working-directory: SharpCaster.Console
+      run: dotnet publish -r ${{ matrix.runtime }} -c Release --verbosity normal
+      env:
+        DOTNET_CLI_TELEMETRY_OPTOUT: 1
+
+    - name: Rename executable (Windows)
+      if: matrix.os == 'windows'
+      working-directory: SharpCaster.Console
+      run: |
+        $publishDir = "bin/Release/net9.0/${{ matrix.runtime }}/publish"
+        if (Test-Path "$publishDir/SharpCaster.Console.exe") {
+          Rename-Item "$publishDir/SharpCaster.Console.exe" "${{ matrix.executable }}"
+          Write-Host "✓ Renamed SharpCaster.Console.exe to ${{ matrix.executable }}"
+        } else {
+          Write-Host "✗ Could not find SharpCaster.Console.exe to rename"
+          Get-ChildItem $publishDir
+          exit 1
+        }
+      shell: pwsh
+
+    - name: Rename executable (Unix)
+      if: matrix.os != 'windows'
+      working-directory: SharpCaster.Console
+      run: |
+        publishDir="bin/Release/net9.0/${{ matrix.runtime }}/publish"
+        if [ -f "$publishDir/SharpCaster.Console" ]; then
+          mv "$publishDir/SharpCaster.Console" "$publishDir/${{ matrix.executable }}"
+          echo "✓ Renamed SharpCaster.Console to ${{ matrix.executable }}"
+        else
+          echo "✗ Could not find SharpCaster.Console to rename"
+          ls -la "$publishDir"
+          exit 1
+        fi
+
+    - name: Verify executable
+      working-directory: SharpCaster.Console
+      run: |
+        $exePath = "bin/Release/net9.0/${{ matrix.runtime }}/publish/${{ matrix.executable }}"
+        if (Test-Path $exePath) {
+          Write-Host "✓ Executable found at: $exePath"
+          $sizeMB = [math]::Round((Get-Item $exePath).Length / 1MB, 2)
+          Write-Host "✓ Size: $sizeMB MB"
+          echo "ARTIFACT_SIZE=$sizeMB" >> $env:GITHUB_ENV
+        } else {
+          Write-Host "✗ Executable not found at: $exePath"
+          Write-Host "Contents of publish directory:"
+          Get-ChildItem "bin/Release/net9.0/${{ matrix.runtime }}/publish/" -ErrorAction SilentlyContinue | Format-Table Name, Length
+          exit 1
+        }
+      shell: pwsh
+
+    - name: Prepare artifact
+      working-directory: SharpCaster.Console
+      run: |
+        $publishDir = "bin/Release/net9.0/${{ matrix.runtime }}/publish"
+        $artifactDir = "artifact-${{ matrix.runtime }}"
+        
+        # Create artifact directory
+        New-Item -ItemType Directory -Force -Path $artifactDir
+        
+        # Copy executable and any required files
+        Copy-Item "$publishDir/${{ matrix.executable }}" "$artifactDir/"
+        
+        # Create info file
+        $content = "SharpCaster Console - AOT Build`n"
+        $content += "===============================`n"
+        $content += "Platform: ${{ matrix.os }} ${{ matrix.arch }}`n"
+        $content += "Runtime: ${{ matrix.runtime }}`n"
+        $content += "Build Date: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss UTC')`n"
+        $content += "Commit: $env:GITHUB_SHA`n"
+        $content += "Branch: $env:GITHUB_REF_NAME`n`n"
+        $content += "Usage:`n"
+        $content += "------`n"
+        $content += "# Interactive mode`n"
+        $content += "./${{ matrix.executable }}`n`n"
+        $content += "# Command-line mode`n"
+        $content += "./${{ matrix.executable }} `"device-name`" play `"https://example.com/video.mp4`"`n"
+        $content += "./${{ matrix.executable }} help`n`n"
+        $content += "For more information, see: https://github.com/Tapanila/SharpCaster"
+        $content | Out-File -FilePath "$artifactDir/README.txt" -Encoding UTF8
+      shell: pwsh
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: SharpCaster-Console-${{ matrix.runtime }}-${{ env.ARTIFACT_SIZE }}MB
+        path: SharpCaster.Console/artifact-${{ matrix.runtime }}/
+        retention-days: 30
+
+  # Create release if this is a tag
+  release:
+    if: startsWith(github.ref, 'refs/tags/')
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Download all artifacts
+      uses: actions/download-artifact@v4
+      with:
+        path: artifacts/
+
+    - name: Set version variable
+      run: |
+        if [ "${{ github.event_name }}" == "workflow_dispatch" ] && [ "${{ inputs.force_release }}" == "true" ]; then
+          if [ -z "${{ inputs.release_version }}" ]; then
+            echo "Error: release_version is required when force_release is true"
+            exit 1
+          fi
+          echo "VERSION=${{ inputs.release_version }}" >> $GITHUB_ENV
+        else
+          VERSION=${GITHUB_REF#refs/tags/}
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+        fi
+        echo "Using version: $VERSION"
+
+    - name: Prepare release assets
+      run: |
+        cd artifacts
+        for dir in SharpCaster-Console-*/; do
+          runtime=$(echo "$dir" | sed 's/SharpCaster-Console-\(.*\)-.*MB\//\1/')
+          echo "Processing $runtime from $dir"
+          
+          cd "$dir"
+          if [[ "$runtime" == win-* ]]; then
+            # Windows - copy .exe directly with renamed filename
+            if [[ "$runtime" == "win-x64" ]]; then
+              cp sharpcaster.exe "../sharpcaster-win-x64.exe"
+            elif [[ "$runtime" == "win-arm64" ]]; then
+              cp sharpcaster.exe "../sharpcaster-win-arm.exe"
+            fi
+          else
+            # Linux/macOS - create tar.gz
+            tar -czf "../SharpCaster-Console-${runtime}.tar.gz" .
+          fi
+          cd ..
+        done
+        
+        # List created files
+        ls -la *.exe *.tar.gz
+
+    - name: Upload Release Assets
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          artifacts/*.exe
+          artifacts/*.tar.gz
+

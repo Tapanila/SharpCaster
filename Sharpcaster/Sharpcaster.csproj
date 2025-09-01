@@ -25,11 +25,29 @@
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
     <Deterministic>true</Deterministic>
     <ContinuousIntegrationBuild Condition="'$(CI)' == 'true'">true</ContinuousIntegrationBuild>
+    <EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
+	  <AnalysisMode>All</AnalysisMode>
   </PropertyGroup>
 
     <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
 		<LangVersion>9.0</LangVersion>
 	</PropertyGroup>
+
+    <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net9.0|AnyCPU'">
+      <NoWarn>1701;1702;1591;1707;CA1819;CA1003;CA1031;CA1056;CA1716;CA1720;CA2227;CA1849</NoWarn>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|netstandard2.0|AnyCPU'">
+      <NoWarn>1701;1702;1591;1707;CA1819;CA1003;CA1031;CA1056;CA1716;CA1720;CA2227;CA1849</NoWarn>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net9.0|AnyCPU'">
+      <NoWarn>1701;1702;1591;1707;CA1819;CA1003;CA1031;CA1056;CA1716;CA1720;CA2227;CA1849</NoWarn>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|netstandard2.0|AnyCPU'">
+      <NoWarn>1701;1702;1591;1707;CA1819;CA1003;CA1031;CA1056;CA1716;CA1720;CA2227;CA1849</NoWarn>
+    </PropertyGroup>
 
   <ItemGroup>
     <Content Include="../README.md">
@@ -47,16 +65,16 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Google.Protobuf" Version="3.31.1" />
+    <PackageReference Include="Google.Protobuf" Version="3.32.0" />
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.7" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.7" />
-    <PackageReference Include="Roslynator.Analyzers" Version="4.13.1">
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.8" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.8" />
+    <PackageReference Include="Roslynator.Analyzers" Version="4.14.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="System.Text.Json" Version="9.0.7" />
-    <PackageReference Include="Tmds.MDns" Version="0.8.0" />
+    <PackageReference Include="System.Text.Json" Version="9.0.8" />
+    <PackageReference Include="Zeroconf" Version="3.7.16" />
   </ItemGroup>
 
 </Project>

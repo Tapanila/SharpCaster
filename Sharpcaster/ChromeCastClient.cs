@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Sharpcaster.Channels;
 using Sharpcaster.Extensions;
+using System.Runtime.CompilerServices;
 using Sharpcaster.Interfaces;
 using Sharpcaster.Messages.Connection;
 using Sharpcaster.Messages.Heartbeat;
@@ -29,93 +30,135 @@ using static Extensions.Api.CastChannel.CastMessage.Types;
 
 namespace Sharpcaster
 {
-    public class ChromecastClient : IChromecastClient
+    public class ChromecastClient
     {
         private const int RECEIVE_TIMEOUT = 30000;
 
         /// <summary>
         /// Raised when the sender is disconnected
         /// </summary>
-        public event EventHandler Disconnected;
+        public event EventHandler? Disconnected;
         public Guid SenderId { get; } = Guid.NewGuid();
-        public string FriendlyName { get; set; }
+        public string FriendlyName { get; set; } = string.Empty;
 
-        public IMediaChannel MediaChannel => GetChannel<IMediaChannel>();
-        public IHeartbeatChannel HeartbeatChannel => GetChannel<IHeartbeatChannel>();
-        public IReceiverChannel ReceiverChannel => GetChannel<IReceiverChannel>();
-        public IConnectionChannel ConnectionChannel => GetChannel<IConnectionChannel>();
+        public MediaChannel MediaChannel => GetChannel<MediaChannel>();
+        public HeartbeatChannel HeartbeatChannel => GetChannel<HeartbeatChannel>();
+        public ReceiverChannel ReceiverChannel => GetChannel<ReceiverChannel>();
+        public ConnectionChannel ConnectionChannel => GetChannel<ConnectionChannel>();
         public MultiZoneChannel MultiZoneChannel => GetChannel<MultiZoneChannel>();
 
-        private ILogger _logger = null;
-        private TcpClient _client;
-        private SslStream _stream;
-        private CancellationTokenSource _cancellationTokenSource;
-        private TaskCompletionSource<bool> ReceiveTcs { get; set; }
+        private ILogger? _logger;
+
+        private static readonly Action<ILogger, string, Exception?> LogMessageTypes =
+            LoggerMessage.Define<string>(LogLevel.Debug, new EventId(4001, "MessageTypes"), "MessageTypes: {MessageTypes}");
+
+        private static readonly Action<ILogger, string, Exception?> LogChannels =
+            LoggerMessage.Define<string>(LogLevel.Debug, new EventId(4002, "Channels"), "Channels: {Channels}");
+
+        private static readonly Action<ILogger, Exception?> LogHeartbeatTimeout =
+            LoggerMessage.Define(LogLevel.Error, new EventId(4003, "HeartbeatTimeout"), "Heartbeat timeout - Disconnecting client.");
+
+        private static readonly Action<ILogger, string, Exception?> LogReceivedMessage =
+            LoggerMessage.Define<string>(LogLevel.Trace, new EventId(4004, "ReceivedMessage"), "RECEIVED: {Payload}");
+
+        private static readonly Action<ILogger, int, int, string, Exception?> LogNoTaskCompletionSource =
+            LoggerMessage.Define<int, int, string>(LogLevel.Trace, new EventId(4005, "NoTaskCompletionSource"), "No TaskCompletionSource found for RequestId: {RequestId}, CompletionSourceCount: {CompletionSourceCount}, Type: {Type} ");
+
+        private static readonly Action<ILogger, string, Exception?> LogExceptionProcessingResponse =
+            LoggerMessage.Define<string>(LogLevel.Error, new EventId(4006, "ExceptionProcessingResponse"), "Exception processing the Response: {Message}");
+
+        private static readonly Action<ILogger, string, Exception?> LogMessageConversionError =
+            LoggerMessage.Define<string>(LogLevel.Error, new EventId(4007, "MessageConversionError"), "The received Message of Type '{Ty}' can not be converted to its response Type. Please add it to the registered Services in Dependency Injection");
+
+        private static readonly Action<ILogger, string, string, Exception?> LogChannelParseError =
+            LoggerMessage.Define<string, string>(LogLevel.Error, new EventId(4008, "ChannelParseError"), "Couldn't parse the channel from: {NameSpace} : {Payload}");
+
+        private static readonly Action<ILogger, string, Exception?> LogReceiveLoopError =
+            LoggerMessage.Define<string>(LogLevel.Error, new EventId(4009, "ReceiveLoopError"), "Error in receive loop: {Message}");
+
+        private static readonly Action<ILogger, string, string, string, Exception?> LogSentMessage =
+            LoggerMessage.Define<string, string, string>(LogLevel.Trace, new EventId(4010, "SentMessage"), "SENT: {NameSpace} - {DestinationId}: {PayloadUtf8}");
+
+        private static readonly Action<ILogger, string, Exception?> LogDisposeError =
+            LoggerMessage.Define<string>(LogLevel.Error, new EventId(4011, "DisposeError"), "Error on disposing. {Message}");
+        private TcpClient? _client;
+        private SslStream? _stream;
+        private CancellationTokenSource _cancellationTokenSource = new();
+        private TaskCompletionSource<bool> ReceiveTcs { get; set; } = new();
         private SemaphoreSlim SendSemaphoreSlim { get; } = new SemaphoreSlim(1, 1);
-        private JsonSerializerOptions _jsonSerializerOptions;
-        private Dictionary<string, Type> MessageTypes { get; set; }
-        private IEnumerable<IChromecastChannel> Channels { get; set; }
+        private JsonSerializerOptions _jsonSerializerOptions = new();
+        private Dictionary<string, Type> MessageTypes { get; set; } = new();
+        private IEnumerable<IChromecastChannel> Channels { get; set; } = new List<IChromecastChannel>();
         private ConcurrentDictionary<int, SharpCasterTaskCompletionSource> WaitingTasks { get; } = new ConcurrentDictionary<int, SharpCasterTaskCompletionSource>();
+        private IServiceProvider _serviceProvider = null!;
 
-        public ChromecastClient(ILoggerFactory loggerFactory = null)
+        public ChromecastClient() : this(null)
         {
+        }
+
+        public ChromecastClient(ILogger<ChromecastClient>? logger)
+        {
+            _logger = logger;
+
             var serviceCollection = new ServiceCollection();
+            RegisterChannels(serviceCollection, logger);
+            RegisterMessages(serviceCollection);
 
-            if (loggerFactory != null)
-            {
-                serviceCollection.AddSingleton<ILoggerFactory>(loggerFactory);
-                serviceCollection.AddSingleton(typeof(ILogger<>), typeof(Logger<>));  // see https://stackoverflow.com/questions/31751437/how-is-iloggert-resolved-via-di 
-            }
+            _serviceProvider = serviceCollection.BuildServiceProvider();
+            InitializeClient();
+        }
 
-            serviceCollection.AddTransient<IChromecastChannel, ConnectionChannel>();
-            serviceCollection.AddTransient<IChromecastChannel, HeartbeatChannel>();
-            serviceCollection.AddTransient<IChromecastChannel, ReceiverChannel>();
-            serviceCollection.AddTransient<IChromecastChannel, MediaChannel>();
-            serviceCollection.AddTransient<IChromecastChannel, MultiZoneChannel>();
-            serviceCollection.AddTransient<IChromecastChannel, SpotifyChannel>();
+        private static void RegisterChannels(IServiceCollection services, ILogger<ChromecastClient>? logger)
+        {
+            // Create channel-specific loggers using the main logger as a base
+            var connectionLogger = logger != null ? new ChannelLogger<ConnectionChannel>(logger) : null;
+            var heartbeatLogger = logger != null ? new ChannelLogger<HeartbeatChannel>(logger) : null;
+            var receiverLogger = logger != null ? new ChannelLogger<ReceiverChannel>(logger) : null;
+            var mediaLogger = logger != null ? new ChannelLogger<MediaChannel>(logger) : null;
+            var multizoneLogger = logger != null ? new ChannelLogger<MultiZoneChannel>(logger) : null;
+            var spotifyLogger = logger != null ? new ChannelLogger<SpotifyChannel>(logger) : null;
+
+            services.AddTransient<IChromecastChannel>(_ => new ConnectionChannel(connectionLogger));
+            services.AddTransient<IChromecastChannel>(_ => new HeartbeatChannel(heartbeatLogger));
+            services.AddTransient<IChromecastChannel>(_ => new ReceiverChannel(receiverLogger));
+            services.AddTransient<IChromecastChannel>(_ => new MediaChannel(mediaLogger));
+            services.AddTransient<IChromecastChannel>(_ => new MultiZoneChannel(multizoneLogger));
+            services.AddTransient<IChromecastChannel>(_ => new SpotifyChannel(spotifyLogger));
+        }
+
+        private static void RegisterMessages(IServiceCollection services)
+        {
             var messageInterfaceType = typeof(IMessage);
-            serviceCollection.AddTransient(messageInterfaceType, typeof(AddUserResponseMessage));
-            serviceCollection.AddTransient(messageInterfaceType, typeof(GetInfoResponseMessage));
-            serviceCollection.AddTransient(messageInterfaceType, typeof(LaunchErrorMessage));
-            serviceCollection.AddTransient(messageInterfaceType, typeof(ReceiverStatusMessage));
-            serviceCollection.AddTransient(messageInterfaceType, typeof(QueueChangeMessage));
-            serviceCollection.AddTransient(messageInterfaceType, typeof(QueueItemIdsMessage));
-            serviceCollection.AddTransient(messageInterfaceType, typeof(QueueItemsMessage));
-            serviceCollection.AddTransient(messageInterfaceType, typeof(DeviceUpdatedMessage));
-            serviceCollection.AddTransient(messageInterfaceType, typeof(MultizoneStatusMessage));
-            serviceCollection.AddTransient(messageInterfaceType, typeof(ErrorMessage));
-            serviceCollection.AddTransient(messageInterfaceType, typeof(InvalidRequestMessage));
-            serviceCollection.AddTransient(messageInterfaceType, typeof(LoadCancelledMessage));
-            serviceCollection.AddTransient(messageInterfaceType, typeof(LoadFailedMessage));
-            serviceCollection.AddTransient(messageInterfaceType, typeof(MediaStatusMessage));
-            serviceCollection.AddTransient(messageInterfaceType, typeof(PingMessage));
-            serviceCollection.AddTransient(messageInterfaceType, typeof(CloseMessage));
-            serviceCollection.AddTransient(messageInterfaceType, typeof(LaunchStatusMessage));
-
-            Init(serviceCollection);
+            services.AddTransient(messageInterfaceType, typeof(AddUserResponseMessage));
+            services.AddTransient(messageInterfaceType, typeof(GetInfoResponseMessage));
+            services.AddTransient(messageInterfaceType, typeof(LaunchErrorMessage));
+            services.AddTransient(messageInterfaceType, typeof(ReceiverStatusMessage));
+            services.AddTransient(messageInterfaceType, typeof(QueueChangeMessage));
+            services.AddTransient(messageInterfaceType, typeof(QueueItemIdsMessage));
+            services.AddTransient(messageInterfaceType, typeof(QueueItemsMessage));
+            services.AddTransient(messageInterfaceType, typeof(DeviceUpdatedMessage));
+            services.AddTransient(messageInterfaceType, typeof(MultizoneStatusMessage));
+            services.AddTransient(messageInterfaceType, typeof(ErrorMessage));
+            services.AddTransient(messageInterfaceType, typeof(InvalidRequestMessage));
+            services.AddTransient(messageInterfaceType, typeof(LoadCancelledMessage));
+            services.AddTransient(messageInterfaceType, typeof(LoadFailedMessage));
+            services.AddTransient(messageInterfaceType, typeof(MediaStatusMessage));
+            services.AddTransient(messageInterfaceType, typeof(PingMessage));
+            services.AddTransient(messageInterfaceType, typeof(PongMessage));
+            services.AddTransient(messageInterfaceType, typeof(CloseMessage));
+            services.AddTransient(messageInterfaceType, typeof(LaunchStatusMessage));
         }
 
-        /// <summary>
-        /// Initializes a new instance of Sender class
-        /// </summary>
-        /// <param name="serviceCollection">collection of service descriptors</param>
-        public ChromecastClient(IServiceCollection serviceCollection)
+        private void InitializeClient()
         {
-            Init(serviceCollection);
-        }
-
-        private void Init(IServiceCollection serviceCollection)
-        {
-            var serviceProvider = serviceCollection.BuildServiceProvider();
-            var channels = serviceProvider.GetServices<IChromecastChannel>();
-            var messages = serviceProvider.GetServices<IMessage>();
+            var channels = _serviceProvider.GetServices<IChromecastChannel>();
+            var messages = _serviceProvider.GetServices<IMessage>();
 
             MessageTypes = messages.Where(t => !string.IsNullOrEmpty(t.Type)).ToDictionary(m => m.Type, m => m.GetType());
             Channels = channels;
 
-            _logger = serviceProvider.GetService<ILogger<ChromecastClient>>();
-            _logger?.LogDebug("MessageTypes: {MessageTypes}", MessageTypes.Keys.ToString(","));
-            _logger?.LogDebug("Channels: {Channels}", Channels.ToString(","));
+            if (_logger != null) LogMessageTypes(_logger, $"[{string.Join(",", MessageTypes.Keys)}]", null);
+            if (_logger != null) LogChannels(_logger, string.Join(",", Channels.Select(c => c.GetType().Name)), null);
 
             foreach (var channel in Channels)
             {
@@ -128,21 +171,24 @@ namespace Sharpcaster
             };
         }
 
-        public async Task<ChromecastStatus> ConnectChromecast(ChromecastReceiver chromecastReceiver)
+
+        public async Task<ChromecastStatus?> ConnectChromecast(ChromecastReceiver chromecastReceiver)
         {
-            if (chromecastReceiver.DeviceUri == null)
+            if (chromecastReceiver?.DeviceUri == null)
             {
-                throw new ArgumentNullException(nameof(chromecastReceiver.DeviceUri));
+                throw new ArgumentNullException(nameof(chromecastReceiver));
             }
-            await Dispose();
+            await Dispose().ConfigureAwait(false);
             FriendlyName = chromecastReceiver.Name;
 
             _client = new TcpClient();
-            await _client.ConnectAsync(chromecastReceiver.DeviceUri.Host, chromecastReceiver.Port);
+            await _client.ConnectAsync(chromecastReceiver.DeviceUri.Host, chromecastReceiver.Port).ConfigureAwait(false);
 
             //Open SSL stream to Chromecast and bypass all SSL validation
+#pragma warning disable CA5359 // Do Not Disable Certificate Validation
             var secureStream = new SslStream(_client.GetStream(), true, (_, __, ___, ____) => true);
-            await secureStream.AuthenticateAsClientAsync(chromecastReceiver.DeviceUri.Host);
+#pragma warning restore CA5359 // Do Not Disable Certificate Validation
+            await secureStream.AuthenticateAsClientAsync(chromecastReceiver.DeviceUri.Host).ConfigureAwait(false);
             _stream = secureStream;
 
             _cancellationTokenSource = new CancellationTokenSource();
@@ -150,115 +196,118 @@ namespace Sharpcaster
             Receive(_cancellationTokenSource.Token);
             HeartbeatChannel.StartTimeoutTimer();
             HeartbeatChannel.StatusChanged += HeartBeatTimedOut;
-            await ConnectionChannel.ConnectAsync();
-            return await ReceiverChannel.GetChromecastStatusAsync();
+            await ConnectionChannel.ConnectAsync().ConfigureAwait(false);
+            return await ReceiverChannel.GetChromecastStatusAsync().ConfigureAwait(false);
         }
 
         private async void HeartBeatTimedOut(object sender, EventArgs e)
         {
-            _logger?.LogError("Heartbeat timeout - Disconnecting client.");
-            await DisconnectAsync();
+            if (_logger != null) LogHeartbeatTimeout(_logger, null);
+            await DisconnectAsync().ConfigureAwait(false);
         }
 
-        private void Receive(CancellationToken cancellationToken)
+        private void Receive(CancellationToken cancellationToken) => Task.Run(async () =>
         {
-            Task.Run(async () =>
+            try
             {
-                try
+                while (true)
                 {
-                    while (true)
+                    //First 4 bytes contains the length of the message
+                    var buffer = await _stream!.ReadAsync(4, cancellationToken).ConfigureAwait(false);
+                    if (BitConverter.IsLittleEndian)
                     {
-                        //First 4 bytes contains the length of the message
-                        var buffer = await _stream.ReadAsync(4, cancellationToken);
-                        if (BitConverter.IsLittleEndian)
+                        Array.Reverse(buffer);
+                    }
+                    var length = BitConverter.ToInt32(buffer, 0);
+                    var castMessage = CastMessage.Parser.ParseFrom(await _stream!.ReadAsync(length, cancellationToken).ConfigureAwait(false));
+                    //Payload can either be Binary or UTF8 json
+                    var payload = (castMessage.PayloadType == PayloadType.Binary ?
+                        Encoding.UTF8.GetString(castMessage.PayloadBinary.ToByteArray()) : castMessage.PayloadUtf8);
+
+                    var channel = Channels.FirstOrDefault(c => c.Namespace == castMessage.Namespace);
+                    if (channel != null)
+                    {
+                        if (channel != HeartbeatChannel)
                         {
-                            Array.Reverse(buffer);
+                            HeartbeatChannel.RestartTimeoutTimer();
                         }
-                        var length = BitConverter.ToInt32(buffer, 0);
-                        var castMessage = CastMessage.Parser.ParseFrom(await _stream.ReadAsync(length, cancellationToken));
-                        //Payload can either be Binary or UTF8 json
-                        var payload = (castMessage.PayloadType == PayloadType.Binary ?
-                            Encoding.UTF8.GetString(castMessage.PayloadBinary.ToByteArray()) : castMessage.PayloadUtf8);
+                        if (channel?.Logger != null) LogReceivedMessage(channel.Logger, payload, null);
 
-                        var channel = Channels.FirstOrDefault(c => c.Namespace == castMessage.Namespace);
-                        if (channel != null)
+                        var message = JsonSerializer.Deserialize(payload, SharpcasteSerializationContext.Default.MessageWithId);
+                        if (message != null && MessageTypes.TryGetValue(message.Type, out Type? type))
                         {
-                            if (channel != HeartbeatChannel)
+                            try
                             {
-                                HeartbeatChannel.StopTimeoutTimer();
-                            }
-                            channel?.Logger?.LogTrace("RECEIVED: {payload}", payload);
-
-                            var message = JsonSerializer.Deserialize(payload, SharpcasteSerializationContext.Default.MessageWithId);
-                            if (MessageTypes.TryGetValue(message.Type, out Type type))
-                            {
-                                try
+                                channel?.OnMessageReceived(payload, message.Type);
+                                if (message.HasRequestId)
                                 {
-                                    await channel.OnMessageReceivedAsync(payload, message.Type);
-                                    if (message.HasRequestId)
-                                    {
-                                        WaitingTasks.TryRemove(message.RequestId, out SharpCasterTaskCompletionSource? tcs);
-                                        tcs?.SetResult(payload);
-                                        if (tcs == null)
-                                            _logger?.LogTrace("No TaskCompletionSource found for RequestId: {RequestId}, CompletionSourceCount: {CompletionSourceCount}, Type: {Type} ", message.RequestId, WaitingTasks.Count, message.Type);
-                                    }
-                                }
-                                catch (Exception ex)
-                                {
-                                    _logger?.LogError("Exception processing the Response: {Message}", ex.Message);
-                                    if (message.HasRequestId)
-                                    {
-                                        WaitingTasks.TryRemove(message.RequestId, out SharpCasterTaskCompletionSource? tcs);
-                                        tcs?.SetException(ex);
-                                    }
+                                    WaitingTasks.TryRemove(message.RequestId, out SharpCasterTaskCompletionSource? tcs);
+                                    tcs?.SetResult(payload);
+                                    if (tcs == null)
+                                        if (_logger != null) LogNoTaskCompletionSource(_logger, message.RequestId, WaitingTasks.Count, message.Type, null);
                                 }
                             }
-                            else
+                            catch (Exception ex)
                             {
-                                _logger?.LogError("The received Message of Type '{ty}' can not be converted to its response Type." +
-                                   " An implementing IMessage class is missing!", message.Type);
-                                Debugger.Break();
+                                if (_logger != null) LogExceptionProcessingResponse(_logger, ex.Message, ex);
+                                if (message.HasRequestId)
+                                {
+                                    WaitingTasks.TryRemove(message.RequestId, out SharpCasterTaskCompletionSource? tcs);
+                                    tcs?.SetException(ex);
+                                }
                             }
                         }
                         else
                         {
-                            _logger?.LogError("Couldn't parse the channel from: {NameSpace} : {Payload}", castMessage.Namespace, payload);
+                            if (_logger != null)
+                            {
+                                if (message?.Type == null)
+                                    LogMessageConversionError(_logger, "null", null);
+                                else
+                                    LogMessageConversionError(_logger, message.Type, null);
+                            }
+                            Debugger.Break();
                         }
                     }
+                    else
+                    {
+                        if (_logger != null) LogChannelParseError(_logger, castMessage.Namespace, payload, null);
+                    }
                 }
-                catch (Exception exception)
-                {
-                    _logger?.LogError("Error in receive loop: {Message}", exception.Message);
-                    //await Dispose(false);
-                    ReceiveTcs.SetResult(true);
-                }
-            }, cancellationToken);
-        }
+            }
+            catch (Exception exception)
+            {
+                if (_logger != null) LogReceiveLoopError(_logger, exception.Message, exception);
+                ReceiveTcs.SetResult(true);
+            }
+        }, cancellationToken).ConfigureAwait(false);
 
-        public async Task SendAsync(ILogger channelLogger, string ns, string messagePayload, string destinationId)
+        public async Task SendAsync(ILogger? logger, string ns, string messagePayload, string destinationId)
         {
             var castMessage = CreateCastMessage(ns, destinationId);
             castMessage.PayloadUtf8 = messagePayload;
-            await SendAsync(channelLogger, castMessage);
+            await SendAsync(logger, castMessage).ConfigureAwait(false);
         }
 
-        private async Task SendAsync(ILogger channelLogger, CastMessage castMessage)
+        private async Task SendAsync(ILogger? logger, CastMessage castMessage)
         {
-            await SendSemaphoreSlim.WaitAsync();
+            await SendSemaphoreSlim.WaitAsync().ConfigureAwait(false);
             try
             {
-                (channelLogger ?? _logger)?.LogTrace("SENT: {NameSpace} - {DestinationId}: {PayloadUtf8}", castMessage.Namespace, castMessage.DestinationId, castMessage.PayloadUtf8);
+                if (logger != null) LogSentMessage(logger, castMessage.Namespace, castMessage.DestinationId, castMessage.PayloadUtf8, null);
 #if NETSTANDARD2_0
                 byte[] message = castMessage.ToProto();
 #else
                 ReadOnlyMemory<byte> message = castMessage.ToProto();
 #endif
+                if (_stream != null)
+                {
 #if NETSTANDARD2_0
                 await _stream.WriteAsync(message, 0, message.Length);
 #else
-                await _stream.WriteAsync(message);
+                await _stream.WriteAsync(message).ConfigureAwait(false);
 #endif
-                await _stream.FlushAsync();
+                }
             }
             finally
             {
@@ -266,59 +315,65 @@ namespace Sharpcaster
             }
         }
 
-        private CastMessage CreateCastMessage(string ns, string destinationId)
+        private CastMessage CreateCastMessage(string ns, string destinationId) => new CastMessage()
         {
-            return new CastMessage()
-            {
-                Namespace = ns,
-                SourceId = SenderId.ToString(),
-                DestinationId = destinationId
-            };
-        }
+            Namespace = ns,
+            SourceId = SenderId.ToString(),
+            DestinationId = destinationId
+        };
 
-        public async Task<string> SendAsync(ILogger channelLogger, string ns, int messageRequestId, string messagePayload, string destinationId)
+        public async Task<string> SendAsync(ILogger? logger, string ns, int messageRequestId, string messagePayload, string destinationId)
         {
             var taskCompletionSource = new SharpCasterTaskCompletionSource();
             WaitingTasks[messageRequestId] = taskCompletionSource;
-            await SendAsync(channelLogger, ns, messagePayload, destinationId);
-            return await taskCompletionSource.Task.TimeoutAfter(RECEIVE_TIMEOUT);
+            await SendAsync(logger, ns, messagePayload, destinationId).ConfigureAwait(false);
+            return await taskCompletionSource.Task.TimeoutAfter(RECEIVE_TIMEOUT).ConfigureAwait(false);
         }
 
         public async Task<string> WaitResponseAsync(int messageRequestId)
         {
             var taskCompletionSource = new SharpCasterTaskCompletionSource();
             WaitingTasks[messageRequestId] = taskCompletionSource;
-            return await taskCompletionSource.Task.TimeoutAfter(RECEIVE_TIMEOUT);
+            return await taskCompletionSource.Task.TimeoutAfter(RECEIVE_TIMEOUT).ConfigureAwait(false);
         }
 
         public async Task DisconnectAsync()
         {
-            foreach (var channel in GetStatusChannels())
+            foreach (var task in WaitingTasks)
             {
-                channel.ClearStatus();
+                _logger?.LogDebug("Cancelling task for RequestId: {RequestId}", task.Key);
+                task.Value?.SetException(new TaskCanceledException("Client disconnected before receiving response."));
             }
-            HeartbeatChannel.StopTimeoutTimer();
-            HeartbeatChannel.StatusChanged -= HeartBeatTimedOut;
+            WaitingTasks.Clear();
+
+            if (HeartbeatChannel != null)
+            {
+                HeartbeatChannel.StopTimeoutTimer();
+                HeartbeatChannel.StatusChanged -= HeartBeatTimedOut;
+                HeartbeatChannel.Dispose();
+            }
+
+
+            // Recreate HeartbeatChannel since it's been disposed
+            RecreateHeartbeatChannel();
+
             _cancellationTokenSource.Cancel(true);
-            await Task.Delay(100);
-            await Dispose();
+            await Task.Delay(100).ConfigureAwait(false);
+            await Dispose().ConfigureAwait(false);
         }
 
-        private async Task Dispose()
-        {
-            await Dispose(true);
-        }
+        public async Task Dispose() => await Dispose(true).ConfigureAwait(false);
 
         private async Task Dispose(bool waitReceiveTask)
         {
             if (_client != null)
             {
                 WaitingTasks.Clear();
-                Dispose(_stream, () => _stream = null);
+                Dispose(_stream!, () => _stream = null);
                 Dispose(_client, () => _client = null);
                 if (waitReceiveTask && ReceiveTcs != null)
                 {
-                    await ReceiveTcs.Task;
+                    await ReceiveTcs.Task.ConfigureAwait(false);
                 }
                 OnDisconnected();
             }
@@ -334,7 +389,7 @@ namespace Sharpcaster
                 }
                 catch (Exception ex)
                 {
-                    _logger?.LogError("Error on disposing. {Message}", ex.Message);
+                    if (_logger != null) LogDisposeError(_logger, ex.Message, ex);
                 }
                 finally
                 {
@@ -346,9 +401,29 @@ namespace Sharpcaster
         /// <summary>
         /// Raises the Disconnected event
         /// </summary>
-        protected virtual void OnDisconnected()
+        protected virtual void OnDisconnected() => Disconnected?.Invoke(this, EventArgs.Empty);
+
+        /// <summary>
+        /// Recreates the HeartbeatChannel after disposal
+        /// </summary>
+        private void RecreateHeartbeatChannel()
         {
-            Disconnected?.Invoke(this, EventArgs.Empty);
+            // Remove the disposed HeartbeatChannel from the channels collection
+            var channelsList = Channels.ToList();
+            var disposedHeartbeat = channelsList.OfType<HeartbeatChannel>().FirstOrDefault();
+            if (disposedHeartbeat != null)
+            {
+                channelsList.Remove(disposedHeartbeat);
+
+                // Create a new HeartbeatChannel instance using the service provider
+                var newHeartbeat = _serviceProvider.GetService<HeartbeatChannel>() ??
+                                   new HeartbeatChannel(_serviceProvider.GetService<ILogger<HeartbeatChannel>>());
+                newHeartbeat.Client = this;
+                channelsList.Add(newHeartbeat);
+
+                // Update the channels collection
+                Channels = channelsList;
+            }
         }
 
         /// <summary>
@@ -358,54 +433,77 @@ namespace Sharpcaster
         /// <returns>a channel</returns>
         public TChannel GetChannel<TChannel>() where TChannel : IChromecastChannel
         {
-            return Channels.OfType<TChannel>().FirstOrDefault();
+            var channel = Channels.OfType<TChannel>().First();
+            return channel == null ? throw new ArgumentNullException($"Channel of type {typeof(TChannel).Name} not found.") : channel;
         }
 
-        public async Task<ChromecastStatus> LaunchApplicationAsync(string applicationId, bool joinExistingApplicationSession = true)
+        public async Task<ChromecastStatus?> LaunchApplicationAsync(string applicationId, bool joinExistingApplicationSession = true)
         {
             if (joinExistingApplicationSession)
             {
-                var status = GetChromecastStatus();
+                var status = ChromecastStatus;
                 var runningApplication = status?.Applications?.FirstOrDefault(x => x.AppId == applicationId);
                 if (runningApplication != null)
                 {
-                    await ConnectionChannel.ConnectAsync(runningApplication.TransportId);
+                    await ConnectionChannel.ConnectAsync(runningApplication.TransportId).ConfigureAwait(false);
                     //Check if the application is using the media namespace
                     //If so go and get the media status
                     if (runningApplication.Namespaces.Where(ns => ns.Name == "urn:x-cast:com.google.cast.media") != null)
                     {
-                        await MediaChannel.GetMediaStatusAsync();
+                        await MediaChannel.GetMediaStatusAsync().ConfigureAwait(false);
                     }
-                    return await ReceiverChannel.GetChromecastStatusAsync();
+                    return await ReceiverChannel.GetChromecastStatusAsync().ConfigureAwait(false);
                 }
             }
-            var newApplication = await ReceiverChannel.LaunchApplicationAsync(applicationId);
-            await ConnectionChannel.ConnectAsync(newApplication.Application.TransportId);
-            return await ReceiverChannel.GetChromecastStatusAsync();
+            var newApplication = await ReceiverChannel.LaunchApplicationAsync(applicationId).ConfigureAwait(false);
+            if (newApplication?.Application == null)
+            {
+                throw new InvalidOperationException($"Application with id {applicationId} could not be started");
+            }
+            await ConnectionChannel.ConnectAsync(newApplication.Application.TransportId).ConfigureAwait(false);
+            return await ReceiverChannel.GetChromecastStatusAsync().ConfigureAwait(false);
         }
 
-        private IEnumerable<IStatusChannel<object>> GetStatusChannels()
+
+        public ChromecastStatus ChromecastStatus => ReceiverChannel.ReceiverStatus;
+
+        public MediaStatus? MediaStatus => MediaChannel.MediaStatus;
+    }
+
+    /// <summary>
+    /// A logger wrapper that uses the main ChromecastClient logger but prefixes logs with the channel name
+    /// </summary>
+    /// <typeparam name="T">The channel type</typeparam>
+    internal class ChannelLogger<T> : ILogger<T>
+    {
+        private readonly ILogger _baseLogger;
+        private readonly string _categoryName;
+
+        public ChannelLogger(ILogger baseLogger)
         {
-            return Channels.OfType<IStatusChannel<object>>();
+            _baseLogger = baseLogger;
+            _categoryName = typeof(T).Name;
         }
 
-        /// <summary>
-        /// Gets the differents statuses
-        /// </summary>
-        /// <returns>a dictionnary of namespace/status</returns>
-        public IDictionary<string, object> GetStatuses()
+        public IDisposable? BeginScope<TState>(TState state) where TState : notnull
         {
-            return GetStatusChannels().ToDictionary(c => c.Namespace, c => c.Status);
+            return _baseLogger.BeginScope(state);
         }
 
-        public ChromecastStatus GetChromecastStatus()
+        public bool IsEnabled(LogLevel logLevel)
         {
-            return ReceiverChannel.ReceiverStatus;
+            return _baseLogger.IsEnabled(logLevel);
         }
 
-        public MediaStatus GetMediaStatus()
+        public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter)
         {
-            return MediaChannel.MediaStatus;
+            if (!IsEnabled(logLevel))
+                return;
+
+            var originalMessage = formatter(state, exception);
+            var prefixedMessage = $"[{_categoryName}] {originalMessage}";
+
+            _baseLogger.Log(logLevel, eventId, prefixedMessage, exception, (msg, ex) => msg);
         }
     }
 }
