@@ -25,7 +25,7 @@ public class CommandExecutor
         _memoryLogService = memoryLogService;
         _chromecastLogger = chromecastLogger;
         _ui = ui;
-        
+
         // Ensure locator is initialized
         if (_state.Locator == null)
         {
@@ -52,14 +52,14 @@ public class CommandExecutor
             if (args.ShowDevices)
             {
                 var listResult = await ListDevicesAsync();
-                
+
                 // Show logs if requested
                 if (args.ShowLogs)
                 {
                     System.Console.WriteLine();
                     await ShowLogsAsync();
                 }
-                
+
                 return listResult;
             }
 
@@ -95,7 +95,7 @@ public class CommandExecutor
                 }
 
                 await DiscoverDevicesQuietAsync();
-                
+
                 if (_state.Devices.Count == 0)
                 {
                     System.Console.WriteLine("Error: No Chromecast devices found on the network.");
@@ -119,42 +119,42 @@ public class CommandExecutor
             // Connect to device
             _state.SelectedDevice = device;
             await ConnectToDeviceQuietAsync();
-            
+
             if (!_state.IsConnected)
             {
                 System.Console.WriteLine($"Error: Failed to connect to device '{device.Name}'.");
                 return 1;
             }
 
-            var connectionInfo = !string.IsNullOrEmpty(args.DeviceIpAddress) 
-                ? $"device at {args.DeviceIpAddress}" 
+            var connectionInfo = !string.IsNullOrEmpty(args.DeviceIpAddress)
+                ? $"device at {args.DeviceIpAddress}"
                 : device.Name;
             System.Console.WriteLine($"Connected to {connectionInfo}");
 
             
             // Execute command
             var result = await ExecuteSpecificCommandAsync(args);
-            
+
             // Show logs if requested
             if (args.ShowLogs)
             {
                 System.Console.WriteLine();
                 await ShowLogsAsync();
             }
-            
+
             return result;
         }
         catch (Exception ex)
         {
             System.Console.WriteLine($"Error: {ex.Message}");
-            
+
             // Show logs if requested even on error
             if (args.ShowLogs)
             {
                 System.Console.WriteLine();
                 await ShowLogsAsync();
             }
-            
+
             return 1;
         }
         finally
@@ -169,7 +169,7 @@ public class CommandExecutor
     {
         System.Console.WriteLine("Discovering Chromecast devices...");
         await DiscoverDevicesQuietAsync();
-        
+
         if (_state.Devices.Count == 0)
         {
             System.Console.WriteLine("No Chromecast devices found on the network.");
@@ -181,7 +181,7 @@ public class CommandExecutor
         {
             System.Console.WriteLine($"  - {device.Name} ({device.Model}) at {device.DeviceUri?.Host}");
         }
-        
+
         return 0;
     }
 
@@ -202,21 +202,22 @@ public class CommandExecutor
     private async Task ConnectToDeviceQuietAsync()
     {
         if (_state.SelectedDevice == null) return;
-        
+
         try
         {
             _state.Client?.Dispose();
             _state.Client = new Sharpcaster.ChromecastClient(_chromecastLogger);
-            
+
             await _state.Client.ConnectChromecast(_state.SelectedDevice);
             await Task.Delay(1000); // Give connection time to stabilize
-            
+
             // Verify the connection
             var status = _state.Client.ReceiverChannel?.ReceiverStatus;
             if (status == null)
             {
                 throw new Exception("Connection established but device is not responding");
             }
+
             _state.IsConnected = true;
             _state.LastConnectionCheck = DateTime.Now;
 
@@ -244,12 +245,12 @@ public class CommandExecutor
     private Sharpcaster.Models.ChromecastReceiver? FindDevice(string deviceName)
     {
         // Try exact match first
-        var exactMatch = _state.Devices.FirstOrDefault(d => 
+        var exactMatch = _state.Devices.FirstOrDefault(d =>
             string.Equals(d.Name, deviceName, StringComparison.OrdinalIgnoreCase));
         if (exactMatch != null) return exactMatch;
 
         // Try partial match
-        var partialMatch = _state.Devices.FirstOrDefault(d => 
+        var partialMatch = _state.Devices.FirstOrDefault(d =>
             d.Name.Contains(deviceName, StringComparison.OrdinalIgnoreCase));
         return partialMatch;
     }
@@ -281,16 +282,16 @@ public class CommandExecutor
                         return 1;
                     }
                     return await PlayMediaAsync(args.MediaUrl, args.MediaTitle);
-                    
+
                 case "pause":
                     return await PauseMediaAsync();
-                    
+
                 case "stop":
                     return await StopMediaAsync();
-                    
+
                 case "stop-app":
                     return await StopApplicationAsync();
-                    
+
                 case "volume":
                     if (!args.Volume.HasValue)
                     {
@@ -298,7 +299,7 @@ public class CommandExecutor
                         return 1;
                     }
                     return await SetVolumeAsync(args.Volume.Value);
-                    
+
                 case "media-volume":
                     if (!args.Volume.HasValue)
                     {
@@ -306,7 +307,7 @@ public class CommandExecutor
                         return 1;
                     }
                     return await SetMediaVolumeAsync(args.Volume.Value);
-                    
+
                 case "seek":
                     if (!args.SeekTime.HasValue)
                     {
@@ -314,10 +315,10 @@ public class CommandExecutor
                         return 1;
                     }
                     return await SeekAsync(args.SeekTime.Value);
-                    
+
                 case "status":
                     return await ShowStatusAsync();
-                    
+
                 case "website":
                     if (string.IsNullOrEmpty(args.MediaUrl))
                     {
@@ -325,7 +326,7 @@ public class CommandExecutor
                         return 1;
                     }
                     return await StartWebsiteAsync(args.MediaUrl);
-                    
+
                 default:
                     System.Console.WriteLine($"Error: Unknown command '{args.Command}'.");
                     System.Console.WriteLine("Use 'sharpcaster help' for available commands.");
@@ -443,7 +444,7 @@ public class CommandExecutor
                 System.Console.WriteLine("Volume must be between 0.0 and 1.0");
                 return 1;
             }
-            
+
             await _state.Client!.ReceiverChannel.SetVolume(volume);
             System.Console.WriteLine($"Volume set to {volume:P0}");
             return 0;
@@ -464,7 +465,7 @@ public class CommandExecutor
                 System.Console.WriteLine("Media volume must be between 0.0 and 1.0");
                 return 1;
             }
-            
+
             var status = await _state.Client!.MediaChannel.SetVolumeAsync(volume);
             if (status == null)
             {
@@ -502,10 +503,10 @@ public class CommandExecutor
         {
             var mediaStatus = await _state.Client!.MediaChannel.GetMediaStatusAsync();
             var receiverStatus = _state.Client.ReceiverChannel.ReceiverStatus;
-            
+
             System.Console.WriteLine($"\nDevice: {_state.SelectedDevice?.Name}");
             System.Console.WriteLine($"Volume: {receiverStatus?.Volume?.Level:P0} (Muted: {receiverStatus?.Volume?.Muted})");
-            
+
             if (mediaStatus != null)
             {
                 System.Console.WriteLine($"Media State: {mediaStatus.PlayerState}");
@@ -517,7 +518,7 @@ public class CommandExecutor
                     var progress = (mediaStatus.CurrentTime / mediaStatus.Media.Duration.Value) * 100;
                     System.Console.WriteLine($"Progress: {progress:F1}%");
                 }
-                
+
                 // Display media volume and mute status
                 if (mediaStatus.Volume != null)
                 {
@@ -532,7 +533,7 @@ public class CommandExecutor
             {
                 System.Console.WriteLine("No media currently playing");
             }
-            
+
             return 0;
         }
         catch (Exception ex)
@@ -547,19 +548,19 @@ public class CommandExecutor
         try
         {
             // Validate URL
-            if (!Uri.TryCreate(url, UriKind.Absolute, out var uri) || 
+            if (!Uri.TryCreate(url, UriKind.Absolute, out var uri) ||
                 (uri.Scheme != "http" && uri.Scheme != "https"))
             {
                 System.Console.WriteLine("Error: Invalid website URL. Must be a valid http or https URL.");
                 return 1;
             }
 
-            
+
 
             try
             {
                 const string dashboardReceiver = "F7FD2183";
-                
+
                 System.Console.WriteLine("Launching Dashboard Receiver...");
                 await _state.Client!.LaunchApplicationAsync(dashboardReceiver, false);
 
@@ -597,7 +598,7 @@ public class CommandExecutor
         try
         {
             var logs = _memoryLogService.GetRecentLogs(20);
-            
+
             if (logs.Count == 0)
             {
                 System.Console.WriteLine("No logs available.");
@@ -606,24 +607,24 @@ public class CommandExecutor
 
             System.Console.WriteLine($"\nShowing last {logs.Count} log entries:");
             System.Console.WriteLine(new string('-', 80));
-            
+
             foreach (var log in logs)
             {
                 var timeStr = log.Timestamp.ToString("HH:mm:ss.fff");
                 var levelStr = log.GetLevelDisplay();
                 var categoryStr = log.Category.Length > 25 ? log.Category.Substring(0, 22) + "..." : log.Category;
-                
+
                 System.Console.WriteLine($"{timeStr} [{levelStr}] {categoryStr}: {log.Message}");
-                
+
                 if (log.Exception != null)
                 {
                     System.Console.WriteLine($"    Exception: {log.Exception.GetType().Name}: {log.Exception.Message}");
                 }
             }
-            
+
             System.Console.WriteLine(new string('-', 80));
             System.Console.WriteLine($"Total logs in memory: {_memoryLogService.Count}");
-            
+
             return 0;
         }
         catch (Exception ex)
@@ -637,7 +638,7 @@ public class CommandExecutor
     {
         var uri = new Uri(url);
         var extension = Path.GetExtension(uri.AbsolutePath).ToLowerInvariant();
-        
+
         return extension switch
         {
             ".mp4" or ".webm" or ".avi" or ".mkv" or ".mov" => "video/mp4",

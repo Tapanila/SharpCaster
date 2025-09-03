@@ -303,9 +303,9 @@ namespace Sharpcaster
                 if (_stream != null)
                 {
 #if NETSTANDARD2_0
-                await _stream.WriteAsync(message, 0, message.Length);
+                    await _stream.WriteAsync(message, 0, message.Length);
 #else
-                await _stream.WriteAsync(message).ConfigureAwait(false);
+                    await _stream.WriteAsync(message).ConfigureAwait(false);
 #endif
                 }
             }

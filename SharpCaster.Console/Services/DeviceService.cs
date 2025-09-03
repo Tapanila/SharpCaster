@@ -26,11 +26,11 @@ public class DeviceService
     public async Task DiscoverDevicesAsync()
     {
         AnsiConsole.MarkupLine("[yellow]🔍 Scanning your network for Chromecast devices...[/]");
-        
+
         try
         {
             _state.Devices.Clear();
-            
+
             await AnsiConsole.Status()
                 .Spinner(Spinner.Known.Dots)
                 .SpinnerStyle(Style.Parse("green"))
@@ -58,7 +58,7 @@ public class DeviceService
     public async Task ConnectToDeviceAsync()
     {
         if (_state.SelectedDevice == null) return;
-        
+
         try
         {
             await AnsiConsole.Status()
@@ -69,14 +69,14 @@ public class DeviceService
                     _state.Client?.Dispose();
                     _logger.LogInformation("Creating ChromecastClient with logger for device: {DeviceName}", _state.SelectedDevice.Name);
                     _state.Client = new Sharpcaster.ChromecastClient(_chromecastLogger);
-                    
+
                     ctx.Status("Establishing connection...");
                     _logger.LogInformation("Connecting to Chromecast device: {DeviceName} at {DeviceUri}", _state.SelectedDevice.Name, _state.SelectedDevice.DeviceUri);
                     await _state.Client.ConnectChromecast(_state.SelectedDevice);
-                    
+
                     ctx.Status("Verifying connection...");
                     await Task.Delay(1000); // Give connection time to stabilize
-                    
+
                     // Verify the connection by trying to get status
                     var status = _state.Client.ReceiverChannel?.ReceiverStatus;
                     if (status == null)
@@ -84,25 +84,25 @@ public class DeviceService
                         throw new Exception("Connection established but device is not responding");
                     }
                 });
-            
+
             _state.IsConnected = true;
             _state.LastConnectionCheck = DateTime.Now;
             _ui.AddSeparator();
             AnsiConsole.MarkupLine($"[green]✅ Successfully connected to {_state.SelectedDevice.Name}![/]");
-            
+
             // Check for existing applications and offer to join them
             await CheckAndJoinExistingApplicationAsync();
         }
         catch (Exception ex)
         {
             AnsiConsole.MarkupLine($"[red]❌ Connection failed: {ex.Message}[/]");
-            
+
             // Provide helpful troubleshooting tips
             AnsiConsole.MarkupLine("[dim]Troubleshooting tips:[/]");
             AnsiConsole.MarkupLine("[dim]• Make sure the device is not busy with another cast session[/]");
             AnsiConsole.MarkupLine("[dim]• Try restarting the Chromecast device[/]");
             AnsiConsole.MarkupLine("[dim]• Ensure your firewall allows the connection[/]");
-            
+
             _state.Client?.Dispose();
             _state.Client = null;
             _state.IsConnected = false;
@@ -135,7 +135,7 @@ public class DeviceService
         {
             _state.IsConnected = false;
         }
-        
+
         return Task.CompletedTask;
     }
 
@@ -173,7 +173,7 @@ public class DeviceService
         if (_state.Client == null || !_state.IsConnected)
             return;
 
-        
+
         try
         {
             var application = _state.Client.ChromecastStatus.Application;
@@ -191,7 +191,7 @@ public class DeviceService
                 await _state.Client.ReceiverChannel.GetChromecastStatusAsync();
             }
             var receiverStatus = _state.Client.ReceiverChannel.ReceiverStatus;
-            
+
             if (receiverStatus?.Applications != null && receiverStatus.Applications.Count > 0)
             {
                 var runningApp = receiverStatus.Applications.FirstOrDefault();
@@ -225,7 +225,7 @@ public class DeviceService
                     AnsiConsole.WriteLine();
 
                     var shouldJoin = AnsiConsole.Confirm("[yellow]Would you like to join this existing application?[/]");
-                    
+
                     if (shouldJoin)
                     {
                         await AnsiConsole.Status()
@@ -237,9 +237,9 @@ public class DeviceService
                                 // This will join the existing app instead of launching a new one
                                 await _state.Client.LaunchApplicationAsync(runningApp.AppId, joinExistingApplicationSession: true);
                             });
-                        
+
                         AnsiConsole.MarkupLine($"[green]✅ Successfully joined {runningApp.DisplayName}![/]");
-                        
+
                         // If it's a media application, try to get current media status
                         var hasMediaNamespace = runningApp.Namespaces?.Any(ns => ns.Name == "urn:x-cast:com.google.cast.media") == true;
                         if (hasMediaNamespace)
@@ -262,7 +262,7 @@ public class DeviceService
                     else
                     {
                         AnsiConsole.MarkupLine("[dim]Skipping existing application. Launching Default Media Receiver...[/]");
-                        
+
                         await AnsiConsole.Status()
                             .Spinner(Spinner.Known.Star)
                             .SpinnerStyle(Style.Parse("blue"))
@@ -271,7 +271,7 @@ public class DeviceService
                                 const string defaultMediaReceiver = "B3419EF5";
                                 await _state.Client.LaunchApplicationAsync(defaultMediaReceiver, false);
                             });
-                        
+
                         AnsiConsole.MarkupLine("[green]✅ Default Media Receiver launched successfully![/]");
                     }
                 }

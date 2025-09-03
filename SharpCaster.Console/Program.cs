@@ -24,7 +24,7 @@ class Program
         // Setup dependency injection
         var services = new ServiceCollection();
         ConfigureServices(services);
-        
+
         var serviceProvider = services.BuildServiceProvider();
 
         // Check if this is command-line mode or interactive mode
@@ -48,7 +48,7 @@ class Program
         // Register memory log service first
         services.AddSingleton<MemoryLogService>();
         services.AddSingleton<LogViewerService>();
-        
+
         // Add logging with memory provider
         services.AddLogging(builder =>
         {
@@ -56,27 +56,27 @@ class Program
             builder.Services.AddSingleton<ILoggerProvider>(provider =>
                 new MemoryLoggerProvider(provider.GetRequiredService<MemoryLogService>()));
         });
-        
+
         // Register application state as singleton
         services.AddSingleton<ApplicationState>();
-        
+
         // Register device locator
         services.AddSingleton<ChromecastLocator>();
-        
+
         // Register UI helper
         services.AddSingleton<UIHelper>();
-        
+
         // Register services
         services.AddSingleton<DeviceService>();
         services.AddSingleton<CommandExecutor>();
-        
+
         // Register controllers
         services.AddSingleton<MediaController>();
         services.AddSingleton<QueueController>();
-        
+
         // Register flows
         services.AddSingleton<ApplicationFlows>();
-        
+
         // Register main application
         services.AddSingleton<SharpCasterApplication>();
     }
@@ -100,7 +100,7 @@ public class SharpCasterApplication
         _flows = flows;
         _ui = ui;
         _logger = logger;
-        
+
         // Initialize application state
         _state.Logger = logger;
         _state.Locator = locator;
@@ -112,16 +112,16 @@ public class SharpCasterApplication
         {
             // Log application startup
             _logger.LogInformation("SharpCaster Console application starting");
-            
+
             // Show welcome message
             _ui.ShowWelcome();
-            
+
             // Step 1: Initial device discovery
             await _flows.InitialDiscoveryFlowAsync();
-            
+
             // Step 2: Device selection and connection
             await _flows.DeviceSelectionFlowAsync();
-            
+
             // Step 3: Main application flow with full options
             await _flows.MainApplicationFlowAsync();
         }

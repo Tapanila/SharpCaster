@@ -13,5 +13,5 @@ public class ApplicationState
     public DateTime LastConnectionCheck { get; set; }
     public ILogger? Logger { get; set; }
     public ChromecastLocator? Locator { get; set; }
-    
+
 }

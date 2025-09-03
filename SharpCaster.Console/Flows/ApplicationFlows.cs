@@ -59,7 +59,7 @@ public class ApplicationFlows
             else
             {
                 await _deviceService.DiscoverDevicesAsync();
-                
+
                 if (_state.Devices.Count == 0)
                 {
                     _ui.AddSeparator("❌ No Devices Found");
@@ -74,7 +74,7 @@ public class ApplicationFlows
                         return;
                     }
                 }
-                
+
                 _ui.AddSeparator("Searching again...");
             }
         }
@@ -94,13 +94,13 @@ public class ApplicationFlows
         while (!_state.IsConnected)
         {
             var choices = new List<string>();
-            
+
             // Add device options
             for (int i = 0; i < _state.Devices.Count; i++)
             {
                 choices.Add($"{i + 1}. {_state.Devices[i].Name}");
             }
-            
+
             // Add other options
             choices.AddRange(new[] { "Search for more devices", "Exit application" });
 
@@ -121,7 +121,7 @@ public class ApplicationFlows
                 await CleanupAsync();
                 return;
             }
-            
+
             if (choice == "Search for more devices")
             {
                 _ui.AddSeparator("Searching for additional devices...");
@@ -142,7 +142,7 @@ public class ApplicationFlows
                 {
                     _state.SelectedDevice = _state.Devices[deviceIndex - 1];
                     await _deviceService.ConnectToDeviceAsync();
-                    
+
                     if (!_state.IsConnected)
                     {
                         AnsiConsole.WriteLine();
@@ -171,7 +171,7 @@ public class ApplicationFlows
         while (true)
         {
             await _deviceService.CheckConnectionHealthAsync();
-            
+
             if (!_state.IsConnected)
             {
                 _ui.AddSeparator("⚠️ Connection Issue Detected");
@@ -197,7 +197,7 @@ public class ApplicationFlows
                 "Website display",
                 "Media controls",
                 "Stop application",
-                "Queue management", 
+                "Queue management",
                 "Device status",
                 "View logs",
                 "Connect to different device",
@@ -312,7 +312,7 @@ public class ApplicationFlows
     private Task CleanupAsync()
     {
         AnsiConsole.MarkupLine("[yellow]👋 Disconnecting and cleaning up...[/]");
-        
+
         if (_state.Client != null)
         {
             try
@@ -324,7 +324,7 @@ public class ApplicationFlows
                 _state.Logger?.LogError(ex, "Error during cleanup");
             }
         }
-        
+
         _state.Locator?.Dispose();
         AnsiConsole.MarkupLine("[green]Goodbye! Thanks for using SharpCaster Console Controller.[/]");
         return Task.CompletedTask;

@@ -90,7 +90,7 @@ namespace Sharpcaster.Models.Media
 
             // Convert HSL to RGB
             var (r, g, b) = HslToRgb(hue, saturation, lightness);
-            
+
             return FromRgba(r, g, b, (byte)(alpha * 255));
         }
 
@@ -108,7 +108,7 @@ namespace Sharpcaster.Models.Media
                 var q = l < 0.5 ? l * (1 + s) : l + s - (l * s);
                 var p = (2 * l) - q;
                 var hNorm = h / 360.0;
-                
+
                 r = Hue2rgb(p, q, hNorm + (1.0 / 3));
                 g = Hue2rgb(p, q, hNorm);
                 b = Hue2rgb(p, q, hNorm - (1.0 / 3));

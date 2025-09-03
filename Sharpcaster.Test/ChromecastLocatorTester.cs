@@ -27,16 +27,16 @@ namespace Sharpcaster.Test
             {
                 counter++;
             };
-            
+
             // Start continuous discovery to trigger events
             locator.StartContinuousDiscovery(TimeSpan.FromSeconds(5));
-            
+
             // Wait for events to be fired
             await Task.Delay(TimeSpan.FromMilliseconds(5200), Xunit.TestContext.Current.CancellationToken);
-            
+
             // Stop discovery
             locator.StopContinuousDiscovery();
-            
+
             // Also test async method still works
             var chromecasts = await locator.FindReceiversAsync();
             Assert.NotEmpty(chromecasts);

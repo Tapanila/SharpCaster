@@ -34,7 +34,7 @@ namespace Sharpcaster.Test
         {
             var TestHelper = new TestHelper();
             var client = await TestHelper.CreateConnectAndLoadAppClient(outputHelper, fixture);
-            
+
             var media = new Media
             {
                 ContentUrl = "https://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/mp4/DesigningForGoogleCast.mp4",

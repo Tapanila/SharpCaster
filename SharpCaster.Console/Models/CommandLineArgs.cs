@@ -21,7 +21,7 @@ public static class CommandLineParser
     public static CommandLineArgs Parse(string[] args)
     {
         var result = new CommandLineArgs();
-        
+
         if (args.Length == 0)
         {
             return result; // Interactive mode
@@ -30,7 +30,7 @@ public static class CommandLineParser
         for (int i = 0; i < args.Length; i++)
         {
             var arg = args[i].ToLowerInvariant();
-            
+
             switch (arg)
             {
                 case "-h":
@@ -38,18 +38,18 @@ public static class CommandLineParser
                 case "help":
                     result.ShowHelp = true;
                     return result;
-                    
+
                 case "--version":
                 case "-v":
                 case "version":
                     result.ShowVersion = true;
                     return result;
-                    
+
                 case "--list-devices":
                 case "list":
                     result.ShowDevices = true;
                     break;
-                    
+
                 case "play":
                 case "pause":
                 case "stop":
@@ -58,20 +58,20 @@ public static class CommandLineParser
                 case "website":
                     result.Command = arg;
                     break;
-                    
+
                 case "cast":
                     result.Command = "play";
                     break;
-                    
+
                 case "volume":
                 case "vol":
                     result.Command = "volume";
                     break;
-                    
+
                 case "seek":
                     result.Command = "seek";
                     break;
-                    
+
                 case "--ip":
                 case "-i":
                     if (i + 1 < args.Length)
@@ -79,7 +79,7 @@ public static class CommandLineParser
                         result.DeviceIpAddress = args[++i];
                     }
                     break;
-                    
+
                 case "--title":
                 case "-t":
                     if (i + 1 < args.Length)
@@ -87,12 +87,12 @@ public static class CommandLineParser
                         result.MediaTitle = args[++i];
                     }
                     break;
-                    
+
                 case "--logs":
                 case "-l":
                     result.ShowLogs = true;
                     break;
-                    
+
                 default:
                     // Check if this is a numeric argument for volume or seek
                     if (double.TryParse(args[i], out double numericValue))
@@ -123,21 +123,21 @@ public static class CommandLineParser
                     break;
             }
         }
-        
+
         return result;
     }
-    
+
     private static bool IsUrl(string value)
     {
-        return Uri.TryCreate(value, UriKind.Absolute, out var uri) && 
+        return Uri.TryCreate(value, UriKind.Absolute, out var uri) &&
                (uri.Scheme == "http" || uri.Scheme == "https");
     }
-    
+
     private static bool IsIPAddress(string value)
     {
         return System.Net.IPAddress.TryParse(value, out _);
     }
-    
+
     public static void ShowHelp()
     {
         System.Console.WriteLine();
@@ -220,7 +220,7 @@ public static class CommandLineParser
     {
         var assembly = System.Reflection.Assembly.GetExecutingAssembly();
         var version = assembly.GetName().Version?.ToString() ?? "Unknown";
-        
+
         // For single-file apps, use AppContext.BaseDirectory instead of Assembly.Location
         var buildDate = DateTime.Now; // Default fallback
         try
@@ -247,7 +247,7 @@ public static class CommandLineParser
         {
             // Fallback to current time if we can't determine build date
         }
-        
+
         System.Console.WriteLine($"sharpcaster v{version}");
         System.Console.WriteLine($"Build Date: {buildDate:yyyy-MM-dd HH:mm:ss}");
         System.Console.WriteLine($"Runtime: {System.Runtime.InteropServices.RuntimeInformation.FrameworkDescription}");

@@ -120,7 +120,7 @@ namespace Sharpcaster.Models.Media
         /// <summary>
         /// All available individual media commands (excluding combined flags like ALL_BASIC_MEDIA and QUEUE_REPEAT)
         /// </summary>
-        private static readonly MediaCommand[] AllIndividualCommands = 
+        private static readonly MediaCommand[] AllIndividualCommands =
         {
             MediaCommand.PAUSE,
             MediaCommand.SEEK,
