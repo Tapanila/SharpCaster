@@ -21,7 +21,8 @@ public class QueueController
     }
 
 
-    public async Task CastPlaylistAsync() {
+    public async Task CastPlaylistAsync()
+    {
         if (!await _deviceService.EnsureConnectedAsync())
             return;
 
@@ -48,31 +49,40 @@ public class QueueController
 
         var queueItems = new List<QueueItem>();
 
-        switch (urlChoice) {
+        switch (urlChoice)
+        {
             case "1":
-                queueItems.Add(new QueueItem() {
-                    Media = new Media {
+                queueItems.Add(new QueueItem()
+                {
+                    Media = new Media
+                    {
                         ContentId = "Aquarium",
                         ContentUrl = "https://incompetech.com/music/royalty-free/mp3-royaltyfree/Aquarium.mp3",
                         ContentType = "audio/mpeg"
                     }
                 });
-                queueItems.Add(new QueueItem() {
-                    Media = new Media {
+                queueItems.Add(new QueueItem()
+                {
+                    Media = new Media
+                    {
                         ContentId = "Arcane",
                         ContentUrl = "https://incompetech.com/music/royalty-free/mp3-royaltyfree/Arcane.mp3",
                         ContentType = "audio/mpeg"
                     }
                 });
-                queueItems.Add(new QueueItem() {
-                    Media = new Media {
+                queueItems.Add(new QueueItem()
+                {
+                    Media = new Media
+                    {
                         ContentId = "A Mission",
                         ContentUrl = "https://incompetech.com/music/royalty-free/mp3-royaltyfree/A%20Mission.mp3",
                         ContentType = "audio/mpeg"
                     }
                 });
-                queueItems.Add(new QueueItem() {
-                    Media = new Media {
+                queueItems.Add(new QueueItem()
+                {
+                    Media = new Media
+                    {
                         ContentId = "All This",
                         ContentUrl = "https://incompetech.com/music/royalty-free/mp3-royaltyfree/All%20This.mp3",
                         ContentType = "audio/mpeg"
@@ -86,11 +96,13 @@ public class QueueController
                 throw new InvalidOperationException("Invalid URL choice");
         }
 
-        try {
+        try
+        {
             await AnsiConsole.Status()
                 .Spinner(Spinner.Known.Star2)
                 .SpinnerStyle(Style.Parse("yellow"))
-                .StartAsync("Loading playlist", async ctx => {
+                .StartAsync("Loading playlist", async ctx =>
+                {
                     ctx.Status("Loading queue...");
                     var status = await _state.Client.MediaChannel.QueueLoadAsync(queueItems.ToArray());
 
@@ -102,11 +114,14 @@ public class QueueController
             AnsiConsole.MarkupLine("[green]✅ Playlist loaded and playing successfully![/]");
             _ui.AddSeparator("📝 Queue Management");
             await ShowQueueManagementAsync();
-        } catch (Exception ex) {
+        }
+        catch (Exception ex)
+        {
             _ui.AddSeparator("❌ Casting Error");
             AnsiConsole.MarkupLine($"[red]❌ Casting failed: {ex.Message}[/]");
 
-            if (ex.Message.Contains("timeout") || ex.Message.Contains("connection")) {
+            if (ex.Message.Contains("timeout") || ex.Message.Contains("connection"))
+            {
                 _state.IsConnected = false;
                 AnsiConsole.MarkupLine("[yellow]⚠️  Connection may have been lost. Try reconnecting.[/]");
             }

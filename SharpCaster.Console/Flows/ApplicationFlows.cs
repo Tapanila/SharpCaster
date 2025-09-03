@@ -210,7 +210,8 @@ public class ApplicationFlows
                     .Title($"[yellow]What would you like to do with {_state.SelectedDevice?.Name}?[/]")
                     .PageSize(10)
                     .AddChoices(choices)
-                    .UseConverter(choice => choice switch { //128464
+                    .UseConverter(choice => choice switch
+                    { //128464
                         "Cast media" => "📺 Cast media",
                         "Cast playlist" => ". Cast playlist",
                         "Website display" => "🌐 Website display",
