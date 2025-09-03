@@ -49,10 +49,10 @@ namespace Sharpcaster.Test
 
             MediaStatus? status = await client.MediaChannel.LoadAsync(media);
             Assert.NotNull(status);
-            
+
             outputHelper.WriteLine($"Media loaded with status: {status.PlayerState}");
             outputHelper.WriteLine($"Supported commands: {status.SupportedMediaCommands}");
-            
+
             await client.DisconnectAsync();
         }
 
@@ -61,7 +61,7 @@ namespace Sharpcaster.Test
         {
             var testHelper = new TestHelper();
             ChromecastClient client = await testHelper.CreateConnectAndLoadAppClient(outputHelper, fixture.Receivers[0]);
-            
+
             bool adSkipped = false;
             AutoResetEvent adSkippedEvent = new(false);
 
@@ -69,7 +69,7 @@ namespace Sharpcaster.Test
             client.MediaChannel.StatusChanged += (sender, mediaStatus) =>
             {
                 outputHelper.WriteLine($"Media status changed: {mediaStatus?.PlayerState}");
-                
+
                 // Check if we're in an ad break
                 if (mediaStatus?.BreakStatus != null && mediaStatus.PlayerState == PlayerStateType.Playing)
                 {
@@ -86,12 +86,12 @@ namespace Sharpcaster.Test
                             adSkipped = true;
                             adSkippedEvent.Set();
                             outputHelper.WriteLine("Ad skip command sent successfully");
-                            }
-                            catch (Exception ex)
-                            {
-                                outputHelper.WriteLine($"Failed to skip ad: {ex.Message}");
-                            }
-                        });
+                        }
+                        catch (Exception ex)
+                        {
+                            outputHelper.WriteLine($"Failed to skip ad: {ex.Message}");
+                        }
+                    });
                 }
             };
 
@@ -116,7 +116,7 @@ namespace Sharpcaster.Test
                     {
                         Id = "preroll-ad",
                         BreakClipIds = new[] { "preroll-clip-1" },
-                        
+
                         Position = 0 // Preroll ad
                     }
                 }
@@ -127,9 +127,9 @@ namespace Sharpcaster.Test
 
             // Wait for ad to potentially be skipped (timeout after 10 seconds)
             bool adEventOccurred = adSkippedEvent.WaitOne(10000);
-            
+
             outputHelper.WriteLine($"Ad event occurred: {adEventOccurred}, Ad skipped: {adSkipped}");
-            
+
             await client.DisconnectAsync();
         }
 
@@ -181,10 +181,10 @@ namespace Sharpcaster.Test
 
             MediaStatus? status = await client.MediaChannel.LoadAsync(media);
             Assert.NotNull(status);
-            
+
             outputHelper.WriteLine($"Media with midroll ads loaded: {status.PlayerState}");
             outputHelper.WriteLine($"Number of breaks defined: {media.Breaks?.Length ?? 0}");
-            
+
             await client.DisconnectAsync();
         }
 
@@ -202,7 +202,7 @@ namespace Sharpcaster.Test
 
             MediaStatus? regularStatus = await client.MediaChannel.LoadAsync(regularMedia);
             Assert.NotNull(regularStatus);
-            
+
             outputHelper.WriteLine($"Regular media supported commands: {regularStatus.SupportedMediaCommands}");
             outputHelper.WriteLine($"Regular media supports SKIP_AD: {regularStatus.SupportedMediaCommands.SupportsCommand(MediaCommand.SKIP_AD)}");
 
@@ -234,7 +234,7 @@ namespace Sharpcaster.Test
 
             MediaStatus? adStatus = await client.MediaChannel.LoadAsync(mediaWithAds);
             Assert.NotNull(adStatus);
-            
+
             outputHelper.WriteLine($"Ad media supported commands: {adStatus.SupportedMediaCommands}");
             outputHelper.WriteLine($"Ad media supports SKIP_AD: {adStatus.SupportedMediaCommands.SupportsCommand(MediaCommand.SKIP_AD)}");
 
@@ -250,7 +250,7 @@ namespace Sharpcaster.Test
         {
             var testHelper = new TestHelper();
             ChromecastClient client = await testHelper.CreateConnectAndLoadAppClient(outputHelper, fixture.Receivers[0]);
-            
+
             bool adBreakDetected = false;
             AutoResetEvent statusChangeEvent = new(false);
 
@@ -264,7 +264,7 @@ namespace Sharpcaster.Test
                     outputHelper.WriteLine($"Break status: {mediaStatus.BreakStatus}");
                     statusChangeEvent.Set();
                 }
-                
+
                 outputHelper.WriteLine($"Player state: {mediaStatus?.PlayerState}");
                 outputHelper.WriteLine($"Current time: {mediaStatus?.CurrentTime}");
             };
@@ -300,10 +300,10 @@ namespace Sharpcaster.Test
 
             // Wait for status changes (timeout after 15 seconds)
             bool statusChanged = statusChangeEvent.WaitOne(15000);
-            
+
             outputHelper.WriteLine($"Status change detected: {statusChanged}");
             outputHelper.WriteLine($"Ad break detected: {adBreakDetected}");
-            
+
             await client.DisconnectAsync();
         }
     }

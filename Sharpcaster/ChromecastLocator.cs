@@ -67,7 +67,7 @@ namespace Sharpcaster
             TimeSpan? fullTimeout = null)
         {
             var devices = new List<ChromecastReceiver>();
-            
+
             // Progressive scan timeouts: quick -> medium -> full
             var scanTimeouts = new[]
             {
@@ -75,16 +75,16 @@ namespace Sharpcaster
                 mediumTimeout ?? TimeSpan.FromMilliseconds(800),  // 2nd scan: medium speed  
                 fullTimeout ?? TimeSpan.FromSeconds(2)            // 3rd scan: full timeout
             };
-            
+
             _progressiveDiscoveryStarted(_logger, scanTimeouts.Length, scanTimeouts[scanTimeouts.Length - 1].TotalMilliseconds, null);
-            
+
             for (int scanIndex = 0; scanIndex < scanTimeouts.Length; scanIndex++)
             {
                 var currentTimeout = scanTimeouts[scanIndex];
                 var scanNumber = scanIndex + 1;
-                
+
                 _progressiveCheckStarted(_logger, scanNumber, currentTimeout.TotalMilliseconds, null);
-                
+
                 try
                 {
                     var responses = await ZeroconfResolver.ResolveAsync(
@@ -92,7 +92,7 @@ namespace Sharpcaster
                         scanTime: currentTimeout).ConfigureAwait(false);
 
                     var responsesList = responses.ToList();
-                    
+
                     var scanDevices = new List<ChromecastReceiver>();
                     foreach (var response in responsesList)
                     {
@@ -108,16 +108,16 @@ namespace Sharpcaster
                             }
                         }
                     }
-                    
+
                     _progressiveCheckCompleted(_logger, scanNumber, scanDevices.Count, devices.Count, null);
-                    
+
                     // If we found devices in this scan, stop here (early exit optimization)
                     if (scanDevices.Count > 0)
                     {
                         _progressiveDiscoveryCompletedEarly(_logger, scanNumber, devices.Count, null);
                         break;
                     }
-                    
+
                     _progressiveCheckWaiting(_logger, scanNumber, null);
                 }
                 catch (OperationCanceledException)
@@ -136,7 +136,7 @@ namespace Sharpcaster
                     // Continue to next scan on error
                 }
             }
-            
+
             _progressiveDiscoveryCompleted(_logger, devices.Count, null);
             return devices;
         }
@@ -148,7 +148,7 @@ namespace Sharpcaster
         {
             var devices = new List<ChromecastReceiver>();
             var responsesList = responses.ToList();
-            
+
             foreach (var response in responsesList)
             {
                 var chromecast = CreateChromecastReceiver(response);
@@ -158,7 +158,7 @@ namespace Sharpcaster
                     _chromecastDiscovered(logger, chromecast.Name, chromecast.DeviceUri.ToString(), chromecast.Port, null);
                 }
             }
-            
+
             return devices;
         }
 
@@ -173,37 +173,37 @@ namespace Sharpcaster
                 throw new ArgumentException("Scan interval must be at least 5 seconds", nameof(scanInterval));
             }
             StopContinuousDiscovery();
-            
+
             var interval = scanInterval ?? TimeSpan.FromSeconds(5);
             _continuousSearchCts = new CancellationTokenSource();
-            
+
             _continuousDiscoveryStarted(_logger, interval.TotalSeconds, null);
-            
+
             Task.Run(async () =>
             {
                 var seenDevices = new HashSet<string>();
-                
+
                 while (!_continuousSearchCts.Token.IsCancellationRequested)
                 {
                     try
                     {
                         _continuousDiscoveryScanStarted(_logger, null);
-                        
+
                         var responses = await ZeroconfResolver.ResolveAsync(
-                            "_googlecast._tcp.local.", 
-                            TimeSpan.FromSeconds(5), 
+                            "_googlecast._tcp.local.",
+                            TimeSpan.FromSeconds(5),
                             cancellationToken: _continuousSearchCts.Token).ConfigureAwait(false);
-                        
+
                         var responsesList = responses.ToList();
                         _continuousDiscoveryScanFound(_logger, responsesList.Count, null);
-                        
+
                         foreach (var response in responsesList)
                         {
                             var chromecast = CreateChromecastReceiver(response);
                             if (chromecast != null)
                             {
                                 var deviceKey = $"{chromecast.DeviceUri}:{chromecast.Port}";
-                                
+
                                 if (seenDevices.Add(deviceKey))
                                 {
                                     _chromecastDiscovered(_logger, chromecast.Name, chromecast.DeviceUri.ToString(), chromecast.Port, null);
@@ -211,7 +211,7 @@ namespace Sharpcaster
                                 }
                             }
                         }
-                        
+
                         await Task.Delay(interval, _continuousSearchCts.Token).ConfigureAwait(false);
                     }
                     catch (OperationCanceledException) when (_continuousSearchCts.Token.IsCancellationRequested)
@@ -237,7 +237,7 @@ namespace Sharpcaster
                         }
                     }
                 }
-                
+
                 _continuousDiscoveryStopped(_logger, null);
             }, _continuousSearchCts.Token);
         }

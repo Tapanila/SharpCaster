@@ -12,7 +12,7 @@ namespace Sharpcaster.Extensions
         {
             var buffer = new byte[bufferLength];
 
-            #if NETSTANDARD2_0
+#if NETSTANDARD2_0
             int bytesRead, totalBytesRead = 0;
             if (stream == null)
             {
@@ -27,10 +27,10 @@ namespace Sharpcaster.Extensions
                 }
                 totalBytesRead += bytesRead;
             }
-            #else
+#else
             ArgumentNullException.ThrowIfNull(stream);
             await stream.ReadExactlyAsync(buffer.AsMemory(0, bufferLength), cancellationToken).ConfigureAwait(false);
-            #endif
+#endif
             return buffer;
         }
     }

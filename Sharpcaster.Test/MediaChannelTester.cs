@@ -44,7 +44,7 @@ namespace Sharpcaster.Test
 
                 mediaChannel.StatusChanged += (object sender, MediaStatus e) =>
                 {
-                        outputHelper.WriteLine(e.PlayerState.ToString());
+                    outputHelper.WriteLine(e.PlayerState.ToString());
                 };
 
                 client.Disconnected += (object sender, EventArgs e) =>
@@ -330,14 +330,14 @@ namespace Sharpcaster.Test
                 loadFailedMessage = e;
             };
 
-            
+
 
             MediaStatus mediaStatus;
- 
+
             mediaStatus = await client.MediaChannel.LoadAsync(media);
 
             await Task.Delay(500, Xunit.TestContext.Current.CancellationToken);
-            
+
 
             Assert.NotNull(loadFailedMessage);
         }
@@ -534,13 +534,13 @@ namespace Sharpcaster.Test
             Assert.Equal(PlayerStateType.Playing, status.PlayerState);
             Assert.Single(status.Items);
             Assert.Equal(status.CurrentItemId, status.Items[0].ItemId);
-            
+
             // Verify that the media has tracks
             var currentItem = status.Items[0];
             Assert.NotNull(currentItem.Media);
             Assert.NotNull(currentItem.Media.Tracks);
             Assert.Single(currentItem.Media.Tracks);
-            
+
             var loadedTrack = currentItem.Media.Tracks[0];
             Assert.Equal(TrackType.TEXT, loadedTrack.Type);
             Assert.Equal(TextTrackType.SUBTITLES, loadedTrack.Subtype);
@@ -617,7 +617,7 @@ namespace Sharpcaster.Test
 
             // Send a like user action
             var userAction = UserAction.DISLIKE;
-            
+
             //await client.MediaChannel.SendUserActionAsync(userAction);
 
             var statusAfterAction = await client.MediaChannel.GetMediaStatusAsync();

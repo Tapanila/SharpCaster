@@ -93,16 +93,16 @@ namespace Sharpcaster.Channels
 
         public static string ComputeMd5Hash(string input)
         {
-            #pragma warning disable CA5351 // Do Not Use Broken Cryptographic Algorithms
-            #if NETSTANDARD2_0
+#pragma warning disable CA5351 // Do Not Use Broken Cryptographic Algorithms
+#if NETSTANDARD2_0
             // Create an instance of the MD5 service provider
             using MD5 md5 = MD5.Create();
             // Compute the hash as a byte array
             byte[] hashBytes = md5.ComputeHash(Encoding.UTF8.GetBytes(input));
-            #else
+#else
             byte[] hashBytes = MD5.HashData(Encoding.UTF8.GetBytes(input));
-            #endif
-            #pragma warning restore CA5351 // Do Not Use Broken Cryptographic Algorithms
+#endif
+#pragma warning restore CA5351 // Do Not Use Broken Cryptographic Algorithms
             // Convert the byte array to a hexadecimal string
             StringBuilder sb = new StringBuilder();
             foreach (byte b in hashBytes)

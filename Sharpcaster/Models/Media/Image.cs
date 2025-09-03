@@ -17,7 +17,7 @@ namespace Sharpcaster.Models.Media
         /// Gets or sets the image height
         /// </summary>
         [JsonPropertyName("height")]
-        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]   
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public int? Height { get; set; }
 
         /// <summary>

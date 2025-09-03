@@ -193,10 +193,12 @@ namespace Sharpcaster.Test
             await client.LaunchApplicationAsync("B3419EF5");
 
             //This should cause issues
-            try { 
+            try
+            {
                 await client.LaunchApplicationAsync("CC1AD845", false);
                 Assert.Fail("Expected exception was not thrown.");
-            } catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 Assert.IsType<TaskCanceledException>(ex);
                 Assert.Contains("Client disconnected before receiving response.", ex.Message);
@@ -234,7 +236,8 @@ namespace Sharpcaster.Test
             ChromecastClient client = await TestHelper.CreateConnectAndLoadAppClient(outputHelper, fixture.Receivers[0]);
 
             // Register malicious handler
-            client.MediaChannel.StatusChanged += async (sender, args) => {
+            client.MediaChannel.StatusChanged += async (sender, args) =>
+            {
                 await Task.Delay(10000);
             };
 

@@ -58,7 +58,7 @@ namespace Sharpcaster.Test
                 //loop till out of media
                 for (int i = 0; i < testQueue.Length; i++)
                 {
-                    outputHelper.WriteLine(i+ "/" + testQueue.Length);
+                    outputHelper.WriteLine(i + "/" + testQueue.Length);
                     mediaStatus = await client.MediaChannel.QueueNextAsync();
                 }
                 Assert.Null(mediaStatus);
@@ -78,13 +78,13 @@ namespace Sharpcaster.Test
             ChromecastClient client = await testHelper.CreateConnectAndLoadAppClient(outputHelper, fixture);
 
             var initialQueue = TestHelper.CreateTestCd.Take(2).ToArray();
-            
+
             try
             {
                 // Load initial queue with 2 items
                 MediaStatus status = await client.MediaChannel.QueueLoadAsync(initialQueue);
                 Assert.NotNull(status);
-                
+
                 await Task.Delay(1000, Xunit.TestContext.Current.CancellationToken);
 
                 // Create new item to insert
@@ -121,11 +121,12 @@ namespace Sharpcaster.Test
             ChromecastClient client = await testHelper.CreateConnectAndLoadAppClient(outputHelper, fixture);
 
             var testQueue = TestHelper.CreateTestCd;
-            try { 
+            try
+            {
                 // Load queue
                 MediaStatus status = await client.MediaChannel.QueueLoadAsync(testQueue);
                 Assert.NotNull(status);
-                
+
                 await Task.Delay(1000, Xunit.TestContext.Current.CancellationToken);
 
                 // Get all item IDs
@@ -151,13 +152,13 @@ namespace Sharpcaster.Test
             ChromecastClient client = await testHelper.CreateConnectAndLoadAppClient(outputHelper, fixture);
 
             var testQueue = TestHelper.CreateTestCd;
-            
+
             try
             {
                 // Load queue
                 MediaStatus status = await client.MediaChannel.QueueLoadAsync(testQueue);
                 Assert.NotNull(status);
-                
+
                 await Task.Delay(1000, Xunit.TestContext.Current.CancellationToken);
 
                 // Get all item IDs
@@ -188,18 +189,18 @@ namespace Sharpcaster.Test
             ChromecastClient client = await testHelper.CreateConnectAndLoadAppClient(outputHelper, fixture);
 
             var testQueue = TestHelper.CreateTestCd;
-            
+
             try
             {
                 // Load queue
                 MediaStatus status = await client.MediaChannel.QueueLoadAsync(testQueue);
                 Assert.NotNull(status);
-                
+
                 await Task.Delay(1000, Xunit.TestContext.Current.CancellationToken);
 
                 // Get existing items and modify them
                 int[] itemIds = await client.MediaChannel.QueueGetItemIdsAsync();
-                
+
                 QueueItem[] existingItems = await client.MediaChannel.QueueGetItemsAsync([itemIds[0]]);
 
                 // Update the first item's metadata
@@ -226,7 +227,7 @@ namespace Sharpcaster.Test
             ChromecastClient client = await testHelper.CreateConnectAndLoadAppClient(outputHelper, fixture);
 
             var testQueue = TestHelper.CreateTestCd;
-            
+
             try
             {
                 // Load queue
@@ -264,13 +265,13 @@ namespace Sharpcaster.Test
             ChromecastClient client = await testHelper.CreateConnectAndLoadAppClient(outputHelper, fixture);
 
             var testQueue = TestHelper.CreateTestCd;
-            
+
             try
             {
                 // Load queue
                 MediaStatus status = await client.MediaChannel.QueueLoadAsync(testQueue);
                 Assert.NotNull(status);
-                
+
                 await Task.Delay(1000, Xunit.TestContext.Current.CancellationToken);
 
                 // Test different repeat modes
