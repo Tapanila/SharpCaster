@@ -1,4 +1,5 @@
 using System.Text;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Sharpcaster;
@@ -21,11 +22,14 @@ class Program
         // Parse command line arguments
         var commandLineArgs = CommandLineParser.Parse(args);
 
+
+
         // Setup dependency injection
         var services = new ServiceCollection();
         ConfigureServices(services);
 
         var serviceProvider = services.BuildServiceProvider();
+
 
         // Check if this is command-line mode or interactive mode
         if (!commandLineArgs.IsInteractive || commandLineArgs.ShowHelp || commandLineArgs.ShowDevices || commandLineArgs.ShowVersion)
@@ -45,6 +49,13 @@ class Program
 
     private static void ConfigureServices(IServiceCollection services)
     {
+        // Use Configuration builder to build and configure
+        var builder = new ConfigurationBuilder();
+        var conf = builder.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+            //.AddEnvironmentVariables()
+            .Build();
+        services.AddSingleton<IConfiguration>(conf);
+
         // Register memory log service first
         services.AddSingleton<MemoryLogService>();
         services.AddSingleton<LogViewerService>();

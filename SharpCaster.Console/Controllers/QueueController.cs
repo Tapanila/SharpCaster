@@ -1,23 +1,37 @@
+using Microsoft.Extensions.Configuration;
 using Sharpcaster.Models.Media;
 using Sharpcaster.Models.Queue;
-using Spectre.Console;
 using SharpCaster.Console.Models;
 using SharpCaster.Console.Services;
 using SharpCaster.Console.UI;
+using Spectre.Console;
+using System;
+using System.Xml.Linq;
 
 namespace SharpCaster.Console.Controllers;
+
+public class NamedUrl
+{
+    public string name { get; set; } = "x";
+    public string url { get; set; } = "y";
+}
 
 public class QueueController
 {
     private readonly ApplicationState _state;
     private readonly DeviceService _deviceService;
     private readonly UIHelper _ui;
+    private Dictionary<string, Media[]> _playlists;
 
-    public QueueController(ApplicationState state, DeviceService deviceService, UIHelper ui)
+    public QueueController(ApplicationState state, DeviceService deviceService, UIHelper ui, IConfiguration conf)
     {
         _state = state;
         _deviceService = deviceService;
         _ui = ui;
+
+        var s = conf.GetSection("Playlists");
+        _playlists = new Dictionary<string, Media[]>();
+        s.Bind(_playlists);
     }
 
 
@@ -27,13 +41,14 @@ public class QueueController
             return;
 
         // TODO: Read from config
-
-        var urlOptions = new[]
+        if (_playlists == null || !_playlists.Any())
         {
-            "1",
-            "2",
-            "Drei"
-        };
+
+            AnsiConsole.MarkupLine("[red]❌ No playlists configured. Please add playlists to the configuration.[/]");
+            return;
+        }
+
+        var urlOptions = _playlists.Keys.ToArray();
 
         var urlChoice = AnsiConsole.Prompt(
             new SelectionPrompt<string>()
@@ -48,53 +63,14 @@ public class QueueController
                 );
 
         var queueItems = new List<QueueItem>();
-
-        switch (urlChoice)
+        foreach (Media m in _playlists[urlChoice])
         {
-            case "1":
-                queueItems.Add(new QueueItem()
-                {
-                    Media = new Media
-                    {
-                        ContentId = "Aquarium",
-                        ContentUrl = "https://incompetech.com/music/royalty-free/mp3-royaltyfree/Aquarium.mp3",
-                        ContentType = "audio/mpeg"
-                    }
-                });
-                queueItems.Add(new QueueItem()
-                {
-                    Media = new Media
-                    {
-                        ContentId = "Arcane",
-                        ContentUrl = "https://incompetech.com/music/royalty-free/mp3-royaltyfree/Arcane.mp3",
-                        ContentType = "audio/mpeg"
-                    }
-                });
-                queueItems.Add(new QueueItem()
-                {
-                    Media = new Media
-                    {
-                        ContentId = "A Mission",
-                        ContentUrl = "https://incompetech.com/music/royalty-free/mp3-royaltyfree/A%20Mission.mp3",
-                        ContentType = "audio/mpeg"
-                    }
-                });
-                queueItems.Add(new QueueItem()
-                {
-                    Media = new Media
-                    {
-                        ContentId = "All This",
-                        ContentUrl = "https://incompetech.com/music/royalty-free/mp3-royaltyfree/All%20This.mp3",
-                        ContentType = "audio/mpeg"
-                    }
-                });
-
-
-                // ...
-                break;
-            default:
-                throw new InvalidOperationException("Invalid URL choice");
+            queueItems.Add(new QueueItem
+            {
+                Media = m
+            });
         }
+
 
         try
         {

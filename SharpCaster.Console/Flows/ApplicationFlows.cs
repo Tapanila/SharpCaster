@@ -213,7 +213,7 @@ public class ApplicationFlows
                     .UseConverter(choice => choice switch
                     { //128464
                         "Cast media" => "📺 Cast media",
-                        "Cast playlist" => ". Cast playlist",
+                        "Cast playlist" => "💿 Cast playlist",
                         "Website display" => "🌐 Website display",
                         "Media controls" => "🎮 Media controls",
                         "Stop application" => "⏹️ Stop application",
