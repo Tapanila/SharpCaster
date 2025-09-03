@@ -91,7 +91,7 @@ namespace Sharpcaster.Channels
                 throw new InvalidOperationException("No running applications found");
             }
             var loadMessage = new LoadMessage()
-            { 
+            {
                 SessionId = status.Application.SessionId,
                 Media = media,
                 AutoPlay = autoPlay,
@@ -216,7 +216,7 @@ namespace Sharpcaster.Channels
         public async Task<MediaStatus?> QueuePrevAsync()
         {
             //For some reason the request id is only returned with the first message that might be buffering, idle or playing and rest of the messages are without it
-            await SendAsync(new QueueUpdateMessage { Jump = -1}, SharpcasteSerializationContext.Default.QueueUpdateMessage, false).ConfigureAwait(false);
+            await SendAsync(new QueueUpdateMessage { Jump = -1 }, SharpcasteSerializationContext.Default.QueueUpdateMessage, false).ConfigureAwait(false);
             return await GetMediaStatusAsync().ConfigureAwait(false);
         }
 
@@ -341,7 +341,7 @@ namespace Sharpcaster.Channels
         /// <returns>media status</returns>
         public async Task<MediaStatus?> EditTracksAsync(int[]? activeTrackIds = null, TextTrackStyle? textTrackStyle = null, string? language = null, object? customData = null)
         {
-            return await SendAsync(new EditTracksInfoMessage () { ActiveTrackIds = activeTrackIds, TextTrackStyle = textTrackStyle, Language = language, CustomData = customData }, SharpcasteSerializationContext.Default.EditTracksInfoMessage).ConfigureAwait(false);
+            return await SendAsync(new EditTracksInfoMessage() { ActiveTrackIds = activeTrackIds, TextTrackStyle = textTrackStyle, Language = language, CustomData = customData }, SharpcasteSerializationContext.Default.EditTracksInfoMessage).ConfigureAwait(false);
         }
 
         /// <summary>

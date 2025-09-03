@@ -101,7 +101,7 @@ public class LogViewerService
             var timeStr = log.Timestamp.ToString("HH:mm:ss.fff");
             var levelStr = $"[{log.GetLevelColor()}]{log.GetLevelDisplay()}[/]";
             var categoryStr = TruncateString(log.Category, 28);
-            var messageStr = log.Exception != null 
+            var messageStr = log.Exception != null
                 ? $"{log.Message} [red]({log.Exception.GetType().Name})[/]"
                 : log.Message;
 
@@ -117,7 +117,7 @@ public class LogViewerService
         var levelChoices = new[]
         {
             "Debug and above",
-            "Information and above", 
+            "Information and above",
             "Warning and above",
             "Error and above",
             "Critical only"
@@ -145,9 +145,9 @@ public class LogViewerService
     private async Task SearchLogsAsync()
     {
         var searchTerm = AnsiConsole.Ask<string>("[yellow]Enter search term:[/]");
-        
+
         var allLogs = _memoryLogService.GetLogs();
-        var filteredLogs = allLogs.Where(log => 
+        var filteredLogs = allLogs.Where(log =>
             log.Message.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
             log.Category.Contains(searchTerm, StringComparison.OrdinalIgnoreCase))
             .ToList();
@@ -173,7 +173,7 @@ public class LogViewerService
         try
         {
             var logs = _memoryLogService.GetLogs();
-            var lines = logs.Select(log => 
+            var lines = logs.Select(log =>
                 $"{log.Timestamp:yyyy-MM-dd HH:mm:ss.fff} [{log.GetLevelDisplay()}] {log.Category}: {log.Message}" +
                 (log.Exception != null ? $" | Exception: {log.Exception}" : ""));
 
@@ -229,7 +229,7 @@ public class LogViewerService
     {
         if (input.Length <= maxLength)
             return input;
-        
+
         return input.Substring(0, maxLength - 3) + "...";
     }
 }

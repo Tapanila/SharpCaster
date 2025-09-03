@@ -40,16 +40,16 @@ public class UIHelper
             Justification = Justify.Center
         };
         AnsiConsole.Write(rule);
-        
+
         AnsiConsole.WriteLine();
         AnsiConsole.MarkupLine("[dim]A powerful console interface for controlling Chromecast devices[/]");
-        
+
         // Show version information
         var assembly = System.Reflection.Assembly.GetExecutingAssembly();
         var version = assembly.GetName().Version?.ToString() ?? "Unknown";
         AnsiConsole.MarkupLine($"[dim]Version: [/][yellow]{version}[/]");
         AnsiConsole.WriteLine();
-        
+
         // Show the flow steps
         var flowPanel = new Panel(
             "[yellow]Getting Started:[/]\n" +
@@ -59,7 +59,7 @@ public class UIHelper
             .Header("[blue]🚀 Quick Start Guide[/]")
             .BorderColor(Color.Blue)
             .Padding(1, 1);
-        
+
         AnsiConsole.Write(flowPanel);
         AnsiConsole.WriteLine();
     }
@@ -73,11 +73,11 @@ public class UIHelper
         };
         AnsiConsole.Write(rule);
         AnsiConsole.WriteLine();
-        
+
         var statusPanel = new Panel($"[green]✅ Ready to cast![/] You can now control your {_state.SelectedDevice?.Model} device.")
             .BorderColor(Color.Green)
             .Padding(1, 0);
-        
+
         AnsiConsole.Write(statusPanel);
         AnsiConsole.WriteLine();
     }
@@ -110,22 +110,22 @@ public class UIHelper
         var table = new Table();
         table.AddColumn("[blue]Property[/]");
         table.AddColumn("[blue]Value[/]");
-        
+
         table.AddRow("[cyan]Volume Level[/]", $"[white]{status.Volume?.Level:P0}[/]");
         table.AddRow("[cyan]Muted[/]", status.Volume?.Muted == true ? "[red]Yes[/]" : "[green]No[/]");
         table.AddRow("[cyan]Applications[/]", $"[white]{status.Applications?.Count ?? 0}[/]");
-        
+
         if (status.Applications?.Any() == true)
         {
             table.AddEmptyRow();
             table.AddRow("[yellow]Running Applications:[/]", "");
-            
+
             foreach (var app in status.Applications)
             {
                 table.AddRow($"[dim]  • {app.DisplayName}[/]", $"[dim]{app.StatusText}[/]");
             }
         }
-        
+
         return table;
     }
 }

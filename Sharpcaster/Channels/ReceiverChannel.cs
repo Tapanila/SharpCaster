@@ -59,7 +59,7 @@ namespace Sharpcaster.Channels
                 throw new ArgumentException("level must be between 0.0 and 1.0", nameof(level));
             }
             var mediaSessionId = Client?.MediaStatus?.MediaSessionId;
-            var setVolumeMessage = new SetVolumeMessage() { Volume = new Models.Volume() { Level = level }};
+            var setVolumeMessage = new SetVolumeMessage() { Volume = new Models.Volume() { Level = level } };
             var response = await SendAsync(setVolumeMessage.RequestId, JsonSerializer.Serialize(setVolumeMessage, SharpcasteSerializationContext.Default.SetVolumeMessage)).ConfigureAwait(false);
             var status = JsonSerializer.Deserialize(response, SharpcasteSerializationContext.Default.ReceiverStatusMessage);
 

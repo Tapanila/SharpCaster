@@ -25,7 +25,7 @@ public class MemoryLogService
         };
 
         _logs.Enqueue(entry);
-        
+
         while (_logs.Count > _maxLogs)
         {
             _logs.TryDequeue(out _);

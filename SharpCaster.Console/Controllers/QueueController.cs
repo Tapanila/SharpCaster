@@ -31,7 +31,7 @@ public class QueueController
             {
                 "Load queue from URLs",
                 "Next track",
-                "Previous track", 
+                "Previous track",
                 "Toggle shuffle",
                 "Set repeat mode",
                 "Get queue items",
@@ -57,13 +57,13 @@ public class QueueController
             try
             {
                 var mediaChannel = _state.Client!.MediaChannel;
-                
+
                 switch (choice)
                 {
                     case "Load queue from URLs":
                         await LoadQueueAsync(mediaChannel);
                         break;
-                        
+
                     case "Next track":
                         await AnsiConsole.Status().StartAsync("Skipping to next track...", async ctx =>
                         {
@@ -72,7 +72,7 @@ public class QueueController
                         AnsiConsole.MarkupLine("[green]⏭️ Skipped to next track[/]");
                         _ui.AddSeparator();
                         break;
-                        
+
                     case "Previous track":
                         await AnsiConsole.Status().StartAsync("Going to previous track...", async ctx =>
                         {
@@ -81,7 +81,7 @@ public class QueueController
                         AnsiConsole.MarkupLine("[green]⏮️ Went to previous track[/]");
                         _ui.AddSeparator();
                         break;
-                        
+
                     case "Toggle shuffle":
                         var shuffle = AnsiConsole.Confirm("[yellow]Enable shuffle?[/]");
                         await AnsiConsole.Status().StartAsync($"{(shuffle ? "Enabling" : "Disabling")} shuffle...", async ctx =>
@@ -91,23 +91,23 @@ public class QueueController
                         AnsiConsole.MarkupLine($"[green]🔀 Shuffle {(shuffle ? "enabled" : "disabled")}[/]");
                         _ui.AddSeparator();
                         break;
-                        
+
                     case "Set repeat mode":
                         await SetRepeatModeAsync(mediaChannel);
                         break;
-                        
+
                     case "Get queue items":
                         var itemIds = await mediaChannel.QueueGetItemIdsAsync();
                         if (itemIds?.Any() == true)
                         {
                             var queueTable = new Table();
                             queueTable.AddColumn("[blue]Item ID[/]");
-                            
+
                             foreach (var id in itemIds)
                             {
                                 queueTable.AddRow($"[white]{id}[/]");
                             }
-                            
+
                             AnsiConsole.MarkupLine($"[green]📋 Queue contains {itemIds.Length} items:[/]");
                             AnsiConsole.Write(queueTable);
                         }
@@ -116,7 +116,7 @@ public class QueueController
                             AnsiConsole.MarkupLine("[yellow]📋 Queue is empty or unavailable.[/]");
                         }
                         break;
-                        
+
                     case "Back to main menu":
                         return;
                 }
@@ -124,7 +124,7 @@ public class QueueController
             catch (Exception ex)
             {
                 AnsiConsole.MarkupLine($"[red]❌ Operation failed: {ex.Message}[/]");
-                
+
                 if (ex.Message.Contains("timeout") || ex.Message.Contains("connection"))
                 {
                     _state.IsConnected = false;
@@ -151,22 +151,22 @@ public class QueueController
                 .Validate(n => n > 0));
 
         var queueItems = new List<QueueItem>();
-        
+
         for (int i = 0; i < trackCount; i++)
         {
             AnsiConsole.MarkupLine($"[cyan]Track {i + 1} of {trackCount}:[/]");
-            
+
             var url = AnsiConsole.Prompt(
                 new TextPrompt<string>($"[yellow]Enter URL for track {i + 1}:[/]")
                     .PromptStyle("green")
                     .ValidationErrorMessage("[red]Please enter a valid URL[/]")
                     .Validate(url => Uri.TryCreate(url, UriKind.Absolute, out _)));
-            
+
             var title = AnsiConsole.Prompt(
                 new TextPrompt<string>($"[yellow]Enter title for track {i + 1} (optional):[/]")
                     .PromptStyle("green")
                     .AllowEmpty());
-            
+
             queueItems.Add(new QueueItem
             {
                 Media = new Media
@@ -193,7 +193,7 @@ public class QueueController
                     ctx.Status($"Loading queue with {queueItems.Count} items...");
                     await mediaChannel.QueueLoadAsync(queueItems.ToArray(), RepeatModeType.OFF, 0);
                 });
-            
+
             _ui.AddSeparator();
             AnsiConsole.MarkupLine($"[green]✅ Queue loaded with {queueItems.Count} items[/]");
         }
@@ -225,7 +225,7 @@ public class QueueController
             {
                 await mediaChannel.QueueSetRepeatModeAsync(repeatMode);
             });
-            
+
             var modeText = repeatMode switch
             {
                 RepeatModeType.OFF => "Off",
@@ -233,7 +233,7 @@ public class QueueController
                 RepeatModeType.SINGLE => "Single",
                 _ => repeatMode.ToString()
             };
-            
+
             AnsiConsole.MarkupLine($"[green]🔁 Repeat mode set to {modeText}[/]");
             _ui.AddSeparator();
         }
