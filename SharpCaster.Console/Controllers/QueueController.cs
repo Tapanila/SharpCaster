@@ -10,12 +10,6 @@ using System.Xml.Linq;
 
 namespace SharpCaster.Console.Controllers;
 
-public class NamedUrl
-{
-    public string name { get; set; } = "x";
-    public string url { get; set; } = "y";
-}
-
 public class QueueController
 {
     private readonly ApplicationState _state;
@@ -23,15 +17,14 @@ public class QueueController
     private readonly UIHelper _ui;
     private Dictionary<string, Media[]> _playlists;
 
-    public QueueController(ApplicationState state, DeviceService deviceService, UIHelper ui, IConfiguration conf)
+    public QueueController(ApplicationState state, DeviceService deviceService, UIHelper ui, IConfiguration config)
     {
         _state = state;
         _deviceService = deviceService;
         _ui = ui;
-
-        var s = conf.GetSection("Playlists");
+    
         _playlists = new Dictionary<string, Media[]>();
-        s.Bind(_playlists);
+        config.Bind("Playlists", _playlists);
     }
 
 
@@ -40,10 +33,8 @@ public class QueueController
         if (!await _deviceService.EnsureConnectedAsync())
             return;
 
-        // TODO: Read from config
         if (_playlists == null || !_playlists.Any())
         {
-
             AnsiConsole.MarkupLine("[red]❌ No playlists configured. Please add playlists to the configuration.[/]");
             return;
         }
@@ -70,7 +61,6 @@ public class QueueController
                 Media = m
             });
         }
-
 
         try
         {
@@ -115,6 +105,7 @@ public class QueueController
             var choices = new[]
             {
                 "Load queue from URLs",
+                "Load queue from playlist",
                 "Next track",
                 "Previous track",
                 "Toggle shuffle",
@@ -130,6 +121,7 @@ public class QueueController
                     .UseConverter(choice => choice switch
                     {
                         "Load queue from URLs" => "📝 Load queue from URLs",
+                        "Load queue from playlist" => "💿 Load queue from URLs",
                         "Next track" => "⏭️ Next track",
                         "Previous track" => "⏮️ Previous track",
                         "Toggle shuffle" => "🔀 Toggle shuffle",
@@ -147,6 +139,10 @@ public class QueueController
                 {
                     case "Load queue from URLs":
                         await LoadQueueAsync(mediaChannel);
+                        break;
+
+                    case "Load queue from playlist":
+                        await CastPlaylistAsync();
                         break;
 
                     case "Next track":
@@ -183,14 +179,17 @@ public class QueueController
 
                     case "Get queue items":
                         var itemIds = await mediaChannel.QueueGetItemIdsAsync();
-                        if (itemIds?.Any() == true)
+                        var items = await mediaChannel.QueueGetItemsAsync(itemIds);
+                        if (items?.Any() == true)
                         {
                             var queueTable = new Table();
                             queueTable.AddColumn("[blue]Item ID[/]");
+                            queueTable.AddColumn("[blue]Name[/]");
+                            queueTable.AddColumn("[blue]Url[/]");
 
-                            foreach (var id in itemIds)
+                            foreach (var item in items)
                             {
-                                queueTable.AddRow($"[white]{id}[/]");
+                                queueTable.AddRow($"[white]{item.ItemId}[/]", $"[white]{item?.Media.ContentId}[/]",item?.Media.ContentUrl??"");
                             }
 
                             AnsiConsole.MarkupLine($"[green]📋 Queue contains {itemIds.Length} items:[/]");

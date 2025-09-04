@@ -208,7 +208,7 @@ public class ApplicationFlows
             var choice = AnsiConsole.Prompt(
                 new SelectionPrompt<string>()
                     .Title($"[yellow]What would you like to do with {_state.SelectedDevice?.Name}?[/]")
-                    .PageSize(10)
+                    .PageSize(11)
                     .AddChoices(choices)
                     .UseConverter(choice => choice switch
                     { //128464
