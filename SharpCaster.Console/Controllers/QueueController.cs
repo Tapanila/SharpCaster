@@ -6,97 +6,192 @@ using SharpCaster.Console.Services;
 using SharpCaster.Console.UI;
 using Spectre.Console;
 using System;
+using System.Globalization;
 using System.Xml.Linq;
 
 namespace SharpCaster.Console.Controllers;
+
+
+public class Node
+{
+    public Node(string name)
+    {
+        Name = name;
+    }
+
+    public String Name { get; set; }
+    public object? Data { get; set; }
+    
+}
 
 public class QueueController
 {
     private readonly ApplicationState _state;
     private readonly DeviceService _deviceService;
     private readonly UIHelper _ui;
-    private Dictionary<string, Media[]> _playlists;
+    private Node _playlistTree;
 
     public QueueController(ApplicationState state, DeviceService deviceService, UIHelper ui, IConfiguration config)
     {
         _state = state;
         _deviceService = deviceService;
         _ui = ui;
-    
-        _playlists = new Dictionary<string, Media[]>();
-        config.Bind("Playlists", _playlists);
+
+        _playlistTree = new Node("root");
+        var _playlists = config.GetSection("Playlists");
+        AddPlaylists(_playlistTree, _playlists);
     }
 
+    private void AddPlaylists(Node parent, IConfigurationSection playlists)
+    {
+        List<Node> children = new List<Node>();
+        var subsections = playlists.GetChildren();
+
+        foreach (var section in subsections)
+        {
+            var data = section.GetChildren().FirstOrDefault();
+            if (data != null && data.Key.Equals("0"))
+            {
+                // This section only contains numbered items -> array of objects(Media)
+                var playlist = new Node(section.Key);
+                List<Media> tracks = new List<Media>(); 
+
+                IEnumerable<IConfigurationSection> mediaArray = section.GetChildren();
+                List<Media>? t = mediaArray.Select(configSection =>
+                        new Media()
+                        {
+                            ContentUrl = configSection["ContentUrl"]!.ToString(),
+                            Metadata = new MediaMetadata() { Title = configSection["Metadata:Title"]!.ToString() }
+                        })?.ToList();
+
+                playlist.Data = t;
+                children.Add(playlist);
+            }
+            else
+            {
+                // This section contains subsections -> create a new node and recurse
+                var container = new Node(section.Key);
+                children.Add(container);
+                AddPlaylists(container, section);
+                
+            }
+
+        }
+
+        parent.Data = children;
+
+    }
 
     public async Task CastPlaylistAsync()
     {
         if (!await _deviceService.EnsureConnectedAsync())
             return;
 
-        if (_playlists == null || !_playlists.Any())
+        if (_playlistTree == null)
         {
             AnsiConsole.MarkupLine("[red]❌ No playlists configured. Please add playlists to the configuration.[/]");
             return;
         }
 
-        var urlOptions = _playlists.Keys.ToArray();
-
-        var urlChoice = AnsiConsole.Prompt(
-            new SelectionPrompt<string>()
-                .Title("[yellow]Select playlist to cast:[/]")
-                .AddChoices(urlOptions)
-                //.UseConverter(choice => choice switch {
-                //    "Sample Video (Designing for Google Cast)" => "🎬 Sample Video (Designing for Google Cast)",
-                //    "Sample Audio (Arcane - Kevin MacLeod)" => "🎵 Sample Audio (Arcane - Kevin MacLeod)",
-                //    "Custom URL" => "🔗 Custom URL",
-                //    _ => choice
-                //})
-                );
-
-        var queueItems = new List<QueueItem>();
-        foreach (Media m in _playlists[urlChoice])
+        Node currentNode = _playlistTree;
+        while (true)
         {
-            m.StreamType = StreamType.Buffered;
-            m.Metadata = m.Metadata??new MediaMetadata() { Title = m.ContentId};
-
-            queueItems.Add(new QueueItem
+            List<string> urlOptions = new();
+            if (currentNode?.Data is List<Node> nodes)
             {
-                Media = m
-            });
-        }
+                urlOptions = nodes.Select(c => c.Name).ToList();
+            }
 
-        try
-        {
-            await AnsiConsole.Status()
-                .Spinner(Spinner.Known.Star2)
-                .SpinnerStyle(Style.Parse("yellow"))
-                .StartAsync("Loading playlist", async ctx =>
+
+            //_playlists.GetChildren().Select(c => c.Key).ToList();
+            urlOptions.Add("Back");
+
+            var urlChoice = AnsiConsole.Prompt(
+                new SelectionPrompt<string>()
+                    .Title("[yellow]Select playlist to cast:[/]")
+                    .AddChoices(urlOptions)
+                    .UseConverter(choice => choice switch
+                    {
+                        "Back" => "🔙 Back",
+                        _ => GetTypeIconForChoice(currentNode, choice) + choice
+                    })
+                    );
+
+            if (urlChoice == "Back")
+            {
+                return;
+            }
+
+
+            var queueItems = new List<QueueItem>();
+            if (currentNode?.Data is List<Node> nodes2)
+            {
+                var selectedNode = nodes2.FirstOrDefault(n => n.Name == urlChoice);
+                if (selectedNode != null)
                 {
-                    ctx.Status("Loading queue...");
-                    var status = await _state.Client.MediaChannel.QueueLoadAsync(queueItems.ToArray());
+                    if (selectedNode.Data is List<Node>)
+                    {
+                        // Navigate into the folder
+                        currentNode = selectedNode;
+                        continue; // Restart the loop to show the new options
+                    }
+                    else if (selectedNode.Data is List<Media> mediaList)
+                    {
+                        // We have reached a playlist, proceed to cast it
+                        foreach (Media m in mediaList)
+                        {
+                            m.StreamType = StreamType.Buffered;
+                            m.Metadata = m.Metadata ?? new MediaMetadata() { Title = m.ContentId };
 
-                    if (status == null)
-                        throw new Exception("Failed to load playlist - no status returned");
-                });
+                            queueItems.Add(new QueueItem
+                            {
+                                Media = m
+                            });
+                        }
 
-            _ui.AddSeparator();
-            AnsiConsole.MarkupLine("[green]✅ Playlist loaded and playing successfully![/]");
-            _ui.AddSeparator("📝 Queue Management");
-            await ShowQueueManagementAsync();
-        }
-        catch (Exception ex)
-        {
-            _ui.AddSeparator("❌ Casting Error");
-            AnsiConsole.MarkupLine($"[red]❌ Casting failed: {ex.Message}[/]");
+                    }
+                }
+            }
 
-            if (ex.Message.Contains("timeout") || ex.Message.Contains("connection"))
+            try
             {
-                _state.IsConnected = false;
-                AnsiConsole.MarkupLine("[yellow]⚠️  Connection may have been lost. Try reconnecting.[/]");
+                await AnsiConsole.Status()
+                    .Spinner(Spinner.Known.Star2)
+                    .SpinnerStyle(Style.Parse("yellow"))
+                    .StartAsync("Loading playlist", async ctx =>
+                    {
+                        ctx.Status("Loading queue...");
+                        var status = await _state.Client.MediaChannel.QueueLoadAsync(queueItems.ToArray());
+
+                        if (status == null)
+                            throw new Exception("Failed to load playlist - no status returned");
+                    });
+
+                _ui.AddSeparator();
+                AnsiConsole.MarkupLine("[green]✅ Playlist loaded and playing successfully![/]");
+                _ui.AddSeparator("📝 Queue Management");
+                await ShowQueueManagementAsync();
+            }
+            catch (Exception ex)
+            {
+                _ui.AddSeparator("❌ Casting Error");
+                AnsiConsole.MarkupLine($"[red]❌ Casting failed: {ex.Message}[/]");
+
+                if (ex.Message.Contains("timeout") || ex.Message.Contains("connection"))
+                {
+                    _state.IsConnected = false;
+                    AnsiConsole.MarkupLine("[yellow]⚠️  Connection may have been lost. Try reconnecting.[/]");
+                }
             }
         }
     }
 
+    private string GetTypeIconForChoice(Node? currentNode, string choice)
+    {
+        return currentNode?.Data is List<Node> nodes && nodes.FirstOrDefault(n => n.Name == choice)?.Data is List<Node>
+            ? "📁 " // Folder icon for categories
+            : "💿 "; // Music note icon for playlists
+    }
 
     public async Task ShowQueueManagementAsync()
     {
@@ -197,7 +292,7 @@ public class QueueController
                                 string col = "[white]";
                                 if (item.ItemId == mediaChannel.MediaStatus?.CurrentItemId)
                                 {
-                                    col = "[blue]* ";
+                                    col = "[blue]";
                                 }
                                 queueTable.AddRow($"{col}{item.ItemId}[/]",
                                                     $"{col}{item?.Media.ContentId}[/]",
