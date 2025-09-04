@@ -56,6 +56,9 @@ public class QueueController
         var queueItems = new List<QueueItem>();
         foreach (Media m in _playlists[urlChoice])
         {
+            m.StreamType = StreamType.Buffered;
+            m.Metadata = m.Metadata??new MediaMetadata() { Title = m.ContentId};
+
             queueItems.Add(new QueueItem
             {
                 Media = m
@@ -121,7 +124,7 @@ public class QueueController
                     .UseConverter(choice => choice switch
                     {
                         "Load queue from URLs" => "📝 Load queue from URLs",
-                        "Load queue from playlist" => "💿 Load queue from URLs",
+                        "Load queue from playlist" => "💿 Load queue from playlist",
                         "Next track" => "⏭️ Next track",
                         "Previous track" => "⏮️ Previous track",
                         "Toggle shuffle" => "🔀 Toggle shuffle",
@@ -184,15 +187,19 @@ public class QueueController
                         {
                             var queueTable = new Table();
                             queueTable.AddColumn("[blue]Item ID[/]");
-                            queueTable.AddColumn("[blue]Name[/]");
+                            queueTable.AddColumn("[blue]MediaId[/]");
                             queueTable.AddColumn("[blue]Url[/]");
+                            queueTable.AddColumn("[blue]Title[/]");
 
                             foreach (var item in items)
                             {
-                                queueTable.AddRow($"[white]{item.ItemId}[/]", $"[white]{item?.Media.ContentId}[/]",item?.Media.ContentUrl??"");
+                                queueTable.AddRow( $"[white]{item.ItemId}[/]",
+                                                   $"[white]{item?.Media.ContentId}[/]",
+                                                   item?.Media.ContentUrl??"",
+                                                   item?.Media.Metadata?.Title??"" );
                             }
 
-                            AnsiConsole.MarkupLine($"[green]📋 Queue contains {itemIds.Length} items:[/]");
+                            AnsiConsole.MarkupLine($"[green]📋 Queue contains {items.Length} items:[/]");
                             AnsiConsole.Write(queueTable);
                         }
                         else
