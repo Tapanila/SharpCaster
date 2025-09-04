@@ -183,6 +183,7 @@ public class QueueController
                     case "Get queue items":
                         var itemIds = await mediaChannel.QueueGetItemIdsAsync();
                         var items = await mediaChannel.QueueGetItemsAsync(itemIds);
+
                         if (items?.Any() == true)
                         {
                             var queueTable = new Table();
@@ -193,12 +194,16 @@ public class QueueController
 
                             foreach (var item in items)
                             {
-                                queueTable.AddRow( $"[white]{item.ItemId}[/]",
-                                                   $"[white]{item?.Media.ContentId}[/]",
-                                                   item?.Media.ContentUrl??"",
-                                                   item?.Media.Metadata?.Title??"" );
+                                string col = "[white]";
+                                if (item.ItemId == mediaChannel.MediaStatus?.CurrentItemId)
+                                {
+                                    col = "[blue]* ";
+                                }
+                                queueTable.AddRow($"{col}{item.ItemId}[/]",
+                                                    $"{col}{item?.Media.ContentId}[/]",
+                                                    $"{col}{item?.Media.ContentUrl??""}[/]",
+                                                    $"{col}{item?.Media.Metadata?.Title??""}[/]");
                             }
-
                             AnsiConsole.MarkupLine($"[green]📋 Queue contains {items.Length} items:[/]");
                             AnsiConsole.Write(queueTable);
                         }
