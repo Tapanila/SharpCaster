@@ -54,17 +54,82 @@ public class QueueController
             {
                 // This section only contains numbered items -> array of objects(Media)
                 var playlist = new Node(section.Key);
-                List<Media> tracks = new List<Media>(); 
+                List<Media> tracks = new List<Media>();
 
-                IEnumerable<IConfigurationSection> mediaArray = section.GetChildren();
-                List<Media>? t = mediaArray.Select(configSection =>
-                        new Media()
+                // This works also but it is not easy to add meaningfull warnings if something is typed wrong in application.json
+                //List<Media>? tracks = mediaArray.Select(configSection =>
+                //        new Media()
+                //        {
+                //            ContentUrl = configSection["ContentUrl"]!.ToString(),
+                //            Metadata = new MediaMetadata() { Title = configSection["Title"]!.ToString() }
+                //        })?.ToList();
+
+                var mediaArray = section.GetChildren();
+                var e = mediaArray.GetEnumerator();
+                while(e.MoveNext()) {
+                    var media = new Media();
+                    var keyValues = e.Current.GetChildren().AsEnumerable();
+                    foreach (var kv in keyValues)
+                    {
+                        switch (kv.Key)
                         {
-                            ContentUrl = configSection["ContentUrl"]!.ToString(),
-                            Metadata = new MediaMetadata() { Title = configSection["Metadata:Title"]!.ToString() }
-                        })?.ToList();
+                            case "ContentId":
+                                media.ContentId = kv.Value?.ToString();
+                                break;
+                            case "ContentUrl":
+                                media.ContentUrl = kv.Value?.ToString();
+                                break;
+                            case "ContentType":
+                                media.ContentType = kv.Value?.ToString();
+                                break;
+                            case "StreamType":
+                                if (Enum.TryParse<StreamType>(kv.Value?.ToString(), true, out var streamType))
+                                {
+                                    media.StreamType = streamType;
+                                }
+                                else
+                                {
+                                    media.StreamType = StreamType.Buffered;
+                                }
+                                break;
+                            case "Title":
+                                media.Metadata = media.Metadata ?? new MediaMetadata();
+                                media.Metadata.Title = kv.Value?.ToString();
+                                break;
+                            case "SubTitle":
+                                media.Metadata = media.Metadata ?? new MediaMetadata();
+                                media.Metadata.SubTitle = kv.Value?.ToString();
+                                break;
+                            case "Duration":
+                                if (double.TryParse(kv.Value?.ToString(), NumberStyles.Any, CultureInfo.InvariantCulture, out var duration))
+                                {
+                                    media.Duration = duration;
+                                }
+                                break;
+                            default:
+                                AnsiConsole.MarkupLine("[yellow]⚠️  Warning: Unknown key in configuration (playlist: "+ playlist.Name + " ) item: [/]" + kv.Key);
+                                break;
+                        }
+                    }
+                    if (media.ContentUrl == null && media.ContentId == null)
+                    {
+                        AnsiConsole.MarkupLine("[yellow]⚠️  Warning: Skipping media item with no ContentUrl or ContentId in playlist: [/]" + playlist.Name);
+                    }
+                    else
+                    {
+                        tracks.Add(media);
+                    }
+                }
+                
 
-                playlist.Data = t;
+                //List<Media>? t = mediaArray.Select(configSection =>
+                //        new Media()
+                //        {
+                //            ContentUrl = configSection["ContentUrl"]!.ToString(),
+                //            Metadata = new MediaMetadata() { Title = configSection["Title"]!.ToString() }
+                //        })?.ToList();
+
+                playlist.Data = tracks;
                 children.Add(playlist);
             }
             else
@@ -73,13 +138,9 @@ public class QueueController
                 var container = new Node(section.Key);
                 children.Add(container);
                 AddPlaylists(container, section);
-                
             }
-
         }
-
         parent.Data = children;
-
     }
 
     public async Task CastPlaylistAsync()
@@ -97,36 +158,28 @@ public class QueueController
         while (true)
         {
             List<string> urlOptions = new();
-            if (currentNode?.Data is List<Node> nodes)
+            if (currentNode?.Data is List<Node> lineNodes)
             {
-                urlOptions = nodes.Select(c => c.Name).ToList();
-            }
+                urlOptions = lineNodes.Select(c => c.Name).ToList();
+                urlOptions.Add("Back");
 
+                var urlChoice = AnsiConsole.Prompt(
+                    new SelectionPrompt<string>()
+                        .Title("[yellow]Select playlist to cast:[/]")
+                        .AddChoices(urlOptions)
+                        .UseConverter(choice => choice switch
+                        {
+                            "Back" => "🔙 Back",
+                            _ => GetTypeIconForChoice(currentNode, choice) + choice
+                        }));
 
-            //_playlists.GetChildren().Select(c => c.Key).ToList();
-            urlOptions.Add("Back");
+                if (urlChoice == "Back")
+                {
+                    return;
+                }
 
-            var urlChoice = AnsiConsole.Prompt(
-                new SelectionPrompt<string>()
-                    .Title("[yellow]Select playlist to cast:[/]")
-                    .AddChoices(urlOptions)
-                    .UseConverter(choice => choice switch
-                    {
-                        "Back" => "🔙 Back",
-                        _ => GetTypeIconForChoice(currentNode, choice) + choice
-                    })
-                    );
-
-            if (urlChoice == "Back")
-            {
-                return;
-            }
-
-
-            var queueItems = new List<QueueItem>();
-            if (currentNode?.Data is List<Node> nodes2)
-            {
-                var selectedNode = nodes2.FirstOrDefault(n => n.Name == urlChoice);
+                var queueItems = new List<QueueItem>();
+                var selectedNode = lineNodes.FirstOrDefault(n => n.Name == urlChoice);
                 if (selectedNode != null)
                 {
                     if (selectedNode.Data is List<Node>)
@@ -151,39 +204,44 @@ public class QueueController
 
                     }
                 }
-            }
 
-            try
-            {
-                await AnsiConsole.Status()
-                    .Spinner(Spinner.Known.Star2)
-                    .SpinnerStyle(Style.Parse("yellow"))
-                    .StartAsync("Loading playlist", async ctx =>
-                    {
-                        ctx.Status("Loading queue...");
-                        var status = await _state.Client.MediaChannel.QueueLoadAsync(queueItems.ToArray());
-
-                        if (status == null)
-                            throw new Exception("Failed to load playlist - no status returned");
-                    });
-
-                _ui.AddSeparator();
-                AnsiConsole.MarkupLine("[green]✅ Playlist loaded and playing successfully![/]");
-                _ui.AddSeparator("📝 Queue Management");
-                await ShowQueueManagementAsync();
-            }
-            catch (Exception ex)
-            {
-                _ui.AddSeparator("❌ Casting Error");
-                AnsiConsole.MarkupLine($"[red]❌ Casting failed: {ex.Message}[/]");
-
-                if (ex.Message.Contains("timeout") || ex.Message.Contains("connection"))
+                try
                 {
-                    _state.IsConnected = false;
-                    AnsiConsole.MarkupLine("[yellow]⚠️  Connection may have been lost. Try reconnecting.[/]");
+                    await AnsiConsole.Status()
+                        .Spinner(Spinner.Known.Star2)
+                        .SpinnerStyle(Style.Parse("yellow"))
+                        .StartAsync("Loading playlist", async ctx =>
+                        {
+                            ctx.Status("Loading queue...");
+                            var status = await _state.Client.MediaChannel.QueueLoadAsync(queueItems.ToArray());
+
+                            if (status == null)
+                                throw new Exception("Failed to load playlist - no status returned");
+                        });
+
+                    _ui.AddSeparator();
+                    AnsiConsole.MarkupLine("[green]✅ Playlist loaded and playing successfully![/]");
+                    _ui.AddSeparator("📝 Queue Management");
+                    await ShowQueueManagementAsync();
                 }
+                catch (Exception ex)
+                {
+                    _ui.AddSeparator("❌ Casting Error");
+                    AnsiConsole.MarkupLine($"[red]❌ Casting failed: {ex.Message}[/]");
+
+                    if (ex.Message.Contains("timeout") || ex.Message.Contains("connection"))
+                    {
+                        _state.IsConnected = false;
+                        AnsiConsole.MarkupLine("[yellow]⚠️  Connection may have been lost. Try reconnecting.[/]");
+                    }
+                }
+            } else
+            {
+                // This should never happen.
+                AnsiConsole.MarkupLine("[red]❌ Menu Node not valid![/]");
+                return;
             }
-        }
+        }   
     }
 
     private string GetTypeIconForChoice(Node? currentNode, string choice)
