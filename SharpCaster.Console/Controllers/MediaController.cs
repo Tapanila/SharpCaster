@@ -32,7 +32,8 @@ public class MediaController
         {
             "Sample Video (Designing for Google Cast)",
             "Sample Audio (Arcane - Kevin MacLeod)",
-            "Custom URL"
+            "Custom URL",
+            "Back"
         };
 
         var urlChoice = AnsiConsole.Prompt(
@@ -44,6 +45,7 @@ public class MediaController
                     "Sample Video (Designing for Google Cast)" => "🎬 Sample Video (Designing for Google Cast)",
                     "Sample Audio (Arcane - Kevin MacLeod)" => "🎵 Sample Audio (Arcane - Kevin MacLeod)",
                     "Custom URL" => "🔗 Custom URL",
+                    "Back" => "🔙 Back",
                     _ => choice
                 }));
 
@@ -72,6 +74,8 @@ public class MediaController
                         .AllowEmpty()
                         .DefaultValue("Custom Media"));
                 break;
+            case "Back":
+                return;
             default:
                 throw new InvalidOperationException("Invalid URL choice");
         }
