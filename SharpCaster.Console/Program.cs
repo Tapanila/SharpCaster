@@ -20,7 +20,7 @@ class Program
         System.Console.InputEncoding = Encoding.UTF8;
 
         // Parse command line arguments
-        var commandLineArgs = CommandLineParser.Parse(args);
+        //var commandLineArgs = CommandLineParser.Parse(args, );
 
 
 
@@ -29,6 +29,9 @@ class Program
         ConfigureServices(services);
 
         var serviceProvider = services.BuildServiceProvider();
+
+        // Parse command line arguments
+        var commandLineArgs = CommandLineParser.Parse(args, serviceProvider.GetRequiredService<PlaylistService>());
 
 
         // Check if this is command-line mode or interactive mode
@@ -80,6 +83,8 @@ class Program
         // Register services
         services.AddSingleton<DeviceService>();
         services.AddSingleton<CommandExecutor>();
+        services.AddSingleton<PlaylistService>();
+
 
         // Register controllers
         services.AddSingleton<MediaController>();

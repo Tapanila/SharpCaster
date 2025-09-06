@@ -3,9 +3,12 @@ using Sharpcaster;
 using Sharpcaster.Extensions;
 using Sharpcaster.Messages.Web;
 using Sharpcaster.Models.Media;
+using Sharpcaster.Models.Queue;
+using SharpCaster.Console.Controllers;
 using SharpCaster.Console.Models;
 using SharpCaster.Console.UI;
 using Spectre.Console;
+using System;
 using System.Text.Json;
 
 namespace SharpCaster.Console.Services;
@@ -17,14 +20,17 @@ public class CommandExecutor
     private readonly MemoryLogService _memoryLogService;
     private readonly ILogger<Sharpcaster.ChromecastClient> _chromecastLogger;
     private readonly UIHelper _ui;
+    private readonly PlaylistService _playlistService;
 
-    public CommandExecutor(ApplicationState state, DeviceService deviceService, MemoryLogService memoryLogService, ILogger<Sharpcaster.ChromecastClient> chromecastLogger, UIHelper ui, ChromecastLocator locator)
+    public CommandExecutor(ApplicationState state, DeviceService deviceService, MemoryLogService memoryLogService,
+                           ILogger<Sharpcaster.ChromecastClient> chromecastLogger, UIHelper ui, ChromecastLocator locator, PlaylistService ps)
     {
         _state = state;
         _deviceService = deviceService;
         _memoryLogService = memoryLogService;
         _chromecastLogger = chromecastLogger;
         _ui = ui;
+        _playlistService = ps;
 
         // Ensure locator is initialized
         if (_state.Locator == null)
@@ -282,8 +288,16 @@ public class CommandExecutor
                 case "play":
                     if (string.IsNullOrEmpty(args.MediaUrl))
                     {
-                        System.Console.WriteLine("Error: Media URL is required for play command.");
-                        return 1;
+                        if (string.IsNullOrEmpty(args.PlaylistId) || !_playlistService.IsPlaylistId(args.PlaylistId))
+                        {
+                            System.Console.WriteLine("Error: Media URL or valid Playlist ID is required for play command.");
+                            return 1;
+                        }
+                        else
+                        {
+                            List<Media> playlist = _playlistService.GetMediaForId(args.PlaylistId);
+                            return await PlayPlaylistAsync(playlist);
+                        }
                     }
                     return await PlayMediaAsync(args.MediaUrl, args.MediaTitle);
 
@@ -340,6 +354,39 @@ public class CommandExecutor
         catch (Exception ex)
         {
             System.Console.WriteLine($"Command execution failed: {ex.Message}");
+            return 1;
+        }
+    }
+
+    private async Task<int> PlayPlaylistAsync(List<Media> playlist)
+    {
+        try
+        {
+            System.Console.WriteLine($"Casting playlist.");
+            var queueItems = new List<QueueItem>();
+            foreach (Media m in playlist)
+            {
+                m.StreamType = StreamType.Buffered;
+                m.Metadata = m.Metadata ?? new MediaMetadata() { Title = m.ContentId };
+                queueItems.Add(new QueueItem
+                {
+                    Media = m
+                });
+            }
+            var status = await _state.Client.MediaChannel.QueueLoadAsync(queueItems.ToArray());
+
+            if (status == null)
+            {
+                System.Console.WriteLine("Failed to load playlist - no status returned");
+                return 1;
+            }
+
+            System.Console.WriteLine($"Successfully loaded playlist.");
+            return 0;
+        }
+        catch (Exception ex)
+        {
+            System.Console.WriteLine($"Failed to cast media: {ex.Message}");
             return 1;
         }
     }

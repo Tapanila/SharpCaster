@@ -6,6 +6,10 @@
     "Console - Ö1": {
       "commandName": "Project",
       "commandLineArgs": "\"My JBL Speaker\" play https://orf-live.ors-shoutcast.at/oe1-q1a"
+    },
+    "Console - BS9": {
+      "commandName": "Project",
+      "commandLineArgs": "\"My JBL Speaker\" play beethoven-s9"
     }
   }
 }
