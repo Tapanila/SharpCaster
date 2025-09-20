@@ -193,6 +193,7 @@ public class ApplicationFlows
             var choices = new[]
             {
                 "Cast media",
+                "Cast playlist",
                 "Website display",
                 "Media controls",
                 "Stop application",
@@ -207,11 +208,12 @@ public class ApplicationFlows
             var choice = AnsiConsole.Prompt(
                 new SelectionPrompt<string>()
                     .Title($"[yellow]What would you like to do with {_state.SelectedDevice?.Name}?[/]")
-                    .PageSize(10)
+                    .PageSize(11)
                     .AddChoices(choices)
                     .UseConverter(choice => choice switch
                     {
                         "Cast media" => "📺 Cast media",
+                        "Cast playlist" => "💿 Cast playlist",
                         "Website display" => "🌐 Website display",
                         "Media controls" => "🎮 Media controls",
                         "Stop application" => "⏹️ Stop application",
@@ -232,6 +234,11 @@ public class ApplicationFlows
                     _ui.AddSeparator("🎬 Casting Media");
                     await _mediaController.CastMediaAsync();
                     break;
+                case "Cast playlist":
+                    _ui.AddSeparator("Casting Playlist");
+                    await _queueController.CastPlaylistAsync();
+                    break;
+
                 case "Website display":
                     _ui.AddSeparator("🌐 Website Display");
                     await _mediaController.CastWebsiteAsync();

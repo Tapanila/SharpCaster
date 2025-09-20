@@ -1,0 +1,70 @@
+{
+  "Playlists": [
+    {
+      "Name": "Easy Radio Ireland",
+      "Content": [
+        {
+          "media": {
+            "contentUrl": "http://easyradio.radioca.st:8099/stream",
+            "contentId": "Easy Radio Ireland",
+            "metadata": {
+              "metadataType": 3,
+              "title": "Easy Radio Ireland"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "Name": "Other radios",
+      "Content": [
+        {
+          "media": {
+            "contentUrl": "https://orf-live.ors-shoutcast.at/oe3-q1a",
+            "contentId": "Österreich 3 (128bps)"
+          }
+        },
+        {
+          "media": {
+            "contentUrl": "https://orf-live.ors-shoutcast.at/fm4-q1a",
+            "contentId": "FM4 (128bps)"
+          }
+        }
+      ]
+    },
+    {
+      "Name": "Classic-CDs",
+      "Content": [
+        {
+          "media": {
+            "contentUrl": "https://incompetech.com/music/royalty-free/mp3-royaltyfree/Derp%20Nugget.mp3",
+            "contentId": "Derp Nugget"
+          }
+        },
+        {
+          "media": {
+            "contentUrl": "https://incompetech.com/music/royalty-free/mp3-royaltyfree/Boogie%20Party.mp3",
+            "contentId": "Boogie Party"
+          }
+        }
+      ]
+    },
+    {
+      "Name": "Some Internet Tracks",
+      "Content": [
+        {
+          "media": {
+            "contentId": "Sample Audio",
+            "contentUrl": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"
+          }
+        },
+        {
+          "media": {
+            "contentUrl": "https://incompetech.com/music/royalty-free/mp3-royaltyfree/March%20of%20the%20Spoons.mp3",
+            "contentId": "March of the Spoons"
+          }
+        }
+      ]
+    }
+  ]
+}

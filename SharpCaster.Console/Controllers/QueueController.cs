@@ -1,9 +1,9 @@
 using Sharpcaster.Models.Media;
 using Sharpcaster.Models.Queue;
-using Spectre.Console;
 using SharpCaster.Console.Models;
 using SharpCaster.Console.Services;
 using SharpCaster.Console.UI;
+using Spectre.Console;
 
 namespace SharpCaster.Console.Controllers;
 
@@ -12,12 +12,69 @@ public class QueueController
     private readonly ApplicationState _state;
     private readonly DeviceService _deviceService;
     private readonly UIHelper _ui;
+    private readonly PlaylistService _playlistService;
 
-    public QueueController(ApplicationState state, DeviceService deviceService, UIHelper ui)
+    public QueueController(ApplicationState state, DeviceService deviceService, UIHelper ui, PlaylistService ps)
     {
         _state = state;
         _deviceService = deviceService;
         _ui = ui;
+        _playlistService = ps;
+    }
+
+    public async Task CastPlaylistAsync()
+    {
+        if (!await _deviceService.EnsureConnectedAsync())
+            return;
+
+        List<string> urlOptions = [.. _playlistService.Playlists.Select(p => p.Name), "Back"];
+
+        var urlChoice = AnsiConsole.Prompt(
+            new SelectionPrompt<string>()
+                .Title("[yellow]Select playlist to cast:[/]")
+                .AddChoices(urlOptions)
+                .UseConverter(choice => choice switch
+                {
+                    "Back" => "🔙 Back",
+                    _ => choice
+                }));
+
+        if (urlChoice == "Back")
+        {
+            return;
+        }
+
+        try
+        {
+            await AnsiConsole.Status()
+                .Spinner(Spinner.Known.Star2)
+                .SpinnerStyle(Style.Parse("yellow"))
+                .StartAsync("Loading playlist", async ctx =>
+                {
+                    ctx.Status("Loading queue...");
+                    var status = await _state.Client.MediaChannel.QueueLoadAsync(_playlistService.Playlists.First(p => p.Name == urlChoice).QueueItems);
+
+                    if (status == null)
+                        throw new Exception("Failed to load playlist - no status returned");
+                });
+
+            _ui.AddSeparator();
+            AnsiConsole.MarkupLine("[green]✅ Playlist loaded and playing successfully![/]");
+            _ui.AddSeparator("📝 Queue Management");
+            await ShowQueueManagementAsync();
+        }
+        catch (Exception ex)
+        {
+            _ui.AddSeparator("❌ Casting Error");
+            AnsiConsole.MarkupLine($"[red]❌ Casting failed: {ex.Message}[/]");
+
+            if (ex.Message.Contains("timeout") || ex.Message.Contains("connection"))
+            {
+                _state.IsConnected = false;
+                AnsiConsole.MarkupLine("[yellow]⚠️  Connection may have been lost. Try reconnecting.[/]");
+            }
+        }
+
     }
 
     public async Task ShowQueueManagementAsync()
@@ -30,6 +87,7 @@ public class QueueController
             var choices = new[]
             {
                 "Load queue from URLs",
+                "Load queue from playlist",
                 "Next track",
                 "Previous track",
                 "Toggle shuffle",
@@ -45,6 +103,7 @@ public class QueueController
                     .UseConverter(choice => choice switch
                     {
                         "Load queue from URLs" => "📝 Load queue from URLs",
+                        "Load queue from playlist" => "💿 Load queue from playlist",
                         "Next track" => "⏭️ Next track",
                         "Previous track" => "⏮️ Previous track",
                         "Toggle shuffle" => "🔀 Toggle shuffle",
@@ -64,13 +123,26 @@ public class QueueController
                         await LoadQueueAsync(mediaChannel);
                         break;
 
+                    case "Load queue from playlist":
+                        await CastPlaylistAsync();
+                        break;
+
                     case "Next track":
-                        await AnsiConsole.Status().StartAsync("Skipping to next track...", async ctx =>
+                        var ids = await mediaChannel.QueueGetItemIdsAsync();
+
+                        if (ids?.LastOrDefault() == mediaChannel.MediaStatus?.CurrentItemId)
                         {
-                            await mediaChannel.QueueNextAsync();
-                        });
-                        AnsiConsole.MarkupLine("[green]⏭️ Skipped to next track[/]");
-                        _ui.AddSeparator();
+                            AnsiConsole.MarkupLine("[yellow]⚠️  Already at the last track in the queue. Cannot skip to next track.[/]");
+                        }
+                        else
+                        {
+                            await AnsiConsole.Status().StartAsync("Skipping to next track...", async ctx =>
+                            {
+                                await mediaChannel.QueueNextAsync();
+                            });
+                            AnsiConsole.MarkupLine("[green]⏭️ Skipped to next track[/]");
+                            _ui.AddSeparator();
+                        }
                         break;
 
                     case "Previous track":
@@ -98,17 +170,29 @@ public class QueueController
 
                     case "Get queue items":
                         var itemIds = await mediaChannel.QueueGetItemIdsAsync();
-                        if (itemIds?.Any() == true)
+                        var items = await mediaChannel.QueueGetItemsAsync(itemIds);
+
+                        if (items?.Any() == true)
                         {
                             var queueTable = new Table();
                             queueTable.AddColumn("[blue]Item ID[/]");
+                            queueTable.AddColumn("[blue]MediaId[/]");
+                            queueTable.AddColumn("[blue]Url[/]");
+                            queueTable.AddColumn("[blue]Title[/]");
 
-                            foreach (var id in itemIds)
+                            foreach (var item in items)
                             {
-                                queueTable.AddRow($"[white]{id}[/]");
+                                string col = "[white]";
+                                if (item.ItemId == mediaChannel.MediaStatus?.CurrentItemId)
+                                {
+                                    col = "[blue]";
+                                }
+                                queueTable.AddRow($"{col}{item.ItemId}[/]",
+                                                    $"{col}{item?.Media.ContentId}[/]",
+                                                    $"{col}{item?.Media.ContentUrl ?? ""}[/]",
+                                                    $"{col}{item?.Media.Metadata?.Title ?? ""}[/]");
                             }
-
-                            AnsiConsole.MarkupLine($"[green]📋 Queue contains {itemIds.Length} items:[/]");
+                            AnsiConsole.MarkupLine($"[green]📋 Queue contains {items.Length} items:[/]");
                             AnsiConsole.Write(queueTable);
                         }
                         else

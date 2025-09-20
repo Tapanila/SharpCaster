@@ -27,4 +27,14 @@
     <PackageReference Include="Spectre.Console" Version="0.50.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="userSettings.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Properties\" />
+  </ItemGroup>
+
 </Project>

@@ -1,4 +1,5 @@
 using System.Text;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Sharpcaster;
@@ -18,14 +19,15 @@ class Program
         System.Console.OutputEncoding = Encoding.UTF8;
         System.Console.InputEncoding = Encoding.UTF8;
 
-        // Parse command line arguments
-        var commandLineArgs = CommandLineParser.Parse(args);
-
         // Setup dependency injection
         var services = new ServiceCollection();
         ConfigureServices(services);
 
         var serviceProvider = services.BuildServiceProvider();
+
+        // Parse command line arguments
+        var commandLineArgs = CommandLineParser.Parse(args, serviceProvider.GetRequiredService<PlaylistService>());
+
 
         // Check if this is command-line mode or interactive mode
         if (!commandLineArgs.IsInteractive || commandLineArgs.ShowHelp || commandLineArgs.ShowDevices || commandLineArgs.ShowVersion)
@@ -69,6 +71,8 @@ class Program
         // Register services
         services.AddSingleton<DeviceService>();
         services.AddSingleton<CommandExecutor>();
+        services.AddSingleton<PlaylistService>();
+
 
         // Register controllers
         services.AddSingleton<MediaController>();
