@@ -139,8 +139,6 @@ public static class CommandLineParser
         return result;
     }
 
-
-
     private static bool IsUrl(string value)
     {
         return Uri.TryCreate(value, UriKind.Absolute, out var uri) &&
