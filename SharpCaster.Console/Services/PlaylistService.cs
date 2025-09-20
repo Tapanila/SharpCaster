@@ -30,7 +30,7 @@ namespace SharpCaster.Console.Services
 
         public bool IsPlaylistId(string arg)
         {
-            return Playlists.First(p => p.Name == arg) != null;
+            return Playlists.Any(p => p.Name == arg);
         }
 
     }
