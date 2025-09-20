@@ -1,3 +1,5 @@
+using SharpCaster.Console.Services;
+
 namespace SharpCaster.Console.Models;
 
 public class CommandLineArgs
@@ -14,11 +16,14 @@ public class CommandLineArgs
     public bool ShowVersion { get; set; }
     public bool ShowLogs { get; set; }
     public bool IsInteractive => string.IsNullOrEmpty(Command);
+
+    public string? PlaylistId { get; set; }
 }
 
 public static class CommandLineParser
 {
-    public static CommandLineArgs Parse(string[] args)
+    // TODO: parse without service?
+    public static CommandLineArgs Parse(string[] args, PlaylistService playlistService)
     {
         var result = new CommandLineArgs();
 
@@ -120,12 +125,22 @@ public static class CommandLineParser
                             result.Command = "play"; // Default to play when URL is provided
                         }
                     }
+                    else if (playlistService.IsPlaylistId(arg))
+                    {
+                        result.PlaylistId = args[i];
+                        if (string.IsNullOrEmpty(result.Command))
+                        {
+                            result.Command = "play"; // Default to play when playlist is provided
+                        }
+                    }
                     break;
             }
         }
 
         return result;
     }
+
+
 
     private static bool IsUrl(string value)
     {
