@@ -1,24 +1,20 @@
-using Microsoft.Extensions.Configuration;
 using Sharpcaster.Models.Media;
 using Sharpcaster.Models.Queue;
 using SharpCaster.Console.Models;
 using SharpCaster.Console.Services;
 using SharpCaster.Console.UI;
 using Spectre.Console;
-using System;
-using System.Globalization;
-using System.Xml.Linq;
 
 namespace SharpCaster.Console.Controllers;
 
-    public class QueueController
+public class QueueController
 {
     private readonly ApplicationState _state;
     private readonly DeviceService _deviceService;
     private readonly UIHelper _ui;
     private readonly PlaylistService _playlistService;
 
-    public QueueController(ApplicationState state, DeviceService deviceService, UIHelper ui, IConfiguration config, PlaylistService ps)
+    public QueueController(ApplicationState state, DeviceService deviceService, UIHelper ui, PlaylistService ps)
     {
         _state = state;
         _deviceService = deviceService;
@@ -31,108 +27,54 @@ namespace SharpCaster.Console.Controllers;
         if (!await _deviceService.EnsureConnectedAsync())
             return;
 
-        if (!_playlistService.HasContent())
+        List<string> urlOptions = [.. _playlistService.Playlists.Select(p => p.Name), "Back"];
+
+        var urlChoice = AnsiConsole.Prompt(
+            new SelectionPrompt<string>()
+                .Title("[yellow]Select playlist to cast:[/]")
+                .AddChoices(urlOptions)
+                .UseConverter(choice => choice switch
+                {
+                    "Back" => "🔙 Back",
+                    _ => choice
+                }));
+
+        if (urlChoice == "Back")
         {
-            AnsiConsole.MarkupLine("[red]❌ No playlists configured. Please add playlists to the configuration.[/]");
             return;
         }
 
-        MenuNode currentNode = _playlistService.GetRoot();
-        while (true)
+        try
         {
-            List<string> urlOptions = new();
-            if (currentNode is Category category)
+            await AnsiConsole.Status()
+                .Spinner(Spinner.Known.Star2)
+                .SpinnerStyle(Style.Parse("yellow"))
+                .StartAsync("Loading playlist", async ctx =>
+                {
+                    ctx.Status("Loading queue...");
+                    var status = await _state.Client.MediaChannel.QueueLoadAsync(_playlistService.Playlists.First(p => p.Name == urlChoice).QueueItems);
+
+                    if (status == null)
+                        throw new Exception("Failed to load playlist - no status returned");
+                });
+
+            _ui.AddSeparator();
+            AnsiConsole.MarkupLine("[green]✅ Playlist loaded and playing successfully![/]");
+            _ui.AddSeparator("📝 Queue Management");
+            await ShowQueueManagementAsync();
+        }
+        catch (Exception ex)
+        {
+            _ui.AddSeparator("❌ Casting Error");
+            AnsiConsole.MarkupLine($"[red]❌ Casting failed: {ex.Message}[/]");
+
+            if (ex.Message.Contains("timeout") || ex.Message.Contains("connection"))
             {
-                urlOptions = category.Content.Select(c => c.Name).ToList();
-                urlOptions.Add("Back");
-
-                var urlChoice = AnsiConsole.Prompt(
-                    new SelectionPrompt<string>()
-                        .Title("[yellow]Select playlist to cast:[/]")
-                        .AddChoices(urlOptions)
-                        .UseConverter(choice => choice switch
-                        {
-                            "Back" => "🔙 Back",
-                            _ => GetTypeIconForChoice(currentNode, choice) + choice
-                        }));
-
-                if (urlChoice == "Back")
-                {
-                    return;
-                }
-
-                var queueItems = new List<QueueItem>();
-                var selectedNode = category.Content.FirstOrDefault(n => n.Name == urlChoice);
-                if (selectedNode != null)
-                {
-                    if (selectedNode is Category)
-                    {
-                        // Navigate into the folder
-                        currentNode = selectedNode;
-                        continue; // Restart the loop to show the new options
-                    }
-                    else if (selectedNode is Playlist mediaList)
-                    {
-                        // We have reached a playlist, proceed to cast it
-                        foreach (Media m in mediaList.Tracks)
-                        {
-                            m.StreamType = StreamType.Buffered;
-                            m.Metadata = m.Metadata ?? new MediaMetadata() { Title = m.ContentId };
-
-                            queueItems.Add(new QueueItem
-                            {
-                                Media = m
-                            });
-                        }
-
-                    }
-                }
-
-                try
-                {
-                    await AnsiConsole.Status()
-                        .Spinner(Spinner.Known.Star2)
-                        .SpinnerStyle(Style.Parse("yellow"))
-                        .StartAsync("Loading playlist", async ctx =>
-                        {
-                            ctx.Status("Loading queue...");
-                            var status = await _state.Client.MediaChannel.QueueLoadAsync(queueItems.ToArray());
-
-                            if (status == null)
-                                throw new Exception("Failed to load playlist - no status returned");
-                        });
-
-                    _ui.AddSeparator();
-                    AnsiConsole.MarkupLine("[green]✅ Playlist loaded and playing successfully![/]");
-                    _ui.AddSeparator("📝 Queue Management");
-                    await ShowQueueManagementAsync();
-                }
-                catch (Exception ex)
-                {
-                    _ui.AddSeparator("❌ Casting Error");
-                    AnsiConsole.MarkupLine($"[red]❌ Casting failed: {ex.Message}[/]");
-
-                    if (ex.Message.Contains("timeout") || ex.Message.Contains("connection"))
-                    {
-                        _state.IsConnected = false;
-                        AnsiConsole.MarkupLine("[yellow]⚠️  Connection may have been lost. Try reconnecting.[/]");
-                    }
-                }
-            }
-            else
-            {
-                // This should never happen.
-                AnsiConsole.MarkupLine("[red]❌ Menu Node not valid![/]");
-                return;
+                _state.IsConnected = false;
+                AnsiConsole.MarkupLine("[yellow]⚠️  Connection may have been lost. Try reconnecting.[/]");
             }
         }
-    }
 
-    private string GetTypeIconForChoice(MenuNode? currentNode, string choice)
-    {
-        return currentNode is Category nodes && nodes.Content.FirstOrDefault(n => n.Name == choice) is Category
-            ? "📁 " // Folder icon for categories
-            : "💿 "; // Music note icon for playlists
     }
 
     public async Task ShowQueueManagementAsync()

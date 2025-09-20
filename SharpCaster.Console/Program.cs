@@ -19,11 +19,6 @@ class Program
         System.Console.OutputEncoding = Encoding.UTF8;
         System.Console.InputEncoding = Encoding.UTF8;
 
-        // Parse command line arguments
-        //var commandLineArgs = CommandLineParser.Parse(args, );
-
-
-
         // Setup dependency injection
         var services = new ServiceCollection();
         ConfigureServices(services);
@@ -52,13 +47,6 @@ class Program
 
     private static void ConfigureServices(IServiceCollection services)
     {
-        // Use Configuration builder to build and configure
-        var builder = new ConfigurationBuilder();
-        var conf = builder.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
-            //.AddEnvironmentVariables()
-            .Build();
-        services.AddSingleton<IConfiguration>(conf);
-
         // Register memory log service first
         services.AddSingleton<MemoryLogService>();
         services.AddSingleton<LogViewerService>();

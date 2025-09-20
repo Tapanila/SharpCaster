@@ -1,11 +1,10 @@
-using Sharpcaster.Models.Media;
-using SharpCaster.Console.UI;
-
+using Sharpcaster.Models.Queue;
+using System.Text.Json.Serialization;
 namespace SharpCaster.Console.Models;
 
-public class Playlist : MenuNode
+public class Playlist
 {
-    public Playlist(string name, string? id = null) : base(name, id) { }
-    
-    public List<Media> Tracks { get; set; } = new List<Media>();
+    public required string Name { get; set; }
+    [JsonPropertyName("Content")]
+    public QueueItem[] QueueItems { get; set; } = [];
 }

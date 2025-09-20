@@ -293,11 +293,7 @@ public class CommandExecutor
                             System.Console.WriteLine("Error: Media URL or valid Playlist ID is required for play command.");
                             return 1;
                         }
-                        else
-                        {
-                            List<Media> playlist = _playlistService.GetMediaForId(args.PlaylistId);
-                            return await PlayPlaylistAsync(playlist);
-                        }
+                        return await PlayPlaylistAsync(_playlistService.Playlists.First(p => p.Name == args.PlaylistId));
                     }
                     return await PlayMediaAsync(args.MediaUrl, args.MediaTitle);
 
@@ -358,22 +354,12 @@ public class CommandExecutor
         }
     }
 
-    private async Task<int> PlayPlaylistAsync(List<Media> playlist)
+    private async Task<int> PlayPlaylistAsync(Playlist playlist)
     {
         try
         {
             System.Console.WriteLine($"Casting playlist.");
-            var queueItems = new List<QueueItem>();
-            foreach (Media m in playlist)
-            {
-                m.StreamType = StreamType.Buffered;
-                m.Metadata = m.Metadata ?? new MediaMetadata() { Title = m.ContentId };
-                queueItems.Add(new QueueItem
-                {
-                    Media = m
-                });
-            }
-            var status = await _state.Client.MediaChannel.QueueLoadAsync(queueItems.ToArray());
+            var status = await _state.Client.MediaChannel.QueueLoadAsync(playlist.QueueItems);
 
             if (status == null)
             {

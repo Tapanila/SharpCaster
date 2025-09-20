@@ -22,7 +22,6 @@ public class CommandLineArgs
 
 public static class CommandLineParser
 {
-    // TODO: parse without service?
     public static CommandLineArgs Parse(string[] args, PlaylistService playlistService)
     {
         var result = new CommandLineArgs();
